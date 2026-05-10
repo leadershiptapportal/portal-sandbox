@@ -1,0 +1,351 @@
+[dotenv@17.3.1] injecting env (14) from .env.local -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+// Auto-generated from Airtable schema. 2026-05-10
+// Run scripts/dump-airtable-schema.ts to regenerate after schema changes.
+
+// ── TABLES ─────────────────────────────────────────────────────────────────
+export const TABLE_IDS = {
+  USERS: 'tblD4Pttofq0sDl2R',  // "Users"
+  COMPANIES: 'tbl56SmsLjb0odxag',  // "Companies"
+  STRENGTHS: 'tblXyaww4PqwXxNjN',  // "Strengths"
+  16PERSONALITIES: 'tblXqHT7DoRNEF7nb',  // "16Personalities"
+  ENNEAGRAM: 'tblxIXPnTaO2GcxRp',  // "Enneagram"
+  APOLOGY_LANGUAGES: 'tblwxN86JQrYPqVlv',  // "Apology Languages"
+  CONFLICT_POSTURES: 'tblqe4I8l7y1Y0TAI',  // "Conflict Postures"
+  CALENDAR_EVENTS: 'tblBhfhZzNEOPOKqs',  // "Calendar Events"
+  LINKED_TODOIST_TASKS: 'tblK0103V31eeZD0c',  // "Linked Todoist Tasks"
+  MESSAGES: 'tbl8VGHVCU8cXyAis',  // "Messages"
+  TOOLS_RESOURCES: 'tblWyhmeuvvlt77ud',  // "Tools & Resources"
+  NOTES: 'tblSTELdCWLYk5dq4',  // "Notes"
+  TASKS: 'tbleG9GWJEB9jd6yt',  // "Tasks"
+  COACH_PERSON_CONTEXT: 'tbly1SOW603Qhd2nJ',  // "Coach-Person Context"
+  COACH_SESSION: 'tblPFj41wHQXZVzzZ',  // "Coach Session"
+  MEETINGS: 'tblUm3dEvQqQBhxSE',  // "Meetings"
+  RELATIONSHIP_CONTEXTS: 'tblYdLi7dp2RmhNjh',  // "Relationship Contexts"
+  PERMISSION_PROFILES: 'tbl1XeWzXjE41fSSE',  // "Permission Profiles"
+  ORGANIZATION_MEMBERSHIPS: 'tbl6Ld2QCBAN4EI62',  // "Organization Memberships"
+} as const
+
+// ── FIELDS ─────────────────────────────────────────────────────────────────
+// Each table's fields, keyed by an upper-snake-case version of the field name.
+// IDs are stable; names are shown as comments for review.
+
+export const FIELD_IDS = {
+  // ── Users ──
+  USERS: {
+    USER: 'fldgTeqhaSE6KbMRm',  // "User"    // formula
+    ID_NUMBER: 'fldJsQM0MfbVakCy4',  // "ID Number"    // autoNumber
+    FULL_NAME: 'fldH8rST4tjq0gis7',  // "Full Name"    // formula
+    PREFERRED_NAME: 'fld3HX06VuQWQYCM1',  // "Preferred Name"    // singleLineText
+    FIRST_NAME: 'fldOGveomFlCV6DjD',  // "First Name"    // singleLineText
+    LAST_NAME: 'fldJh2vuJqYkyyZqx',  // "Last Name"    // singleLineText
+    WORK_EMAIL: 'fldlL8HrXCnd3K4KL',  // "Work Email"    // email
+    WORK_EMAIL_VALID: 'fldDlAiei9RnRskpA',  // "Work Email Valid"    // formula
+    PERSONAL_EMAIL: 'fldsARb1wJcJauPAx',  // "Personal Email"    // email
+    TITLE: 'fldVwZtWoJjZp920l',  // "Title"    // singleLineText
+    COMPANY: 'fldUu6I5aaiIhTVj6',  // "Company"    // multipleRecordLinks
+    COMPANY_NAME_FROM_COMPANY: 'fldHd3omMw7PUAWNJ',  // "Company Name (from Company)"    // multipleLookupValues
+    ROLE: 'fldaSnC1UCEukV8Um',  // "Role"    // single-select: Team Lead | Team Member | Both | Coach | Senior Leader
+    COACH: 'fld4kKouAYi5plNVL',  // "Coach"    // multipleRecordLinks
+    TEAM_LEAD: 'fldRyJGLnzfoZlIpN',  // "Team Lead"    // multipleRecordLinks
+    PROFILE_PHOTO: 'fldHj7YBmed6S8s58',  // "Profile Photo"    // multipleAttachments
+    APOLOGY_LANGUAGE: 'fldVEQ4DZuTARM3ST',  // "Apology Language"    // multipleRecordLinks
+    APOLOGY_LANGUAGE_FROM_APOLOGY_LANGUAGE: 'fldz2XhOUPxcU3W0O',  // "Apology Language (from Apology Language)"    // multipleLookupValues
+    CONFLICT_POSTURE: 'fldCD4HvwKE5SXXLE',  // "Conflict Posture"    // multipleRecordLinks
+    ENNEAGRAM: 'fldSQ11YFsWjlkREZ',  // "Enneagram"    // multipleRecordLinks
+    ENNEAGRAM_TYPE_FROM_ENNEAGRAM: 'fld3NTWw3EmFRVBRY',  // "Enneagram Type (from Enneagram)"    // multipleLookupValues
+    MBTI: 'fldyjw72Zx7bbbSqQ',  // "MBTI"    // multipleRecordLinks
+    MBTI_FROM_MBTI: 'fldetFbWFerHgk3Ai',  // "MBTI (from MBTI)"    // multipleLookupValues
+    STRENGTHS: 'fldcQe5diYYsoThxi',  // "Strengths"    // multipleRecordLinks
+    QUICK_NOTES: 'fldduqJaVzxE9u6IP',  // "Quick Notes"    // richText
+    FAMILY_DETAILS: 'fldZb1F9kHhHPjqLk',  // "Family Details"    // multilineText
+    BIRTHDAY: 'flde4V2mmmYv0dMME',  // "Birthday"    // date
+    HIRE_DATE: 'fldQPh2SMs4SXjp6Q',  // "Hire Date"    // date
+    TIME_AT_COMPANY: 'fldi1Ez09JdS0tjnb',  // "Time at Company"    // formula
+    WORK_DESK_NUMBER: 'fldZIvMj9ggKNAHwO',  // "Work Desk Number"    // phoneNumber
+    WORK_CELL_NUMBER: 'fldoMP21FCwAemPEW',  // "Work Cell Number"    // phoneNumber
+    PERSONAL_CELL_NUMBER: 'fldV3990UGnVEdSQL',  // "Personal Cell Number"    // phoneNumber
+    LAST_MODIFIED: 'fldAAzvWFfJSpUs93',  // "Last Modified"    // lastModifiedTime
+    TEAM_MEMBERS: 'fldbpthkjaXy7mU0R',  // "Team Members"    // multipleRecordLinks
+    TEAM_MEMBERS_TITLES: 'fldPlj85PZ4WewsK9',  // "Team Members Titles"    // multipleLookupValues
+    TEAM_MEMBERS_HIRE_DATES: 'fldpOnqF6LcLuQCYd',  // "Team Members Hire Dates"    // multipleLookupValues
+    ASSOCIATED_TASKS: 'fld0NnCbzi18TrX9v',  // "Associated Tasks"    // multipleRecordLinks
+    ASSOCIATED_MEETINGS: 'fld1t3bIXyBxHEh4B',  // "Associated Meetings"    // multipleRecordLinks
+    NOTE_NAME_FROM_ASSOCIATED_MEETINGS: 'fldzEn2N2pdxVbPro',  // "Note Name (from Associated Meetings)"    // multipleLookupValues
+    SUMMARY_FROM_MEETING_NOTES_AND_SUMMARIES_FROM_ASSOCIATED_MEETINGS: 'fldAgmgXCAtdeW0Oe',  // "Summary (from Meeting Notes and Summaries) (from Associated Meetings)"    // multipleLookupValues
+    STARTTIME_FROM_ASSOCIATED_MEETINGS: 'fldW9VRngXkXbnPXE',  // "StartTime (from Associated Meetings)"    // multipleLookupValues
+    MESSAGES_FROM_ASSOCIATED_MEETINGS: 'fldVCf1zZTVA47iR3',  // "Messages (from Associated Meetings)"    // multipleLookupValues
+    ASSOCIATED_MESSAGES_NOT_ASSOCIATED_TO_MEETING: 'fldL6HHPcLxBfBoMu',  // "Associated Messages (Not Associated to Meeting)"    // multipleRecordLinks
+    MESSAGES: 'fldlcpt4DeytkoWVC',  // "Messages"    // multipleRecordLinks
+    NOTES: 'fldtaUHrHe079g2iz',  // "Notes"    // multipleRecordLinks
+    DESCRIPTOR_FROM_ENNEAGRAM: 'fldfTiZfRCarNCvUe',  // "Descriptor (from Enneagram)"    // multipleLookupValues
+    DESCRIPTOR_FROM_MBTI: 'fld3rOcdWcI0jexPr',  // "Descriptor (from MBTI)"    // multipleLookupValues
+    DESCRIPTOR_FROM_CONFLICT_POSTURE: 'fldW64peeLXRGtaMt',  // "Descriptor (from Conflict Posture)"    // multipleLookupValues
+    DESCRIPTOR_FROM_APOLOGY_LANGUAGE: 'fldcmyFlWikFNyR53',  // "Descriptor (from Apology Language)"    // multipleLookupValues
+    STRENGTH_NAME_FROM_STRENGTHS: 'fldm4MrDJsj8BZHRz',  // "Strength Name (from Strengths)"    // multipleLookupValues
+    DOMAIN_FROM_STRENGTHS: 'fldG84OLoi5HtKagW',  // "Domain (from Strengths)"    // multipleLookupValues
+    TASKS: 'fldeWGoSfUIqV3CbE',  // "Tasks"    // multipleRecordLinks
+    COACH_PERSON_CONTEXT_COACH: 'fldFDOzVEtp6219Vb',  // "Coach-Person Context (Coach)"    // multipleRecordLinks
+    COACH_PERSON_CONTEXT_PERSON: 'fldtrwuBVk5Hr48bp',  // "Coach-Person Context (Person)"    // multipleRecordLinks
+    COACH_SESSION_FOCAL_PERSON: 'fldtu9QcBGws3pnzF',  // "Coach Session (Focal Person)"    // multipleRecordLinks
+    COACH_SESSION_COACH: 'fldfeh5YSQcTxq8xq',  // "Coach Session (Coach)"    // multipleRecordLinks
+    RELATIONSHIP_CONTEXTS_CLIENT: 'fldXDcLMxY0q87gwE',  // "Relationship Contexts (Client)"    // multipleRecordLinks
+    RELATIONSHIP_CONTEXTS_COACH: 'fldFabqxT4dx63zeK',  // "Relationship Contexts (Coach)"    // multipleRecordLinks
+    ORGANIZATION_MEMBERSHIPS: 'fldrLtH0MprRJE9s1',  // "Organization Memberships"    // multipleRecordLinks
+    MEETINGS: 'fldPvW5FXxWUiiI8F',  // "Meetings"    // multipleRecordLinks
+    NOTES_AUTHOR_PERSON: 'fld9fc2dqt7mwouzp',  // "Notes (Author Person)"    // multipleRecordLinks
+    NOTES_SUBJECT_PERSON: 'fldEROOAVsWVX99Bv',  // "Notes (Subject Person)"    // multipleRecordLinks
+    TASKS_CREATED_BY_PERSON: 'fldHjKdov8hqfyxHd',  // "Tasks (Created By Person)"    // multipleRecordLinks
+    TASKS_ASSIGNED_TO_PERSON: 'fldHRyU1eHVpaj9OA',  // "Tasks (Assigned To Person)"    // multipleRecordLinks
+  },
+  // ── Companies ──
+  COMPANIES: {
+    COMPANY_NAME: 'fldl7bZkR5JCKyLHk',  // "Company Name"    // singleLineText
+    COMPANY_LOGO: 'fldgW4xeX2hkieVb2',  // "Company Logo"    // url
+    COMPANY_DOMAIN_NAME: 'fldKGWHDCJJZEGorT',  // "Company Domain Name"    // singleLineText
+    USERS: 'fldhcWW0UFdt078ms',  // "Users"    // multipleRecordLinks
+    LAST_MODIFIED: 'fldeuGaJVDmySG791',  // "Last Modified"    // lastModifiedTime
+    ORGANIZATION_TYPE: 'fldkxkzOX87KZctuL',  // "Organization Type"    // single-select: internal_company | client_company | partner
+    STATUS: 'fldk33AceBzzND138',  // "Status"    // single-select: Active | Inactive | Prospect
+    INTERNAL_NOTES: 'fldgCOLVEFrQGjjnT',  // "Internal Notes"    // multilineText
+    ORGANIZATION_MEMBERSHIPS: 'fld0NKFwkXUOTuAla',  // "Organization Memberships"    // multipleRecordLinks
+  },
+  // ── Strengths ──
+  STRENGTHS: {
+    STRENGTH: 'fldO3GPrkGxC1ldZi',  // "Strength"    // singleLineText
+    DOMAIN: 'fld9Eo9KfPJK8bQGU',  // "Domain"    // single-select: Strategic Thinking | Relationship Building | Influencing | Executing
+    USERS: 'fldNIfYD4pTpno2Hp',  // "Users"    // multipleRecordLinks
+    DESCRIPTOR: 'fldA4m8V4MfsI6oKY',  // "Descriptor"    // multilineText
+  },
+  // ── 16Personalities ──
+  16PERSONALITIES: {
+    NAME: 'fldPBfoiEuRsDFQr9',  // "Name"    // singleLineText
+    MBTI: 'fldbRR957E0X0bQgf',  // "MBTI"    // singleLineText
+    DESCRIPTOR: 'fldaroTONh1ZcZvd3',  // "Descriptor"    // singleLineText
+    GROUP: 'fldNOr07P1tPJtCX2',  // "Group"    // single-select: Analysts | Diplomats | Sentinals | Explorers
+    USERS_2: 'fldBq8zyBuVFbsZPl',  // "Users 2"    // multipleRecordLinks
+  },
+  // ── Enneagram ──
+  ENNEAGRAM: {
+    NAME: 'fldDHEcTx28Dpnccp',  // "Name"    // singleLineText
+    TYPE: 'fldSgVRsdnNyK0HgN',  // "Type"    // number
+    DESCRIPTOR: 'fldEeNLu9MW947rVL',  // "Descriptor"    // singleLineText
+    USERS_2: 'fldCPIOzKth2XjRf5',  // "Users 2"    // multipleRecordLinks
+  },
+  // ── Apology Languages ──
+  APOLOGY_LANGUAGES: {
+    APOLOGY_LANGUAGE: 'fldS441fSkXjaFdO9',  // "Apology Language"    // singleLineText
+    DESCRIPTOR: 'fldUrCuGaonOKDsck',  // "Descriptor"    // multilineText
+    USERS_2: 'fldXzvOhFcNx79YWF',  // "Users 2"    // multipleRecordLinks
+  },
+  // ── Conflict Postures ──
+  CONFLICT_POSTURES: {
+    CONFLICT_POSTURE: 'fldtdKv50CBpFe7V8',  // "Conflict Posture"    // singleLineText
+    DEFINITION: 'flddLFG4V9SLw6aax',  // "Definition"    // multilineText
+    DESCRIPTOR: 'fld5Z2cHIrC9guXgO',  // "Descriptor"    // multilineText
+    USERS_2: 'fld0Af6z7nQh51ltx',  // "Users 2"    // multipleRecordLinks
+  },
+  // ── Calendar Events ──
+  CALENDAR_EVENTS: {
+    NOTE_NAME: 'flduR7OGRtRoAkVQV',  // "Note Name"    // multilineText
+    EVENTNAME: 'fldFfkN55v6g4SKAE',  // "EventName"    // singleLineText
+    STARTTIME: 'fldPub47Z7Lmggu3o',  // "StartTime"    // dateTime
+    ENDTIME: 'fldZiQfFFoKbrQ5XN',  // "EndTime"    // dateTime
+    SENDEREMAIL: 'fldkR2RrJ0oXVRVWc',  // "SenderEmail"    // single-select: Josh | Matt
+    PARTICIPANTEMAILS: 'fldBCdh0n8sBI9cNm',  // "ParticipantEmails"    // multilineText
+    USERS: 'fldQrDysEqHwZaBlj',  // "Users"    // multipleRecordLinks
+    FULL_NAME_FROM_USERS: 'fldaV5cSdI6eG2Ai0',  // "Full Name (from Users)"    // multipleLookupValues
+    EVENTID: 'fldmAwBHWPyhUnBAJ',  // "EventID"    // singleLineText
+    ACTION_TYPE: 'fldnLKUD8olducRba',  // "Action Type"    // single-select: added | updated | deleted
+    CONVERT: 'fldifv8witmnOoO9a',  // "Convert"    // multilineText
+    MESSAGES: 'fldepwUgjVXHvENwQ',  // "Messages"    // multipleRecordLinks
+    ASSOCIATED_MEETING_NOTES: 'fld0kVXrnoeO9KpeL',  // "Associated Meeting Notes"    // singleLineText
+    NOTES: 'fldJUwW9mxOX9I3W0',  // "Notes"    // multilineText
+    SESSION_STATUS: 'fldHLAGgrtHexbRTO',  // "Session Status"    // single-select: Completed | Scheduled | Cancelled
+    ACTION_ITEMS: 'fldhpRGr8TtraWXS0',  // "Action Items"    // multilineText
+    COACH_SESSION: 'fldUxaFXI8cBu4ke3',  // "Coach Session"    // multipleRecordLinks
+    PROVIDER_EVENT_ID: 'fldnPQxiP3VSBlNjU',  // "Provider Event ID"    // singleLineText
+  },
+  // ── Linked Todoist Tasks ──
+  LINKED_TODOIST_TASKS: {
+    TASK: 'fld84pJ1dUxsb8VLS',  // "Task"    // singleLineText
+    STATUS: 'fldOG4qwCE68eWOYG',  // "Status"    // checkbox
+    TODOIST_FILTER: 'fldR9ZosGjQ4NLDpZ',  // "Todoist Filter"    // singleLineText
+    USERS: 'fld838plUPSbcQcTx',  // "Users"    // singleLineText
+    ASSOCIATED_EMAIL: 'fld26F7XyGZSVebv1',  // "Associated Email"    // multilineText
+    TASK_ID: 'fldrvPlKU9kTf3C3C',  // "Task ID"    // singleLineText
+    DELETED: 'fldUzD22Yp7C3o138',  // "Deleted"    // checkbox
+    USERS_2: 'fldTBN4R6nZlQLFO7',  // "Users 2"    // multipleRecordLinks
+    RECORD_ID: 'fldyM2JBiE3HWI9CL',  // "Record ID"    // multilineText
+  },
+  // ── Messages ──
+  MESSAGES: {
+    CALCULATION: 'fldBZqa7NGys5YDWI',  // "Calculation"    // formula
+    MESSAGE_NAME: 'fldRIXITrwYvnBGyL',  // "Message Name"    // singleLineText
+    TYPE: 'fldWlN8Hm3TaSrK8b',  // "Type"    // single-select: Follow Up | Tool / Resource | General Communication
+    STATUS: 'fld3tCgsq2nnnLYjT',  // "Status"    // single-select: Pending | Sent | Archived
+    ASSOCIATED_MEETINGS: 'fldyyn094584CIz6x',  // "Associated Meetings"    // multipleRecordLinks
+    USERS_FROM_ASSOCIATED_MEETINGS: 'fldOW7FMXs6BeOqbJ',  // "Users (from Associated Meetings)"    // multipleLookupValues
+    SENDER_EMAIL_FROM_ASSOCIATED_MEETINGS: 'fldeNtDbAH0Ht5apO',  // "Sender Email (from Associated Meetings)"    // multipleLookupValues
+    RECIPIENT_EMAILS_FROM_ASSOCIATED_MEETINGS: 'fldKgoDyTOmBBa3QX',  // "Recipient Emails (from Associated Meetings)"    // multipleLookupValues
+    ASSOCIATED_USERS_NOT_ASSOCIATED_TO_MEETING: 'fldSWBxwjIUudQAeX',  // "Associated Users (Not Associated to Meeting)"    // multipleRecordLinks
+    FIRST_NAME_FROM_ASSOCIATED_USERS_NOT_ASSOCIATED_TO_MEETING: 'fldLCbd8g2fXxkrTw',  // "First Name (from Associated Users (Not Associated to Meeting))"    // multipleLookupValues
+    WORK_EMAIL_FROM_ASSOCIATED_USERS: 'fldHclcsw7ucQXiqq',  // "Work Email (from Associated Users)"    // multipleLookupValues
+    RECIPIENT_EMAIL_FINAL: 'fld0EeBYZPVu0PH7j',  // "Recipient Email (Final)"    // formula
+    SUBJECT: 'fldnUHEAWC8FcR5eZ',  // "Subject"    // singleLineText
+    AI_GENERATED_FUP_MESSAGE_FROM_MEETING_NOTES_AND_SUMMARIES_FROM_ASSOCIATED_MEETINGS: 'fldWBPu7kbogCySXN',  // "AI Generated FUP Message (from Meeting Notes and Summaries) (from Associated Meetings)"    // multipleLookupValues
+    TOOLS_RESOURCES: 'fldkmBgodxSlz4zPT',  // "Tools & Resources"    // multipleRecordLinks
+    NAME_FROM_TOOLS_RESOURCES: 'fldmvnLF0hrJooFuv',  // "Name (from Tools & Resources)"    // multipleLookupValues
+    EMAIL_SNIPPET_WITH_RESOURCE_LINK_FROM_TOOLS_RESOURCES: 'fldnJCpwX3r0qHkRy',  // "Email Snippet with Resource Link (from Tools & Resources)"    // multipleLookupValues
+    AI_GENERATED_MESSAGE_CONTENT: 'fldSvD7C2yybmEeUf',  // "AI Generated Message Content"    // aiText
+    ATTACHMENTS: 'fldxGMUQVcekiQ0Cj',  // "Attachments"    // multipleAttachments
+    SENT_MESSAGE: 'fldCCnyA3I5OiWdcK',  // "Sent Message"    // richText
+    SENT_DATE: 'fldl3gImAEAqahxt4',  // "Sent Date"    // dateTime
+    CREATED: 'fldFrjFZVlpUm7Abj',  // "Created"    // createdTime
+    DRAFT_CONTENT: 'fldd7GyTc2CwGKg6z',  // "Draft Content"    // multilineText
+    CLIENT: 'fldyAJpx9JBLeMNj7',  // "Client"    // multipleRecordLinks
+  },
+  // ── Tools & Resources ──
+  TOOLS_RESOURCES: {
+    NAME: 'flda16ae8NihFyC1j',  // "Name"    // singleLineText
+    AUTHORORCREATOR: 'fldVlY81SeDANW4D8',  // "AuthorOrCreator"    // singleLineText
+    TYPE: 'fld5njxZXQuSjHbIG',  // "Type"    // multipleSelects
+    URL: 'fldFBtPXI2JQHubR1',  // "URL"    // url
+    LEADERSHIP_TAP_SLUG: 'fldPxFKWd7MfVbOhr',  // "Leadership Tap Slug"    // singleLineText
+    RESOURCETHUMBNAIL: 'fld4CksGKg2ZBVZqK',  // "ResourceThumbnail"    // url
+    RESOURCEIMAGE: 'fldQ8YzN0DB3w9jIQ',  // "ResourceImage"    // url
+    FILEORATTACHMENT: 'fldchWHsIgv99qtno',  // "FileOrAttachment"    // multipleAttachments
+    TEMPLATE_CONTENT: 'fldFVtwPe1kbrFDzK',  // "Template Content"    // multilineText
+    WEBSITE_ONE_LINER: 'fldYkQrbjEw94gvPT',  // "Website One-Liner"    // singleLineText
+    EMAILSNIPPET: 'fldTXTvLsiEwUINtq',  // "emailSnippet"    // richText
+    TAGS: 'fldq2Bkt2cOp5pS0v',  // "Tags"    // multipleSelects
+    STARRED_OFTEN_USED: 'fldxtNBYTaT9RoZi8',  // "Starred (Often Used)"    // checkbox
+    DESCRIPTION: 'fldgMBePD8PjqrRyo',  // "Description"    // multilineText
+    INSTRUCTIONS: 'fld3WqpbW84EeckkE',  // "Instructions"    // multilineText
+    SPOKEN_DESCRIPTION_FOR_VIDEO_OR_AUDIO: 'fldM2e4x2wWJ46zQa',  // "Spoken Description for Video or Audio"    // multilineText
+    RELATED_DOMAIN: 'fldk5p4gWEwQcroje',  // "Related Domain"    // singleLineText
+    LEQQUESTIONS: 'fldftarev85SDZj1G',  // "LEQQuestions"    // singleLineText
+    RELATEDCRITICALACTIVITY: 'fldAAjPf7kNG8m5c1',  // "RelatedCriticalActivity"    // singleLineText
+    RESOURCEID: 'fldc6BTIECRgCIHbl',  // "ResourceID"    // multilineText
+    KEYWORDS: 'fld5Tu0dOl10VnHzL',  // "Keywords"    // multilineText
+    USERS: 'fldbI6ftzGCJ3QvKH',  // "Users"    // singleLineText
+    MESSAGES: 'fldcmPS8MBp9FwzdE',  // "Messages"    // multipleRecordLinks
+    AI_ASSIST: 'fldaMKjvIV2E2aFle',  // "AI assist"    // multilineText
+    EMAIL_SNIPPET_WITH_RESOURCE_LINK: 'fldh7OHkd0rHtXKcg',  // "Email Snippet with Resource Link"    // multilineText
+    AI_GENERATED_EMAIL_FRIENDLY_DESCRIPTION: 'fldpMZEZ0FOxYC7Xa',  // "AI Generated Email Friendly Description"    // multilineText
+  },
+  // ── Notes ──
+  NOTES: {
+    CONTENT: 'fldCT8P7Da1INkG0T',  // "Content"    // multilineText
+    DATE: 'fldnOSv13VmCbOtEY',  // "Date"    // date
+    CLIENT: 'fldDLBsX8zXpJInAD',  // "Client"    // multipleRecordLinks
+    COACH_NAME: 'fld4QwJB7HdqZPQZt',  // "Coach Name"    // singleLineText
+    RELATIONSHIP_CONTEXT_ID: 'fldXc6lPXxw5Y84PM',  // "Relationship Context ID"    // singleLineText
+    NOTE_TYPE: 'fldRCz98Sppbgbq5e',  // "Note Type"    // single-select: general_context | meeting_note | follow_up | private_observation
+    VISIBILITY: 'fldan9xqdso86TKBv',  // "Visibility"    // single-select: Private | Team | Organization | Public | private_to_author | shared_with_target | internal_only
+    BODY: 'fldA9OAIkuQYhFL0R',  // "Body"    // multilineText
+    AUTHOR_PERSON: 'fldWJgq54h0A2OvCy',  // "Author Person"    // multipleRecordLinks
+    SUBJECT_PERSON: 'fldzCJbxYI9Ny5nwj',  // "Subject Person"    // multipleRecordLinks
+    MEETING: 'flduXwHTvTUjaZ9Fz',  // "Meeting"    // singleLineText
+    RELATIONSHIP_CONTEXT: 'fldltUsIa9P0U73li',  // "Relationship Context"    // multipleRecordLinks
+  },
+  // ── Tasks ──
+  TASKS: {
+    TITLE: 'fldRgrskNdZharknP',  // "Title"    // singleLineText
+    STATUS: 'fldtsgD1YZ6t1mwpm',  // "Status"    // single-select: pending | in progress | completed | Not Started | In Progress | Complete | Cancelled
+    DUE_DATE: 'fldrSWXmgm4vSuLyV',  // "Due Date"    // date
+    CLIENT: 'flduy2wmhQfarU9yP',  // "Client"    // multipleRecordLinks
+    COACH_NAME: 'fldL9jwQH58TZ6dcA',  // "Coach Name"    // singleLineText
+    NOTES: 'fldPjSEnJ22a10vfw',  // "Notes"    // multilineText
+    ASSIGNED_TO: 'fldSvowzJWL9cqbBr',  // "Assigned To"    // singleLineText
+    ASSIGNED_TO_NAME: 'fldhYvTCbxm00iRwY',  // "Assigned To Name"    // singleLineText
+    ASSIGNMENT_TYPE: 'fld6uspPoBcAJS0gk',  // "Assignment Type"    // single-select: personal | shared_with_client | delegated_to_coach
+    TASK_TYPE: 'fldhJUxdZGKijHSKX',  // "Task Type"    // single-select: personal_reminder | assignment
+    VISIBILITY: 'fldOpVCxStZP5tMhP',  // "Visibility"    // single-select: private_to_author | shared_with_target
+    RELATIONSHIP_CONTEXT: 'fldQbgGA2WfAXXVuV',  // "Relationship Context"    // multipleRecordLinks
+    CREATED_BY_PERSON: 'fldVIIP6weGTTYB07',  // "Created By Person"    // multipleRecordLinks
+    ASSIGNED_TO_PERSON: 'fldFOgzUG94oxI4jU',  // "Assigned To Person"    // multipleRecordLinks
+  },
+  // ── Coach-Person Context ──
+  COACH_PERSON_CONTEXT: {
+    ID: 'fldjRKQnbeQSSXCde',  // "Id"    // autoNumber
+    COACH: 'fldMidd750nvVaOuD',  // "Coach"    // multipleRecordLinks
+    QUICK_NOTES: 'fldeCsw5wQ9cJJJte',  // "Quick Notes"    // multilineText
+    FAMILY_DETAILS: 'fldICfOOjlBgwXLzI',  // "Family Details"    // multilineText
+    RELATIONSHIP_FLAGS: 'fldkaBmcetVEbGD02',  // "Relationship Flags"    // multipleSelects
+    LAST_UPDATED: 'fldV5RnOV6h0IkPkR',  // "Last Updated"    // date
+    PERSON: 'fldgP7Hn2EnOCeEOn',  // "Person"    // multipleRecordLinks
+  },
+  // ── Coach Session ──
+  COACH_SESSION: {
+    ID: 'fldkc5YG4vb5EQfpk',  // "Id"    // autoNumber
+    CALENDAR_EVENT: 'fldoHpg3OxFnuKeJ5',  // "Calendar Event"    // multipleRecordLinks
+    FOCAL_PERSON: 'fldz6kvciTYm30gNq',  // "Focal Person"    // multipleRecordLinks
+    SESSION_NOTES: 'fldEy7rDjvvIG13Af',  // "Session Notes"    // multilineText
+    ACTION_ITEMS: 'fldVJ8aeHxjrHd1Gh',  // "Action Items"    // multilineText
+    LAST_UPDATED: 'fld5Veqq1nQpQkdaG',  // "Last Updated"    // date
+    COACH: 'fldMKmrbXmxpXV3Y5',  // "Coach"    // multipleRecordLinks
+  },
+  // ── Meetings ──
+  MEETINGS: {
+    SUBJECT: 'fldAk4BCE60mYBv4I',  // "Subject"    // singleLineText
+    START_TIME: 'fldvUrf7tG2xQ8Q1E',  // "Start Time"    // dateTime
+    END_TIME: 'fldfdh1Tq2Xmsp68X',  // "End Time"    // dateTime
+    PROVIDER_EVENT_ID: 'fldcugcsHlIPbEgna',  // "Provider Event ID"    // singleLineText
+    ATTENDEES: 'fldpCCYTuIOXuqqCd',  // "Attendees"    // multilineText
+    NOTES: 'fldyTf8tVlyfmNT5S',  // "Notes"    // multilineText
+    PARTICIPANT_EMAILS: 'fldrKHTiLsfdCwHLG',  // "Participant Emails"    // multilineText
+    NOTE_NAME: 'fldhYmaFzYM86fi1O',  // "Note Name"    // singleLineText
+    CALENDAR_OWNER: 'fld790fAzn86Lquig',  // "Calendar Owner"    // singleLineText
+    CLIENT_NAME: 'fldK2TOXuqUOSWdk9',  // "Client Name"    // singleLineText
+    RELATIONSHIP_CONTEXT_ID: 'fldJdvP94uJKQ4eeZ',  // "Relationship Context ID"    // singleLineText
+    TIMEZONE: 'fld0MYHtXEbwJ0EFe',  // "Timezone"    // singleLineText
+    MEETING_STATUS: 'fldj6d4eqytFAjg56',  // "Meeting Status"    // single-select: Scheduled | Completed | Cancelled | Rescheduled | No Show
+    CALENDAR_PROVIDER: 'fldBhVB6jjJZVER4o',  // "Calendar Provider"    // single-select: Google Calendar | Outlook | Apple Calendar | Other | Manual
+    ICAL_UID: 'fldFCmcfx1vGgXdBl',  // "iCal UID"    // singleLineText
+    ASSOCIATED_RELATIONSHIP_CONTEXT: 'fld7h6OYODKBxIHVK',  // "Associated Relationship Context"    // multipleRecordLinks
+    CALENDAR_OWNER_PERSON: 'fldj13l8IStVOJeq1',  // "Calendar Owner Person"    // multipleRecordLinks
+    RELATIONSHIP_CONTEXT: 'fldwLPj5ahMVI9mam',  // "Relationship Context"    // multipleRecordLinks
+  },
+  // ── Relationship Contexts ──
+  RELATIONSHIP_CONTEXTS: {
+    ID: 'fldvpjctYa8Sbz1br',  // "Id"    // autoNumber
+    PERSON: 'fldvNEiXLMymiyCTj',  // "Person"    // multipleRecordLinks
+    RELATIONSHIP_TYPE: 'fldjEfITRItxf7OLl',  // "Relationship Type"    // single-select: coach | manager | sponsor | peer | Executive Coaching | coaching
+    PERMISSION_LEVEL: 'fldbZwRLGEz5mAsws',  // "Permission Level"    // multipleRecordLinks
+    STATUS: 'fldm3QrrCbs34ai2F',  // "Status"    // single-select: Active | Inactive | Paused | Ended
+    START_DATE: 'fld3bTwZSm3lQNi9N',  // "Start Date"    // date
+    LEAD: 'fld1f2J50eTmLoSXG',  // "Lead"    // multipleRecordLinks
+    MEETINGS: 'fld5joZmV9WaPGGns',  // "Meetings"    // multipleRecordLinks
+    END_DATE: 'fldeAxACxxeiULgZr',  // "End Date"    // date
+    CREATED_BY: 'fldXv7OL7dpVdNbdt',  // "Created By"    // singleCollaborator
+    TASKS: 'fld9UnUYXwKCEBKrT',  // "Tasks"    // multipleRecordLinks
+    MEETINGS_2: 'fldsveh7HeHv9b8fU',  // "Meetings 2"    // multipleRecordLinks
+    NOTES: 'fld3omA1BHtk6k1cK',  // "Notes"    // multipleRecordLinks
+  },
+  // ── Permission Profiles ──
+  PERMISSION_PROFILES: {
+    PROFILE_NAME: 'fldnGsXftdue5s0Ws',  // "Profile Name"    // singleLineText
+    DESCRIPTION: 'fldC4dbMzGt3nRRK6',  // "Description"    // multilineText
+    CAN_WRITE_NOTES: 'fldy2Cxmr3Irsa8Bd',  // "Can Write Notes"    // checkbox
+    CAN_CREATE_MEETINGS: 'fldsdgjDfBgCkZpE6',  // "Can Create Meetings"    // checkbox
+    CAN_VIEW_PERSON_PROFILE: 'fldVT89tY1d0mgPxu',  // "Can View Person Profile"    // checkbox
+    CAN_VIEW_DIRECT_REPORTS: 'fldRnf8el6uan7QEt',  // "Can View Direct Reports"    // checkbox
+    NOTES_DEFAULT_VISIBILITY: 'fldoio0Bwxso2736X',  // "Notes Default Visibility"    // single-select: private_to_author | shared_with_target | internal_only
+    RELATIONSHIP_CONTEXTS: 'fldqIjUpJFsdVSIsn',  // "Relationship Contexts"    // multipleRecordLinks
+  },
+  // ── Organization Memberships ──
+  ORGANIZATION_MEMBERSHIPS: {
+    MEMBERSHIP_ID: 'fldtohabw1bOacITQ',  // "Membership ID"    // autoNumber
+    PERSON: 'fldxsyMbKHunmGphc',  // "Person"    // multipleRecordLinks
+    ORGANIZATION: 'fldnh8VNPPnXKC9HV',  // "Organization"    // multipleRecordLinks
+    ORG_ROLE: 'fldsfYQ2SfjbUqGOg',  // "Org Role"    // single-select: employee | executive | hr | sponsor | admin_contact
+    JOB_TITLE: 'fldA3K07yVOj0ApRW',  // "Job Title"    // singleLineText
+    DEPARTMENT: 'fldKuNLBAph2TlJkb',  // "Department"    // singleLineText
+    STATUS: 'fldaS6usaq3QMfkCx',  // "Status"    // single-select: Active | Inactive | On Leave
+    START_DATE: 'fldk5PBLsSlGPrFlD',  // "Start Date"    // date
+    END_DATE: 'fldaGkIAtrZrb9TUZ',  // "End Date"    // date
+  },
+} as const
+
+// Summary: 19 tables, 258 fields total.
