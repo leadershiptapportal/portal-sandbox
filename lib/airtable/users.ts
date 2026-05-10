@@ -39,8 +39,11 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Use
     workEmail: record.fields["Work Email"] as string | undefined,
     jobTitle: record.fields["Job Title"] as string | undefined,
     role: record.fields["Role"] as string | undefined,
-    companyId: record.fields["Company ID"] as string | undefined,
-    companyName: record.fields["Company Name"] as string | undefined,
+    // Company ID and Company Name are Airtable lookup fields — they come back
+    // as arrays, not strings. Casting straight to string gives "Acme,Other" for
+    // multi-company users and an array-ish render otherwise. Use readLookup.
+    companyId: readLookup(record.fields["Company ID"]),
+    companyName: readLookup(record.fields["Company Name"]),
     avatarUrl: record.fields["Avatar URL"] as string | undefined,
     profilePhoto: Array.isArray(record.fields["Profile Photo"])
       ? (record.fields["Profile Photo"] as Array<{ url: string }>)[0]?.url

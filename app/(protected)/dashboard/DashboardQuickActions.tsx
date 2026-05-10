@@ -38,14 +38,17 @@ function ActionCard({
   return (
     <div className="relative">
       {children}
-      {/* Non-interactive label layer — pointer-events-none so the trigger above captures clicks */}
-      <div className="pointer-events-none absolute inset-0 flex items-center gap-4 px-5 rounded-xl">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+      {/* Non-interactive label layer — pointer-events-none so the trigger above
+          captures clicks. On mobile the description is hidden and padding is
+          tightened so the overlay fits within the 72px card height; on sm+
+          the original spacing returns. */}
+      <div className="pointer-events-none absolute inset-0 flex items-center gap-3 sm:gap-4 px-3 sm:px-5 rounded-xl">
+        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${iconBg}`}>
           {icon}
         </div>
-        <div className="text-left">
-          <p className="text-sm font-semibold text-slate-800">{label}</p>
-          <p className="text-xs text-slate-400 mt-0.5">{description}</p>
+        <div className="text-left min-w-0">
+          <p className="text-sm font-semibold text-slate-800 truncate">{label}</p>
+          <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">{description}</p>
         </div>
       </div>
     </div>
