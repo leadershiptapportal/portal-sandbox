@@ -1,4 +1,5 @@
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
+import { airtableFetch } from '@/lib/airtable/client'
 
 const API_BASE = 'https://api.airtable.com/v0'
 const TABLE = encodeURIComponent(TABLES.COACH_SESSION)
@@ -38,7 +39,7 @@ function mapRecord(r: { id: string; fields: Record<string, unknown> }): CoachSes
 
 async function fetchAll(): Promise<CoachSession[]> {
   const { apiKey, baseId } = getCredentials()
-  const res = await fetch(
+  const res = await airtableFetch(
     `${API_BASE}/${baseId}/${TABLE}?maxRecords=5000`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
@@ -127,7 +128,7 @@ export async function upsertCoachSession(
   const existing = await getCoachSession(coachAirtableId, calendarEventId)
 
   if (existing) {
-    const res = await fetch(
+    const res = await airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}/${existing.id}`,
       {
         method: 'PATCH',
@@ -141,7 +142,7 @@ export async function upsertCoachSession(
     }
     console.log('[upsertCoachSession] PATCHed record:', existing.id)
   } else {
-    const res = await fetch(
+    const res = await airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}`,
       {
         method: 'POST',

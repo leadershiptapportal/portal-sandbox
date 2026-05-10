@@ -1,5 +1,6 @@
 import type { Meeting } from "@/lib/types";
 import { TABLES, FIELDS } from "@/lib/airtable/constants";
+import { airtableFetch } from "@/lib/airtable/client";
 import { log } from "@/lib/utils/logger";
 
 const API_BASE = "https://api.airtable.com/v0";
@@ -57,7 +58,7 @@ export async function getAllUpcomingMeetings(daysAhead = 7, ownerEmail?: string)
     ? `AND(${timeFilter}, LOWER({${FIELDS.MEETINGS.CALENDAR_OWNER}}) = "${safeOwner}")`
     : timeFilter;
   log.debug('[getAllUpcomingMeetings] table:', TABLES.MEETINGS, 'filter:', formula);
-  const res = await fetch(
+  const res = await airtableFetch(
     `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${encodeURIComponent(formula)}&sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.MEETINGS.START)}&sort%5B0%5D%5Bdirection%5D=asc&maxRecords=50`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: "no-store" },
   );
@@ -83,7 +84,7 @@ export async function getRecentPastMeetings(daysBack = 14, ownerEmail?: string):
   const formula = safeOwner
     ? `AND(${timeFilter}, LOWER({${FIELDS.MEETINGS.CALENDAR_OWNER}}) = "${safeOwner}")`
     : timeFilter;
-  const res = await fetch(
+  const res = await airtableFetch(
     `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${encodeURIComponent(formula)}&sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.MEETINGS.START)}&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=100`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: "no-store" },
   );
@@ -104,7 +105,7 @@ export async function getAllMeetings(ownerEmail?: string): Promise<Meeting[]> {
     ? `filterByFormula=${encodeURIComponent(`LOWER({${FIELDS.MEETINGS.CALENDAR_OWNER}}) = "${safeOwner}"`)}&`
     : '';
   log.debug('[getAllMeetings] table:', TABLES.MEETINGS, 'ownerEmail:', ownerEmail ?? '(all)');
-  const res = await fetch(
+  const res = await airtableFetch(
     `${API_BASE}/${baseId}/${TABLE}?${filterParam}sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.MEETINGS.START)}&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=500`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: "no-store" },
   );
@@ -149,7 +150,7 @@ export async function getMeetingsByUserEmail(
   const formula = safeOwner
     ? `AND(${matchFilter}, LOWER({${FIELDS.MEETINGS.CALENDAR_OWNER}}) = "${safeOwner}")`
     : matchFilter;
-  const res = await fetch(
+  const res = await airtableFetch(
     `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${encodeURIComponent(formula)}&sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.MEETINGS.START)}&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=100`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: "no-store" },
   );
@@ -164,7 +165,7 @@ export async function getMeetingsByUserEmail(
 // Fetch a single Meetings record by Airtable record ID
 export async function getMeetingById(meetingId: string): Promise<Meeting | null> {
   const { apiKey, baseId } = getCredentials();
-  const res = await fetch(
+  const res = await airtableFetch(
     `${API_BASE}/${baseId}/${TABLE}/${meetingId}`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: "no-store" },
   );
@@ -179,7 +180,7 @@ export async function updatePortalEventNotes(
   notes: string,
 ): Promise<void> {
   const { apiKey, baseId } = getCredentials();
-  const res = await fetch(
+  const res = await airtableFetch(
     `${API_BASE}/${baseId}/${TABLE}/${recordId}`,
     {
       method: "PATCH",
@@ -235,7 +236,7 @@ export async function createManualMeeting(data: CreateManualMeetingData): Promis
     [FIELDS.MEETINGS.RELATIONSHIP_CONTEXT]: [data.relationshipContextId],
     [FIELDS.MEETINGS.CLIENT_NAME]: data.clientName,
   }
-  const res = await fetch(`${API_BASE}/${baseId}/${TABLE}`, {
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ fields }),

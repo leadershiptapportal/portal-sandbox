@@ -1,6 +1,9 @@
 import type { User } from "@/lib/types";
+import { airtableFetch } from "@/lib/airtable/client";
+import { TABLES, FIELDS } from "@/lib/airtable/constants";
 
 const API_BASE = "https://api.airtable.com/v0";
+const USERS_TABLE = encodeURIComponent(TABLES.PEOPLE);
 
 function getCredentials() {
   const apiKey = process.env.AIRTABLE_API_KEY;
@@ -29,94 +32,93 @@ function readStrengths(
 }
 
 function mapRecord(record: { id: string; fields: Record<string, unknown> }): User {
+  const f = record.fields
   return {
     id: record.id,
-    fullName: record.fields["Full Name"] as string | undefined,
-    preferredName: record.fields["Preferred Name"] as string | undefined,
-    firstName: record.fields["First Name"] as string | undefined,
-    lastName: record.fields["Last Name"] as string | undefined,
-    email: (record.fields["Email"] as string) ?? "",
-    workEmail: record.fields["Work Email"] as string | undefined,
-    jobTitle: record.fields["Job Title"] as string | undefined,
-    role: record.fields["Role"] as string | undefined,
+    fullName: f[FIELDS.USERS.FULL_NAME] as string | undefined,
+    preferredName: f[FIELDS.USERS.PREFERRED_NAME] as string | undefined,
+    firstName: f[FIELDS.USERS.FIRST_NAME] as string | undefined,
+    lastName: f[FIELDS.USERS.LAST_NAME] as string | undefined,
+    email: (f[FIELDS.USERS.EMAIL] as string) ?? "",
+    workEmail: f[FIELDS.USERS.WORK_EMAIL] as string | undefined,
+    jobTitle: f[FIELDS.USERS.JOB_TITLE] as string | undefined,
+    role: f[FIELDS.USERS.ROLE] as string | undefined,
     // Company ID and Company Name are Airtable lookup fields — they come back
-    // as arrays, not strings. Casting straight to string gives "Acme,Other" for
-    // multi-company users and an array-ish render otherwise. Use readLookup.
-    companyId: readLookup(record.fields["Company ID"]),
-    companyName: readLookup(record.fields["Company Name"]),
-    avatarUrl: record.fields["Avatar URL"] as string | undefined,
-    profilePhoto: Array.isArray(record.fields["Profile Photo"])
-      ? (record.fields["Profile Photo"] as Array<{ url: string }>)[0]?.url
+    // as arrays, not strings. Use readLookup to normalise.
+    companyId: readLookup(f[FIELDS.USERS.COMPANY_ID]),
+    companyName: readLookup(f[FIELDS.USERS.COMPANY_NAME]),
+    avatarUrl: f[FIELDS.USERS.AVATAR_URL] as string | undefined,
+    profilePhoto: Array.isArray(f[FIELDS.USERS.PROFILE_PHOTO])
+      ? (f[FIELDS.USERS.PROFILE_PHOTO] as Array<{ url: string }>)[0]?.url
       : undefined,
-    timeAtCompany: record.fields["Time at Company"] as string | undefined,
+    timeAtCompany: f[FIELDS.USERS.TIME_AT_COMPANY] as string | undefined,
     // Linked record IDs for Coach and Team Lead
-    coachIds: Array.isArray(record.fields["Coach"])
-      ? (record.fields["Coach"] as string[])
+    coachIds: Array.isArray(f[FIELDS.USERS.COACH])
+      ? (f[FIELDS.USERS.COACH] as string[])
       : [],
-    teamLeadIds: Array.isArray(record.fields["Team Lead"])
-      ? (record.fields["Team Lead"] as string[])
+    teamLeadIds: Array.isArray(f[FIELDS.USERS.TEAM_LEAD])
+      ? (f[FIELDS.USERS.TEAM_LEAD] as string[])
       : [],
     // Coaching context
-    quickNotes: record.fields["Quick Notes"] as string | undefined,
-    familyDetails: record.fields["Family Details"] as string | undefined,
+    quickNotes: f[FIELDS.USERS.QUICK_NOTES] as string | undefined,
+    familyDetails: f[FIELDS.USERS.FAMILY_DETAILS] as string | undefined,
     // Personality — lookup fields from linked tables (read only)
-    enneagramType: readLookup(record.fields["Enneagram Type (from Enneagram)"]),
-    enneagramDescriptor: readLookup(record.fields["Descriptor (from Enneagram)"]),
-    mbtiType: readLookup(record.fields["MBTI (from MBTI)"]),
-    mbtiDescriptor: readLookup(record.fields["Descriptor (from MBTI)"]),
+    enneagramType: readLookup(f[FIELDS.USERS.ENNEAGRAM_TYPE_FROM_ENNEAGRAM]),
+    enneagramDescriptor: readLookup(f[FIELDS.USERS.DESCRIPTOR_FROM_ENNEAGRAM]),
+    mbtiType: readLookup(f[FIELDS.USERS.MBTI_FROM_MBTI]),
+    mbtiDescriptor: readLookup(f[FIELDS.USERS.DESCRIPTOR_FROM_MBTI]),
     // "Conflict Posture" field returns raw linked record IDs — no name lookup exists.
     // Only the descriptor lookup is available in this base.
     conflictPosture: undefined,
-    conflictPostureDescriptor: readLookup(record.fields["Descriptor (from Conflict Posture)"]),
-    apologyLanguage: readLookup(record.fields["Apology Language (from Apology Language)"]),
-    apologyLanguageDescriptor: readLookup(record.fields["Descriptor (from Apology Language)"]),
+    conflictPostureDescriptor: readLookup(f[FIELDS.USERS.DESCRIPTOR_FROM_CONFLICT_POSTURE]),
+    apologyLanguage: readLookup(f[FIELDS.USERS.APOLOGY_LANGUAGE_FROM_APOLOGY_LANGUAGE]),
+    apologyLanguageDescriptor: readLookup(f[FIELDS.USERS.DESCRIPTOR_FROM_APOLOGY_LANGUAGE]),
     strengths: readStrengths(
-      record.fields["Strength Name (from Strengths)"],
-      record.fields["Domain (from Strengths)"]
+      f[FIELDS.USERS.STRENGTH_NAME_FROM_STRENGTHS],
+      f[FIELDS.USERS.DOMAIN_FROM_STRENGTHS]
     ),
-    // Session count — linked field to Calendar Events (no email matching needed)
-    associatedMeetingIds: Array.isArray(record.fields["Associated Meetings"])
-      ? (record.fields["Associated Meetings"] as string[])
+    associatedMeetingIds: Array.isArray(f[FIELDS.USERS.ASSOCIATED_MEETINGS])
+      ? (f[FIELDS.USERS.ASSOCIATED_MEETINGS] as string[])
       : [],
     // Org / Team — linked record IDs
-    managerIds: Array.isArray(record.fields["Manager"])
-      ? (record.fields["Manager"] as string[])
+    managerIds: Array.isArray(f[FIELDS.USERS.MANAGER])
+      ? (f[FIELDS.USERS.MANAGER] as string[])
       : [],
-    directReportIds: Array.isArray(record.fields["Direct Reports"])
-      ? (record.fields["Direct Reports"] as string[])
+    directReportIds: Array.isArray(f[FIELDS.USERS.DIRECT_REPORTS])
+      ? (f[FIELDS.USERS.DIRECT_REPORTS] as string[])
       : [],
-    teamMemberIds: Array.isArray(record.fields["Team Members"])
-      ? (record.fields["Team Members"] as string[])
+    teamMemberIds: Array.isArray(f[FIELDS.USERS.TEAM_MEMBERS])
+      ? (f[FIELDS.USERS.TEAM_MEMBERS] as string[])
       : [],
     // Raw linked record IDs for edit forms
-    enneagramIds: Array.isArray(record.fields["Enneagram"])
-      ? (record.fields["Enneagram"] as string[]) : [],
-    mbtiIds: Array.isArray(record.fields["MBTI"])
-      ? (record.fields["MBTI"] as string[]) : [],
-    conflictPostureIds: Array.isArray(record.fields["Conflict Posture"])
-      ? (record.fields["Conflict Posture"] as string[]) : [],
-    apologyLanguageIds: Array.isArray(record.fields["Apology Language"])
-      ? (record.fields["Apology Language"] as string[]) : [],
-    strengthIds: Array.isArray(record.fields["Strengths"])
-      ? (record.fields["Strengths"] as string[]) : [],
-    companyLinkedIds: Array.isArray(record.fields["Company"])
-      ? (record.fields["Company"] as string[]) : [],
+    enneagramIds: Array.isArray(f[FIELDS.USERS.ENNEAGRAM])
+      ? (f[FIELDS.USERS.ENNEAGRAM] as string[]) : [],
+    mbtiIds: Array.isArray(f[FIELDS.USERS.MBTI])
+      ? (f[FIELDS.USERS.MBTI] as string[]) : [],
+    conflictPostureIds: Array.isArray(f[FIELDS.USERS.CONFLICT_POSTURE])
+      ? (f[FIELDS.USERS.CONFLICT_POSTURE] as string[]) : [],
+    apologyLanguageIds: Array.isArray(f[FIELDS.USERS.APOLOGY_LANGUAGE])
+      ? (f[FIELDS.USERS.APOLOGY_LANGUAGE] as string[]) : [],
+    strengthIds: Array.isArray(f[FIELDS.USERS.STRENGTHS])
+      ? (f[FIELDS.USERS.STRENGTHS] as string[]) : [],
+    companyLinkedIds: Array.isArray(f[FIELDS.USERS.COMPANY])
+      ? (f[FIELDS.USERS.COMPANY] as string[]) : [],
     // Extra contact fields
-    personalEmail: record.fields["Personal Email"] as string | undefined,
-    birthday: record.fields["Birthday"] as string | undefined,
-    workDeskNumber: record.fields["Work Desk Number"] as string | undefined,
-    workCellNumber: record.fields["Work Cell Number"] as string | undefined,
-    personalCellNumber: record.fields["Personal Cell Number"] as string | undefined,
-    // Legacy
-    enneagram: record.fields["Enneagram"] as string | undefined,
-    mbti: record.fields["MBTI"] as string | undefined,
-    department: record.fields["Department"] as string | undefined,
-    title: record.fields["Title"] as string | undefined,
-    startDate: record.fields["Start Date"] as string | undefined,
-    hireDate: record.fields["Hire Date"] as string | undefined,
-    engagementLevel: record.fields["Engagement Level"] as string | undefined,
-    coachNotes: record.fields["Coach Notes"] as string | undefined,
-    internalNotes: record.fields["Internal Notes"] as string | undefined,
+    personalEmail: f[FIELDS.USERS.PERSONAL_EMAIL] as string | undefined,
+    birthday: f[FIELDS.USERS.BIRTHDAY] as string | undefined,
+    workDeskNumber: f[FIELDS.USERS.WORK_DESK_NUMBER] as string | undefined,
+    workCellNumber: f[FIELDS.USERS.WORK_CELL_NUMBER] as string | undefined,
+    personalCellNumber: f[FIELDS.USERS.PERSONAL_CELL_NUMBER] as string | undefined,
+    // Legacy / alternate read paths
+    enneagram: f[FIELDS.USERS.ENNEAGRAM] as string | undefined,
+    mbti: f[FIELDS.USERS.MBTI] as string | undefined,
+    department: f[FIELDS.USERS.DEPARTMENT] as string | undefined,
+    title: f[FIELDS.USERS.TITLE] as string | undefined,
+    startDate: f[FIELDS.USERS.START_DATE] as string | undefined,
+    hireDate: f[FIELDS.USERS.HIRE_DATE] as string | undefined,
+    engagementLevel: f[FIELDS.USERS.ENGAGEMENT_LEVEL] as string | undefined,
+    coachNotes: f[FIELDS.USERS.COACH_NOTES] as string | undefined,
+    internalNotes: f[FIELDS.USERS.INTERNAL_NOTES] as string | undefined,
   };
 }
 
@@ -131,8 +133,8 @@ export async function searchUsersByName(
     `SEARCH("${q}",LOWER(IF({First Name},{First Name},"")&" "&IF({Last Name},{Last Name},"")),0)` +
     `)`,
   )
-  const res = await fetch(
-    `${API_BASE}/${baseId}/Users?filterByFormula=${formula}&maxRecords=20`,
+  const res = await airtableFetch(
+    `${API_BASE}/${baseId}/${USERS_TABLE}?filterByFormula=${formula}&maxRecords=20`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
   if (!res.ok) return []
@@ -140,11 +142,11 @@ export async function searchUsersByName(
   return (data.records ?? []).map((r: { id: string; fields: Record<string, unknown> }) => {
     const f = r.fields
     const name =
-      (f['Full Name'] as string | undefined) ||
-      [f['First Name'], f['Last Name']].filter(Boolean).join(' ') ||
-      (f['Email'] as string | undefined) ||
+      (f[FIELDS.USERS.FULL_NAME] as string | undefined) ||
+      [f[FIELDS.USERS.FIRST_NAME], f[FIELDS.USERS.LAST_NAME]].filter(Boolean).join(' ') ||
+      (f[FIELDS.USERS.EMAIL] as string | undefined) ||
       r.id
-    return { id: r.id, name, jobTitle: f['Job Title'] as string | undefined }
+    return { id: r.id, name, jobTitle: f[FIELDS.USERS.JOB_TITLE] as string | undefined }
   })
 }
 
@@ -176,7 +178,7 @@ export async function createUserRecord(fields: {
     },
   }
   console.log('[createUserRecord] POST body:', JSON.stringify(body, null, 2))
-  const res = await fetch(`${API_BASE}/${baseId}/Users`, {
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${USERS_TABLE}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -199,7 +201,7 @@ export async function patchTeamMembers(
   const { apiKey, baseId } = getCredentials()
   const body = { fields: { 'Team Members': memberIds } }
   console.log('[patchTeamMembers] PATCH userId:', userId, 'body:', JSON.stringify(body))
-  const res = await fetch(`${API_BASE}/${baseId}/Users/${userId}`, {
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${USERS_TABLE}/${userId}`, {
     method: 'PATCH',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -225,7 +227,7 @@ export async function getAllUsers(): Promise<User[]> {
 
   try {
     console.log('[debug] getAllUsers table: Users')
-    const res = await fetch(`${API_BASE}/${baseId}/Users`, {
+    const res = await airtableFetch(`${API_BASE}/${baseId}/${USERS_TABLE}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
       next: { revalidate: 60 },
     });
@@ -253,7 +255,7 @@ export async function updateUserCoachNotes(userId: string, notes: string): Promi
     return;
   }
   try {
-    const res = await fetch(`${API_BASE}/${baseId}/Users/${userId}`, {
+    const res = await airtableFetch(`${API_BASE}/${baseId}/${USERS_TABLE}/${userId}`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -317,7 +319,7 @@ export async function updateUserProfile(
   console.log('[updateUserProfile] userId:', userId)
   console.log('[updateUserProfile] fields to write:', JSON.stringify(sanitized, null, 2))
 
-  const res = await fetch(`${API_BASE}/${baseId}/Users/${userId}`, {
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${USERS_TABLE}/${userId}`, {
     method: 'PATCH',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -355,7 +357,7 @@ async function fetchTableOptions(
     params.append('fields[]', nameField)
     params.set('maxRecords', '200')
     if (filterFormula) params.set('filterByFormula', filterFormula)
-    const res = await fetch(
+    const res = await airtableFetch(
       `${API_BASE}/${baseId}/${encodeURIComponent(tableName)}?${params}`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     )
@@ -390,12 +392,12 @@ export async function fetchProfileOptions(allUsers: User[]): Promise<{
     await Promise.all([
       // Companies primary field is "Company Name", not "Name". Restrict to
       // Active orgs only — spec Section 5 Table 2.
-      fetchTableOptions('Companies', 'Company Name', '{Status}="Active"'),
-      fetchTableOptions('Enneagram', 'Name'),
-      fetchTableOptions('16Personalities', 'Name'),
-      fetchTableOptions('Conflict Postures', 'Conflict Posture'),
-      fetchTableOptions('Apology Languages', 'Apology Language'),
-      fetchTableOptions('Strengths', 'Strength'),
+      fetchTableOptions(TABLES.ORGANIZATIONS, FIELDS.COMPANIES.NAME, `{${FIELDS.COMPANIES.STATUS}}="Active"`),
+      fetchTableOptions('Enneagram', FIELDS.ENNEAGRAM.NAME),
+      fetchTableOptions('16Personalities', FIELDS.PERSONALITIES_16.NAME),
+      fetchTableOptions('Conflict Postures', FIELDS.CONFLICT_POSTURES.NAME),
+      fetchTableOptions('Apology Languages', FIELDS.APOLOGY_LANGUAGES.NAME),
+      fetchTableOptions('Strengths', FIELDS.STRENGTHS.NAME),
     ])
 
   const nameOf = (u: User) =>
@@ -419,7 +421,7 @@ export async function getUserById(id: string): Promise<User | null> {
     return null;
   }
   try {
-    const res = await fetch(`${API_BASE}/${baseId}/Users/${id}`, {
+    const res = await airtableFetch(`${API_BASE}/${baseId}/${USERS_TABLE}/${id}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
       next: { revalidate: 60 },
     });

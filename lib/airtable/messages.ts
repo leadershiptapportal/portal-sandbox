@@ -1,6 +1,9 @@
 import type { Message } from "@/lib/types";
+import { airtableFetch } from "@/lib/airtable/client";
+import { TABLES, FIELDS } from "@/lib/airtable/constants";
 
 const API_BASE = "https://api.airtable.com/v0";
+const MESSAGES_TABLE = encodeURIComponent(TABLES.MESSAGES);
 
 function getCredentials() {
   const apiKey = process.env.AIRTABLE_API_KEY;
@@ -10,16 +13,17 @@ function getCredentials() {
 }
 
 function mapRecord(record: { id: string; fields: Record<string, unknown> }): Message {
-  const meetingLinks = record.fields["Meeting"] as string[] | undefined;
-  const userLinks = (record.fields["Client"] ?? []) as string[];
+  const f = record.fields
+  const meetingLinks = f[FIELDS.MESSAGES.MEETING] as string[] | undefined;
+  const userLinks = (f[FIELDS.MESSAGES.CLIENT] ?? []) as string[];
   return {
     id: record.id,
-    messageName: (record.fields["Message Name"] as string) ?? "",
-    subject: record.fields["Subject"] as string | undefined,
-    body: (record.fields["AI Generated Message Content"] ?? record.fields["Draft Content"]) as string | undefined,
-    status: ((record.fields["Status"] as string) === "Sent" ? "Sent" : "Pending"),
-    created: record.fields["Created"] as string | undefined,
-    sentAt: record.fields["Sent Date"] as string | undefined,
+    messageName: (f[FIELDS.MESSAGES.MESSAGE_NAME] as string) ?? "",
+    subject: f[FIELDS.MESSAGES.SUBJECT] as string | undefined,
+    body: (f[FIELDS.MESSAGES.AI_GENERATED_MESSAGE_CONTENT] ?? f[FIELDS.MESSAGES.DRAFT_CONTENT]) as string | undefined,
+    status: ((f[FIELDS.MESSAGES.STATUS] as string) === "Sent" ? "Sent" : "Pending"),
+    created: f[FIELDS.MESSAGES.CREATED] as string | undefined,
+    sentAt: f[FIELDS.MESSAGES.SENT_DATE] as string | undefined,
     meetingId: meetingLinks?.[0],
     userIds: userLinks,
   };
@@ -35,7 +39,7 @@ export async function createMessage(fields: {
   // Only send writable scalar fields on creation.
   // "Draft Content" is omitted — Airtable rejects empty strings
   // for this field type. Coaches fill it in via updateMessage (PATCH) after creation.
-  const res = await fetch(`${API_BASE}/${baseId}/Messages`, {
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${MESSAGES_TABLE}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -71,7 +75,7 @@ export async function updateMessage(
       : {}),
   };
 
-  const res = await fetch(`${API_BASE}/${baseId}/Messages/${messageId}`, {
+  const res = await airtableFetch(`${API_BASE}/${baseId}/Messages/${messageId}`, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -94,7 +98,7 @@ export async function fetchAllMessages(): Promise<Message[]> {
 
 async function getAllMessages(apiKey: string, baseId: string): Promise<Message[]> {
   console.log('[debug] getAllMessages table: Messages')
-  const res = await fetch(
+  const res = await airtableFetch(
     `${API_BASE}/${baseId}/Messages?sort%5B0%5D%5Bfield%5D=Created&sort%5B0%5D%5Bdirection%5D=desc`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' }
   );

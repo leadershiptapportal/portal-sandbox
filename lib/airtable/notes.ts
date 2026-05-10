@@ -1,4 +1,5 @@
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
+import { airtableFetch } from '@/lib/airtable/client'
 
 const API_BASE = 'https://api.airtable.com/v0'
 const TABLE = encodeURIComponent(TABLES.NOTES)
@@ -62,7 +63,7 @@ const SORT_DATE_DESC =
 export async function getAllRecentNotes(limit = 100): Promise<Note[]> {
   const { apiKey, baseId } = getCredentials()
   const url = `${API_BASE}/${baseId}/${TABLE}?${SORT_DATE_DESC}&maxRecords=${limit}`
-  const res = await fetch(url, {
+  const res = await airtableFetch(url, {
     headers: { Authorization: `Bearer ${apiKey}` },
     cache: 'no-store',
   })
@@ -81,7 +82,7 @@ export async function getAllRecentNotes(limit = 100): Promise<Note[]> {
 export async function getNotesByClient(clientAirtableId: string): Promise<Note[]> {
   const { apiKey, baseId } = getCredentials()
   const url = `${API_BASE}/${baseId}/${TABLE}?${SORT_DATE_DESC}&maxRecords=500`
-  const res = await fetch(url, {
+  const res = await airtableFetch(url, {
     headers: { Authorization: `Bearer ${apiKey}` },
     cache: 'no-store',
   })
@@ -103,7 +104,7 @@ export async function getNotesByClient(clientAirtableId: string): Promise<Note[]
 export async function getNotesByAuthor(authorAirtableId: string): Promise<Note[]> {
   const { apiKey, baseId } = getCredentials()
   const url = `${API_BASE}/${baseId}/${TABLE}?${SORT_DATE_DESC}&maxRecords=500`
-  const res = await fetch(url, {
+  const res = await airtableFetch(url, {
     headers: { Authorization: `Bearer ${apiKey}` },
     cache: 'no-store',
   })
@@ -123,7 +124,7 @@ export async function getNotesByAuthor(authorAirtableId: string): Promise<Note[]
 export async function getNotesByMeetingId(meetingId: string): Promise<Note[]> {
   const { apiKey, baseId } = getCredentials()
   const url = `${API_BASE}/${baseId}/${TABLE}?${SORT_DATE_DESC}&maxRecords=500`
-  const res = await fetch(url, {
+  const res = await airtableFetch(url, {
     headers: { Authorization: `Bearer ${apiKey}` },
     cache: 'no-store',
   })
@@ -144,7 +145,7 @@ export async function getNotesByRelationshipContext(
 ): Promise<Note[]> {
   const { apiKey, baseId } = getCredentials()
   const url = `${API_BASE}/${baseId}/${TABLE}?${SORT_DATE_DESC}&maxRecords=500`
-  const res = await fetch(url, {
+  const res = await airtableFetch(url, {
     headers: { Authorization: `Bearer ${apiKey}` },
     cache: 'no-store',
   })
@@ -192,7 +193,7 @@ export async function createNote(data: CreateNoteData): Promise<Note> {
   if (data.relationshipContextId) fields[FIELDS.NOTES.RELATIONSHIP_CONTEXT] = [data.relationshipContextId]
   if (data.coachName) fields[FIELDS.NOTES.COACH_NAME] = data.coachName
 
-  const res = await fetch(`${API_BASE}/${baseId}/${TABLE}`, {
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -212,7 +213,7 @@ export async function updateNote(
   content: string,
 ): Promise<{ success: true } | { error: string }> {
   const { apiKey, baseId } = getCredentials()
-  const res = await fetch(`${API_BASE}/${baseId}/${TABLE}/${noteId}`, {
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}/${noteId}`, {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ fields: { [FIELDS.NOTES.BODY]: content } }),
@@ -228,7 +229,7 @@ export async function deleteNote(
   noteId: string,
 ): Promise<{ success: true } | { error: string }> {
   const { apiKey, baseId } = getCredentials()
-  const res = await fetch(`${API_BASE}/${baseId}/${TABLE}/${noteId}`, {
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}/${noteId}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${apiKey}` },
   })

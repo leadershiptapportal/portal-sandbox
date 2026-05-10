@@ -1,4 +1,5 @@
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
+import { airtableFetch } from '@/lib/airtable/client'
 
 const API_BASE = 'https://api.airtable.com/v0'
 const TABLE = TABLES.MEETINGS
@@ -25,7 +26,7 @@ async function findByProviderEventId(
 ): Promise<string | null> {
   const safe = providerEventId.replace(/"/g, '\\"')
   const formula = encodeURIComponent(`({${FIELDS.MEETINGS.PROVIDER_EVENT_ID}}="${safe}")`)
-  const res = await fetch(
+  const res = await airtableFetch(
     `${API_BASE}/${baseId}/${encodeURIComponent(TABLE)}?filterByFormula=${formula}&maxRecords=1&fields[]=${encodeURIComponent(FIELDS.MEETINGS.PROVIDER_EVENT_ID)}`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
@@ -50,7 +51,7 @@ export async function upsertCalendarEvent(
   const existingId = await findByProviderEventId(apiKey, baseId, fields.providerEventId)
 
   if (existingId) {
-    const res = await fetch(
+    const res = await airtableFetch(
       `${API_BASE}/${baseId}/${encodeURIComponent(TABLE)}/${existingId}`,
       {
         method: 'PATCH',
@@ -63,7 +64,7 @@ export async function upsertCalendarEvent(
       throw new Error(`Airtable PATCH failed for ${fields.providerEventId}: ${text}`)
     }
   } else {
-    const res = await fetch(
+    const res = await airtableFetch(
       `${API_BASE}/${baseId}/${encodeURIComponent(TABLE)}`,
       {
         method: 'POST',

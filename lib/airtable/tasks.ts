@@ -1,5 +1,6 @@
 import type { Task, TaskStatus } from '@/lib/types'
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
+import { airtableFetch } from '@/lib/airtable/client'
 
 const API_BASE = 'https://api.airtable.com/v0'
 const TABLE = encodeURIComponent(TABLES.TASKS)
@@ -77,7 +78,7 @@ function sortByDueDate(tasks: Task[]): Task[] {
 export async function getTasks(personAirtableId: string): Promise<Task[]> {
   try {
     const { apiKey, baseId } = getCredentials()
-    const res = await fetch(
+    const res = await airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}?maxRecords=500`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     )
@@ -109,7 +110,7 @@ export async function getTasks(personAirtableId: string): Promise<Task[]> {
 export async function getTasksByUser(userId: string): Promise<Task[]> {
   try {
     const { apiKey, baseId } = getCredentials()
-    const res = await fetch(
+    const res = await airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}?maxRecords=500`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     )
@@ -134,7 +135,7 @@ export async function getTasksByUser(userId: string): Promise<Task[]> {
 export async function getAllOpenTasks(): Promise<Task[]> {
   try {
     const { apiKey, baseId } = getCredentials()
-    const res = await fetch(
+    const res = await airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}?maxRecords=500`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     )
@@ -197,7 +198,7 @@ export async function createTask(data: CreateTaskData): Promise<string> {
   if (data.assignedToPersonId) fields[FIELDS.TASKS.ASSIGNED_TO_PERSON] = [data.assignedToPersonId]
   if (rcId) fields[FIELDS.TASKS.RELATIONSHIP_CONTEXT] = [rcId]
 
-  const res = await fetch(`${API_BASE}/${baseId}/${TABLE}`, {
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ fields }),
@@ -229,7 +230,7 @@ export async function updateTask(
     if (data.notes !== undefined) writeFields[FIELDS.TASKS.NOTES] = data.notes
     if (Object.keys(writeFields).length === 0) return { success: true }
 
-    const res = await fetch(`${API_BASE}/${baseId}/${TABLE}/${taskId}`, {
+    const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}/${taskId}`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ fields: writeFields }),
@@ -253,7 +254,7 @@ export async function deleteTask(
 ): Promise<{ success: true } | { error: string }> {
   try {
     const { apiKey, baseId } = getCredentials()
-    const res = await fetch(`${API_BASE}/${baseId}/${TABLE}/${taskId}`, {
+    const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}/${taskId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${apiKey}` },
     })

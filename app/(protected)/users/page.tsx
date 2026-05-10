@@ -1,4 +1,5 @@
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
+import { airtableFetch } from '@/lib/airtable/client'
 import { getUsers } from '@/lib/services/usersService'
 import { formatEastern } from '@/lib/utils/dateFormat'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
@@ -35,7 +36,7 @@ async function getCoachCalendarSessions(ownerEmail: string): Promise<CoachSessio
   if (!apiKey || !baseId) return []
   const safeEmail = ownerEmail.toLowerCase().replace(/"/g, '\\"')
   const formula = encodeURIComponent(`AND(LOWER({${FIELDS.MEETINGS.CALENDAR_OWNER}})="${safeEmail}",{${FIELDS.MEETINGS.CLIENT_NAME}}!="")`)
-  const res = await fetch(
+  const res = await airtableFetch(
     `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(TABLES.MEETINGS)}` +
       `?filterByFormula=${formula}` +
       `&fields[]=${encodeURIComponent(FIELDS.MEETINGS.CLIENT_NAME)}&fields[]=${encodeURIComponent(FIELDS.MEETINGS.START)}&fields[]=${encodeURIComponent(FIELDS.MEETINGS.END)}` +

@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getRelationshipContext } from '@/lib/airtable/relationships'
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
+import { airtableFetch } from '@/lib/airtable/client'
 
 const API_BASE = 'https://api.airtable.com/v0'
 
@@ -49,7 +50,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
   }
 
-  const res = await fetch(
+  const res = await airtableFetch(
     `${API_BASE}/${baseId}/${encodeURIComponent(TABLES.PEOPLE)}/${id}`,
     {
       method: 'PATCH',

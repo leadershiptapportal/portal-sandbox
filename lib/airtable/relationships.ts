@@ -1,4 +1,5 @@
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
+import { airtableFetch } from '@/lib/airtable/client'
 import { log } from '@/lib/utils/logger'
 
 const API_BASE = 'https://api.airtable.com/v0'
@@ -55,9 +56,13 @@ function normalizeRelationshipType(raw: unknown): 'coaching' | 'reports_to' {
  * Used to populate personName / leadName without per-record lookups.
  */
 async function buildNameMap(apiKey: string, baseId: string): Promise<Map<string, string>> {
-  const res = await fetch(
-    `${API_BASE}/${baseId}/${TABLES.PEOPLE}` +
-      `?fields[]=Full%20Name&fields[]=First%20Name&fields[]=Last%20Name&maxRecords=5000`,
+  const usersTable = encodeURIComponent(TABLES.PEOPLE)
+  const res = await airtableFetch(
+    `${API_BASE}/${baseId}/${usersTable}` +
+      `?fields[]=${encodeURIComponent(FIELDS.USERS.FULL_NAME)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.USERS.FIRST_NAME)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.USERS.LAST_NAME)}` +
+      `&maxRecords=5000`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
   const map = new Map<string, string>()
@@ -65,9 +70,9 @@ async function buildNameMap(apiKey: string, baseId: string): Promise<Map<string,
   const data = await res.json()
   for (const r of data.records ?? []) {
     const f = r.fields as Record<string, unknown>
-    const full = (f['Full Name'] as string | undefined)?.trim()
-    const first = (f['First Name'] as string | undefined)?.trim()
-    const last = (f['Last Name'] as string | undefined)?.trim()
+    const full = (f[FIELDS.USERS.FULL_NAME] as string | undefined)?.trim()
+    const first = (f[FIELDS.USERS.FIRST_NAME] as string | undefined)?.trim()
+    const last = (f[FIELDS.USERS.LAST_NAME] as string | undefined)?.trim()
     const name = full || [first, last].filter(Boolean).join(' ') || (r.id as string)
     map.set(r.id as string, name)
   }
@@ -120,7 +125,7 @@ export async function getRelationshipContexts(
   )
 
   const [res, nameMap] = await Promise.all([
-    fetch(
+    airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${formula}&maxRecords=1000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
@@ -167,7 +172,7 @@ export async function getUpstreamContexts(
   )
 
   const [res, nameMap] = await Promise.all([
-    fetch(
+    airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${formula}&maxRecords=1000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
@@ -196,7 +201,7 @@ export async function getAllRelationshipContexts(): Promise<RelationshipContext[
   const { apiKey, baseId } = getCredentials()
 
   const [res, nameMap] = await Promise.all([
-    fetch(
+    airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}?maxRecords=5000` +
         `&sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.RELATIONSHIP_CONTEXTS.STATUS)}&sort%5B0%5D%5Bdirection%5D=asc`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
@@ -237,7 +242,7 @@ export async function getDirectReports(
     `LOWER({${FIELDS.RELATIONSHIP_CONTEXTS.STATUS}}) = "active"`,
   )
 
-  const res = await fetch(
+  const res = await airtableFetch(
     `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${formula}&maxRecords=1000`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
@@ -271,17 +276,18 @@ export async function getDirectReports(
   // Batch-fetch Users records for these person IDs
   const orClauses = capped.map((id) => `RECORD_ID()="${id}"`).join(',')
   const userFormula = encodeURIComponent(`OR(${orClauses})`)
-  const userRes = await fetch(
-    `${API_BASE}/${baseId}/${TABLES.PEOPLE}` +
+  const usersTable = encodeURIComponent(TABLES.PEOPLE)
+  const userRes = await airtableFetch(
+    `${API_BASE}/${baseId}/${usersTable}` +
       `?filterByFormula=${userFormula}` +
-      `&fields[]=${encodeURIComponent('Full Name')}` +
-      `&fields[]=${encodeURIComponent('First Name')}` +
-      `&fields[]=${encodeURIComponent('Last Name')}` +
-      `&fields[]=${encodeURIComponent('Title')}` +
-      `&fields[]=${encodeURIComponent('Job Title')}` +
-      `&fields[]=${encodeURIComponent('Work Email')}` +
-      `&fields[]=${encodeURIComponent('Profile Photo')}` +
-      `&fields[]=${encodeURIComponent('Avatar URL')}`,
+      `&fields[]=${encodeURIComponent(FIELDS.USERS.FULL_NAME)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.USERS.FIRST_NAME)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.USERS.LAST_NAME)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.USERS.TITLE)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.USERS.JOB_TITLE)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.USERS.WORK_EMAIL)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.USERS.PROFILE_PHOTO)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.USERS.AVATAR_URL)}`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
   if (!userRes.ok) {
@@ -293,20 +299,20 @@ export async function getDirectReports(
   const results: DirectReport[] = []
   for (const r of userData.records ?? []) {
     const f = r.fields as Record<string, unknown>
-    const fullName = (f['Full Name'] as string | undefined)?.trim()
-    const first = (f['First Name'] as string | undefined)?.trim()
-    const last = (f['Last Name'] as string | undefined)?.trim()
+    const fullName = (f[FIELDS.USERS.FULL_NAME] as string | undefined)?.trim()
+    const first = (f[FIELDS.USERS.FIRST_NAME] as string | undefined)?.trim()
+    const last = (f[FIELDS.USERS.LAST_NAME] as string | undefined)?.trim()
     const name = fullName || [first, last].filter(Boolean).join(' ') || r.id
 
-    const photoArr = f['Profile Photo'] as Array<{ url: string }> | undefined
-    const photoUrl = photoArr?.[0]?.url ?? (f['Avatar URL'] as string | undefined) ?? undefined
+    const photoArr = f[FIELDS.USERS.PROFILE_PHOTO] as Array<{ url: string }> | undefined
+    const photoUrl = photoArr?.[0]?.url ?? (f[FIELDS.USERS.AVATAR_URL] as string | undefined) ?? undefined
 
     results.push({
       personId: r.id as string,
       name,
-      title: (f['Title'] as string | undefined)?.trim() ||
-        (f['Job Title'] as string | undefined)?.trim() || undefined,
-      email: (f['Work Email'] as string | undefined)?.trim() || undefined,
+      title: (f[FIELDS.USERS.TITLE] as string | undefined)?.trim() ||
+        (f[FIELDS.USERS.JOB_TITLE] as string | undefined)?.trim() || undefined,
+      email: (f[FIELDS.USERS.WORK_EMAIL] as string | undefined)?.trim() || undefined,
       photoUrl,
     })
   }
@@ -379,7 +385,7 @@ export async function resolveContextForSubject(
   )
 
   const [res, nameMap] = await Promise.all([
-    fetch(
+    airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${formula}&maxRecords=2000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
@@ -425,7 +431,7 @@ async function fetchExistingPairs(
   baseId: string,
   personId: string,
 ): Promise<Array<{ leadId: string; type: string }>> {
-  const res = await fetch(
+  const res = await airtableFetch(
     `${API_BASE}/${baseId}/${TABLE}?maxRecords=500`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
@@ -524,7 +530,7 @@ export async function generateRelationshipRows(data: OnboardingData): Promise<vo
       [FIELDS.RELATIONSHIP_CONTEXTS.STATUS]: 'Active',
     }
 
-    const res = await fetch(`${API_BASE}/${baseId}/${TABLE}`, {
+    const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ fields }),

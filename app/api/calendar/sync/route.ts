@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
+import { airtableFetch } from '@/lib/airtable/client'
 
 export const maxDuration = 60
 
@@ -37,9 +38,9 @@ async function getCoachEmails(): Promise<string[]> {
   const baseId = process.env.AIRTABLE_BASE_ID
   if (!apiKey || !baseId) throw new Error('Missing AIRTABLE_API_KEY or AIRTABLE_BASE_ID')
 
-  const formula = encodeURIComponent('SEARCH("@leadershiptap.com",{Work Email})')
-  const res = await fetch(
-    `${AIRTABLE_API}/${baseId}/${TABLES.PEOPLE}?filterByFormula=${formula}&fields[]=Work%20Email&maxRecords=200`,
+  const formula = encodeURIComponent(`SEARCH("@leadershiptap.com",{${FIELDS.USERS.WORK_EMAIL}})`)
+  const res = await airtableFetch(
+    `${AIRTABLE_API}/${baseId}/${encodeURIComponent(TABLES.PEOPLE)}?filterByFormula=${formula}&fields[]=${encodeURIComponent(FIELDS.USERS.WORK_EMAIL)}&maxRecords=200`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
   if (!res.ok) {
@@ -49,7 +50,7 @@ async function getCoachEmails(): Promise<string[]> {
   const data = await res.json()
   const emails: string[] = []
   for (const record of data.records ?? []) {
-    const email = (record.fields['Work Email'] as string | undefined)?.trim()
+    const email = (record.fields[FIELDS.USERS.WORK_EMAIL] as string | undefined)?.trim()
     if (email?.toLowerCase().includes('@leadershiptap.com')) emails.push(email)
   }
   return emails
@@ -78,14 +79,19 @@ interface SyncIndex {
 }
 
 async function buildSyncIndex(apiKey: string, baseId: string): Promise<SyncIndex> {
+  const usersTable = encodeURIComponent(TABLES.PEOPLE)
   const [usersRes, ctxRes] = await Promise.all([
-    fetch(
-      `${AIRTABLE_API}/${baseId}/${TABLES.PEOPLE}` +
-        `?fields[]=Full%20Name&fields[]=First%20Name&fields[]=Last%20Name` +
-        `&fields[]=Work%20Email&fields[]=Email&maxRecords=5000`,
+    airtableFetch(
+      `${AIRTABLE_API}/${baseId}/${usersTable}` +
+        `?fields[]=${encodeURIComponent(FIELDS.USERS.FULL_NAME)}` +
+        `&fields[]=${encodeURIComponent(FIELDS.USERS.FIRST_NAME)}` +
+        `&fields[]=${encodeURIComponent(FIELDS.USERS.LAST_NAME)}` +
+        `&fields[]=${encodeURIComponent(FIELDS.USERS.WORK_EMAIL)}` +
+        `&fields[]=${encodeURIComponent(FIELDS.USERS.EMAIL)}` +
+        `&maxRecords=5000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
-    fetch(
+    airtableFetch(
       `${AIRTABLE_API}/${baseId}/${encodeURIComponent(TABLES.RELATIONSHIP_CONTEXTS)}` +
         `?filterByFormula=${encodeURIComponent(`{${FIELDS.RELATIONSHIP_CONTEXTS.STATUS}}="Active"`)}&maxRecords=5000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
@@ -101,15 +107,15 @@ async function buildSyncIndex(apiKey: string, baseId: string): Promise<SyncIndex
 
   for (const r of usersData.records ?? []) {
     const f = r.fields as Record<string, unknown>
-    const fullName = (f['Full Name'] as string | undefined)?.trim()
-    const firstName = (f['First Name'] as string | undefined)?.trim() ?? ''
-    const lastName = (f['Last Name'] as string | undefined)?.trim()
+    const fullName = (f[FIELDS.USERS.FULL_NAME] as string | undefined)?.trim()
+    const firstName = (f[FIELDS.USERS.FIRST_NAME] as string | undefined)?.trim() ?? ''
+    const lastName = (f[FIELDS.USERS.LAST_NAME] as string | undefined)?.trim()
     const name = fullName || [firstName, lastName].filter(Boolean).join(' ') || '(Unknown)'
     const entry: UserEntry = { id: r.id as string, name, firstName }
     idToUser.set(r.id as string, entry)
 
-    const workEmail = (f['Work Email'] as string | undefined)?.toLowerCase().trim()
-    const email = (f['Email'] as string | undefined)?.toLowerCase().trim()
+    const workEmail = (f[FIELDS.USERS.WORK_EMAIL] as string | undefined)?.toLowerCase().trim()
+    const email = (f[FIELDS.USERS.EMAIL] as string | undefined)?.toLowerCase().trim()
     const emails: string[] = []
     if (workEmail) {
       emailToUser.set(workEmail, entry)
@@ -367,7 +373,7 @@ async function upsertMeeting(
   // so we fetch all matches and filter by contextId in JavaScript.
   const safeId = event.id.replace(/"/g, '\\"')
   const formula = encodeURIComponent(`{${FIELDS.MEETINGS.PROVIDER_EVENT_ID}}="${safeId}"`)
-  const findRes = await fetch(
+  const findRes = await airtableFetch(
     `${AIRTABLE_API}/${baseId}/${MEETINGS_TABLE}?filterByFormula=${formula}&maxRecords=50` +
       `&fields[]=${encodeURIComponent(FIELDS.MEETINGS.PROVIDER_EVENT_ID)}` +
       `&fields[]=${encodeURIComponent(FIELDS.MEETINGS.RELATIONSHIP_CONTEXT)}`,
@@ -385,7 +391,7 @@ async function upsertMeeting(
   )
 
   if (existingRecord) {
-    const res = await fetch(`${AIRTABLE_API}/${baseId}/${MEETINGS_TABLE}/${existingRecord.id}`, {
+    const res = await airtableFetch(`${AIRTABLE_API}/${baseId}/${MEETINGS_TABLE}/${existingRecord.id}`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ fields }),
@@ -395,7 +401,7 @@ async function upsertMeeting(
       throw new Error(`PATCH failed for ${event.id}|${contextId}: ${text}`)
     }
   } else {
-    const res = await fetch(`${AIRTABLE_API}/${baseId}/${MEETINGS_TABLE}`, {
+    const res = await airtableFetch(`${AIRTABLE_API}/${baseId}/${MEETINGS_TABLE}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ fields }),
@@ -416,7 +422,7 @@ async function cancelMeetings(
 ): Promise<number> {
   const safeId = providerEventId.replace(/"/g, '\\"')
   const formula = encodeURIComponent(`{${FIELDS.MEETINGS.PROVIDER_EVENT_ID}}="${safeId}"`)
-  const findRes = await fetch(
+  const findRes = await airtableFetch(
     `${AIRTABLE_API}/${baseId}/${MEETINGS_TABLE}?filterByFormula=${formula}&maxRecords=50` +
       `&fields[]=${encodeURIComponent(FIELDS.MEETINGS.PROVIDER_EVENT_ID)}`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
@@ -426,7 +432,7 @@ async function cancelMeetings(
 
   let cancelled = 0
   for (const r of findData.records ?? []) {
-    const patchRes = await fetch(`${AIRTABLE_API}/${baseId}/${MEETINGS_TABLE}/${r.id}`, {
+    const patchRes = await airtableFetch(`${AIRTABLE_API}/${baseId}/${MEETINGS_TABLE}/${r.id}`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ fields: { [FIELDS.MEETINGS.MEETING_STATUS]: 'Cancelled' } }),

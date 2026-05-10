@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { airtableFetch } from '@/lib/airtable/client'
+import { TABLES } from '@/lib/airtable/constants'
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,8 +40,8 @@ export async function POST(req: NextRequest) {
     const baseId = process.env.AIRTABLE_BASE_ID!
     const token = process.env.AIRTABLE_API_KEY!
 
-    const airtableRes = await fetch(
-      `https://api.airtable.com/v0/${baseId}/Users/${userId}`,
+    const airtableRes = await airtableFetch(
+      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(TABLES.PEOPLE)}/${userId}`,
       {
         method: 'PATCH',
         headers: {

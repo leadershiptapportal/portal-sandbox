@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ChevronRight, Clock, CalendarDays, FileText } from 'lucide-react'
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
+import { airtableFetch } from '@/lib/airtable/client'
 import { log } from '@/lib/utils/logger'
 import { getUsers, getClientsByRelationship, getPortalCoaches } from '@/lib/services/usersService'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
@@ -72,7 +73,7 @@ async function getUpcomingPortalEvents(ownerEmail: string): Promise<PortalCalend
     `AND(IS_AFTER({${FIELDS.MEETINGS.START}}, "${now.toISOString()}"), IS_BEFORE({${FIELDS.MEETINGS.START}}, "${cutoff.toISOString()}"), LOWER({${FIELDS.MEETINGS.CALENDAR_OWNER}}) = "${safeOwner}")`,
   )
   try {
-    const res = await fetch(
+    const res = await airtableFetch(
       `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(TABLES.MEETINGS)}?filterByFormula=${formula}&sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.MEETINGS.START)}&sort%5B0%5D%5Bdirection%5D=asc&maxRecords=10`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     )

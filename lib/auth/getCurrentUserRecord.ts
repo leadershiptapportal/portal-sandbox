@@ -1,5 +1,7 @@
 import { currentUser } from '@clerk/nextjs/server'
 import { log } from '@/lib/utils/logger'
+import { airtableFetch } from '@/lib/airtable/client'
+import { TABLES, FIELDS } from '@/lib/airtable/constants'
 
 export interface CurrentUserRecord {
   clerkId: string
@@ -36,13 +38,13 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
     }
 
     const searchEmail = email.toLowerCase().trim()
+    const usersTable = encodeURIComponent(TABLES.PEOPLE)
 
     // ── Step 1: formula lookup (fast, handles most cases) ──────────────────
-    // Field confirmed as "Work Email" from paginated scan debug log.
     const safeEmail = searchEmail.replace(/"/g, '\\"')
-    const formula = encodeURIComponent(`LOWER({Work Email}) = "${safeEmail}"`)
-    const formulaRes = await fetch(
-      `https://api.airtable.com/v0/${baseId}/Users?filterByFormula=${formula}&maxRecords=1`,
+    const formula = encodeURIComponent(`LOWER({${FIELDS.USERS.WORK_EMAIL}}) = "${safeEmail}"`)
+    const formulaRes = await airtableFetch(
+      `https://api.airtable.com/v0/${baseId}/${usersTable}?filterByFormula=${formula}&maxRecords=1`,
       { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' },
     )
     const formulaData = await formulaRes.json()
@@ -58,8 +60,8 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
       let offset: string | undefined
       let firstRecordLogged = false
       scan: do {
-        const url = `https://api.airtable.com/v0/${baseId}/Users?pageSize=100${offset ? `&offset=${offset}` : ''}`
-        const pageRes = await fetch(url, {
+        const url = `https://api.airtable.com/v0/${baseId}/${usersTable}?pageSize=100${offset ? `&offset=${offset}` : ''}`
+        const pageRes = await airtableFetch(url, {
           headers: { Authorization: `Bearer ${token}` },
           cache: 'no-store',
         })
@@ -101,7 +103,7 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
       return { clerkId: clerkUser.id, email, airtableId: null, role, name }
     }
 
-    const rawRole = ((match.fields['Role'] as string) ?? '').toLowerCase().trim()
+    const rawRole = ((match.fields[FIELDS.USERS.ROLE] as string) ?? '').toLowerCase().trim()
     const role: CurrentUserRecord['role'] =
       rawRole === 'admin' ? 'admin' :
       rawRole === 'coach' ? 'coach' :

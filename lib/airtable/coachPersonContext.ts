@@ -1,4 +1,5 @@
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
+import { airtableFetch } from '@/lib/airtable/client'
 
 const API_BASE = 'https://api.airtable.com/v0'
 const TABLE = encodeURIComponent(TABLES.COACH_PERSON_CONTEXT)
@@ -43,7 +44,7 @@ export async function getCoachPersonContext(
 ): Promise<CoachPersonContext | null> {
   try {
     const { apiKey, baseId } = getCredentials()
-    const res = await fetch(
+    const res = await airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}?maxRecords=2000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     )
@@ -94,7 +95,7 @@ export async function upsertCoachPersonContext(
 
   if (existing) {
     // PATCH the existing record
-    const res = await fetch(
+    const res = await airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}/${existing.id}`,
       {
         method: 'PATCH',
@@ -109,7 +110,7 @@ export async function upsertCoachPersonContext(
     console.log('[upsertCoachPersonContext] PATCHed record:', existing.id)
   } else {
     // POST a new record — include the linked Coach and Person fields
-    const res = await fetch(
+    const res = await airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}`,
       {
         method: 'POST',
