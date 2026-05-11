@@ -1,5 +1,4 @@
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import BackLink from '@/components/BackLink'
 import { getUserById } from '@/lib/services/usersService'
 import { getUserMessages } from '@/lib/services/messagesService'
 import PageHeader from '@/components/layout/PageHeader'
@@ -32,13 +31,9 @@ export default async function NewMessagePage({ params }: Props) {
       />
 
       <div className="p-8 max-w-2xl mx-auto">
-        <Link
-          href={`/users/${id}`}
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to {clientName}
-        </Link>
+        <div className="mb-6">
+          <BackLink fallbackHref={`/users/${id}`} label={`Back to ${clientName}`} />
+        </div>
 
         <div className="bg-white rounded-xl shadow-sm p-6">
           {latestDraft && (

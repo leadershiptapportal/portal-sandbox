@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import {
-  ArrowLeft,
   ChevronRight,
   CheckSquare,
   Paperclip,
 } from 'lucide-react'
+import BackLink from '@/components/BackLink'
 import { getUserById } from '@/lib/services/usersService'
 import { getMeetingsForUser } from '@/lib/services/meetingsService'
 import { getUserMessages } from '@/lib/services/messagesService'
@@ -184,14 +184,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   return (
     <div className="px-4 py-5 md:p-8 max-w-5xl mx-auto space-y-6">
 
-      {/* Back link */}
-      <Link
-        href="/users"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Clients
-      </Link>
+      {/* Back link — goes to wherever the user actually came from. */}
+      <BackLink fallbackHref="/users" label="Back" />
 
       {/* Breadcrumb trail for downstream navigation */}
       {trailEntries.length > 0 && (

@@ -1,5 +1,5 @@
-import Link from 'next/link'
-import { ArrowLeft, Calendar, Clock, Users, CheckSquare } from 'lucide-react'
+import { Calendar, Clock, Users, CheckSquare } from 'lucide-react'
+import BackLink from '@/components/BackLink'
 import { notFound } from 'next/navigation'
 import { getUserById } from '@/lib/services/usersService'
 import { getMeetingById } from '@/lib/airtable/meetings'
@@ -72,14 +72,8 @@ export default async function SessionDetailPage({ params }: Props) {
   return (
     <div className="px-4 py-5 md:p-8 max-w-3xl mx-auto space-y-6">
 
-      {/* Back link */}
-      <Link
-        href={`/users/${id}`}
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to {userName}
-      </Link>
+      {/* Back link — goes to wherever the user actually came from. */}
+      <BackLink fallbackHref={`/users/${id}`} label={`Back to ${userName}`} />
 
       {/* Session header */}
       <div className="bg-white rounded-xl shadow-sm p-5 md:p-6">

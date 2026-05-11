@@ -1,5 +1,4 @@
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import BackLink from '@/components/BackLink'
 import { getMeetingById } from '@/lib/airtable/meetings'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
@@ -66,14 +65,8 @@ export default async function SessionPage({ params }: Props) {
   return (
     <div className="px-4 py-5 md:p-8 max-w-2xl mx-auto space-y-6">
 
-      {/* Back */}
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Dashboard
-      </Link>
+      {/* Back — goes to wherever the user came from. */}
+      <BackLink fallbackHref="/dashboard" label="Back" />
 
       {/* Event header */}
       <div className="bg-white rounded-xl shadow-sm p-5 space-y-1">

@@ -1,5 +1,4 @@
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import BackLink from '@/components/BackLink'
 import { notFound } from 'next/navigation'
 import { getUserById } from '@/lib/services/usersService'
 import { getMeetingDetail } from '@/lib/services/meetingsService'
@@ -45,14 +44,10 @@ export default async function MeetingDetailPage({ params }: Props) {
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
-      {/* Back link */}
-      <Link
-        href={`/users/${id}`}
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-6"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to {userName}
-      </Link>
+      {/* Back link — respects browser history. */}
+      <div className="mb-6">
+        <BackLink fallbackHref={`/users/${id}`} label={`Back to ${userName}`} />
+      </div>
 
       {/* Meeting header card */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
