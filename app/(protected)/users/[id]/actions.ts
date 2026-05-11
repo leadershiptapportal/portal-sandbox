@@ -15,7 +15,14 @@ import {
 } from '@/lib/airtable/users'
 import { upsertCoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
-import { resolveContextForSubject } from '@/lib/airtable/relationships'
+import {
+  resolveContextForSubject,
+  createRelationshipContext,
+  updateRelationshipContext,
+  deleteRelationshipContext,
+  type CreateRCInput,
+  type UpdateRCInput,
+} from '@/lib/airtable/relationships'
 
 // ── Edit Profile ──────────────────────────────────────────────────────────────
 
@@ -321,4 +328,76 @@ export async function logManualSessionAction(params: {
   }
 
   revalidatePath(`/users/${params.subjectPersonId}`)
+}
+
+// ── Relationship Context management ───────────────────────────────────────────
+
+/**
+ * Create a new RC row.
+ *  - subjectPersonId: the user whose profile this is being added from
+ *  - input: the other person + relationship type + role
+ *    - role='subject_is_person' → subject reports to / is coached by otherPersonId
+ *    - role='subject_is_lead'   → otherPersonId reports to / is coached by subject
+ */
+export async function addRelationshipAction(params: {
+  subjectPersonId: string
+  otherPersonId: string
+  type: 'coaching' | 'reports_to'
+  role: 'subject_is_person' | 'subject_is_lead'
+  startDate?: string
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const userRecord = await getCurrentUserRecord()
+    if (!userRecord.airtableId) return { success: false, error: 'Could not resolve your user record.' }
+
+    const personId =
+      params.role === 'subject_is_person' ? params.subjectPersonId : params.otherPersonId
+    const leadId =
+      params.role === 'subject_is_person' ? params.otherPersonId : params.subjectPersonId
+
+    const input: CreateRCInput = {
+      personId,
+      leadId,
+      type: params.type,
+      status: 'Active',
+    }
+    if (params.startDate) input.startDate = params.startDate
+
+    await createRelationshipContext(input)
+    revalidatePath(`/users/${params.subjectPersonId}`)
+    revalidatePath(`/users/${params.otherPersonId}`)
+    return { success: true }
+  } catch (err) {
+    console.error('[addRelationshipAction]', err)
+    return { success: false, error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+export async function updateRelationshipAction(params: {
+  rcId: string
+  subjectPersonId: string  // for revalidation
+  fields: UpdateRCInput
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    await updateRelationshipContext(params.rcId, params.fields)
+    revalidatePath(`/users/${params.subjectPersonId}`)
+    return { success: true }
+  } catch (err) {
+    console.error('[updateRelationshipAction]', err)
+    return { success: false, error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+export async function deleteRelationshipAction(params: {
+  rcId: string
+  subjectPersonId: string  // for revalidation
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    await deleteRelationshipContext(params.rcId)
+    revalidatePath(`/users/${params.subjectPersonId}`)
+    return { success: true }
+  } catch (err) {
+    console.error('[deleteRelationshipAction]', err)
+    return { success: false, error: err instanceof Error ? err.message : String(err) }
+  }
 }

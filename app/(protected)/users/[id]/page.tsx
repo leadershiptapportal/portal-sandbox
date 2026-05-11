@@ -15,7 +15,12 @@ import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import { getCoachPersonContext } from '@/lib/airtable/coachPersonContext'
-import { getRelationshipContext, getDirectReports } from '@/lib/airtable/relationships'
+import {
+  getRelationshipContext,
+  getDirectReports,
+  getRelationshipsForPerson,
+} from '@/lib/airtable/relationships'
+import { getAllUsers } from '@/lib/airtable/users'
 import PlaceholderSection from '@/components/ui/PlaceholderSection'
 import UserActionsBar from './UserActionsBar'
 import { getDisplayName, getInitials, isRecordId, SectionHeading } from './sections/helpers'
@@ -31,6 +36,7 @@ import TheirTeamSection from './sections/TheirTeamSection'
 import MeetingsSection from './sections/MeetingsSection'
 import MessagesSection from './sections/MessagesSection'
 import TasksSection from './sections/TasksSection'
+import RelationshipsSection from './sections/RelationshipsSection'
 import type { User, Note, Task } from '@/lib/types'
 
 interface Props {
@@ -95,6 +101,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     relationshipContext,
     portalSessionEvents,
     theirTeamReports,
+    allPersonRelationships,
+    allUsersForPicker,
   ] = await Promise.all([
     getMeetingsForUser(contactEmail, sessionUser, id, currentUserRecord.email || undefined, displayName),
     getUserMessages(id),
@@ -114,6 +122,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
       ? getPortalEventsByClientEmail(contactEmail, currentUserRecord.email || undefined, displayName).catch(() => [])
       : Promise.resolve([]),
     getDirectReports(id).catch(() => []),
+    getRelationshipsForPerson(id).catch(() => []),
+    getAllUsers().catch(() => [] as User[]),
   ])
 
   const directReports = theirTeamReports
@@ -286,6 +296,21 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
 
       {/* ── Coach Notes ──────────────────────────────────────────────────── */}
       <CoachNotesSection sessionNotes={sessionNotes} userCanWrite={userCanWrite} />
+
+      {/* ── Relationships (coaches, coachees, manager, reports) ──────────── */}
+      <RelationshipsSection
+        subjectPersonId={id}
+        subjectName={name}
+        relationships={allPersonRelationships}
+        allPeople={allUsersForPicker.map((u) => ({
+          id: u.id,
+          name:
+            u.fullName ||
+            [u.firstName, u.lastName].filter(Boolean).join(' ') ||
+            u.email,
+        }))}
+        canEdit={userCanWrite}
+      />
 
       {/* ── Team ─────────────────────────────────────────────────────────── */}
       <TeamSection

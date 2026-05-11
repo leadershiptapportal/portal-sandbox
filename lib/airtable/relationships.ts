@@ -543,3 +543,128 @@ export async function generateRelationshipRows(data: OnboardingData): Promise<vo
     }
   }
 }
+
+// ── Single-record CRUD on Relationship Contexts ──────────────────────────────
+
+export interface CreateRCInput {
+  personId: string
+  leadId: string
+  type: 'coaching' | 'reports_to'
+  status?: 'Active' | 'Inactive' | 'Paused' | 'Ended'
+  startDate?: string  // YYYY-MM-DD
+}
+
+/**
+ * Creates a single Relationship Context row. Returns the new record's ID.
+ * Skips if a duplicate (same Person+Lead+Type) already exists — returns the
+ * existing row's ID instead.
+ */
+export async function createRelationshipContext(input: CreateRCInput): Promise<string> {
+  const { apiKey, baseId } = getCredentials()
+
+  // Dedup: check for existing Person+Lead+Type combo before creating.
+  const existingPairs = await fetchExistingPairs(apiKey, baseId, input.personId)
+  const dupe = existingPairs.find((p) => p.leadId === input.leadId && p.type === input.type)
+  if (dupe) {
+    log.warn(`[createRelationshipContext] duplicate ignored: person=${input.personId} lead=${input.leadId} type=${input.type}`)
+    // Walk RCs to find the existing record ID
+    const res = await airtableFetch(
+      `${API_BASE}/${baseId}/${TABLE}?maxRecords=1000`,
+      { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
+    )
+    if (res.ok) {
+      const data = await res.json()
+      for (const r of data.records ?? []) {
+        const f = r.fields as Record<string, unknown>
+        const persons = Array.isArray(f[FIELDS.RELATIONSHIP_CONTEXTS.PERSON]) ? (f[FIELDS.RELATIONSHIP_CONTEXTS.PERSON] as string[]) : []
+        const leads = Array.isArray(f[FIELDS.RELATIONSHIP_CONTEXTS.LEAD]) ? (f[FIELDS.RELATIONSHIP_CONTEXTS.LEAD] as string[]) : []
+        if (persons[0] === input.personId && leads[0] === input.leadId) {
+          const t = normalizeRelationshipType(f[FIELDS.RELATIONSHIP_CONTEXTS.TYPE])
+          if (t === input.type) return r.id as string
+        }
+      }
+    }
+  }
+
+  const fields: Record<string, unknown> = {
+    [FIELDS.RELATIONSHIP_CONTEXTS.PERSON]: [input.personId],
+    [FIELDS.RELATIONSHIP_CONTEXTS.LEAD]: [input.leadId],
+    [FIELDS.RELATIONSHIP_CONTEXTS.TYPE]: input.type,
+    [FIELDS.RELATIONSHIP_CONTEXTS.STATUS]: input.status ?? 'Active',
+  }
+  if (input.startDate) fields[FIELDS.RELATIONSHIP_CONTEXTS.START_DATE] = input.startDate
+
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields }),
+  })
+  const result = await res.json()
+  if (!res.ok) throw new Error(`Relationship Context POST failed: ${JSON.stringify(result)}`)
+  return result.id as string
+}
+
+export interface UpdateRCInput {
+  type?: 'coaching' | 'reports_to'
+  status?: 'Active' | 'Inactive' | 'Paused' | 'Ended'
+  startDate?: string | null
+  endDate?: string | null
+}
+
+export async function updateRelationshipContext(
+  rcId: string,
+  input: UpdateRCInput,
+): Promise<void> {
+  const { apiKey, baseId } = getCredentials()
+  const fields: Record<string, unknown> = {}
+  if (input.type !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.TYPE] = input.type
+  if (input.status !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.STATUS] = input.status
+  if (input.startDate !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.START_DATE] = input.startDate
+  if (Object.keys(fields).length === 0) return
+
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}/${rcId}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields }),
+  })
+  if (!res.ok) {
+    const detail = await res.text()
+    throw new Error(`Relationship Context PATCH failed: ${detail}`)
+  }
+}
+
+export async function deleteRelationshipContext(rcId: string): Promise<void> {
+  const { apiKey, baseId } = getCredentials()
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}/${rcId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${apiKey}` },
+  })
+  if (!res.ok) {
+    const detail = await res.text()
+    throw new Error(`Relationship Context DELETE failed: ${detail}`)
+  }
+}
+
+/**
+ * Returns every RC where the given person is either Person OR Lead.
+ * Used by the Relationships section on profile pages to show all of a
+ * person's connections in both directions.
+ */
+export async function getRelationshipsForPerson(personId: string): Promise<RelationshipContext[]> {
+  const { apiKey, baseId } = getCredentials()
+  const [res, nameMap] = await Promise.all([
+    airtableFetch(`${API_BASE}/${baseId}/${TABLE}?maxRecords=2000`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      cache: 'no-store',
+    }),
+    buildNameMap(apiKey, baseId),
+  ])
+  if (!res.ok) return []
+  const data = await res.json()
+  return (data.records ?? [])
+    .map((r: { id: string; fields: Record<string, unknown> }) => mapRecord(r, nameMap))
+    .filter((r: RelationshipContext | null): r is RelationshipContext =>
+      r !== null && (r.personId === personId || r.leadId === personId),
+    )
+}
+
