@@ -17,11 +17,11 @@ import {
 } from './regions/Skeletons'
 import type { User } from '@/lib/types'
 
-function getTimeOfDay(): string {
+function getTimeOfDay(): { label: string; emoji: string } {
   const h = getHourInTimezone()
-  if (h < 12) return 'morning'
-  if (h < 17) return 'afternoon'
-  return 'evening'
+  if (h < 12) return { label: 'morning', emoji: '☀️' }
+  if (h < 17) return { label: 'afternoon', emoji: '👋' }
+  return { label: 'evening', emoji: '🌙' }
 }
 
 function getDisplayName(user: User): string {
@@ -61,7 +61,7 @@ export default async function DashboardPage() {
       {/* ── Greeting ─────────────────────────────────────────────────────────── */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900">
-          Good {getTimeOfDay()}, {firstName} 👋
+          Good {getTimeOfDay().label}, {firstName} {getTimeOfDay().emoji}
         </h1>
         <p className="text-sm text-slate-500 mt-1">
           Here&apos;s your coaching dashboard
