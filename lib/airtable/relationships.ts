@@ -609,6 +609,14 @@ export interface UpdateRCInput {
   status?: 'Active' | 'Inactive' | 'Paused' | 'Ended'
   startDate?: string | null
   endDate?: string | null
+  /**
+   * When the editor changes the role (coach↔coachee or manager↔report) we
+   * must swap which user sits in the Person vs Lead linked field. Patching
+   * `type` alone doesn't move the relationship between buckets in the UI.
+   * Provide the new Person/Lead record IDs to apply the direction change.
+   */
+  personId?: string
+  leadId?: string
 }
 
 export async function updateRelationshipContext(
@@ -620,6 +628,8 @@ export async function updateRelationshipContext(
   if (input.type !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.TYPE] = input.type
   if (input.status !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.STATUS] = input.status
   if (input.startDate !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.START_DATE] = input.startDate
+  if (input.personId !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.PERSON] = [input.personId]
+  if (input.leadId !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.LEAD] = [input.leadId]
   if (Object.keys(fields).length === 0) return
 
   const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}/${rcId}`, {

@@ -47,6 +47,7 @@ interface EditProps {
   rcId: string
   subjectPersonId: string
   subjectName: string
+  otherPersonId: string   // needed so we can swap Person/Lead when role changes
   otherName: string
   initialRole: RelationshipRole
   initialStartDate?: string
@@ -141,7 +142,15 @@ export default function RelationshipDialog(props: Props) {
         }
         toast.success('Relationship added')
       } else {
-        const { type } = roleToTypeAndDirection(role)
+        // Recompute Person/Lead from the new role so direction changes
+        // (e.g. coachee → coach, manager → report) actually move the pill
+        // into the right bucket on the profile. Patching `type` alone won't
+        // do it because both ends of each pair share the same type.
+        const { type, subjectIs } = roleToTypeAndDirection(role)
+        const personId =
+          subjectIs === 'person' ? props.subjectPersonId : props.otherPersonId
+        const leadId =
+          subjectIs === 'person' ? props.otherPersonId : props.subjectPersonId
         const result = await updateRelationshipAction({
           rcId: props.rcId,
           subjectPersonId: props.subjectPersonId,
@@ -149,6 +158,8 @@ export default function RelationshipDialog(props: Props) {
             type,
             status,
             startDate: startDate || null,
+            personId,
+            leadId,
           },
         })
         if (!result.success) {

@@ -101,6 +101,7 @@ function RelationshipPill({
           rcId={item.rc.id}
           subjectPersonId={subjectPersonId}
           subjectName={subjectName}
+          otherPersonId={item.otherPersonId}
           otherName={item.otherName}
           initialRole={item.role}
           initialStartDate={item.rc.startDate}
