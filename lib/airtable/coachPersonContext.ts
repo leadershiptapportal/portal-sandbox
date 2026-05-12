@@ -49,7 +49,12 @@ export async function getCoachPersonContext(
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     )
     if (!res.ok) {
-      console.warn('[getCoachPersonContext] Airtable GET failed:', res.status, await res.text())
+      // Expected when the token doesn't have access to the Coach-Person Context
+      // table (data is being migrated to Notes as part of Item 11). Demoted
+      // from warn to debug-only so it doesn't masquerade as a real failure.
+      if (process.env.NODE_ENV !== 'production') {
+        console.debug('[getCoachPersonContext] table unavailable (status', res.status, '— returning null)')
+      }
       return null
     }
     const data = await res.json()

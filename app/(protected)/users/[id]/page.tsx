@@ -104,14 +104,19 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     allPersonRelationships,
     allUsersForPicker,
   ] = await Promise.all([
-    getMeetingsForUser(contactEmail, sessionUser, id, currentUserRecord.email || undefined, displayName),
-    getUserMessages(id),
+    // Every fetch is wrapped in `.catch(...)` so a single failing Airtable
+    // call (permission, rate limit, transient network) can't reject the
+    // whole Promise.all and crash the page. The UI handles empty/null for
+    // each piece of data individually.
+    getMeetingsForUser(contactEmail, sessionUser, id, currentUserRecord.email || undefined, displayName)
+      .catch(() => ({ upcoming: [], past: [] })),
+    getUserMessages(id).catch(() => []),
     getNotesByUser(id).catch(() => [] as Note[]),
     getTasksByUser(id).catch(() => [] as Task[]),
-    managerId ? getUserById(managerId) : Promise.resolve(null),
-    coachId ? getUserById(coachId) : Promise.resolve(null),
-    teamLeadId ? getUserById(teamLeadId) : Promise.resolve(null),
-    Promise.all(teamMemberIdList.map((tid) => getUserById(tid))),
+    managerId ? getUserById(managerId).catch(() => null) : Promise.resolve(null),
+    coachId ? getUserById(coachId).catch(() => null) : Promise.resolve(null),
+    teamLeadId ? getUserById(teamLeadId).catch(() => null) : Promise.resolve(null),
+    Promise.all(teamMemberIdList.map((tid) => getUserById(tid).catch(() => null))),
     currentUserRecord.airtableId
       ? getCoachPersonContext(currentUserRecord.airtableId, id).catch(() => null)
       : Promise.resolve(null),
