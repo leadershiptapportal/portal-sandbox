@@ -100,10 +100,12 @@ export default function DashboardTaskItem({ task }: { task: DashboardTask }) {
         </div>
 
         {/* Edit button — visible on hover */}
+        {/* Edit button — always visible at 60% opacity (was opacity-0 + group-hover,
+            which hid the affordance entirely on touch devices like iPad). */}
         <button
           onClick={() => setEditOpen(true)}
           aria-label="Edit task"
-          className="flex-shrink-0 p-1.5 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors opacity-0 group-hover:opacity-100"
+          className="flex-shrink-0 p-1.5 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>

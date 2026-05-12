@@ -48,7 +48,7 @@ function ActionCard({
         </div>
         <div className="text-left min-w-0">
           <p className="text-sm font-semibold text-slate-800 truncate">{label}</p>
-          <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">{description}</p>
+          <p className="text-xs text-slate-400 mt-0.5 hidden sm:block truncate">{description}</p>
         </div>
       </div>
     </div>
@@ -61,7 +61,9 @@ export default function DashboardQuickActions({ clients, coaches }: Props) {
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-4 md:mb-6">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Quick Actions</p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* 2-up through iPad portrait, 4-up at lg+. Keeps the description text
+          readable instead of crushing it into a narrow strip next to the icon. */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <ActionCard
           icon={<FileText className="w-5 h-5 text-blue-600" />}
           iconBg="bg-blue-100"

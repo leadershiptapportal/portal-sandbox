@@ -327,7 +327,7 @@ export default function ClientRowWithNotes({
                       {note.body}
                     </span>
                   </div>
-                  <div className="flex-shrink-0 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex-shrink-0 flex gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => startEdit(note)}
                       aria-label="Edit note"

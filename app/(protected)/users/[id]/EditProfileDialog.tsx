@@ -114,7 +114,10 @@ function SelectField({
   )
 }
 
-const ROLE_OPTIONS = ['Client', 'Team Member', 'Senior Leader', 'Coach', 'Admin']
+// Role is a display label only. Portal access is controlled by Clerk's
+// publicMetadata.role, not this field. Three values mirror the system roles
+// documented in CLAUDE.md.
+const ROLE_OPTIONS = ['Client', 'Coach', 'Admin']
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -141,21 +144,18 @@ export default function EditProfileDialog({ user, coachContext }: Props) {
   const [preferredName, setPreferredName] = useState('')
   const [title, setTitle] = useState('')
   const [workEmail, setWorkEmail] = useState('')
-  const [personalEmail, setPersonalEmail] = useState('')
-  const [hireDate, setHireDate] = useState('')
-  const [birthday, setBirthday] = useState('')
-  const [workDeskNumber, setWorkDeskNumber] = useState('')
-  const [workCellNumber, setWorkCellNumber] = useState('')
-  const [personalCellNumber, setPersonalCellNumber] = useState('')
 
   // ── Organization ─────────────────────────────────────────────────────────────
+  // Coach and Team Lead removed — those relationships are now managed via the
+  // RelationshipsSection on the profile page, which writes to the canonical
+  // Relationship Contexts table.
   const [companyId, setCompanyId] = useState('')
   const [role, setRole] = useState('')
-  const [coachId, setCoachId] = useState('')
-  const [teamLeadId, setTeamLeadId] = useState('')
 
   // ── Coaching Context ─────────────────────────────────────────────────────────
-  const [internalNotes, setInternalNotes] = useState('')
+  // Quick Notes and Family Details remain here until Item 11 (Coach-Person
+  // Context → Notes) code cutover lands. After that, replace these textareas
+  // with an "Add Context Note" trigger that opens the standard note composer.
   const [quickNotes, setQuickNotes] = useState('')
   const [familyDetails, setFamilyDetails] = useState('')
 
@@ -181,17 +181,8 @@ export default function EditProfileDialog({ user, coachContext }: Props) {
     setPreferredName(user.preferredName ?? '')
     setTitle(user.title ?? user.jobTitle ?? '')
     setWorkEmail(user.workEmail ?? '')
-    setPersonalEmail(user.personalEmail ?? '')
-    setHireDate(user.hireDate ?? '')
-    setBirthday(user.birthday ?? '')
-    setWorkDeskNumber(user.workDeskNumber ?? '')
-    setWorkCellNumber(user.workCellNumber ?? '')
-    setPersonalCellNumber(user.personalCellNumber ?? '')
     setCompanyId(user.companyLinkedIds?.[0] ?? '')
     setRole(user.role ?? '')
-    setCoachId(user.coachIds?.[0] ?? '')
-    setTeamLeadId(user.teamLeadIds?.[0] ?? '')
-    setInternalNotes(user.internalNotes ?? '')
     setQuickNotes(coachContext?.quickNotes ?? '')
     setFamilyDetails(coachContext?.familyDetails ?? '')
     setEnneagramId(user.enneagramIds?.[0] ?? '')
@@ -249,7 +240,6 @@ export default function EditProfileDialog({ user, coachContext }: Props) {
     // ── Phase 1: upload photo if a new file was selected ─────────────────────
     if (selectedFile) {
       setSaveStatus('uploading')
-      console.log('[EditProfile] Uploading photo for userId:', user.id, '| starts with rec:', user.id?.startsWith('rec'))
       const fd = new FormData()
       fd.append('file', selectedFile)
       fd.append('userId', user.id)
@@ -271,25 +261,16 @@ export default function EditProfileDialog({ user, coachContext }: Props) {
 
     const patch: UserProfileFields = {}
 
-    // Text / date fields — only include if changed
+    // Text fields — only include if changed
     if (firstName !== (user.firstName ?? '')) patch['First Name'] = firstName
     if (lastName !== (user.lastName ?? '')) patch['Last Name'] = lastName
     if (preferredName !== (user.preferredName ?? '')) patch['Preferred Name'] = preferredName
     if (title !== (user.title ?? user.jobTitle ?? '')) patch['Title'] = title
     if (workEmail !== (user.workEmail ?? '')) patch['Work Email'] = workEmail
-    if (personalEmail !== (user.personalEmail ?? '')) patch['Personal Email'] = personalEmail
-    if (hireDate !== (user.hireDate ?? '')) patch['Hire Date'] = hireDate
-    if (birthday !== (user.birthday ?? '')) patch['Birthday'] = birthday
-    if (workDeskNumber !== (user.workDeskNumber ?? '')) patch['Work Desk Number'] = workDeskNumber
-    if (workCellNumber !== (user.workCellNumber ?? '')) patch['Work Cell Number'] = workCellNumber
-    if (personalCellNumber !== (user.personalCellNumber ?? '')) patch['Personal Cell Number'] = personalCellNumber
     if (role !== (user.role ?? '')) patch['Role'] = role
-    if (internalNotes !== (user.internalNotes ?? '')) patch['Internal Notes'] = internalNotes
 
     // Linked single-record fields — only if changed and non-empty
     if (companyId && companyId !== (user.companyLinkedIds?.[0] ?? '')) patch['Company'] = [companyId]
-    if (coachId && coachId !== (user.coachIds?.[0] ?? '')) patch['Coach'] = [coachId]
-    if (teamLeadId && teamLeadId !== (user.teamLeadIds?.[0] ?? '')) patch['Team Lead'] = [teamLeadId]
     if (enneagramId && enneagramId !== (user.enneagramIds?.[0] ?? '')) patch['Enneagram'] = [enneagramId]
     if (mbtiId && mbtiId !== (user.mbtiIds?.[0] ?? '')) patch['MBTI'] = [mbtiId]
     if (conflictPostureId && conflictPostureId !== (user.conflictPostureIds?.[0] ?? '')) patch['Conflict Posture'] = [conflictPostureId]
@@ -303,7 +284,6 @@ export default function EditProfileDialog({ user, coachContext }: Props) {
     }
 
     if (Object.keys(patch).length > 0) {
-      console.log('[EditProfileDialog] Patch being sent:', JSON.stringify(patch, null, 2))
       const result = await updateProfileAction(user.id, patch)
       if ('error' in result) {
         setSaving(false)
@@ -410,14 +390,8 @@ export default function EditProfileDialog({ user, coachContext }: Props) {
                   <Field label="First Name" half><input className={inputCls} value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" disabled={saving} /></Field>
                   <Field label="Last Name" half><input className={inputCls} value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Smith" disabled={saving} /></Field>
                   <Field label="Preferred Name" half><input className={inputCls} value={preferredName} onChange={(e) => setPreferredName(e.target.value)} placeholder="e.g. Jay" disabled={saving} /></Field>
-                  <Field label="Title / Job Title" half><input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="VP of Operations" disabled={saving} /></Field>
-                  <Field label="Work Email" half><input className={inputCls} type="email" value={workEmail} onChange={(e) => setWorkEmail(e.target.value)} placeholder="jane@company.com" disabled={saving} /></Field>
-                  <Field label="Personal Email" half><input className={inputCls} type="email" value={personalEmail} onChange={(e) => setPersonalEmail(e.target.value)} placeholder="jane@gmail.com" disabled={saving} /></Field>
-                  <Field label="Hire Date" half><input className={inputCls} type="date" value={hireDate} onChange={(e) => setHireDate(e.target.value)} disabled={saving} /></Field>
-                  <Field label="Birthday" half><input className={inputCls} type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} disabled={saving} /></Field>
-                  <Field label="Work Desk Number" half><input className={inputCls} value={workDeskNumber} onChange={(e) => setWorkDeskNumber(e.target.value)} placeholder="ext. 1234" disabled={saving} /></Field>
-                  <Field label="Work Cell Number" half><input className={inputCls} value={workCellNumber} onChange={(e) => setWorkCellNumber(e.target.value)} placeholder="+1 555 000 0000" disabled={saving} /></Field>
-                  <Field label="Personal Cell Number" half><input className={inputCls} value={personalCellNumber} onChange={(e) => setPersonalCellNumber(e.target.value)} placeholder="+1 555 000 0000" disabled={saving} /></Field>
+                  <Field label="Title" half><input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="VP of Operations" disabled={saving} /></Field>
+                  <Field label="Work Email"><input className={inputCls} type="email" value={workEmail} onChange={(e) => setWorkEmail(e.target.value)} placeholder="jane@company.com" disabled={saving} /></Field>
                 </div>
               </Section>
 
@@ -433,22 +407,15 @@ export default function EditProfileDialog({ user, coachContext }: Props) {
                       {ROLE_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
                     </select>
                   </Field>
-                  <Field label="Coach" half>
-                    <SelectField value={coachId} onChange={setCoachId} options={options?.coaches ?? []} placeholder="Select coach…" disabled={saving} loading={optionsLoading} />
-                  </Field>
-                  <Field label="Team Lead" half>
-                    <SelectField value={teamLeadId} onChange={setTeamLeadId} options={options?.allUsers ?? []} placeholder="Select team lead…" disabled={saving} loading={optionsLoading} />
-                  </Field>
                 </div>
+                <p className="text-xs text-slate-400 mt-2">
+                  Coach and reporting relationships are managed in the Relationships section on this profile.
+                </p>
               </Section>
 
               {/* ── Section 4: Coaching Context ─────────────────────────── */}
               <Section title="Coaching Context">
                 <div className="space-y-3">
-                  <Field label="Internal Notes">
-                    <textarea className={`${inputCls} resize-none`} rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} placeholder="Internal coaching notes about this client…" disabled={saving} />
-                    <p className="text-xs text-slate-400 mt-1">Only visible to coaches with an active relationship context.</p>
-                  </Field>
                   <Field label="Quick Context Notes">
                     <textarea className={`${inputCls} resize-none`} rows={3} value={quickNotes} onChange={(e) => setQuickNotes(e.target.value)} placeholder="Short context notes about this client…" disabled={saving} />
                   </Field>
