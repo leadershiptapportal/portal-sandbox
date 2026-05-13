@@ -143,6 +143,54 @@ export async function saveNoteAction(
   revalidatePath(`/users/${subjectPersonId}`)
 }
 
+// ── Save Ink Note ─────────────────────────────────────────────────────────────
+
+/**
+ * Persists a handwritten note. The image was already uploaded to Cloudinary by
+ * the caller; we embed its URL in the note body using standard markdown image
+ * syntax so the display layer can render it inline.
+ */
+export async function saveInkNoteAction(
+  subjectPersonId: string,
+  imageUrl: string,
+  caption?: string,
+): Promise<{ success: true } | { error: string }> {
+  try {
+    const userRecord = await getCurrentUserRecord()
+    if (!userRecord.airtableId) {
+      return { error: 'Could not resolve your user record.' }
+    }
+
+    const rc = await resolveContextForSubject(userRecord.airtableId, subjectPersonId)
+    if (!rc) {
+      return { error: 'No active coaching or reporting relationship reaches this person.' }
+    }
+
+    const cleanCaption = (caption ?? '').trim()
+    // Body convention: optional caption, then a blank line, then the markdown
+    // image. The NoteBody display helper looks for the image syntax and
+    // renders <img> inline.
+    const body = cleanCaption
+      ? `${cleanCaption}\n\n![Ink note](${imageUrl})`
+      : `![Ink note](${imageUrl})`
+
+    await createNote({
+      content: body,
+      authorPersonId: userRecord.airtableId,
+      coachName: userRecord.name || undefined,
+      subjectPersonId,
+      clientId: subjectPersonId,
+      relationshipContextId: rc.id,
+      noteType: 'general_context',
+    })
+    revalidatePath(`/users/${subjectPersonId}`)
+    return { success: true }
+  } catch (err) {
+    console.error('[saveInkNoteAction]', err)
+    return { error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
 // ── Edit / Delete Note ────────────────────────────────────────────────────────
 
 export async function updateNoteAction(

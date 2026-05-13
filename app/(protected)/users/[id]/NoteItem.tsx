@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateNoteAction, deleteNoteAction } from './actions'
+import NoteBody from '@/components/notes/NoteBody'
 import type { Note } from '@/lib/types'
 
 function formatNoteDate(dateStr: string): string {
@@ -74,9 +75,9 @@ export default function NoteItem({ note }: { note: Note }) {
           </button>
         </div>
 
-        <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed pr-20">
-          {content}
-        </p>
+        <div className="pr-20">
+          <NoteBody content={content} />
+        </div>
         {note.date && (
           <p className="text-xs font-medium text-slate-400 mt-2">
             {formatNoteDate(note.date)}

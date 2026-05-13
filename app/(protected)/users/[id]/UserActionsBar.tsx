@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, PenLine } from 'lucide-react'
 import LogNoteDialog from './LogNoteDialog'
 import LogSessionDialog from './LogSessionDialog'
 import AddTaskDialog from './AddTaskDialog'
@@ -24,6 +24,13 @@ export default function UserActionsBar({ userId }: UserActionsBarProps) {
       <LogNoteDialog userId={userId} />
       <LogSessionDialog userId={userId} />
       <AddTaskDialog userId={userId} />
+
+      <Button asChild variant="outline" size="sm">
+        <Link href={`/users/${userId}/notes/new/ink`}>
+          <PenLine />
+          Ink Note
+        </Link>
+      </Button>
     </div>
   )
 }

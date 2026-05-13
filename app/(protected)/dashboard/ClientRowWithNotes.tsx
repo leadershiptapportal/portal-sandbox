@@ -9,6 +9,7 @@ import {
   dashboardUpdateNoteAction,
   dashboardDeleteNoteAction,
 } from './actions'
+import { previewText } from '@/components/notes/NoteBody'
 
 export interface ClientNote {
   id: string
@@ -72,9 +73,9 @@ export default function ClientRowWithNotes({
   const [savingAdd, setSavingAdd] = useState(false)
 
   const mostRecentNote = notes[0] ?? null
-  const previewText = mostRecentNote
-    ? mostRecentNote.body.slice(0, 80) + (mostRecentNote.body.length > 80 ? '…' : '')
-    : null
+  // Use the shared previewText helper so ink-note markdown collapses to a
+  // "[ink]" sentinel instead of dumping a raw Cloudinary URL in the preview.
+  const previewLine = mostRecentNote ? previewText(mostRecentNote.body, 80) : null
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
 
@@ -171,9 +172,9 @@ export default function ClientRowWithNotes({
               <p className="text-xs text-slate-500 truncate mt-0.5">{subtitle}</p>
             )}
             <div className="mt-0.5">
-              {previewText ? (
+              {previewLine ? (
                 <p className="text-xs text-slate-400 truncate">
-                  {previewText}
+                  {previewLine}
                   {mostRecentNote?.createdAt && (
                     <span className="text-slate-300"> · {formatNoteDate(mostRecentNote.createdAt)}</span>
                   )}
@@ -324,7 +325,7 @@ export default function ClientRowWithNotes({
                       </span>
                     )}
                     <span className="text-xs text-slate-600 leading-relaxed line-clamp-1">
-                      {note.body}
+                      {previewText(note.body, 120)}
                     </span>
                   </div>
                   <div className="flex-shrink-0 flex gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">

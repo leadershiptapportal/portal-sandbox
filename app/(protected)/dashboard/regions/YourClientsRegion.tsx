@@ -7,6 +7,7 @@ import { getAllMeetings } from '@/lib/airtable/meetings'
 import { buildEmailToUserMap, groupMeetingsByUser } from '@/lib/services/meetingsService'
 import { fetchAllMessages } from '@/lib/airtable/messages'
 import { getAllRecentNotes } from '@/lib/airtable/notes'
+import { previewText } from '@/components/notes/NoteBody'
 import ClientRowWithNotes from '../ClientRowWithNotes'
 import type { CurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import type { User, Meeting, Message } from '@/lib/types'
@@ -266,7 +267,7 @@ export default async function YourClientsRegion({ userRecord }: Props) {
                     )}
                   </p>
                   <p className="text-sm text-slate-700 line-clamp-2 leading-relaxed">
-                    {note.content}
+                    {previewText(note.content, 240)}
                   </p>
                 </div>
               )
