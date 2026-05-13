@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { getStroke } from 'perfect-freehand'
 
 interface InkPoint {
@@ -120,14 +120,20 @@ export default function InkCanvas({
   const cacheRef = useRef<HTMLCanvasElement | null>(null)
 
   const strokesRef = useRef<Stroke[]>([])
+  /**
+   * Index into strokesRef.current of the first stroke that hasn't been baked
+   * into the cache canvas yet. paint() renders [bakedCount..length) live on
+   * top of the cache, which lets us defer bakeStroke off the critical path
+   * after pointerup without showing a blank where the just-committed stroke
+   * should be.
+   */
+  const bakedCountRef = useRef(0)
   const currentRef = useRef<Stroke | null>(null)
   const activePointerRef = useRef<number | null>(null)
   const activeKindRef = useRef<'pen' | 'mouse' | 'touch' | null>(null)
   const rafRef = useRef<number | null>(null)
   const dirtyRef = useRef(false)
-
-  const [, forceUpdate] = useState(0)
-  const rerender = () => forceUpdate((n) => n + 1)
+  const lastNotifiedStrokeCountRef = useRef(0)
 
   // Latest props captured in refs so the native event listeners attached in
   // the mount effect always see fresh values without needing to re-attach.
@@ -184,10 +190,11 @@ export default function InkCanvas({
     ctx.clearRect(0, 0, cache.width, cache.height)
     ctx.scale(dpr, dpr)
     for (const stroke of strokesRef.current) renderStroke(ctx, stroke, 'final')
+    bakedCountRef.current = strokesRef.current.length
   }
 
-  /** Append a single stroke to the cache canvas without clearing. */
-  function bakeStroke(stroke: Stroke) {
+  /** Bake every stroke past bakedCountRef onto the cache. Idempotent. */
+  function bakePending() {
     const cache = cacheRef.current
     if (!cache) return
     const ctx = cache.getContext('2d')
@@ -195,7 +202,27 @@ export default function InkCanvas({
     const dpr = getDpr()
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.scale(dpr, dpr)
-    renderStroke(ctx, stroke, 'final')
+    for (let i = bakedCountRef.current; i < strokesRef.current.length; i++) {
+      renderStroke(ctx, strokesRef.current[i], 'final')
+    }
+    bakedCountRef.current = strokesRef.current.length
+  }
+
+  /**
+   * Notifies the parent of a stroke-count change ONLY when the count actually
+   * crossed a meaningful boundary for the parent's UI (currently just empty
+   * vs non-empty). Avoids triggering a parent re-render on every stroke,
+   * which was a measurable source of inter-stroke latency.
+   */
+  function maybeNotifyStrokeCount() {
+    const next = strokesRef.current.length
+    const prev = lastNotifiedStrokeCountRef.current
+    if (next === prev) return
+    // Parent only cares about empty/non-empty for now. If a future caller
+    // needs exact counts we can drop this short-circuit.
+    const emptyChanged = (next === 0) !== (prev === 0)
+    lastNotifiedStrokeCountRef.current = next
+    if (emptyChanged) onStrokesChange?.(next)
   }
 
   function renderStroke(
@@ -225,6 +252,12 @@ export default function InkCanvas({
     ctx.drawImage(cache, 0, 0)
     const dpr = getDpr()
     ctx.scale(dpr, dpr)
+    // Render strokes that have been committed but not yet baked — bake is
+    // deferred to rAF so pointerup returns instantly. Without this loop those
+    // strokes would visually disappear in the gap between pen-up and bake.
+    for (let i = bakedCountRef.current; i < strokesRef.current.length; i++) {
+      renderStroke(ctx, strokesRef.current[i], 'final')
+    }
     if (currentRef.current) {
       renderStroke(ctx, currentRef.current, 'live')
     }
@@ -349,7 +382,6 @@ export default function InkCanvas({
       size: widthRef.current,
     }
     paint()
-    rerender()
   }
 
   function handleMove(e: PointerEvent) {
@@ -391,14 +423,22 @@ export default function InkCanvas({
     const cur = currentRef.current
     if (cur && cur.points.length > 0) {
       strokesRef.current.push(cur)
-      bakeStroke(cur)
     }
     currentRef.current = null
     activePointerRef.current = null
     activeKindRef.current = null
-    onStrokesChange?.(strokesRef.current.length)
-    requestRender()
-    rerender()
+    // Paint immediately so the just-finished stroke stays visible; the
+    // un-baked render path in paint() handles drawing it from strokesRef.
+    paint()
+    // Defer the expensive bake AND the parent state update so this handler
+    // returns in well under 1ms — that's what lets the next pointerdown fire
+    // without queueing behind us, eliminating the inter-letter latency.
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null
+      bakePending()
+      maybeNotifyStrokeCount()
+    })
   }
 
   function handleUp(e: PointerEvent) {
@@ -468,10 +508,9 @@ export default function InkCanvas({
       undo: () => {
         if (strokesRef.current.length === 0) return
         strokesRef.current.pop()
-        onStrokesChange?.(strokesRef.current.length)
         repaintCache()
-        requestRender()
-        rerender()
+        paint()
+        maybeNotifyStrokeCount()
       },
       clear: () => {
         if (strokesRef.current.length === 0 && currentRef.current === null) return
@@ -479,10 +518,9 @@ export default function InkCanvas({
         currentRef.current = null
         activePointerRef.current = null
         activeKindRef.current = null
-        onStrokesChange?.(strokesRef.current.length)
         repaintCache()
-        requestRender()
-        rerender()
+        paint()
+        maybeNotifyStrokeCount()
       },
       isEmpty: () => strokesRef.current.length === 0 && currentRef.current === null,
     }
