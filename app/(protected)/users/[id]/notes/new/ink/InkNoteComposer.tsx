@@ -19,10 +19,12 @@ const COLORS: Array<{ value: string; label: string; swatch: string }> = [
   { value: '#15803d', label: 'Green',  swatch: 'bg-emerald-700' },
 ]
 
+// `size` is the perfect-freehand polygon outline width baseline. Tuned for
+// Apple Pencil — Medium feels close to a 0.5mm gel pen at default pressure.
 const WIDTHS: Array<{ value: number; label: string; dot: string }> = [
-  { value: 1.6, label: 'Fine',   dot: 'w-1.5 h-1.5' },
-  { value: 2.6, label: 'Medium', dot: 'w-2.5 h-2.5' },
-  { value: 4.0, label: 'Bold',   dot: 'w-3.5 h-3.5' },
+  { value: 3,  label: 'Fine',   dot: 'w-1.5 h-1.5' },
+  { value: 5,  label: 'Medium', dot: 'w-2.5 h-2.5' },
+  { value: 8,  label: 'Bold',   dot: 'w-3.5 h-3.5' },
 ]
 
 /**
@@ -42,7 +44,10 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
 
   const [color, setColor] = useState(COLORS[0].value)
   const [width, setWidth] = useState(WIDTHS[1].value)
-  const [penOnly, setPenOnly] = useState(false)
+  // Default ON for palm rejection on iPad. Coaches drawing with the Pencil
+  // get clean strokes; desktop users on a mouse can leave it on (mouse is
+  // still accepted) or toggle it off to test with a finger.
+  const [penOnly, setPenOnly] = useState(true)
   const [strokeCount, setStrokeCount] = useState(0)
   const [caption, setCaption] = useState('')
   const [saving, setSaving] = useState(false)
