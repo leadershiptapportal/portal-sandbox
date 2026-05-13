@@ -15,11 +15,17 @@ interface Stroke {
   size: number       // perfect-freehand "size" — visual stroke width baseline
 }
 
+export type InkTool = 'pen' | 'eraser'
+
 interface Props {
   /** Drawing color. Defaults to slate-900-ish ink. */
   color?: string
   /** Stroke size baseline (perfect-freehand `size`). */
   width?: number
+  /** Active tool: 'pen' draws, 'eraser' removes whole strokes on contact. */
+  tool?: InkTool
+  /** Eraser hit radius in CSS pixels (only used when tool === 'eraser'). */
+  eraserSize?: number
   /**
    * When true, only Pointer Events with pointerType==='pen' or 'mouse' draw —
    * touches are ignored so the palm doesn't smear ink on iPad. Default true.
@@ -37,25 +43,29 @@ interface Props {
 
 // ── perfect-freehand options ──────────────────────────────────────────────────
 //
-// These knobs tune how the raw pointer samples are turned into a smooth ink
-// outline. The values below were tuned for Apple Pencil sampling rates on
-// iPadOS Safari. If ink ever feels syrupy or laggy, lower `smoothing` and
-// `streamline`. If it feels jittery, raise them.
+// Two presets: LIVE is used while the stroke is in progress (lower smoothing
+// = ink hugs the pen tip with less perceived lag, cheaper to recompute every
+// frame). FINAL is used once on commit so the saved/displayed stroke gets the
+// full smoothing pass.
 
-const STROKE_OPTS = {
-  thinning: 0.55,    // how much pressure thins the stroke (0 = none, 1 = max)
-  smoothing: 0.62,   // post-process smoothing (Catmull-Rom)
-  streamline: 0.45,  // input streamlining (Lerp)
+const STROKE_OPTS_LIVE = {
+  thinning: 0.5,
+  smoothing: 0.18,   // light smoothing so ink follows the pen tip closely
+  streamline: 0.22,  // minimal lerp so the line doesn't trail behind
   easing: (t: number) => t,
-  start: {
-    taper: 0,
-    cap: true,
-  },
-  end: {
-    taper: 0,
-    cap: true,
-  },
-  // size is set per-stroke from the toolbar
+  start: { taper: 0, cap: true },
+  end:   { taper: 0, cap: true },
+  last: false,       // critical: this is the in-progress preview
+}
+
+const STROKE_OPTS_FINAL = {
+  thinning: 0.5,
+  smoothing: 0.42,
+  streamline: 0.32,
+  easing: (t: number) => t,
+  start: { taper: 0, cap: true },
+  end:   { taper: 0, cap: true },
+  last: true,        // tell perfect-freehand this is the final pass
 }
 
 /**
@@ -93,6 +103,8 @@ function polygonToPath(points: number[][]): Path2D {
 export default function InkCanvas({
   color = '#0f172a',
   width = 4,
+  tool = 'pen',
+  eraserSize = 16,
   penOnly = true,
   onStrokesChange,
   canvasRef,
@@ -122,9 +134,16 @@ export default function InkCanvas({
   const colorRef = useRef(color)
   const widthRef = useRef(width)
   const penOnlyRef = useRef(penOnly)
+  const toolRef = useRef<InkTool>(tool)
+  const eraserSizeRef = useRef(eraserSize)
+  // Eraser cursor position (CSS px) — rendered as a ring overlay so the user
+  // sees their target. null when not erasing or pointer not over canvas.
+  const eraserCursorRef = useRef<{ x: number; y: number } | null>(null)
   useEffect(() => { colorRef.current = color }, [color])
   useEffect(() => { widthRef.current = width }, [width])
   useEffect(() => { penOnlyRef.current = penOnly }, [penOnly])
+  useEffect(() => { toolRef.current = tool }, [tool])
+  useEffect(() => { eraserSizeRef.current = eraserSize }, [eraserSize])
 
   // ── Geometry helpers ───────────────────────────────────────────────────────
 
@@ -164,7 +183,7 @@ export default function InkCanvas({
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.clearRect(0, 0, cache.width, cache.height)
     ctx.scale(dpr, dpr)
-    for (const stroke of strokesRef.current) renderStroke(ctx, stroke)
+    for (const stroke of strokesRef.current) renderStroke(ctx, stroke, 'final')
   }
 
   /** Append a single stroke to the cache canvas without clearing. */
@@ -176,12 +195,19 @@ export default function InkCanvas({
     const dpr = getDpr()
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.scale(dpr, dpr)
-    renderStroke(ctx, stroke)
+    renderStroke(ctx, stroke, 'final')
   }
 
-  function renderStroke(ctx: CanvasRenderingContext2D, stroke: Stroke) {
-    const raw = stroke.points.map((p) => [p.x, p.y, p.pressure] as [number, number, number])
-    const outline = getStroke(raw, { ...STROKE_OPTS, size: stroke.size })
+  function renderStroke(
+    ctx: CanvasRenderingContext2D,
+    stroke: Stroke,
+    mode: 'live' | 'final',
+  ) {
+    const raw = stroke.points.map(
+      (p) => [p.x, p.y, p.pressure] as [number, number, number],
+    )
+    const opts = mode === 'live' ? STROKE_OPTS_LIVE : STROKE_OPTS_FINAL
+    const outline = getStroke(raw, { ...opts, size: stroke.size })
     if (outline.length < 2) return
     ctx.fillStyle = stroke.color
     ctx.fill(polygonToPath(outline))
@@ -197,10 +223,65 @@ export default function InkCanvas({
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(cache, 0, 0)
+    const dpr = getDpr()
+    ctx.scale(dpr, dpr)
     if (currentRef.current) {
-      ctx.scale(getDpr(), getDpr())
-      renderStroke(ctx, currentRef.current)
+      renderStroke(ctx, currentRef.current, 'live')
     }
+    // Eraser ring overlay so the user sees exactly which area will be erased.
+    const cursor = eraserCursorRef.current
+    if (toolRef.current === 'eraser' && cursor) {
+      const r = eraserSizeRef.current
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(cursor.x, cursor.y, r, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(244, 63, 94, 0.10)'   // rose-500 @ 10%
+      ctx.fill()
+      ctx.lineWidth = 1.2
+      ctx.strokeStyle = 'rgba(244, 63, 94, 0.55)' // rose-500 @ 55%
+      ctx.stroke()
+      ctx.restore()
+    }
+  }
+
+  /**
+   * Object eraser: remove any stroke that intersects the disk centered at
+   * (x, y) with radius eraserSize. We test each stroke's points against the
+   * radius padded by the stroke's own half-width so thick strokes register
+   * a hit when the eraser merely brushes their edge.
+   *
+   * Returns true if anything was removed (caller repaints the cache).
+   */
+  function eraseAt(x: number, y: number): boolean {
+    const r = eraserSizeRef.current
+    const strokes = strokesRef.current
+    if (strokes.length === 0) return false
+    let changed = false
+    const remaining: Stroke[] = []
+    for (const stroke of strokes) {
+      const hitRadius = r + stroke.size * 0.5
+      const r2 = hitRadius * hitRadius
+      let hit = false
+      for (const p of stroke.points) {
+        const dx = p.x - x
+        const dy = p.y - y
+        if (dx * dx + dy * dy < r2) {
+          hit = true
+          break
+        }
+      }
+      if (hit) {
+        changed = true
+      } else {
+        remaining.push(stroke)
+      }
+    }
+    if (changed) {
+      strokesRef.current = remaining
+      repaintCache()
+      onStrokesChange?.(strokesRef.current.length)
+    }
+    return changed
   }
 
   function requestRender() {
@@ -250,17 +331,45 @@ export default function InkCanvas({
     activePointerRef.current = e.pointerId
     activeKindRef.current = e.pointerType as 'pen' | 'mouse' | 'touch'
     ref.current?.setPointerCapture(e.pointerId)
+
+    if (toolRef.current === 'eraser') {
+      const canvas = ref.current!
+      const rect = canvas.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      eraserCursorRef.current = { x, y }
+      eraseAt(x, y)
+      paint()
+      return
+    }
+
     currentRef.current = {
       points: [eventToPoint(e)],
       color: colorRef.current,
       size: widthRef.current,
     }
-    requestRender()
+    paint()
     rerender()
   }
 
   function handleMove(e: PointerEvent) {
     if (activePointerRef.current !== e.pointerId) return
+
+    if (toolRef.current === 'eraser') {
+      const canvas = ref.current!
+      const rect = canvas.getBoundingClientRect()
+      const coalesced = e.getCoalescedEvents?.() ?? []
+      const points = coalesced.length > 0 ? coalesced : [e]
+      for (const sub of points) {
+        const x = sub.clientX - rect.left
+        const y = sub.clientY - rect.top
+        eraserCursorRef.current = { x, y }
+        eraseAt(x, y)
+      }
+      paint()
+      return
+    }
+
     const cur = currentRef.current
     if (!cur) return
     // High-frequency Pencil samples arrive in batches via getCoalescedEvents.
@@ -270,7 +379,12 @@ export default function InkCanvas({
     } else {
       cur.points.push(eventToPoint(e))
     }
-    requestRender()
+    // Paint synchronously: rAF added up to one frame of latency before the
+    // new point reached the screen, which is what made fast handwriting feel
+    // like the ink was chasing the pen. The browser still composites at
+    // vsync, so painting more often than that doesn't actually flash to the
+    // user — but it removes the rAF dispatch delay.
+    paint()
   }
 
   function commitStroke() {
@@ -290,11 +404,25 @@ export default function InkCanvas({
   function handleUp(e: PointerEvent) {
     if (activePointerRef.current !== e.pointerId) return
     ref.current?.releasePointerCapture(e.pointerId)
+    if (toolRef.current === 'eraser') {
+      eraserCursorRef.current = null
+      activePointerRef.current = null
+      activeKindRef.current = null
+      paint()
+      return
+    }
     commitStroke()
   }
 
   function handleCancel(e: PointerEvent) {
     if (activePointerRef.current !== e.pointerId) return
+    if (toolRef.current === 'eraser') {
+      eraserCursorRef.current = null
+      activePointerRef.current = null
+      activeKindRef.current = null
+      paint()
+      return
+    }
     commitStroke()
   }
 
