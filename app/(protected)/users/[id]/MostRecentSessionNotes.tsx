@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Pencil } from 'lucide-react'
 import { updateSessionNotesAction } from './actions'
+import NoteBody from '@/components/notes/NoteBody'
 import type { Meeting } from '@/lib/types'
 import type { Note } from '@/lib/airtable/notes'
 
@@ -123,9 +124,11 @@ export default function MostRecentSessionNotes({ meeting, userId, meetingNotes }
           meetingNotes.length > 0 ? (
             <div className="space-y-3">
               {meetingNotes.map((n) => (
-                <p key={n.id} className="text-base text-slate-800 whitespace-pre-wrap leading-relaxed">
-                  {n.content}
-                </p>
+                <NoteBody
+                  key={n.id}
+                  content={n.content}
+                  className="text-base text-slate-800 whitespace-pre-wrap leading-relaxed"
+                />
               ))}
             </div>
           ) : (
