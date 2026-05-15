@@ -6,6 +6,30 @@ import { updateNoteAction, deleteNoteAction } from './actions'
 import NoteBody from '@/components/notes/NoteBody'
 import type { Note } from '@/lib/types'
 
+/**
+ * Splits a Note body into its typed-caption portion and any embedded ink
+ * image URLs. Used so edit mode can change the caption without destroying
+ * the attached image — the rebuilt body re-appends the image markdown after
+ * the new caption.
+ */
+const IMG_RE = /!\[([^\]]*)\]\(([^)\s]+)\)/g
+
+function splitNoteBody(body: string): { caption: string; images: Array<{ alt: string; url: string }> } {
+  const images: Array<{ alt: string; url: string }> = []
+  const stripped = body.replace(IMG_RE, (_match, alt: string, url: string) => {
+    images.push({ alt: alt || 'Ink note', url })
+    return ''
+  })
+  return { caption: stripped.trim(), images }
+}
+
+function rebuildNoteBody(caption: string, images: Array<{ alt: string; url: string }>): string {
+  if (images.length === 0) return caption
+  const captionBlock = caption.trim()
+  const imageBlock = images.map((img) => `![${img.alt}](${img.url})`).join('\n')
+  return captionBlock ? `${captionBlock}\n\n${imageBlock}` : imageBlock
+}
+
 function formatNoteDate(dateStr: string): string {
   if (!dateStr) return ''
   return new Date(dateStr).toLocaleDateString('en-US', {
@@ -18,18 +42,29 @@ function formatNoteDate(dateStr: string): string {
 export default function NoteItem({ note }: { note: Note }) {
   const router = useRouter()
   const [mode, setMode] = useState<'view' | 'edit' | 'confirmDelete'>('view')
+  // Editing tracks the typed caption separately from any embedded ink images.
+  // This way edit mode preserves attached images instead of forcing the user
+  // to retype + re-attach.
+  const initialSplit = splitNoteBody(note.content)
+  const [caption, setCaption] = useState(initialSplit.caption)
   const [content, setContent] = useState(note.content)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
 
+  const hasInkImage = initialSplit.images.length > 0
+
   async function handleSave() {
-    if (!content.trim()) { setError('Note cannot be empty.'); return }
+    const body = hasInkImage
+      ? rebuildNoteBody(caption, initialSplit.images)
+      : caption
+    if (!body.trim()) { setError('Note cannot be empty.'); return }
     setSaving(true)
     setError('')
-    const result = await updateNoteAction(note.id, content.trim())
+    const result = await updateNoteAction(note.id, body.trim())
     setSaving(false)
     if (result.success) {
+      setContent(body.trim())
       setMode('view')
       router.refresh()
     } else {
@@ -38,7 +73,7 @@ export default function NoteItem({ note }: { note: Note }) {
   }
 
   function handleCancel() {
-    setContent(note.content)
+    setCaption(initialSplit.caption)
     setError('')
     setMode('view')
   }
@@ -91,14 +126,33 @@ export default function NoteItem({ note }: { note: Note }) {
   if (mode === 'edit') {
     return (
       <div className="rounded-lg border border-blue-200 bg-blue-50/30 p-4">
+        {hasInkImage && (
+          <div className="mb-3">
+            <p className="text-xs font-semibold text-slate-500 mb-1.5">Ink (preserved)</p>
+            {initialSplit.images.map((img, i) => (
+              <img
+                key={i}
+                src={img.url}
+                alt={img.alt}
+                className="block w-full object-contain rounded-md border border-slate-200 bg-white max-h-60 mb-1.5"
+              />
+            ))}
+            <p className="text-xs text-slate-400">
+              The ink stays attached. To redraw, delete this note and create a new ink note.
+            </p>
+          </div>
+        )}
         <div className="mb-3">
-          <label className="text-xs font-semibold text-slate-500 block mb-1">Note</label>
+          <label className="text-xs font-semibold text-slate-500 block mb-1">
+            {hasInkImage ? 'Caption' : 'Note'}
+          </label>
           <textarea
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={5}
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            rows={hasInkImage ? 2 : 5}
+            placeholder={hasInkImage ? 'Optional caption…' : undefined}
             className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white resize-y focus:outline-none focus:ring-2 focus:ring-blue-400 leading-relaxed"
           />
         </div>

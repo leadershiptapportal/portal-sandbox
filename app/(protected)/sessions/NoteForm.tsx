@@ -15,8 +15,6 @@ import {
 const NOTE_TYPES = [
   { value: 'general_context', label: 'General Context' },
   { value: 'meeting_note', label: 'Meeting Note' },
-  { value: 'follow_up', label: 'Follow Up' },
-  { value: 'private_observation', label: 'Private Observation' },
 ] as const
 
 interface Client {

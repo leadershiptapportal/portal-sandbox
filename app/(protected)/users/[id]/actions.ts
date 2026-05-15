@@ -13,7 +13,6 @@ import {
   patchTeamMembers,
   getAllUsers,
 } from '@/lib/airtable/users'
-import { upsertCoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import {
   resolveContextForSubject,
@@ -278,25 +277,9 @@ export async function updateSessionNotesAction(
   }
 }
 
-// ── Coach-Person Context ──────────────────────────────────────────────────────
-
-export async function upsertCoachContextAction(
-  personId: string,
-  fields: { quickNotes?: string; familyDetails?: string; flags?: string[] },
-): Promise<{ success: true } | { error: string }> {
-  try {
-    const userRecord = await getCurrentUserRecord()
-    if (!userRecord.airtableId) {
-      return { error: 'Could not resolve your coach record — please try again.' }
-    }
-    await upsertCoachPersonContext(userRecord.airtableId, personId, fields)
-    revalidatePath(`/users/${personId}`)
-    return { success: true }
-  } catch (err) {
-    console.error('[upsertCoachContextAction] error:', err)
-    return { error: 'Failed to save coaching context — please try again.' }
-  }
-}
+// Coach-Person Context table is deprecated. Coaching context (Quick Notes,
+// Family Details) is now captured as Notes with note_type='general_context'.
+// upsertCoachContextAction has been removed.
 
 // ── Upload Profile Photo ──────────────────────────────────────────────────────
 

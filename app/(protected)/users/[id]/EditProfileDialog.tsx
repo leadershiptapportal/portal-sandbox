@@ -3,9 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera } from 'lucide-react'
-import { updateProfileAction, fetchProfileOptionsAction, upsertCoachContextAction } from './actions'
+import { updateProfileAction, fetchProfileOptionsAction } from './actions'
 import type { UserProfileFields } from '@/lib/airtable/users'
-import type { CoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import type { User } from '@/lib/types'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -28,7 +27,6 @@ interface ProfileOptions {
 
 interface Props {
   user: User
-  coachContext: CoachPersonContext | null
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -121,7 +119,7 @@ const ROLE_OPTIONS = ['Client', 'Coach', 'Admin']
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function EditProfileDialog({ user, coachContext }: Props) {
+export default function EditProfileDialog({ user }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -152,12 +150,10 @@ export default function EditProfileDialog({ user, coachContext }: Props) {
   const [companyId, setCompanyId] = useState('')
   const [role, setRole] = useState('')
 
-  // ── Coaching Context ─────────────────────────────────────────────────────────
-  // Quick Notes and Family Details remain here until Item 11 (Coach-Person
-  // Context → Notes) code cutover lands. After that, replace these textareas
-  // with an "Add Context Note" trigger that opens the standard note composer.
-  const [quickNotes, setQuickNotes] = useState('')
-  const [familyDetails, setFamilyDetails] = useState('')
+  // Coaching context (Quick Notes / Family Details) used to live here. It's
+  // now captured as proper Notes (note_type=general_context) via the "Log a
+  // Note" button on the profile, so this dialog no longer writes to the
+  // deprecated Coach-Person Context table.
 
   // ── Personality ──────────────────────────────────────────────────────────────
   const [enneagramId, setEnneagramId] = useState('')
@@ -183,8 +179,6 @@ export default function EditProfileDialog({ user, coachContext }: Props) {
     setWorkEmail(user.workEmail ?? '')
     setCompanyId(user.companyLinkedIds?.[0] ?? '')
     setRole(user.role ?? '')
-    setQuickNotes(coachContext?.quickNotes ?? '')
-    setFamilyDetails(coachContext?.familyDetails ?? '')
     setEnneagramId(user.enneagramIds?.[0] ?? '')
     setMbtiId(user.mbtiIds?.[0] ?? '')
     setConflictPostureId(user.conflictPostureIds?.[0] ?? '')
@@ -294,24 +288,6 @@ export default function EditProfileDialog({ user, coachContext }: Props) {
       }
     }
 
-    // ── Save coaching context fields to Coach-Person Context table ────────────
-    const origQuickNotes = coachContext?.quickNotes ?? ''
-    const origFamilyDetails = coachContext?.familyDetails ?? ''
-    const contextChanged =
-      quickNotes !== origQuickNotes || familyDetails !== origFamilyDetails
-    if (contextChanged) {
-      const ctxResult = await upsertCoachContextAction(user.id, {
-        quickNotes,
-        familyDetails,
-      })
-      if ('error' in ctxResult) {
-        setSaving(false)
-        setSaveStatus('')
-        setErrorMsg((prev) => (prev ? `${prev}\n${ctxResult.error}` : ctxResult.error))
-        return
-      }
-    }
-
     setSaving(false)
     setSaveStatus('')
     setSaved(true)
@@ -411,18 +387,6 @@ export default function EditProfileDialog({ user, coachContext }: Props) {
                 <p className="text-xs text-slate-400 mt-2">
                   Coach and reporting relationships are managed in the Relationships section on this profile.
                 </p>
-              </Section>
-
-              {/* ── Section 4: Coaching Context ─────────────────────────── */}
-              <Section title="Coaching Context">
-                <div className="space-y-3">
-                  <Field label="Quick Context Notes">
-                    <textarea className={`${inputCls} resize-none`} rows={3} value={quickNotes} onChange={(e) => setQuickNotes(e.target.value)} placeholder="Short context notes about this client…" disabled={saving} />
-                  </Field>
-                  <Field label="Family Details">
-                    <textarea className={`${inputCls} resize-none`} rows={3} value={familyDetails} onChange={(e) => setFamilyDetails(e.target.value)} placeholder="Family context relevant to coaching…" disabled={saving} />
-                  </Field>
-                </div>
               </Section>
 
               {/* ── Section 5: Personality & Strengths ──────────────────── */}

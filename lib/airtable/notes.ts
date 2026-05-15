@@ -13,7 +13,18 @@ function getCredentials() {
 
 type AirtableRecord = { id: string; fields: Record<string, unknown> }
 
-export type NoteType = 'general_context' | 'meeting_note' | 'follow_up' | 'private_observation'
+/**
+ * Simplified to two types after audit:
+ *   - meeting_note: notes attached to a specific Meeting (Calendar Event).
+ *   - general_context: everything else (profile-level coaching context, ink
+ *     notes, free-form observations).
+ *
+ * The legacy values `follow_up` and `private_observation` are not written by
+ * any current code path. Existing Airtable records that still carry them will
+ * round-trip safely (TypeScript widens to string at the boundary), but new
+ * UIs only offer the two values above.
+ */
+export type NoteType = 'general_context' | 'meeting_note'
 
 export interface Note {
   id: string

@@ -2,7 +2,6 @@ import { Mail, Clock, UserCheck } from 'lucide-react'
 import EditProfileDialog from '../EditProfileDialog'
 import { getDisplayName, getInitials, isRecordId } from './helpers'
 import type { User } from '@/lib/types'
-import type { CoachPersonContext } from '@/lib/airtable/coachPersonContext'
 
 interface Props {
   user: User
@@ -14,7 +13,6 @@ interface Props {
   badges: Array<{ label: string; className: string }>
   coach: User | null
   teamLead: User | null
-  coachContext: CoachPersonContext | null
   userCanWrite: boolean
 }
 
@@ -28,7 +26,6 @@ export default function ProfileCardSection({
   badges,
   coach,
   teamLead,
-  coachContext,
   userCanWrite,
 }: Props) {
   return (
@@ -37,7 +34,7 @@ export default function ProfileCardSection({
         <div className="flex items-start justify-between gap-2 mb-4 sm:mb-0">
           <span />
           <div className="flex items-center gap-3">
-            <EditProfileDialog user={user} coachContext={coachContext} />
+            <EditProfileDialog user={user} />
           </div>
         </div>
       )}

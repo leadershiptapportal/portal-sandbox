@@ -98,7 +98,7 @@ export interface Note {
   authorPersonId?: string;
   subjectPersonId?: string;
   meetingId?: string;
-  noteType?: 'general_context' | 'meeting_note' | 'follow_up' | 'private_observation';
+  noteType?: 'general_context' | 'meeting_note';
   visibility: 'private_to_author';
 }
 

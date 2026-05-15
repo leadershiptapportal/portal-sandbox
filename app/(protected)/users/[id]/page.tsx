@@ -14,7 +14,6 @@ import { getPortalEventsByClientEmail } from '@/lib/airtable/meetings'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
-import { getCoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import {
   getRelationshipContext,
   getDirectReports,
@@ -27,7 +26,6 @@ import { getDisplayName, getInitials, isRecordId, SectionHeading } from './secti
 import ProfileCardSection from './sections/ProfileCardSection'
 import MostRecentSessionSection from './sections/MostRecentSessionSection'
 import SessionNotesFromCalendarSection from './sections/SessionNotesFromCalendarSection'
-import CoachingContextSection from './sections/CoachingContextSection'
 import PersonalityStrengthsSection from './sections/PersonalityStrengthsSection'
 import ProfileDetailsSection from './sections/ProfileDetailsSection'
 import CoachNotesSection from './sections/CoachNotesSection'
@@ -97,7 +95,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     coach,
     teamLead,
     teamMemberResults,
-    coachContext,
     relationshipContext,
     portalSessionEvents,
     theirTeamReports,
@@ -117,9 +114,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     coachId ? getUserById(coachId).catch(() => null) : Promise.resolve(null),
     teamLeadId ? getUserById(teamLeadId).catch(() => null) : Promise.resolve(null),
     Promise.all(teamMemberIdList.map((tid) => getUserById(tid).catch(() => null))),
-    currentUserRecord.airtableId
-      ? getCoachPersonContext(currentUserRecord.airtableId, id).catch(() => null)
-      : Promise.resolve(null),
     currentUserRecord.airtableId
       ? getRelationshipContext(currentUserRecord.airtableId, id).catch(() => null)
       : Promise.resolve(null),
@@ -190,10 +184,9 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     user.role && !isRecordId(user.role)
       ? { label: user.role, className: 'bg-slate-100 text-slate-600' }
       : null,
-    ...(coachContext?.flags ?? []).map((flag) => ({
-      label: flag,
-      className: 'bg-amber-50 text-amber-700 border border-amber-200',
-    })),
+    // Relationship flags badges were sourced from the deprecated Coach-Person
+    // Context table. After the Item 11 cutover they're surfaced as Notes with
+    // note_type='general_context' instead.
   ].filter((b): b is { label: string; className: string } => b !== null)
 
   return (
@@ -275,7 +268,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         badges={badges}
         coach={coach}
         teamLead={teamLead}
-        coachContext={coachContext}
         userCanWrite={userCanWrite}
       />
 
@@ -289,9 +281,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
 
       {/* ── Session Notes (from Calendar) ─────────────────────────────────── */}
       <SessionNotesFromCalendarSection portalSessionEvents={portalSessionEvents} />
-
-      {/* ── Coaching Context ──────────────────────────────────────────────── */}
-      <CoachingContextSection user={user} coachContext={coachContext} />
 
       {/* ── Personality & Strengths ───────────────────────────────────────── */}
       <PersonalityStrengthsSection user={user} />
