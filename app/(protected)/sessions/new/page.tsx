@@ -24,7 +24,7 @@ export default async function NewSessionNotePage() {
       <div className="bg-white rounded-xl shadow-sm p-5">
         <h1 className="text-xl font-bold text-slate-900 mb-1">Log a Note</h1>
         <p className="text-sm text-slate-400 mb-6">
-          Record a coaching observation not tied to a specific session.
+          Record a coaching observation not tied to a specific interaction.
         </p>
 
         <NoteForm

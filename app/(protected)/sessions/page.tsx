@@ -80,9 +80,9 @@ export default async function SessionsIndexPage({ searchParams }: Props) {
     <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto">
       <div className="mb-6 flex items-center gap-2">
         <Calendar className="h-6 w-6 text-slate-400" />
-        <h1 className="text-2xl font-bold text-slate-900">Sessions</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Interactions</h1>
         <span className="ml-auto text-sm text-slate-400">
-          {combined.length} session{combined.length === 1 ? '' : 's'} ({PAST_DAYS} days back · {FUTURE_DAYS} days ahead)
+          {combined.length} interaction{combined.length === 1 ? '' : 's'} ({PAST_DAYS} days back · {FUTURE_DAYS} days ahead)
         </span>
       </div>
 

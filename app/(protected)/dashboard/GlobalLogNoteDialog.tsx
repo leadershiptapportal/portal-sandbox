@@ -150,7 +150,7 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
               </Label>
               <Textarea
                 id="log-note-content"
-                placeholder="What happened in this session or observation?"
+                placeholder="What happened in this interaction or observation?"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={4}
@@ -161,7 +161,7 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
             {/* Session link — only shown after a client is selected */}
             {clientId && (
               <div className="space-y-1.5">
-                <Label htmlFor="log-note-session">Link to a session</Label>
+                <Label htmlFor="log-note-session">Link to an interaction</Label>
                 <Select
                   value={meetingId}
                   onValueChange={setMeetingId}
@@ -170,12 +170,12 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
                   <SelectTrigger id="log-note-session">
                     <SelectValue placeholder={
                       sessionsLoading
-                        ? 'Loading sessions…'
-                        : 'General note (not tied to a session)'
+                        ? 'Loading interactions…'
+                        : 'General note (not tied to an interaction)'
                     } />
                   </SelectTrigger>
                   <SelectContent className="max-h-48 overflow-y-auto">
-                    <SelectItem value="__none__">General note (not tied to a session)</SelectItem>
+                    <SelectItem value="__none__">General note (not tied to an interaction)</SelectItem>
                     {sessions.map((s) => (
                       <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
                     ))}

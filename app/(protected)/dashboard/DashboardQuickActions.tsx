@@ -82,8 +82,8 @@ export default function DashboardQuickActions({ clients, coaches }: Props) {
             <ActionCard
               icon={<History className="w-5 h-5 text-amber-600" />}
               iconBg="bg-amber-100"
-              label="Log Session"
-              description="Record a session manually"
+              label="Log Interaction"
+              description="Record an interaction manually"
             >
               <button className="w-full min-h-[72px] rounded-xl border border-slate-200 bg-white hover:border-amber-200 hover:bg-amber-50/40 transition-colors" />
             </ActionCard>
@@ -108,7 +108,7 @@ export default function DashboardQuickActions({ clients, coaches }: Props) {
         <ActionCard
           icon={<Calendar className="w-5 h-5 text-violet-600" />}
           iconBg="bg-violet-100"
-          label="All Sessions"
+          label="All Interactions"
           description="Browse past and upcoming"
         >
           <Link

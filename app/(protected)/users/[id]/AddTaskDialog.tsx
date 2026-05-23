@@ -75,7 +75,7 @@ export default function AddTaskDialog({ userId }: AddTaskDialogProps) {
               <Label htmlFor="task-name">Task name <span className="text-destructive">*</span></Label>
               <Input
                 id="task-name"
-                placeholder="e.g. Send session recap email"
+                placeholder="e.g. Send interaction recap email"
                 value={taskName}
                 onChange={(e) => setTaskName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSave()}

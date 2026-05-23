@@ -121,7 +121,7 @@ export default function AddTaskDashboardDialog({ clients, coaches, trigger }: Pr
               </Label>
               <Input
                 id="add-task-title"
-                placeholder="e.g. Send session recap email"
+                placeholder="e.g. Send interaction recap email"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSave()}

@@ -65,7 +65,7 @@ export default async function SessionsNeedingNotesRegion({ userRecord }: Props) 
     <div className="mb-4 md:mb-6 bg-white rounded-xl shadow-sm p-4 md:p-6">
       <div className="flex items-center gap-2 mb-3">
         <FileText className="h-5 w-5 text-amber-500" />
-        <h2 className="text-lg font-semibold text-slate-900">Sessions Needing Notes</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Interactions Needing Notes</h2>
         <Link
           href="/sessions?filter=needs-notes"
           className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-2 py-0.5 rounded-full transition-colors"

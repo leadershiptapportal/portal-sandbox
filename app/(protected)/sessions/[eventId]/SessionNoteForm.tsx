@@ -77,7 +77,7 @@ export default function SessionNoteForm({
           Notes
         </label>
         <Textarea
-          placeholder="Session observations, themes, action items…"
+          placeholder="Interaction notes, themes, action items…"
           value={body}
           onChange={(e) => { setBody(e.target.value); setSaved(false) }}
           rows={8}

@@ -65,14 +65,14 @@ export default function MeetingsSection({
                 </Link>
               )
             })() : (
-              <p className="text-sm text-slate-400 pl-1">No upcoming sessions scheduled.</p>
+              <p className="text-sm text-slate-400 pl-1">No upcoming interactions scheduled.</p>
             )}
           </div>
 
           {/* LAST SESSION */}
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
-              Last Session
+              Last Interaction
             </p>
             {lastMeeting ? (() => {
               const { weekday, day, month, time } = formatMeetingDay(lastMeeting.startTime, lastMeeting.timezone)
@@ -110,15 +110,15 @@ export default function MeetingsSection({
                 </div>
               )
             })() : (
-              <p className="text-sm text-slate-400 pl-1">No past sessions.</p>
+              <p className="text-sm text-slate-400 pl-1">No past interactions.</p>
             )}
           </div>
 
-          {/* PAST SESSIONS */}
+          {/* PAST INTERACTIONS */}
           {recentMeetings.length > 0 && (
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
-                Past Sessions
+                Past Interactions
               </p>
               <div className="rounded-lg border border-slate-100 overflow-hidden">
                 {recentMeetings.map((m) => (

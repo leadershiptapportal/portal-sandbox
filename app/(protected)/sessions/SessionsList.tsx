@@ -23,18 +23,18 @@ const FILTER_LABELS: { key: Filter; label: string }[] = [
 const EMPTY_COPY: Record<Filter, { title: string; message: string }> = {
   'needs-notes': {
     title: 'All caught up.',
-    message: 'No past sessions are missing notes.',
+    message: 'No past interactions are missing notes.',
   },
   upcoming: {
     title: 'Nothing on the calendar.',
-    message: 'No upcoming sessions in the next 60 days.',
+    message: 'No upcoming interactions in the next 60 days.',
   },
   past: {
-    title: 'No past sessions yet.',
-    message: 'Sessions you have already had will show up here.',
+    title: 'No past interactions yet.',
+    message: 'Interactions you have already had will show up here.',
   },
   all: {
-    title: 'No sessions found.',
+    title: 'No interactions found.',
     message: 'Try a different filter or run a calendar sync from Settings.',
   },
 }

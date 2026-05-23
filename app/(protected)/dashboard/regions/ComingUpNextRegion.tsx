@@ -262,7 +262,7 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
         <div className="mb-4 md:mb-6 bg-white rounded-xl shadow-sm p-4 md:p-6">
           <div className="flex items-center gap-2 mb-4">
             <CalendarDays className="h-5 w-5 text-slate-400" />
-            <h2 className="text-lg font-semibold text-slate-900">Upcoming Sessions (from Calendar)</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Upcoming Interactions (from Calendar)</h2>
             <span className="ml-auto text-xs text-slate-400 font-medium">
               {portalEvents.length} {portalEvents.length === 1 ? 'event' : 'events'}
             </span>

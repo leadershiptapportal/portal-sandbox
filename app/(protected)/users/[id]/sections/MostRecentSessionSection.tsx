@@ -28,7 +28,7 @@ export default function MostRecentSessionSection({
       {recentMeetings.length > 0 && (
         <div>
           <h3 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
-            Past Sessions
+            Past Interactions
             <span className="text-xs font-normal text-slate-400">
               ({recentMeetings.length} more)
             </span>
@@ -62,7 +62,7 @@ export default function MostRecentSessionSection({
               href={`/users/${userId}/sessions`}
               className="text-sm text-blue-600 hover:underline mt-3 block"
             >
-              View all {recentMeetings.length + 1} sessions →
+              View all {recentMeetings.length + 1} interactions →
             </Link>
           )}
         </div>

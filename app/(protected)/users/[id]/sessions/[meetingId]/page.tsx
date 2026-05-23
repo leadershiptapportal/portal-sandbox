@@ -79,7 +79,7 @@ export default async function SessionDetailPage({ params }: Props) {
       <div className="bg-white rounded-xl shadow-sm p-5 md:p-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <h1 className="text-xl font-bold text-slate-900 leading-snug">
-            {meeting.title || 'Untitled Session'}
+            {meeting.title || 'Untitled Interaction'}
           </h1>
           {meeting.sessionStatus && statusStyle && (
             <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border flex-shrink-0 ${statusStyle}`}>
@@ -119,7 +119,7 @@ export default async function SessionDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Session Notes */}
+      {/* Interaction Notes */}
       <div className="bg-white rounded-xl shadow-sm p-5 md:p-6">
         <SessionNotesEditor meetingId={meetingId} userId={id} initialNotes={notesForEditor} />
       </div>

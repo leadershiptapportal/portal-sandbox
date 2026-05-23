@@ -55,7 +55,7 @@ export default function SessionNotesEditor({ meetingId, userId, initialNotes }: 
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-            Session Notes
+            Interaction Notes
           </h2>
           <div className="flex items-center gap-2">
             {status === 'saved' && (
@@ -76,7 +76,7 @@ export default function SessionNotesEditor({ meetingId, userId, initialNotes }: 
           </p>
         ) : (
           <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center">
-            <p className="text-sm text-slate-400">No notes yet for this session.</p>
+            <p className="text-sm text-slate-400">No notes yet for this interaction.</p>
             <p className="text-xs text-slate-300 mt-1">Click Edit Notes to add some.</p>
           </div>
         )}
@@ -90,7 +90,7 @@ export default function SessionNotesEditor({ meetingId, userId, initialNotes }: 
     <div>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-          Session Notes
+          Interaction Notes
         </h2>
         <div className="flex items-center gap-2">
           {status === 'error' && (
@@ -119,7 +119,7 @@ export default function SessionNotesEditor({ meetingId, userId, initialNotes }: 
         onChange={(e) => setDraft(e.target.value)}
         disabled={isPending}
         rows={12}
-        placeholder="Add session notes…"
+        placeholder="Add interaction notes…"
         className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 leading-relaxed placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,50%)] focus:border-transparent resize-y disabled:opacity-50"
       />
     </div>

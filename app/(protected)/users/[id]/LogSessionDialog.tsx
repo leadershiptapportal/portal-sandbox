@@ -85,7 +85,7 @@ export default function LogSessionDialog({ userId }: Props) {
         durationMinutes: Number(duration),
         notes: notes.trim() || undefined,
       })
-      toast.success('Session logged')
+      toast.success('Interaction logged')
       setOpen(false)
       router.refresh()
     } catch (err) {
@@ -93,7 +93,7 @@ export default function LogSessionDialog({ userId }: Props) {
       if (code === 'NO_RELATIONSHIP') {
         setSaveError('No active coaching or reporting relationship reaches this person.')
       } else {
-        setSaveError('Failed to log session. Please try again.')
+        setSaveError('Failed to log interaction. Please try again.')
       }
     } finally {
       setSaving(false)
@@ -104,13 +104,13 @@ export default function LogSessionDialog({ userId }: Props) {
     <>
       <Button variant="outline" size="sm" onClick={handleOpen}>
         <Calendar />
-        Log Session
+        Log Interaction
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Log a Session</DialogTitle>
+            <DialogTitle>Log an Interaction</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -161,7 +161,7 @@ export default function LogSessionDialog({ userId }: Props) {
               </Label>
               <Textarea
                 id="session-notes"
-                placeholder="Session observations, follow-up items…"
+                placeholder="Interaction notes, follow-up items…"
                 rows={4}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -184,7 +184,7 @@ export default function LogSessionDialog({ userId }: Props) {
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={!canSubmit}>
-              {saving ? 'Saving…' : saveError ? 'Try Again' : 'Log Session'}
+              {saving ? 'Saving…' : saveError ? 'Try Again' : 'Log Interaction'}
             </Button>
           </DialogFooter>
         </DialogContent>

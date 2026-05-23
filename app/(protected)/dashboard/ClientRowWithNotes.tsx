@@ -226,7 +226,7 @@ export default function ClientRowWithNotes({
                 autoFocus
                 value={addContent}
                 onChange={(e) => setAddContent(e.target.value)}
-                placeholder="Session notes…"
+                placeholder="Interaction notes…"
                 rows={3}
                 className="w-full border border-slate-200 rounded-md px-2.5 py-2 text-sm bg-white resize-none focus:outline-none focus:ring-1 focus:ring-blue-400"
               />
@@ -368,7 +368,7 @@ export default function ClientRowWithNotes({
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-3 w-3 text-slate-400 flex-shrink-0" />
                   <span className="text-xs text-slate-500">
-                    <span className="font-medium">Next session:</span> {nextSessionLabel}
+                    <span className="font-medium">Next interaction:</span> {nextSessionLabel}
                   </span>
                 </div>
               )}
@@ -376,7 +376,7 @@ export default function ClientRowWithNotes({
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-3 w-3 text-slate-300 flex-shrink-0" />
                   <span className="text-xs text-slate-400">
-                    <span className="font-medium">Last session:</span> {lastSessionLabel}
+                    <span className="font-medium">Last interaction:</span> {lastSessionLabel}
                   </span>
                 </div>
               )}

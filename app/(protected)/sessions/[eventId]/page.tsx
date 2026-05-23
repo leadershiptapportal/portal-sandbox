@@ -38,7 +38,7 @@ export default async function SessionPage({ params }: Props) {
   if (!meeting) {
     return (
       <div className="px-4 py-8 max-w-2xl mx-auto">
-        <p className="text-slate-500">Session not found.</p>
+        <p className="text-slate-500">Interaction not found.</p>
       </div>
     )
   }
@@ -71,7 +71,7 @@ export default async function SessionPage({ params }: Props) {
       {/* Event header */}
       <div className="bg-white rounded-xl shadow-sm p-5 space-y-1">
         <p className="text-xs font-semibold uppercase tracking-wide text-[hsl(213,70%,40%)]">
-          Session
+          Interaction
         </p>
         <h1 className="text-xl font-bold text-slate-900 leading-snug">
           {meeting.title || 'Untitled Meeting'}
@@ -89,7 +89,7 @@ export default async function SessionPage({ params }: Props) {
       {/* Session note — create or edit */}
       <div className="bg-white rounded-xl shadow-sm p-5">
         <h2 className="text-base font-semibold text-slate-900 mb-1">
-          {existingNote ? 'Session Note' : 'Add a Session Note'}
+          {existingNote ? 'Interaction Note' : 'Add an Interaction Note'}
         </h2>
         {existingNote && (
           <p className="text-xs text-slate-400 mb-5">
@@ -119,7 +119,7 @@ export default async function SessionPage({ params }: Props) {
             </p>
           </div>
         ) : (
-          <p className="text-sm text-slate-400">No session note yet.</p>
+          <p className="text-sm text-slate-400">No interaction note yet.</p>
         )}
       </div>
 

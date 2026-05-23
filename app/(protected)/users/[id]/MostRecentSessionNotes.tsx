@@ -39,7 +39,7 @@ export default function MostRecentSessionNotes({ meeting, userId, meetingNotes }
   if (!meeting) {
     return (
       <div className="border border-dashed border-slate-200 rounded-xl p-5 text-center">
-        <p className="text-sm text-slate-400">No sessions recorded yet.</p>
+        <p className="text-sm text-slate-400">No interactions recorded yet.</p>
       </div>
     )
   }
@@ -81,7 +81,7 @@ export default function MostRecentSessionNotes({ meeting, userId, meetingNotes }
       <div className="flex justify-between items-start px-5 pt-5 pb-3">
         <div>
           <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
-            Most Recent Session
+            Most Recent Interaction
           </p>
           {dateLabel && (
             <p className="text-sm font-medium text-slate-800 mt-0.5">{dateLabel}</p>
@@ -94,7 +94,7 @@ export default function MostRecentSessionNotes({ meeting, userId, meetingNotes }
           href={`/users/${userId}/sessions/${meeting.id}`}
           className="text-xs text-blue-600 hover:underline whitespace-nowrap flex-shrink-0"
         >
-          Full session →
+          Full interaction →
         </Link>
       </div>
 
@@ -102,7 +102,7 @@ export default function MostRecentSessionNotes({ meeting, userId, meetingNotes }
       <div className="mx-5 mb-5 bg-white/80 rounded-lg border border-blue-100 p-4">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-            Session Notes
+            Interaction Notes
           </p>
           <div className="flex items-center gap-2">
             {savedFlash && (
@@ -133,7 +133,7 @@ export default function MostRecentSessionNotes({ meeting, userId, meetingNotes }
             </div>
           ) : (
             <p className="text-sm text-slate-400 italic">
-              No session notes yet — click Log a Note or Add Notes to add some.
+              No interaction notes yet — click Log a Note or Add Notes to add some.
             </p>
           )
         ) : (
@@ -145,7 +145,7 @@ export default function MostRecentSessionNotes({ meeting, userId, meetingNotes }
               onChange={(e) => setNotes(e.target.value)}
               rows={6}
               disabled={isPending}
-              placeholder="Session notes, observations, action items…"
+              placeholder="Interaction notes, observations, action items…"
               className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white resize-y focus:outline-none focus:ring-2 focus:ring-blue-400 leading-relaxed disabled:opacity-50"
             />
             {errorMsg && (

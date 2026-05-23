@@ -93,7 +93,7 @@ export default function SessionNotePanel({
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
-          <h2 className="text-base font-semibold text-slate-900">Session Notes</h2>
+          <h2 className="text-base font-semibold text-slate-900">Interaction Notes</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-700 transition-colors"
@@ -110,14 +110,14 @@ export default function SessionNotePanel({
           {showPicker && (
             <div className="space-y-1.5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Session
+                Interaction
               </p>
               {events.length === 0 ? (
-                <p className="text-sm text-slate-400">No upcoming sessions this week.</p>
+                <p className="text-sm text-slate-400">No upcoming interactions this week.</p>
               ) : (
                 <Select value={selectedId} onValueChange={setSelectedId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Pick a session…" />
+                    <SelectValue placeholder="Pick an interaction…" />
                   </SelectTrigger>
                   <SelectContent className="max-h-52 overflow-y-auto">
                     {events.map((ev) => {
@@ -193,7 +193,7 @@ export default function SessionNotePanel({
                   Notes
                 </p>
                 <Textarea
-                  placeholder="Session notes, observations, follow-ups…"
+                  placeholder="Interaction notes, observations, follow-ups…"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={8}

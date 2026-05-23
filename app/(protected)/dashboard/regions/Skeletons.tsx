@@ -30,7 +30,7 @@ export function SessionsNeedingNotesSkeleton() {
     <div className="mb-4 md:mb-6 bg-white rounded-xl shadow-sm p-4 md:p-6">
       <div className="flex items-center gap-2 mb-3">
         <FileText className="h-5 w-5 text-amber-500" />
-        <span className="text-lg font-semibold text-slate-900">Sessions Needing Notes</span>
+        <span className="text-lg font-semibold text-slate-900">Interactions Needing Notes</span>
       </div>
       <div className="divide-y divide-slate-100">
         {[1, 2, 3].map((i) => (

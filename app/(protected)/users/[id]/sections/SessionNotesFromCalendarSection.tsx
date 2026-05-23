@@ -12,7 +12,7 @@ export default function SessionNotesFromCalendarSection({ portalSessionEvents }:
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
-      <SectionHeading icon={BookOpen} title="Session Notes (from Calendar)" />
+      <SectionHeading icon={BookOpen} title="Interaction Notes (from Calendar)" />
       <div className="space-y-3">
         {portalSessionEvents.map((event) => (
           <div
@@ -21,7 +21,7 @@ export default function SessionNotesFromCalendarSection({ portalSessionEvents }:
           >
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="text-sm font-medium text-slate-900">{event.title || 'Untitled Session'}</p>
+                <p className="text-sm font-medium text-slate-900">{event.title || 'Untitled Interaction'}</p>
                 <p className="text-xs text-slate-400 mt-0.5">
                   {formatEastern(event.startTime, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }, event.timezone)}
                 </p>

@@ -140,7 +140,7 @@ function ClientCard({ enriched }: { enriched: EnrichedUser }) {
           {(noteCount > 0 || openTaskCount > 0 || meetingCount > 0) && (
             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
               {meetingCount > 0 && (
-                <span className="text-xs text-slate-400">{meetingCount} session{meetingCount !== 1 ? 's' : ''}</span>
+                <span className="text-xs text-slate-400">{meetingCount} interaction{meetingCount !== 1 ? 's' : ''}</span>
               )}
               {noteCount > 0 && (
                 <>
@@ -373,7 +373,7 @@ export default function ClientsGrid({ users, coaches, companies }: Props) {
           <option value="recent">Recently Active</option>
           <option value="name-asc">Name A–Z</option>
           <option value="name-desc">Name Z–A</option>
-          <option value="sessions">Most Sessions</option>
+          <option value="sessions">Most Interactions</option>
         </FilterSelect>
 
         {/* View toggle */}
