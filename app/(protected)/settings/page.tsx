@@ -1,5 +1,6 @@
 import { currentUser } from '@clerk/nextjs/server'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
+import { getConnectedCalendarsByClerkUserId } from '@/lib/airtable/connectedCalendars'
 import ManageAccountButton from './ManageAccountButton'
 import SyncCalendarSection from './SyncCalendarSection'
 
@@ -15,6 +16,11 @@ export default async function SettingsPage() {
     currentUser(),
     getCurrentUserRecord(),
   ])
+
+  const connectedCalendars = userRecord.clerkId
+    ? await getConnectedCalendarsByClerkUserId(userRecord.clerkId)
+    : []
+  const calendarLinked = connectedCalendars.some((c) => c.provider === 'Outlook')
 
   const rawBaseId = process.env.AIRTABLE_BASE_ID ?? ''
   const maskedBaseId = rawBaseId
@@ -120,7 +126,7 @@ export default async function SettingsPage() {
       {/* ── Calendar Sync ───────────────────────────────────────────────── */}
       <section className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
         <h2 className="text-base font-semibold text-slate-900 mb-4">Calendar</h2>
-        <SyncCalendarSection />
+        <SyncCalendarSection calendarLinked={calendarLinked} />
       </section>
 
       {/* ── Help & Support ──────────────────────────────────────────────── */}
