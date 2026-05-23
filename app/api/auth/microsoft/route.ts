@@ -7,8 +7,13 @@ export async function GET() {
   const clientId = process.env.AZURE_CLIENT_ID
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
 
-  if (!tenantId || !clientId || !appUrl) {
-    return NextResponse.json({ error: 'OAuth not configured' }, { status: 500 })
+  const missing = [
+    !tenantId && 'AZURE_TENANT_ID',
+    !clientId && 'AZURE_CLIENT_ID',
+    !appUrl && 'NEXT_PUBLIC_APP_URL',
+  ].filter(Boolean)
+  if (missing.length > 0) {
+    return NextResponse.json({ error: 'OAuth not configured', missing }, { status: 500 })
   }
 
   const state = crypto.randomUUID()
