@@ -87,6 +87,9 @@ export const FIELDS = {
     LAST_UPDATED: 'fld5Veqq1nQpQkdaG',          // "Last Updated"
   },
   USERS: {
+    CLERK_USER_ID: 'fldFADxRhS8Jx8oEr',                            // "Clerk User ID"
+    PERMISSION_PROFILE: 'fldKCYbCstGpxPqDh',                       // "Portal Permission Profile" (linked)
+    LAST_PORTAL_LOGIN: 'fldHRzhxghjtyXBbt',                        // "Last Portal Login"
     FULL_NAME: 'fldH8rST4tjq0gis7',                                // "Full Name"
     PREFERRED_NAME: 'fld3HX06VuQWQYCM1',                           // "Preferred Name"
     FIRST_NAME: 'fldOGveomFlCV6DjD',                               // "First Name"

@@ -1,5 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+import { requireCurrentPortalPerson } from "@/lib/auth/requireCurrentPortalPerson";
 import AppShell from "@/components/layout/AppShell";
 
 export default async function ProtectedLayout({
@@ -7,11 +6,9 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await currentUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  // Resolves Clerk session → People record, enforces Permission Profile gate,
+  // and writes Clerk User ID on first email-matched login. Redirects on failure.
+  await requireCurrentPortalPerson();
 
   return <AppShell>{children}</AppShell>;
 }
