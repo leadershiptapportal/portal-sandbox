@@ -294,13 +294,13 @@ export default function NewPersonForm({ coaches, allUsers, companies }: Props) {
 
         {companies.length > 0 && (
           <div className="space-y-1.5">
-            <Label htmlFor="np-company">Company</Label>
+            <Label htmlFor="np-company">Organization</Label>
             <Select value={companyId} onValueChange={setCompanyId} disabled={saving}>
               <SelectTrigger id="np-company">
-                <SelectValue placeholder="Select company…" />
+                <SelectValue placeholder="Select organization…" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={NO_COMPANY}>No company</SelectItem>
+                <SelectItem value={NO_COMPANY}>No organization</SelectItem>
                 {companies.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name}
@@ -334,11 +334,11 @@ export default function NewPersonForm({ coaches, allUsers, companies }: Props) {
         </h2>
         <PersonPicker
           label="Who does this person report to?"
-          hint={hasCompany ? 'Their direct manager(s).' : 'Pick a company above to see who they could report to.'}
+          hint={hasCompany ? 'Their direct manager(s).' : 'Pick an organization above to see who they could report to.'}
           options={orgUsers}
           selected={reportsTo}
           onChange={setReportsTo}
-          placeholder={hasCompany ? 'Search people…' : 'Select a company first'}
+          placeholder={hasCompany ? 'Search people…' : 'Select an organization first'}
         />
       </section>
 
@@ -349,11 +349,11 @@ export default function NewPersonForm({ coaches, allUsers, companies }: Props) {
         </h2>
         <PersonPicker
           label="Who reports to this person?"
-          hint={hasCompany ? 'Usually populated for senior leaders.' : 'Pick a company above to see who they could report to.'}
+          hint={hasCompany ? 'Usually populated for senior leaders.' : 'Pick an organization above to see who they could report to.'}
           options={orgUsers}
           selected={directReports}
           onChange={setDirectReports}
-          placeholder={hasCompany ? 'Search people…' : 'Select a company first'}
+          placeholder={hasCompany ? 'Search people…' : 'Select an organization first'}
         />
       </section>
 

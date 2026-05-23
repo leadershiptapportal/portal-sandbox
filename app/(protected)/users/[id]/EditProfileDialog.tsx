@@ -374,8 +374,8 @@ export default function EditProfileDialog({ user }: Props) {
               {/* ── Section 3: Organization ─────────────────────────────── */}
               <Section title="Organization">
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Company" half>
-                    <SelectField value={companyId} onChange={setCompanyId} options={options?.companies ?? []} placeholder="Select company…" disabled={saving} loading={optionsLoading} />
+                  <Field label="Organization" half>
+                    <SelectField value={companyId} onChange={setCompanyId} options={options?.companies ?? []} placeholder="Select organization…" disabled={saving} loading={optionsLoading} />
                   </Field>
                   <Field label="Role" half>
                     <select value={role} onChange={(e) => setRole(e.target.value)} disabled={saving} className={selectCls}>

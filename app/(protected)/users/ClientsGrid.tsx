@@ -210,7 +210,7 @@ function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode
         }`}
       >
         <Building2 className="h-3.5 w-3.5" />
-        By Company
+        By Organization
       </button>
     </div>
   )
@@ -333,7 +333,7 @@ export default function ClientsGrid({ users, coaches, companies }: Props) {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name or company..."
+            placeholder="Search by name or organization..."
             className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)]"
           />
         </div>

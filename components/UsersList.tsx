@@ -61,7 +61,7 @@ export default function UsersList({ users }: UsersListProps) {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <input
           type="text"
-          placeholder="Search by name, company, or email…"
+          placeholder="Search by name, organization, or email…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           aria-label="Search users"

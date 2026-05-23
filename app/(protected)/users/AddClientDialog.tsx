@@ -157,13 +157,13 @@ export default function AddClientDialog({ coaches, companies, currentCoachId }: 
             <div className="grid grid-cols-2 gap-3">
               {companies.length > 0 && (
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-700">Company</label>
+                  <label className="text-xs font-medium text-slate-700">Organization</label>
                   <select
                     value={companyId}
                     onChange={(e) => setCompanyId(e.target.value)}
                     className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-white"
                   >
-                    <option value="">Select company</option>
+                    <option value="">Select organization</option>
                     {companies.map((c) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
