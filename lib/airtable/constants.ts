@@ -18,17 +18,17 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const TABLES = {
-  PEOPLE: 'tblD4Pttofq0sDl2R',                  // "Users"
-  ORGANIZATIONS: 'tbl56SmsLjb0odxag',           // "Companies"
+  PEOPLE: 'tblD4Pttofq0sDl2R',                  // "People"
+  ORGANIZATIONS: 'tbl56SmsLjb0odxag',           // "Organizations"
   ORG_MEMBERSHIPS: 'tbl6Ld2QCBAN4EI62',         // "Organization Memberships"
   PERMISSION_PROFILES: 'tbl1XeWzXjE41fSSE',     // "Permission Profiles"
+  CONNECTED_CALENDARS: 'tblJs7uabNEOsgyoF',     // "Connected Calendars"
   RELATIONSHIP_CONTEXTS: 'tblYdLi7dp2RmhNjh',   // "Relationship Contexts"
-  PORTAL_ACCOUNTS: 'Portal Accounts',           // future — table doesn't exist yet
   MEETINGS: 'tblUm3dEvQqQBhxSE',                // "Meetings"
   NOTES: 'tblSTELdCWLYk5dq4',                   // "Notes"
   TASKS: 'tbleG9GWJEB9jd6yt',                   // "Tasks"
   COACH_SESSION: 'tblPFj41wHQXZVzzZ',           // "Coach Session"
-  COACH_PERSON_CONTEXT: 'tbly1SOW603Qhd2nJ',    // "Coach-Person Context"
+  COACH_PERSON_CONTEXT: 'tbly1SOW603Qhd2nJ',    // "Coach-Person Context" — legacy, table may not exist; reads return null gracefully
   MESSAGES: 'tbl8VGHVCU8cXyAis',                // "Messages"
 } as const
 
@@ -40,6 +40,9 @@ export const FIELDS = {
     PERMISSION_LEVEL: 'fldbZwRLGEz5mAsws',      // "Permission Level"
     STATUS: 'fldm3QrrCbs34ai2F',                // "Status"
     START_DATE: 'fld3bTwZSm3lQNi9N',            // "Start Date"
+    END_DATE: 'fldeAxACxxeiULgZr',              // "End Date"
+    TASKS_LINKED: 'fld9UnUYXwKCEBKrT',          // "Tasks" (linked → Tasks)
+    NOTES_LINKED: 'fld3omA1BHtk6k1cK',          // "Notes" (linked → Notes)
   },
   MEETINGS: {
     TITLE: 'fldAk4BCE60mYBv4I',                 // "Subject"
@@ -47,24 +50,29 @@ export const FIELDS = {
     END: 'fldfdh1Tq2Xmsp68X',                   // "End Time"
     PROVIDER_EVENT_ID: 'fldcugcsHlIPbEgna',     // "Provider Event ID"
     ATTENDEES: 'fldpCCYTuIOXuqqCd',             // "Attendees"
-    CALENDAR_OWNER: 'fld790fAzn86Lquig',        // "Calendar Owner"
+    CALENDAR_OWNER: 'fld790fAzn86Lquig',        // "Calendar Owner" (text email)
+    CALENDAR_OWNER_PERSON: 'fldj13l8IStVOJeq1', // "Calendar Owner Person" (linked → People)
     CLIENT_NAME: 'fldK2TOXuqUOSWdk9',           // "Client Name"
-    RELATIONSHIP_CONTEXT: 'fldwLPj5ahMVI9mam',  // "Relationship Context"
+    RELATIONSHIP_CONTEXT: 'fldwLPj5ahMVI9mam',  // "Relationship Context" (linked)
     TIMEZONE: 'fld0MYHtXEbwJ0EFe',              // "Timezone"
     MEETING_STATUS: 'fldj6d4eqytFAjg56',        // "Meeting Status"
     CALENDAR_PROVIDER: 'fldBhVB6jjJZVER4o',     // "Calendar Provider"
+    NOTES_TEXT: 'fldyTf8tVlyfmNT5S',            // "Notes" (coach-written notes — multilineText)
+    NOTE_NAME: 'fldhYmaFzYM86fi1O',             // "Note Name" (auto-set by sync as YYYY-MM-DD // Attendee)
+    ICAL_UID: 'fldFCmcfx1vGgXdBl',              // "iCal UID"
   },
   NOTES: {
-    BODY: 'fldCT8P7Da1INkG0T',                  // "Content"
+    BODY: 'fldCT8P7Da1INkG0T',                  // "Content" (primary text field)
     DATE: 'fldnOSv13VmCbOtEY',                  // "Date"
-    CLIENT: 'fldDLBsX8zXpJInAD',                // "Client"
+    CLIENT: 'fldDLBsX8zXpJInAD',                // "Client" (linked → People)
     COACH_NAME: 'fld4QwJB7HdqZPQZt',            // "Coach Name"
-    AUTHOR_PERSON: 'fldWJgq54h0A2OvCy',         // "Author Person"
-    SUBJECT_PERSON: 'fldzCJbxYI9Ny5nwj',        // "Subject Person"
-    MEETING: 'flduXwHTvTUjaZ9Fz',               // "Meeting" (singleLineText today)
+    AUTHOR_PERSON: 'fldWJgq54h0A2OvCy',         // "Author Person" (linked → People)
+    SUBJECT_PERSON: 'fldzCJbxYI9Ny5nwj',        // "Subject Person" (linked → People)
+    MEETING: 'flduXwHTvTUjaZ9Fz',               // "Meeting" (singleLineText — legacy)
+    MEETING_LINK: 'fldb4rVcTf0mrkvFf',          // "Meeting Link" (linked → Meetings — preferred)
     NOTE_TYPE: 'fldRCz98Sppbgbq5e',             // "Note Type"
     VISIBILITY: 'fldan9xqdso86TKBv',            // "Visibility"
-    RELATIONSHIP_CONTEXT: 'fldltUsIa9P0U73li',  // "Relationship Context"
+    RELATIONSHIP_CONTEXT: 'fldltUsIa9P0U73li',  // "Relationship Context" (linked)
   },
   TASKS: {
     TITLE: 'fldRgrskNdZharknP',                 // "Title"
@@ -138,11 +146,21 @@ export const FIELDS = {
     ENGAGEMENT_LEVEL: 'Engagement Level',                          // does not exist in schema
     COACH_NOTES: 'Coach Notes',                                    // does not exist in schema
     INTERNAL_NOTES: 'Internal Notes',                              // does not exist in schema
+    // Linked record fields on People (not the singleLineText lookup variants)
+    MEETINGS_LINKED: 'fldPvW5FXxWUiiI8F',                         // "Meetings" (multipleRecordLinks → Meetings)
+    NOTES_LINKED: 'fldtaUHrHe079g2iz',                            // "Notes" (multipleRecordLinks → Notes)
+    TASKS_LINKED: 'fldeWGoSfUIqV3CbE',                            // "Tasks" (multipleRecordLinks → Tasks)
+    CONNECTED_CALENDARS: 'fld7aipXZ3XzINu0p',                     // "Connected Calendars" (multipleRecordLinks)
+    RELATIONSHIP_CONTEXTS_CLIENT: 'fldXDcLMxY0q87gwE',            // "Relationship Contexts (Client)" — person is coachee
+    RELATIONSHIP_CONTEXTS_COACH: 'fldFabqxT4dx63zeK',             // "Relationship Contexts (Coach)" — person is lead
+    LAST_MODIFIED: 'fldAAzvWFfJSpUs93',                           // "Last Modified" (lastModifiedTime)
   },
   COMPANIES: {
     NAME: 'fldl7bZkR5JCKyLHk',                  // "Company Name"
     STATUS: 'fldk33AceBzzND138',                // "Status"
     ORGANIZATION_TYPE: 'fldkxkzOX87KZctuL',     // "Organization Type"
+    LOGO: 'fldgW4xeX2hkieVb2',                  // "Company Logo" (url)
+    DOMAIN_NAME: 'fldKGWHDCJJZEGorT',           // "Company Domain Name"
   },
   ENNEAGRAM: {
     NAME: 'fldDHEcTx28Dpnccp',                  // "Name"
@@ -167,9 +185,36 @@ export const FIELDS = {
     RELATIONSHIP_FLAGS: 'fldkaBmcetVEbGD02',    // "Relationship Flags"
     LAST_UPDATED: 'fldV5RnOV6h0IkPkR',          // "Last Updated"
   },
+  CONNECTED_CALENDARS: {
+    CONNECTION_NAME: 'fldjj4sUqh1Rdz34T',       // "Connection Name" (primary)
+    PERSON: 'fldaS5RFjObe3O40j',                // "Person" (linked → People)
+    PROVIDER: 'fldFdmevMOuaMCJGS',              // "Provider" (singleSelect: "Outlook", "Google")
+    PROVIDER_ACCOUNT_EMAIL: 'fld6WDIroNlUQb5TN', // "Provider Account Email"
+    PROVIDER_USER_ID: 'fldk7m4uHjglWykbP',      // "Provider User ID"
+    PROVIDER_TENANT_ID: 'fld5Q7HpW8RrrZcFC',    // "Provider Tenant ID"
+    CALENDAR_ID: 'fld0ac0bykZDneFsV',           // "Calendar ID"
+    ACCESS_TOKEN: 'fldUIhHaasR612tPN',          // "Access Token" (multilineText)
+    REFRESH_TOKEN: 'fldHmWIXLsjYFZDcl',         // "Refresh Token" (multilineText)
+    TOKEN_EXPIRES_AT: 'flduBUEM43LTfY6j0',      // "Token Expires At" (dateTime)
+    SCOPES: 'fldau0POzcX3lAhj5',                // "Scopes" (multilineText)
+    DELTA_LINK: 'fld0p9fniyXx1xee8',            // "Delta Link" (multilineText — Outlook incremental sync)
+    SYNC_STATUS: 'fldh0yPUYzkBR5U2a',           // "Sync Status" (singleSelect: "Active", "Error", "Paused")
+    LAST_SYNCED_AT: 'fldGpI3ftPAQLYXwP',        // "Last Synced At" (dateTime)
+    LAST_SYNC_ERROR: 'fldQrI8nZci0u00BV',       // "Last Sync Error" (multilineText)
+    ENVIRONMENT: 'fldt01pqCMveUGus4',           // "Environment" (singleSelect: "production", "sandbox")
+    CLERK_USER_ID: 'fldmQRycM725Y8yGD',         // "Clerk User ID"
+    CLERK_EMAIL: 'fld3iesrZfNJhWXXk',           // "Clerk Email"
+  },
   PERMISSION_PROFILES: {
-    PROFILE_NAME: 'fldnGsXftdue5s0Ws',          // "Profile Name"
-    NOTES_DEFAULT_VISIBILITY: 'fldoio0Bwxso2736X', // "Notes Default Visibility"
+    PROFILE_NAME: 'fldnGsXftdue5s0Ws',               // "Profile Name"
+    DESCRIPTION: 'fldC4dbMzGt3nRRK6',                // "Description"
+    CAN_WRITE_NOTES: 'fldy2Cxmr3Irsa8Bd',            // "Can Write Notes" (checkbox)
+    CAN_CREATE_MEETINGS: 'fldsdgjDfBgCkZpE6',         // "Can Create Meetings" (checkbox)
+    CAN_VIEW_PERSON_PROFILE: 'fldVT89tY1d0mgPxu',     // "Can View Person Profile" (checkbox)
+    CAN_VIEW_DIRECT_REPORTS: 'fldRnf8el6uan7QEt',     // "Can View Direct Reports" (checkbox)
+    NOTES_DEFAULT_VISIBILITY: 'fldoio0Bwxso2736X',    // "Notes Default Visibility" (singleSelect)
+    RELATIONSHIP_CONTEXTS_LINKED: 'fldqIjUpJFsdVSIsn', // "Relationship Contexts" (linked)
+    PEOPLE_LINKED: 'fldMq09F3luFHKdRM',               // "People" (linked)
   },
   MESSAGES: {
     MESSAGE_NAME: 'fldRIXITrwYvnBGyL',          // "Message Name"

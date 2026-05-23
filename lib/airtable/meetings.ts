@@ -38,7 +38,7 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Mee
     timezone: (record.fields[FIELDS.MEETINGS.TIMEZONE] as string) || undefined,
     senderEmail: undefined,
     participantEmails: parseEmails(record.fields[FIELDS.MEETINGS.ATTENDEES]),
-    notes: undefined,
+    notes: (record.fields[FIELDS.MEETINGS.NOTES_TEXT] as string) || undefined,
     sessionStatus: null,
     actionItems: null,
     clientName: (record.fields[FIELDS.MEETINGS.CLIENT_NAME] as string) || undefined,
@@ -188,7 +188,7 @@ export async function updatePortalEventNotes(
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ fields: { Notes: notes } }),
+      body: JSON.stringify({ fields: { [FIELDS.MEETINGS.NOTES_TEXT]: notes } }),
     },
   );
   if (!res.ok) {

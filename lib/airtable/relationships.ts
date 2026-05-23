@@ -103,7 +103,7 @@ function mapRecord(
     status: (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.STATUS] as string) ?? '',
     organizationId: undefined,
     startDate: (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.START_DATE] as string) ?? undefined,
-    endDate: undefined,
+    endDate: (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.END_DATE] as string) ?? undefined,
   }
 }
 
@@ -628,6 +628,7 @@ export async function updateRelationshipContext(
   if (input.type !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.TYPE] = input.type
   if (input.status !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.STATUS] = input.status
   if (input.startDate !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.START_DATE] = input.startDate
+  if (input.endDate !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.END_DATE] = input.endDate
   if (input.personId !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.PERSON] = [input.personId]
   if (input.leadId !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.LEAD] = [input.leadId]
   if (Object.keys(fields).length === 0) return
