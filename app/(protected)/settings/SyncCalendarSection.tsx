@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
+import LinkCalendarButton from './LinkCalendarButton'
 
-export default function SyncCalendarSection() {
+export default function SyncCalendarSection({ calendarLinked = false }: { calendarLinked?: boolean }) {
   const [syncing, setSyncing] = useState(false)
 
   async function handleSync() {
@@ -38,21 +39,27 @@ export default function SyncCalendarSection() {
   }
 
   return (
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm text-slate-700 font-medium">Calendar Sync</p>
-        <p className="text-xs text-slate-400 mt-0.5">
-          Pulls all @leadershiptap.com calendars from Microsoft 365
-        </p>
+    <div className="space-y-4">
+      <LinkCalendarButton linked={calendarLinked} />
+
+      <div className="border-t border-slate-100" />
+
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-slate-700 font-medium">Calendar Sync</p>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Pulls all @leadershiptap.com calendars from Microsoft 365
+          </p>
+        </div>
+        <button
+          onClick={handleSync}
+          disabled={syncing}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[hsl(213,70%,30%)] text-white hover:bg-[hsl(213,70%,25%)] disabled:opacity-50 transition-colors"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${syncing ? 'animate-spin' : ''}`} />
+          {syncing ? 'Syncing…' : 'Sync Now'}
+        </button>
       </div>
-      <button
-        onClick={handleSync}
-        disabled={syncing}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[hsl(213,70%,30%)] text-white hover:bg-[hsl(213,70%,25%)] disabled:opacity-50 transition-colors"
-      >
-        <RefreshCw className={`h-3.5 w-3.5 ${syncing ? 'animate-spin' : ''}`} />
-        {syncing ? 'Syncing…' : 'Sync Now'}
-      </button>
     </div>
   )
 }

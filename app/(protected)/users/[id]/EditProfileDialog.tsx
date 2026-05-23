@@ -115,7 +115,11 @@ function SelectField({
 // Role is a display label only. Portal access is controlled by Clerk's
 // publicMetadata.role, not this field. Three values mirror the system roles
 // documented in CLAUDE.md.
-const ROLE_OPTIONS = ['Client', 'Coach', 'Admin']
+const ROLE_OPTIONS = [
+  { value: 'Client', label: 'Person' },
+  { value: 'Coach', label: 'Coach' },
+  { value: 'Admin', label: 'Admin' },
+]
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -380,7 +384,7 @@ export default function EditProfileDialog({ user }: Props) {
                   <Field label="Role" half>
                     <select value={role} onChange={(e) => setRole(e.target.value)} disabled={saving} className={selectCls}>
                       <option value="">Select role…</option>
-                      {ROLE_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+                      {ROLE_OPTIONS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
                     </select>
                   </Field>
                 </div>
