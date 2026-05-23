@@ -162,7 +162,7 @@ export default async function UsersPage() {
   return (
     <>
       <PageHeader
-        title="People"
+        title="My People"
         description={description}
       />
       <ClientsGrid
