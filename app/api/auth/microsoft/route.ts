@@ -27,12 +27,13 @@ export async function GET() {
     path: '/',
   })
 
+  // Non-null safe — all three are guaranteed by the missing check above
   const authUrl = new URL(
-    `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize`,
+    `https://login.microsoftonline.com/${tenantId!}/oauth2/v2.0/authorize`,
   )
-  authUrl.searchParams.set('client_id', clientId)
+  authUrl.searchParams.set('client_id', clientId!)
   authUrl.searchParams.set('response_type', 'code')
-  authUrl.searchParams.set('redirect_uri', `${appUrl}/api/auth/microsoft/callback`)
+  authUrl.searchParams.set('redirect_uri', `${appUrl!}/api/auth/microsoft/callback`)
   authUrl.searchParams.set('scope', 'Calendars.ReadBasic offline_access User.Read')
   authUrl.searchParams.set('state', state)
   authUrl.searchParams.set('prompt', 'select_account')
