@@ -53,9 +53,10 @@ function mapRecord(r: AirtableRecord): Note {
     coachName: (r.fields[FIELDS.NOTES.COACH_NAME] as string) || undefined,
     authorPersonId: firstLinkedId(r.fields[FIELDS.NOTES.AUTHOR_PERSON]),
     subjectPersonId: firstLinkedId(r.fields[FIELDS.NOTES.SUBJECT_PERSON]),
-    // Notes.Meeting is singleLineText in Airtable today (spec wants linked
-    // record; deferred to architecture migration). Read as string.
-    meetingId: (r.fields[FIELDS.NOTES.MEETING] as string) || undefined,
+    // Prefer the linked MEETING_LINK field (multipleRecordLinks); fall back to
+    // the legacy singleLineText MEETING field for older records.
+    meetingId: firstLinkedId(r.fields[FIELDS.NOTES.MEETING_LINK]) ||
+      (r.fields[FIELDS.NOTES.MEETING] as string) || undefined,
     relationshipContextId: firstLinkedId(r.fields[FIELDS.NOTES.RELATIONSHIP_CONTEXT]),
     noteType: (r.fields[FIELDS.NOTES.NOTE_TYPE] as NoteType) || undefined,
     visibility: 'private_to_author',
@@ -198,9 +199,12 @@ export async function createNote(data: CreateNoteData): Promise<Note> {
   if (data.clientId) fields[FIELDS.NOTES.CLIENT] = [data.clientId]
   if (data.authorPersonId) fields[FIELDS.NOTES.AUTHOR_PERSON] = [data.authorPersonId]
   if (data.subjectPersonId) fields[FIELDS.NOTES.SUBJECT_PERSON] = [data.subjectPersonId]
-  // Notes.Meeting is singleLineText today (spec wants linked record; this
-  // will move to [data.meetingId] array form once the field is converted).
-  if (data.meetingId) fields[FIELDS.NOTES.MEETING] = data.meetingId
+  // Write meetingId to both the linked MEETING_LINK field and the legacy
+  // singleLineText MEETING field so older read paths still work.
+  if (data.meetingId) {
+    fields[FIELDS.NOTES.MEETING_LINK] = [data.meetingId]
+    fields[FIELDS.NOTES.MEETING] = data.meetingId
+  }
   if (data.relationshipContextId) fields[FIELDS.NOTES.RELATIONSHIP_CONTEXT] = [data.relationshipContextId]
   if (data.coachName) fields[FIELDS.NOTES.COACH_NAME] = data.coachName
 
