@@ -63,7 +63,7 @@ export default async function UpcomingThisWeekRegion({ userRecord }: Props) {
         <div className="ml-auto flex items-center gap-3">
           <span className="text-xs text-slate-400 font-medium">
             {clientCount > 0
-              ? `${clientCount} client ${clientCount === 1 ? 'meeting' : 'meetings'}`
+              ? `${clientCount} ${clientCount === 1 ? 'meeting' : 'meetings'}`
               : `${items.length} ${items.length === 1 ? 'meeting' : 'meetings'}`}
           </span>
           <Link

@@ -15,7 +15,7 @@ export default async function NewMessagePage({ params }: Props) {
   const clientName = user?.fullName
     ?? (user ? [user.firstName, user.lastName].filter(Boolean).join(' ') : null)
     ?? user?.email
-    ?? 'Client'
+    ?? 'Person'
 
   // Pre-fill from the most recent Pending draft if one exists
   const messages = await getUserMessages(id)

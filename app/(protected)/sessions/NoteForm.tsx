@@ -62,7 +62,7 @@ export default function NoteForm({
       return
     }
     if (showClientDropdown && !resolvedClientId) {
-      setError('Please select a client.')
+      setError('Please select a person.')
       return
     }
 

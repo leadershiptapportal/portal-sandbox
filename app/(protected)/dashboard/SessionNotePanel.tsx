@@ -69,7 +69,7 @@ export default function SessionNotePanel({
     if (!event || saving) return
     setSaving(true)
     if (!event.clientId) {
-      toast.error('No client linked to this event')
+      toast.error('No person linked to this event')
       return
     }
     const result = await savePortalEventNotesAction(event.meetingId, notes, event.clientId)
@@ -151,7 +151,7 @@ export default function SessionNotePanel({
                     className="text-xs font-medium text-[hsl(213,70%,30%)] hover:underline"
                     onClick={onClose}
                   >
-                    Open Client Profile →
+                    Open Profile →
                   </Link>
                 )}
               </div>

@@ -206,7 +206,7 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
                 href={`/users/${nextItem.clientId}`}
                 className="inline-flex items-center justify-center gap-1.5 h-12 px-6 w-full md:w-auto rounded-lg bg-[hsl(213,70%,30%)] text-white text-base font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
               >
-                Open Client Profile
+                Open Profile
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </div>

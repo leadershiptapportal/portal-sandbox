@@ -385,7 +385,7 @@ export default function ClientsGrid({ users, coaches, companies }: Props) {
           className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
         >
           <Plus className="h-4 w-4" />
-          Add Client
+          Add Person
         </Link>
       </div>
 

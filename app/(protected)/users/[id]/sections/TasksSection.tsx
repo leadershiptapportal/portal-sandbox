@@ -61,7 +61,7 @@ export default function TasksSection({ tasks }: { tasks: Task[] }) {
           </p>
           {tasks.length === 0 && (
             <p className="text-xs text-slate-400 mt-1">
-              Use the Add Task button above to create a task for this client.
+              Use the Add Task button above to create a task for this person.
             </p>
           )}
         </div>

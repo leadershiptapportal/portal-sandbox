@@ -82,7 +82,7 @@ export default function AddClientDialog({ coaches, companies, currentCoachId }: 
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[hsl(213,70%,30%)] text-white text-sm font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
       >
         <UserPlus className="h-4 w-4" />
-        Add Client
+        Add Person
       </button>
 
       {toast && (

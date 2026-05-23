@@ -58,7 +58,7 @@ export default async function SessionDetailPage({ params }: Props) {
   // still appear.
   const notesForEditor = coachSession?.sessionNotes ?? meeting.notes ?? undefined
 
-  const userName = user?.fullName ?? user?.preferredName ?? user?.firstName ?? 'Client'
+  const userName = user?.fullName ?? user?.preferredName ?? user?.firstName ?? 'Person'
 
   const tz = meeting.timezone || 'America/New_York'
   const dateLabel = meeting.endTime
