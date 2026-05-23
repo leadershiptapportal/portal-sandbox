@@ -5,15 +5,11 @@ import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getHourInTimezone } from '@/lib/utils/dateFormat'
 import ComingUpNextRegion from './regions/ComingUpNextRegion'
 import OpenTasksRegion from './regions/OpenTasksRegion'
-import SessionsNeedingNotesRegion from './regions/SessionsNeedingNotesRegion'
 import UpcomingThisWeekRegion from './regions/UpcomingThisWeekRegion'
-import YourClientsRegion from './regions/YourClientsRegion'
 import {
   ComingUpNextSkeleton,
   TasksSkeleton,
-  SessionsNeedingNotesSkeleton,
   UpcomingThisWeekSkeleton,
-  ClientsSkeleton,
 } from './regions/Skeletons'
 import type { User } from '@/lib/types'
 
@@ -68,11 +64,6 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Order is intentional: hero + today's chips first, then the
-          actionable lists (tasks, sessions needing notes), then the calendar
-          overview, then the client roster. Tasks moved up so coaches don't
-          have to scroll past the calendar to see what's on their plate. */}
-
       {/* ── Coming Up Next + Today chips + Quick Actions ────────────────────── */}
       <Suspense fallback={<ComingUpNextSkeleton />}>
         <ComingUpNextRegion userRecord={userRecord} />
@@ -83,19 +74,9 @@ export default async function DashboardPage() {
         <OpenTasksRegion userRecord={userRecord} />
       </Suspense>
 
-      {/* ── Sessions Needing Notes (past 14 days, no notes yet) ─────────────── */}
-      <Suspense fallback={<SessionsNeedingNotesSkeleton />}>
-        <SessionsNeedingNotesRegion userRecord={userRecord} />
-      </Suspense>
-
       {/* ── Upcoming This Week (calendar overview) ─────────────────────────── */}
       <Suspense fallback={<UpcomingThisWeekSkeleton />}>
         <UpcomingThisWeekRegion userRecord={userRecord} />
-      </Suspense>
-
-      {/* ── Your Clients + Admin Activity ──────────────────────────────────── */}
-      <Suspense fallback={<ClientsSkeleton />}>
-        <YourClientsRegion userRecord={userRecord} />
       </Suspense>
 
     </div>
