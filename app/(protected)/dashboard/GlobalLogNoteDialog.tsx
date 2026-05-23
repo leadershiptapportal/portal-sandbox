@@ -129,11 +129,11 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
             {/* Client */}
             <div className="space-y-1.5">
               <Label htmlFor="log-note-client">
-                Client <span className="text-destructive">*</span>
+                Person <span className="text-destructive">*</span>
               </Label>
               <Select value={clientId} onValueChange={setClientId}>
                 <SelectTrigger id="log-note-client">
-                  <SelectValue placeholder="Select a client..." />
+                  <SelectValue placeholder="Select a person..." />
                 </SelectTrigger>
                 <SelectContent className="max-h-48 overflow-y-auto">
                   {clients.map((c) => (

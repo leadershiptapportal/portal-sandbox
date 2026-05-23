@@ -102,7 +102,7 @@ export default function AddClientDialog({ coaches, companies, currentCoachId }: 
           {/* Modal */}
           <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">Add New Client</h2>
+              <h2 className="text-lg font-semibold text-slate-900">Add New Person</h2>
               <button
                 onClick={() => setOpen(false)}
                 disabled={saving}

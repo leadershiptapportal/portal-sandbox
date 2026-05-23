@@ -199,7 +199,7 @@ function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode
         }`}
       >
         <LayoutGrid className="h-3.5 w-3.5" />
-        By Client
+        By Name
       </button>
       <button
         onClick={() => onChange('company')}
@@ -391,13 +391,13 @@ export default function ClientsGrid({ users, coaches, companies }: Props) {
 
       {/* ── Grid or empty state ─────────────────────────────────────────────── */}
       {users.length === 0 ? (
-        <p className="text-sm text-slate-500">No clients yet.</p>
+        <p className="text-sm text-slate-500">No people yet.</p>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
             <Users className="h-6 w-6 text-slate-400" />
           </div>
-          <p className="text-sm font-medium text-slate-700 mb-1">No clients match your search</p>
+          <p className="text-sm font-medium text-slate-700 mb-1">No people match your search</p>
           <p className="text-xs text-slate-400 mb-4">Try adjusting your filters</p>
           {hasFilters && (
             <button

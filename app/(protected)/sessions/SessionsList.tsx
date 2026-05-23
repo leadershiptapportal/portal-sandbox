@@ -152,7 +152,7 @@ export default function SessionsList({ items, initialFilter }: Props) {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by client or title…"
+            placeholder="Search by name or title…"
             className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-9 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)]"
           />
           {query && (

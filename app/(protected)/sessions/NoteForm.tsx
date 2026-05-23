@@ -112,7 +112,7 @@ export default function NoteForm({
           </label>
           <Select value={selectedClientId} onValueChange={setSelectedClientId}>
             <SelectTrigger>
-              <SelectValue placeholder="Select a client…" />
+              <SelectValue placeholder="Select a person…" />
             </SelectTrigger>
             <SelectContent>
               {clients!.map((c) => (

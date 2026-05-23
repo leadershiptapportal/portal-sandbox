@@ -181,7 +181,7 @@ export default async function YourClientsRegion({ userRecord }: Props) {
     <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
       <div className="flex items-center gap-2 mb-4">
         <Users className="h-5 w-5 text-slate-400" />
-        <h2 className="text-lg font-semibold text-slate-900">Your Clients</h2>
+        <h2 className="text-lg font-semibold text-slate-900">My People</h2>
         <div className="ml-auto flex items-center gap-3">
           <Link
             href="/people/new"
@@ -204,7 +204,7 @@ export default async function YourClientsRegion({ userRecord }: Props) {
           <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-3">
             <Users className="w-5 h-5 text-slate-400" />
           </div>
-          <p className="text-sm font-medium text-slate-700 mb-1">No clients yet</p>
+          <p className="text-sm font-medium text-slate-700 mb-1">No people yet</p>
           <p className="text-xs text-slate-400 mb-4">
             Add your first person to start tracking sessions, notes, and tasks.
           </p>

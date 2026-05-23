@@ -89,12 +89,12 @@ export default async function SettingsPage() {
           <div className="flex justify-between items-center">
             <span className="text-slate-500">Hosting</span>
             <a
-              href="https://portal-leadershiptap.com"
+              href="https://myhumans.app"
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-[hsl(213,70%,30%)] hover:underline"
             >
-              portal-leadershiptap.com ↗
+              myhumans.app ↗
             </a>
           </div>
         </div>

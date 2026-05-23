@@ -142,7 +142,7 @@ export default async function UsersPage() {
   const clientsWithOpenTasks = users.filter((u) => (openTaskCountByUser.get(u.id) ?? 0) > 0).length
 
   const statParts = [
-    `${users.length} client${users.length !== 1 ? 's' : ''}`,
+    `${users.length} ${users.length !== 1 ? 'people' : 'person'}`,
     coachCount > 0 ? `${coachCount} coach${coachCount !== 1 ? 'es' : ''}` : null,
     clientsWithOpenTasks > 0 ? `${clientsWithOpenTasks} with open tasks` : null,
   ].filter(Boolean)
@@ -162,7 +162,7 @@ export default async function UsersPage() {
   return (
     <>
       <PageHeader
-        title="Clients"
+        title="People"
         description={description}
       />
       <ClientsGrid

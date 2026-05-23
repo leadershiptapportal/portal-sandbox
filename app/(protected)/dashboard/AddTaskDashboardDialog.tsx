@@ -162,7 +162,7 @@ export default function AddTaskDashboardDialog({ clients, coaches, trigger }: Pr
                   <SelectItem value={PERSONAL_VALUE}>Just me</SelectItem>
                   {clients.length > 0 && (
                     <SelectGroup>
-                      <SelectLabel>My Clients</SelectLabel>
+                      <SelectLabel>My People</SelectLabel>
                       {clients.map((c) => (
                         <SelectItem key={c.id} value={c.id}>
                           {c.name}

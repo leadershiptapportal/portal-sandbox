@@ -249,7 +249,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         ) : (
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-700">
             <span>⚠️</span>
-            <span>No formal relationship context — you&apos;re seeing this client via legacy access</span>
+            <span>No formal relationship context — you&apos;re seeing this person via legacy access</span>
           </div>
         )
       )}
@@ -347,7 +347,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         <PlaceholderSection
           icon={<Paperclip />}
           title="No resources yet"
-          message="Resources and documents attached to this client will appear here."
+          message="Resources and documents attached to this person will appear here."
         />
       </div>
 

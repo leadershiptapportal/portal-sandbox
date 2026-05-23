@@ -120,11 +120,11 @@ export default function LogSessionDashboardDialog({ clients, trigger }: Props) {
           <div className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="dash-session-client">
-                Client <span className="text-destructive">*</span>
+                Person <span className="text-destructive">*</span>
               </Label>
               <Select value={clientId} onValueChange={setClientId} disabled={saving}>
                 <SelectTrigger id="dash-session-client">
-                  <SelectValue placeholder="Select a client…" />
+                  <SelectValue placeholder="Select a person…" />
                 </SelectTrigger>
                 <SelectContent>
                   {clients.map((c) => (

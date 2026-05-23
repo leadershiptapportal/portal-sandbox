@@ -83,7 +83,7 @@ export default function MessagesSection({ messages, userId, userCanWrite }: Prop
         <PlaceholderSection
           icon={<MessageSquare />}
           title="No messages yet"
-          message="Use the button above to draft a follow-up for this client."
+          message="Use the button above to draft a follow-up for this person."
         />
       ) : (
         <div className="rounded-lg border border-slate-100 overflow-hidden">

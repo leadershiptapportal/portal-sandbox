@@ -9,4 +9,4 @@ services:
       - key: SYNC_SECRET
         sync: false
       - key: SYNC_HOST
-        value: portal-leadershiptap.com
+        value: myhumans.app
