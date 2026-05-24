@@ -3,14 +3,14 @@ import { cookies } from 'next/headers'
 import crypto from 'crypto'
 
 export async function GET() {
-  const tenantId = process.env.AZURE_TENANT_ID
-  const clientId = process.env.AZURE_CLIENT_ID
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  const tenantId = process.env.MICROSOFT_TENANT_ID
+  const clientId = process.env.MICROSOFT_CLIENT_ID
+  const redirectUrl = process.env.MICROSOFT_REDIRECT_URL
 
   const missing = [
-    !tenantId && 'AZURE_TENANT_ID',
-    !clientId && 'AZURE_CLIENT_ID',
-    !appUrl && 'NEXT_PUBLIC_APP_URL',
+    !tenantId && 'MICROSOFT_TENANT_ID',
+    !clientId && 'MICROSOFT_CLIENT_ID',
+    !redirectUrl && 'MICROSOFT_REDIRECT_URL',
   ].filter(Boolean)
   if (missing.length > 0) {
     return NextResponse.json({ error: 'OAuth not configured', missing }, { status: 500 })
@@ -33,7 +33,7 @@ export async function GET() {
   )
   authUrl.searchParams.set('client_id', clientId!)
   authUrl.searchParams.set('response_type', 'code')
-  authUrl.searchParams.set('redirect_uri', `${appUrl!}/api/auth/microsoft/callback`)
+  authUrl.searchParams.set('redirect_uri', redirectUrl!)
   authUrl.searchParams.set('scope', 'Calendars.ReadBasic offline_access User.Read')
   authUrl.searchParams.set('state', state)
   authUrl.searchParams.set('prompt', 'select_account')

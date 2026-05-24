@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
   const successUrl = `${appUrl}/settings`
   const failureUrl = `${appUrl}/settings?calendar_error=1`
 
+
   const { searchParams } = req.nextUrl
   const code = searchParams.get('code')
   const state = searchParams.get('state')
@@ -25,14 +26,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(failureUrl)
   }
 
-  const tenantId = process.env.AZURE_TENANT_ID
-  const clientId = process.env.AZURE_CLIENT_ID
-  const clientSecret = process.env.AZURE_CLIENT_SECRET
-  if (!tenantId || !clientId || !clientSecret) {
+  const tenantId = process.env.MICROSOFT_TENANT_ID
+  const clientId = process.env.MICROSOFT_CLIENT_ID
+  const clientSecret = process.env.MICROSOFT_CLIENT_SECRET
+  const redirectUri = process.env.MICROSOFT_REDIRECT_URL
+  if (!tenantId || !clientId || !clientSecret || !redirectUri) {
     return NextResponse.redirect(failureUrl)
   }
-
-  const redirectUri = `${appUrl}/api/auth/microsoft/callback`
 
   // Exchange authorization code for tokens
   let accessToken: string
