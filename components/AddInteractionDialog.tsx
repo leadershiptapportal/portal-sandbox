@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Plus } from 'lucide-react'
+import { Plus, Search, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -73,10 +73,15 @@ function roundedTimeStr() {
   return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
 }
 
+const MIN_CHARS = 2
+
 export default function AddInteractionDialog({ defaultPersonId, clients, trigger }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [personId, setPersonId] = useState(defaultPersonId ?? '')
+  const [personName, setPersonName] = useState('')
+  const [query, setQuery] = useState('')
+  const [showResults, setShowResults] = useState(false)
   const [type, setType] = useState<string>('In-Person')
   const [date, setDate] = useState(todayStr)
   const [time, setTime] = useState(roundedTimeStr)
@@ -84,6 +89,25 @@ export default function AddInteractionDialog({ defaultPersonId, clients, trigger
   const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const searchRef = useRef<HTMLDivElement>(null)
+
+  const searchResults =
+    query.trim().length >= MIN_CHARS && clients
+      ? clients.filter((c) =>
+          c.name.toLowerCase().includes(query.trim().toLowerCase()),
+        )
+      : []
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowResults(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const isSync = SYNC_TYPES.includes(type)
   const effectivePersonId = defaultPersonId ?? personId
@@ -96,6 +120,9 @@ export default function AddInteractionDialog({ defaultPersonId, clients, trigger
 
   function handleOpen() {
     setPersonId(defaultPersonId ?? '')
+    setPersonName('')
+    setQuery('')
+    setShowResults(false)
     setType('In-Person')
     setDate(todayStr())
     setTime(roundedTimeStr())
@@ -103,6 +130,19 @@ export default function AddInteractionDialog({ defaultPersonId, clients, trigger
     setNotes('')
     setSaveError(null)
     setOpen(true)
+  }
+
+  function selectPerson(client: Client) {
+    setPersonId(client.id)
+    setPersonName(client.name)
+    setQuery(client.name)
+    setShowResults(false)
+  }
+
+  function clearPerson() {
+    setPersonId('')
+    setPersonName('')
+    setQuery('')
   }
 
   function handleOpenChange(v: boolean) {
@@ -164,24 +204,68 @@ export default function AddInteractionDialog({ defaultPersonId, clients, trigger
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Person picker — only shown from dashboard (no defaultPersonId) */}
+            {/* Person search — only shown from dashboard (no defaultPersonId) */}
             {!defaultPersonId && clients && (
-              <div className="space-y-1.5">
-                <Label htmlFor="ai-person">
+              <div className="space-y-1.5" ref={searchRef}>
+                <Label>
                   Person <span className="text-destructive">*</span>
                 </Label>
-                <Select value={personId} onValueChange={setPersonId} disabled={saving}>
-                  <SelectTrigger id="ai-person">
-                    <SelectValue placeholder="Select a person…" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => {
+                      setQuery(e.target.value)
+                      if (personId && e.target.value !== personName) {
+                        setPersonId('')
+                        setPersonName('')
+                      }
+                      setShowResults(true)
+                    }}
+                    onFocus={() => setShowResults(true)}
+                    placeholder="Search by name…"
+                    disabled={saving}
+                    className="w-full pl-9 pr-9 py-2 text-sm rounded-md border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] placeholder:text-slate-400 disabled:opacity-50"
+                  />
+                  {query && (
+                    <button
+                      type="button"
+                      onClick={clearPerson}
+                      disabled={saving}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+
+                  {showResults && query.trim().length >= MIN_CHARS && (
+                    <div className="absolute z-50 top-full mt-1 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-52 overflow-y-auto">
+                      {searchResults.length > 0 ? (
+                        searchResults.map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault()
+                              selectPerson(c)
+                            }}
+                            className="w-full text-left px-3 py-2.5 text-sm hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
+                          >
+                            {c.name}
+                          </button>
+                        ))
+                      ) : (
+                        <p className="px-3 py-3 text-sm text-slate-400 italic">
+                          No matching people found.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {query.trim().length > 0 && query.trim().length < MIN_CHARS && (
+                  <p className="text-xs text-slate-400">Keep typing to search…</p>
+                )}
               </div>
             )}
 
