@@ -2,13 +2,16 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
-import { Search, ChevronRight, FileText, Calendar, X } from 'lucide-react'
+import {
+  Search, ChevronRight, FileText, Calendar, X,
+  Users, Phone, Video, MessageSquare, Mail, Package, MoreHorizontal,
+} from 'lucide-react'
 import type { UpcomingItem } from '../dashboard/UpcomingSessionsCard'
 
 type Filter = 'needs-notes' | 'upcoming' | 'past' | 'all'
+type TypeFilter = 'all' | string
 
 interface ListItem extends UpcomingItem {
-  /** ms since epoch for sort */
   startMs: number
   isPast: boolean
 }
@@ -19,6 +22,23 @@ const FILTER_LABELS: { key: Filter; label: string }[] = [
   { key: 'past', label: 'Past' },
   { key: 'all', label: 'All' },
 ]
+
+// All interaction types from Airtable
+const TYPE_OPTIONS: { key: string; label: string; icon: React.ReactNode }[] = [
+  { key: 'Calendar Event', label: 'Calendar', icon: <Calendar className="h-3.5 w-3.5" /> },
+  { key: 'In-Person', label: 'In-Person', icon: <Users className="h-3.5 w-3.5" /> },
+  { key: 'Phone Call', label: 'Phone', icon: <Phone className="h-3.5 w-3.5" /> },
+  { key: 'Video Call', label: 'Video', icon: <Video className="h-3.5 w-3.5" /> },
+  { key: 'Text', label: 'Text', icon: <MessageSquare className="h-3.5 w-3.5" /> },
+  { key: 'Email', label: 'Email', icon: <Mail className="h-3.5 w-3.5" /> },
+  { key: 'Mail', label: 'Mail', icon: <Package className="h-3.5 w-3.5" /> },
+  { key: 'Other', label: 'Other', icon: <MoreHorizontal className="h-3.5 w-3.5" /> },
+]
+
+function typeIcon(interactionType: string | undefined) {
+  const match = TYPE_OPTIONS.find((t) => t.key === interactionType)
+  return match?.icon ?? <Calendar className="h-3.5 w-3.5" />
+}
 
 const EMPTY_COPY: Record<Filter, { title: string; message: string }> = {
   'needs-notes': {
@@ -44,22 +64,18 @@ function formatRowDate(item: ListItem): string {
 }
 
 function groupByMonth(items: ListItem[]): { label: string; rows: ListItem[] }[] {
-  const groups: Map<string, ListItem[]> = new Map()
+  const groups = new Map<string, ListItem[]>()
+  const labels = new Map<string, string>()
   for (const item of items) {
     const d = new Date(item.startMs)
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    const label = d.toLocaleString('en-US', { month: 'long', year: 'numeric' })
-    if (!groups.has(key)) groups.set(key, [])
+    if (!groups.has(key)) {
+      groups.set(key, [])
+      labels.set(key, d.toLocaleString('en-US', { month: 'long', year: 'numeric' }))
+    }
     groups.get(key)!.push(item)
-    // Use label as a side-channel via a parallel Map, but simpler: store on first push
-    ;(groups as unknown as { _labels?: Map<string, string> })._labels ??= new Map()
-    ;(groups as unknown as { _labels?: Map<string, string> })._labels!.set(key, label)
   }
-  const labelMap = (groups as unknown as { _labels?: Map<string, string> })._labels ?? new Map()
-  return [...groups.entries()].map(([key, rows]) => ({
-    label: labelMap.get(key) ?? key,
-    rows,
-  }))
+  return [...groups.entries()].map(([key, rows]) => ({ label: labels.get(key) ?? key, rows }))
 }
 
 interface Props {
@@ -69,15 +85,21 @@ interface Props {
 
 export default function SessionsList({ items, initialFilter }: Props) {
   const [filter, setFilter] = useState<Filter>(initialFilter)
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
   const [query, setQuery] = useState('')
 
-  // Update URL when filter changes (without navigation)
   useEffect(() => {
     const url = new URL(window.location.href)
     if (filter === 'needs-notes') url.searchParams.delete('filter')
     else url.searchParams.set('filter', filter)
     window.history.replaceState({}, '', url.toString())
   }, [filter])
+
+  // Only show type pills that actually appear in the current dataset
+  const presentTypes = useMemo(() => {
+    const types = new Set(items.map((i) => i.interactionType ?? 'Calendar Event'))
+    return TYPE_OPTIONS.filter((t) => types.has(t.key))
+  }, [items])
 
   const counts = useMemo(() => {
     const all = items.length
@@ -89,13 +111,14 @@ export default function SessionsList({ items, initialFilter }: Props) {
 
   const filtered = useMemo(() => {
     let result = items
-    if (filter === 'needs-notes') {
-      result = result.filter((i) => i.isPast && !i.hasNote)
-    } else if (filter === 'upcoming') {
-      result = result.filter((i) => !i.isPast)
-    } else if (filter === 'past') {
-      result = result.filter((i) => i.isPast)
+    if (filter === 'needs-notes') result = result.filter((i) => i.isPast && !i.hasNote)
+    else if (filter === 'upcoming') result = result.filter((i) => !i.isPast)
+    else if (filter === 'past') result = result.filter((i) => i.isPast)
+
+    if (typeFilter !== 'all') {
+      result = result.filter((i) => (i.interactionType ?? 'Calendar Event') === typeFilter)
     }
+
     if (query.trim()) {
       const q = query.toLowerCase()
       result = result.filter(
@@ -105,21 +128,17 @@ export default function SessionsList({ items, initialFilter }: Props) {
           (i.displayLabel ?? '').toLowerCase().includes(q),
       )
     }
-    // Sort: upcoming asc (soonest first), past desc (most recent first), all by abs distance from now? Use simple desc.
-    if (filter === 'upcoming') {
-      result = [...result].sort((a, b) => a.startMs - b.startMs)
-    } else {
-      result = [...result].sort((a, b) => b.startMs - a.startMs)
-    }
-    return result
-  }, [items, filter, query])
+
+    if (filter === 'upcoming') return [...result].sort((a, b) => a.startMs - b.startMs)
+    return [...result].sort((a, b) => b.startMs - a.startMs)
+  }, [items, filter, typeFilter, query])
 
   const grouped = useMemo(() => groupByMonth(filtered), [filtered])
   const empty = EMPTY_COPY[filter]
 
   return (
-    <div className="space-y-5">
-      {/* Filter + search bar */}
+    <div className="space-y-4">
+      {/* Row 1: status filter + search */}
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
         <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
           {FILTER_LABELS.map(({ key, label }) => {
@@ -130,9 +149,7 @@ export default function SessionsList({ items, initialFilter }: Props) {
                 key={key}
                 onClick={() => setFilter(key)}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  active
-                    ? 'bg-slate-800 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  active ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
                 {label}
@@ -167,6 +184,36 @@ export default function SessionsList({ items, initialFilter }: Props) {
         </div>
       </div>
 
+      {/* Row 2: type filter — only shown when >1 type present */}
+      {presentTypes.length > 1 && (
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+          <button
+            onClick={() => setTypeFilter('all')}
+            className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+              typeFilter === 'all'
+                ? 'bg-[hsl(213,70%,30%)] text-white'
+                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+            }`}
+          >
+            All Types
+          </button>
+          {presentTypes.map(({ key, label, icon }) => (
+            <button
+              key={key}
+              onClick={() => setTypeFilter(typeFilter === key ? 'all' : key)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                typeFilter === key
+                  ? 'bg-[hsl(213,70%,30%)] text-white'
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+              }`}
+            >
+              {icon}
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Results */}
       {filtered.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-10 text-center">
@@ -190,6 +237,7 @@ export default function SessionsList({ items, initialFilter }: Props) {
                   const href = item.clientId
                     ? `/users/${item.clientId}/sessions/${item.meetingId}`
                     : `/sessions/${item.meetingId}`
+                  const itype = item.interactionType ?? 'Calendar Event'
                   return (
                     <li key={item.meetingId}>
                       <Link
@@ -211,16 +259,22 @@ export default function SessionsList({ items, initialFilter }: Props) {
                           </p>
                           <p className="text-xs text-slate-400 mt-0.5">{item.timeRange}</p>
                         </div>
+
+                        {/* Type badge */}
+                        <span className="hidden sm:inline-flex items-center gap-1 text-xs text-slate-400 whitespace-nowrap">
+                          {typeIcon(itype)}
+                          {TYPE_OPTIONS.find((t) => t.key === itype)?.label ?? itype}
+                        </span>
+
                         {needsNotes ? (
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full whitespace-nowrap">
                             <FileText className="h-3 w-3" />
                             Add notes
                           </span>
                         ) : item.hasNote ? (
-                          <span className="text-xs text-slate-400 whitespace-nowrap">
-                            Noted
-                          </span>
+                          <span className="text-xs text-slate-400 whitespace-nowrap">Noted</span>
                         ) : null}
+
                         <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 flex-shrink-0" />
                       </Link>
                     </li>

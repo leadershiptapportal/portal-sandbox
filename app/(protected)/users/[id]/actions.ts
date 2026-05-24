@@ -309,7 +309,8 @@ export async function saveTaskAction(
 export async function logManualSessionAction(params: {
   subjectPersonId: string
   startIso: string
-  durationMinutes: number
+  durationMinutes?: number
+  interactionType?: string
   notes?: string
 }): Promise<void> {
   const userRecord = await getCurrentUserRecord()
@@ -325,17 +326,18 @@ export async function logManualSessionAction(params: {
     : 'Unknown'
 
   const coachFirst = userRecord.name.split(' ')[0] || 'Coach'
+  const typeLabel = params.interactionType ?? 'In-Person'
 
   const start = new Date(params.startIso)
-  const end = new Date(start.getTime() + params.durationMinutes * 60_000)
+  const durationMs = (params.durationMinutes ?? 0) * 60_000
+  const end = new Date(start.getTime() + Math.max(durationMs, 60_000))
 
-  // Populate Attendees so the profile-page email-match query picks this
-  // session up. Without it, manual sessions don't appear under the client.
+  // Populate Attendees so the profile-page email-match query picks this up.
   const subjectEmail = subject?.workEmail ?? subject?.email ?? ''
 
   const { createManualMeeting } = await import('@/lib/airtable/meetings')
   const meetingId = await createManualMeeting({
-    title: `${coachFirst} / ${subjectName} — Manual Session`,
+    title: `${coachFirst} / ${subjectName} — ${typeLabel}`,
     startIso: start.toISOString(),
     endIso: end.toISOString(),
     timezone: 'America/New_York',
@@ -343,6 +345,7 @@ export async function logManualSessionAction(params: {
     relationshipContextId: rc.id,
     clientName: subjectName,
     attendeeEmails: subjectEmail || undefined,
+    interactionType: params.interactionType,
   })
 
   if (params.notes && params.notes.trim().length > 0) {

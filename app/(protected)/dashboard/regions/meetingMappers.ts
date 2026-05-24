@@ -94,6 +94,8 @@ export function meetingsToUpcomingItems(
       })(),
       participantEmails: externalEmails,
       hasNote: notedMeetingIds.has(meeting.id),
+      interactionType: meeting.interactionType,
+      source: meeting.source,
     }
   })
 }

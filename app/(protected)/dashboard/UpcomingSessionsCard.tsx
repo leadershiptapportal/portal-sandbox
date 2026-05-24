@@ -20,6 +20,8 @@ export interface UpcomingItem {
   // For participant display in the note panel
   participantEmails: string[]
   hasNote: boolean
+  interactionType?: string
+  source?: string
 }
 
 interface Props {

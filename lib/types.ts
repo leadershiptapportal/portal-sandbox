@@ -87,6 +87,8 @@ export interface Meeting {
   // Set during calendar sync when a participant matches a known Relationship Context
   clientName?: string;
   relationshipContextId?: string;
+  interactionType?: string;
+  source?: string;
 }
 
 export interface Note {

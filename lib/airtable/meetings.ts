@@ -43,6 +43,8 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Mee
     actionItems: null,
     clientName: (record.fields[FIELDS.MEETINGS.CLIENT_NAME] as string) || undefined,
     relationshipContextId: firstLinkedId(record.fields[FIELDS.MEETINGS.RELATIONSHIP_CONTEXT]),
+    interactionType: (record.fields[FIELDS.MEETINGS.INTERACTION_TYPE] as string) || undefined,
+    source: (record.fields[FIELDS.MEETINGS.SOURCE] as string) || undefined,
   };
 }
 
@@ -220,6 +222,7 @@ export interface CreateManualMeetingData {
   /** Comma-joined participant emails (excluding coach). Required for the
    *  profile page email-match query to pick up this meeting. */
   attendeeEmails?: string
+  interactionType?: string
 }
 
 export async function createManualMeeting(data: CreateManualMeetingData): Promise<string> {
@@ -235,7 +238,9 @@ export async function createManualMeeting(data: CreateManualMeetingData): Promis
     [FIELDS.MEETINGS.ATTENDEES]: data.attendeeEmails ?? '',
     [FIELDS.MEETINGS.RELATIONSHIP_CONTEXT]: [data.relationshipContextId],
     [FIELDS.MEETINGS.CLIENT_NAME]: data.clientName,
+    [FIELDS.MEETINGS.SOURCE]: 'Manual',
   }
+  if (data.interactionType) fields[FIELDS.MEETINGS.INTERACTION_TYPE] = data.interactionType
   const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },

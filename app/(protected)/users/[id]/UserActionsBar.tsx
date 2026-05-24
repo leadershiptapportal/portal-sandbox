@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MessageSquare, PenLine } from 'lucide-react'
 import LogNoteDialog from './LogNoteDialog'
-import LogSessionDialog from './LogSessionDialog'
 import AddTaskDialog from './AddTaskDialog'
+import AddInteractionDialog from '@/components/AddInteractionDialog'
 
 interface UserActionsBarProps {
   userId: string
@@ -22,7 +22,7 @@ export default function UserActionsBar({ userId }: UserActionsBarProps) {
       </Button>
 
       <LogNoteDialog userId={userId} />
-      <LogSessionDialog userId={userId} />
+      <AddInteractionDialog defaultPersonId={userId} />
       <AddTaskDialog userId={userId} />
 
       <Button asChild variant="outline" size="sm">

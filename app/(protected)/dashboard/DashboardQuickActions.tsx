@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { FileText, CheckSquare, Calendar, History } from 'lucide-react'
 import AddTaskDashboardDialog from './AddTaskDashboardDialog'
-import LogSessionDashboardDialog from './LogSessionDashboardDialog'
+import AddInteractionDialog from '@/components/AddInteractionDialog'
 
 interface Client {
   id: string
@@ -76,13 +76,13 @@ export default function DashboardQuickActions({ clients, coaches }: Props) {
           />
         </ActionCard>
 
-        <LogSessionDashboardDialog
+        <AddInteractionDialog
           clients={clients}
           trigger={
             <ActionCard
               icon={<History className="w-5 h-5 text-amber-600" />}
               iconBg="bg-amber-100"
-              label="Log Interaction"
+              label="Add Interaction"
               description="Record an interaction manually"
             >
               <button className="w-full min-h-[72px] rounded-xl border border-slate-200 bg-white hover:border-amber-200 hover:bg-amber-50/40 transition-colors" />
