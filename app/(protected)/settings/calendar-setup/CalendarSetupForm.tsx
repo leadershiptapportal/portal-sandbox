@@ -118,14 +118,22 @@ export default function CalendarSetupForm({
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={saving || selected.size === 0}
-        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-[hsl(213,70%,30%)] text-white hover:bg-[hsl(213,70%,25%)] disabled:opacity-50 transition-colors"
-      >
-        <CalendarCheck className="h-4 w-4" />
-        {saving ? 'Saving & syncing…' : 'Save & Start Sync'}
-      </button>
+      <div className="flex gap-3">
+        <a
+          href="/settings"
+          className="flex-1 inline-flex items-center justify-center px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
+        >
+          Cancel
+        </a>
+        <button
+          type="submit"
+          disabled={saving || selected.size === 0}
+          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-[hsl(213,70%,30%)] text-white hover:bg-[hsl(213,70%,25%)] disabled:opacity-50 transition-colors"
+        >
+          <CalendarCheck className="h-4 w-4" />
+          {saving ? 'Saving & syncing…' : 'Save & Start Sync'}
+        </button>
+      </div>
     </form>
   )
 }
