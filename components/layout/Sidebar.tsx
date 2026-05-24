@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
+import GlobalSearch from '@/components/GlobalSearch'
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'My Dashboard', enabled: true },
@@ -193,6 +194,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
         {/* Nav */}
         <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
+          {/* Search */}
+          <div className="mb-3">
+            <GlobalSearch collapsed={collapsed} />
+          </div>
+
           {navItems.map(({ href, icon, label, enabled }) => (
             <NavRow
               key={href}
