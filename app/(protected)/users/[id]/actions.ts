@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createNote } from '@/lib/airtable/notes'
+import { createNote, updateNote, getNotesByMeetingId } from '@/lib/airtable/notes'
 import { createTask, updateTaskStatus } from '@/lib/airtable/tasks'
 import {
   updateUserProfile,
@@ -195,14 +195,15 @@ export async function saveInkNoteAction(
 export async function updateNoteAction(
   noteId: string,
   body: string,
+  subjectPersonId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { updateNote } = await import('@/lib/airtable/notes')
     const result = await updateNote(noteId, body)
     if ('error' in result) {
       console.error('[updateNoteAction] Airtable error:', result.error)
       return { success: false, error: result.error }
     }
+    if (subjectPersonId) revalidatePath(`/users/${subjectPersonId}`)
     return { success: true }
   } catch (err) {
     console.error('[updateNoteAction] error:', err)
@@ -212,6 +213,7 @@ export async function updateNoteAction(
 
 export async function deleteNoteAction(
   noteId: string,
+  subjectPersonId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const { deleteNote } = await import('@/lib/airtable/notes')
@@ -220,6 +222,7 @@ export async function deleteNoteAction(
       console.error('[deleteNoteAction] Airtable error:', result.error)
       return { success: false, error: result.error }
     }
+    if (subjectPersonId) revalidatePath(`/users/${subjectPersonId}`)
     return { success: true }
   } catch (err) {
     console.error('[deleteNoteAction] error:', err)
@@ -259,16 +262,26 @@ export async function updateSessionNotesAction(
       return { success: false, error: 'No active coaching or reporting relationship reaches this person.' }
     }
 
-    await createNote({
-      content: notes,
-      authorPersonId: userRecord.airtableId,
-      coachName: userRecord.name || undefined,
-      subjectPersonId: userId,
-      clientId: userId,
-      relationshipContextId: rc.id,
-      meetingId,
-      noteType: 'meeting_note',
-    })
+    // Upsert: find an existing note for this meeting authored by this coach;
+    // PATCH it if found, POST a new one if not. Prevents accumulating duplicate
+    // notes records every time a session note is saved.
+    const existingNotes = await getNotesByMeetingId(meetingId)
+    const myNote = existingNotes.find((n) => n.authorPersonId === userRecord.airtableId)
+    if (myNote) {
+      const result = await updateNote(myNote.id, notes)
+      if ('error' in result) throw new Error(result.error)
+    } else {
+      await createNote({
+        content: notes,
+        authorPersonId: userRecord.airtableId,
+        coachName: userRecord.name || undefined,
+        subjectPersonId: userId,
+        clientId: userId,
+        relationshipContextId: rc.id,
+        meetingId,
+        noteType: 'meeting_note',
+      })
+    }
     revalidatePath(`/users/${userId}`)
     return { success: true }
   } catch (err) {

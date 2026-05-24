@@ -120,6 +120,9 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
 
   const directReports = theirTeamReports
   const teamMembers = teamMemberResults.filter((u): u is User => u !== null)
+  // Only show notes not attached to a meeting in the standalone Notes section.
+  // Meeting-linked notes belong to their interaction's detail view.
+  const standaloneNotes = sessionNotes.filter((n) => !n.meetingId)
 
   const permissionLevel = await getPermissionLevel(
     currentUserRecord.airtableId,
@@ -274,7 +277,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
       <ProfileDetailsSection user={user} />
 
       {/* ── Coach Notes ──────────────────────────────────────────────────── */}
-      <CoachNotesSection sessionNotes={sessionNotes} userCanWrite={userCanWrite} />
+      <CoachNotesSection sessionNotes={standaloneNotes} userCanWrite={userCanWrite} />
 
       {/* ── Relationships (coaches, coachees, manager, reports) ──────────── */}
       <RelationshipsSection

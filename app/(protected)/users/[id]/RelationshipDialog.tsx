@@ -141,6 +141,10 @@ export default function RelationshipDialog(props: Props) {
           return
         }
         toast.success('Relationship added')
+        setOpen(false)
+        await new Promise((r) => setTimeout(r, 400))
+        router.refresh()
+        return
       } else {
         // Recompute Person/Lead from the new role so direction changes
         // (e.g. coachee → coach, manager → report) actually move the pill
@@ -170,6 +174,9 @@ export default function RelationshipDialog(props: Props) {
         toast.success('Relationship updated')
       }
       setOpen(false)
+      // Brief pause before refreshing so Airtable has time to propagate
+      // the write before the server component re-fetches.
+      await new Promise((r) => setTimeout(r, 400))
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
@@ -194,6 +201,7 @@ export default function RelationshipDialog(props: Props) {
       }
       toast.success('Relationship removed')
       setOpen(false)
+      await new Promise((r) => setTimeout(r, 400))
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
