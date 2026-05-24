@@ -49,7 +49,6 @@ export async function fetchCalendarViewWithDelta(
     startDateTime: start.toISOString(),
     endDateTime: end.toISOString(),
     $select: 'id,subject,isCancelled,iCalUId,start,end,attendees,type',
-    $top: '500',
   })
 
   const events: GraphEvent[] = []
@@ -59,7 +58,7 @@ export async function fetchCalendarViewWithDelta(
 
   while (url) {
     const res: Response = await fetch(url, {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${accessToken}`, Prefer: 'odata.maxpagesize=500' },
       cache: 'no-store',
     })
     if (!res.ok) throw new Error(`calendarView/delta failed (${res.status}): ${await res.text()}`)
@@ -90,7 +89,7 @@ export async function fetchDeltaChanges(
 
   while (url) {
     const res: Response = await fetch(url, {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${accessToken}`, Prefer: 'odata.maxpagesize=500' },
       cache: 'no-store',
     })
     if (!res.ok) throw new Error(`delta fetch failed (${res.status}): ${await res.text()}`)
