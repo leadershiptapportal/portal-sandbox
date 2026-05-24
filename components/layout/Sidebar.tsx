@@ -15,8 +15,8 @@ import {
 } from 'lucide-react'
 
 const navItems = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', enabled: true },
-  { href: '/users', icon: Users, label: 'My People', enabled: true },
+  { href: '/dashboard', icon: LayoutDashboard, label: 'My Dashboard', enabled: true },
+  { href: '/users', icon: Users, label: 'My Humans', enabled: true },
   { href: '/sessions', icon: Calendar, label: 'My Interactions', enabled: true },
   { href: '/settings', icon: Settings, label: 'Settings', enabled: true },
 ]
