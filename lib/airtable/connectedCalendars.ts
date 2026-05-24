@@ -24,7 +24,10 @@ export interface ConnectedCalendar {
   refreshToken?: string
   tokenExpiresAt?: string     // ISO 8601 dateTime
   scopes?: string
-  deltaLink?: string          // Outlook incremental sync cursor
+  deltaLink?: string          // JSON map of { calendarId: deltaLink } for incremental sync
+  selectedCalendarIds?: string[]  // Graph calendar IDs the user chose to sync
+  syncPastDays?: number       // how far back to pull on first sync (default 90)
+  syncFutureDays?: number     // how far forward to pull (default 60)
   syncStatus?: string         // "Connected" | "Needs Reauth" | "Error" | "Paused" | "Disconnected" | "Active"
   lastSyncedAt?: string       // ISO 8601 dateTime
   lastSyncError?: string
@@ -50,6 +53,12 @@ function mapRecord(r: { id: string; fields: Record<string, unknown> }): Connecte
     tokenExpiresAt: (f[CC.TOKEN_EXPIRES_AT] as string) || undefined,
     scopes: (f[CC.SCOPES] as string) || undefined,
     deltaLink: (f[CC.DELTA_LINK] as string) || undefined,
+    selectedCalendarIds: (() => {
+      const raw = (f[CC.SELECTED_CALENDAR_IDS] as string) || ''
+      return raw ? raw.split('\n').map(s => s.trim()).filter(Boolean) : undefined
+    })(),
+    syncPastDays: typeof f[CC.SYNC_PAST_DAYS] === 'number' ? (f[CC.SYNC_PAST_DAYS] as number) : undefined,
+    syncFutureDays: typeof f[CC.SYNC_FUTURE_DAYS] === 'number' ? (f[CC.SYNC_FUTURE_DAYS] as number) : undefined,
     syncStatus: (f[CC.SYNC_STATUS] as string) || undefined,
     lastSyncedAt: (f[CC.LAST_SYNCED_AT] as string) || undefined,
     lastSyncError: (f[CC.LAST_SYNC_ERROR] as string) || undefined,
@@ -237,4 +246,48 @@ export async function updateCalendarTokens(
     const detail = await res.text()
     throw new Error(`Calendar token PATCH failed: ${detail}`)
   }
+}
+
+/**
+ * Saves the user's calendar selection and sync window after the setup step.
+ */
+export async function updateCalendarSetup(
+  recordId: string,
+  setup: {
+    selectedCalendarIds: string[]
+    syncPastDays: number
+    syncFutureDays: number
+  },
+): Promise<void> {
+  const { apiKey, baseId } = getCredentials()
+  const CC = FIELDS.CONNECTED_CALENDARS
+  const fields = {
+    [CC.SELECTED_CALENDAR_IDS]: setup.selectedCalendarIds.join('\n'),
+    [CC.SYNC_PAST_DAYS]: setup.syncPastDays,
+    [CC.SYNC_FUTURE_DAYS]: setup.syncFutureDays,
+  }
+  const res = await fetch(`${API_BASE}/${baseId}/${TABLE}/${recordId}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields }),
+  })
+  if (!res.ok) throw new Error(`Calendar setup PATCH failed: ${await res.text()}`)
+}
+
+/**
+ * Saves updated delta links (keyed by calendar ID) after a sync run.
+ * Delta links are stored as a JSON string in the Delta Link field.
+ */
+export async function updateDeltaLinks(
+  recordId: string,
+  deltaLinks: Record<string, string>,
+): Promise<void> {
+  const { apiKey, baseId } = getCredentials()
+  const CC = FIELDS.CONNECTED_CALENDARS
+  const res = await fetch(`${API_BASE}/${baseId}/${TABLE}/${recordId}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: { [CC.DELTA_LINK]: JSON.stringify(deltaLinks) } }),
+  })
+  if (!res.ok) throw new Error(`Delta link PATCH failed: ${await res.text()}`)
 }

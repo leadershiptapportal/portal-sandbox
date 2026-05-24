@@ -207,10 +207,9 @@ export const FIELDS = {
     ENVIRONMENT: 'fldt01pqCMveUGus4',           // "Environment" (singleSelect: "Production" | "Test" | "Local")
     CLERK_USER_ID: 'fldmQRycM725Y8yGD',         // "Clerk User ID"
     CLERK_EMAIL: 'fld3iesrZfNJhWXXk',           // "Clerk Email"
-    // ── Fields to add in Airtable — replace TODO values with real field IDs ──
-    SELECTED_CALENDAR_IDS: 'TODO_fld_selected_calendar_ids', // "Selected Calendar IDs" (multilineText — one Graph calendar ID per line)
-    SYNC_PAST_DAYS: 'TODO_fld_sync_past_days',               // "Sync Past Days" (number, default 90)
-    SYNC_FUTURE_DAYS: 'TODO_fld_sync_future_days',           // "Sync Future Days" (number, default 60)
+    SELECTED_CALENDAR_IDS: 'fldNeClDrVmOgM4n3',  // "Selected Calendar IDs" (multilineText — one Graph calendar ID per line)
+    SYNC_PAST_DAYS: 'fldzCSP6rq0J38Fjg',         // "Sync Past Days" (number, default 90)
+    SYNC_FUTURE_DAYS: 'fldgyEfjN2FJzOoBz',        // "Sync Future Days" (number, default 60)
   },
   PERMISSION_PROFILES: {
     PROFILE_NAME: 'fldnGsXftdue5s0Ws',               // "Profile Name"

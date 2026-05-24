@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { requireCurrentPortalPerson } from '@/lib/auth/requireCurrentPortalPerson'
-import { upsertConnectedCalendar } from '@/lib/airtable/connectedCalendars'
+import { getConnectedCalendarsByClerkUserId, upsertConnectedCalendar } from '@/lib/airtable/connectedCalendars'
 
 export async function GET(req: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
@@ -90,6 +90,10 @@ export async function GET(req: NextRequest) {
   // Resolve portal person — may throw NEXT_REDIRECT to /sign-in or /access-denied
   const person = await requireCurrentPortalPerson()
 
+  // Check if this is a new connection before upserting (determines post-auth destination)
+  const existingCalendars = await getConnectedCalendarsByClerkUserId(person.clerkUserId)
+  const isNewConnection = !existingCalendars.find(c => c.provider === 'Outlook')
+
   // Persist the connection
   try {
     const tokenExpiresAt = new Date(Date.now() + expiresIn * 1000).toISOString()
@@ -114,5 +118,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(failureUrl)
   }
 
-  return NextResponse.redirect(successUrl)
+  // New connections → calendar setup; re-links → settings
+  const destination = isNewConnection ? `${appUrl}/settings/calendar-setup` : successUrl
+  return NextResponse.redirect(destination)
 }
