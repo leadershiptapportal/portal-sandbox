@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 import crypto from 'crypto'
 
 export async function GET() {
@@ -18,15 +17,6 @@ export async function GET() {
 
   const state = crypto.randomUUID()
 
-  const cookieStore = await cookies()
-  cookieStore.set('ms_oauth_state', state, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 600,
-    path: '/',
-  })
-
   // Non-null safe — all three are guaranteed by the missing check above
   const authUrl = new URL(
     `https://login.microsoftonline.com/${tenantId!}/oauth2/v2.0/authorize`,
@@ -38,5 +28,15 @@ export async function GET() {
   authUrl.searchParams.set('state', state)
   authUrl.searchParams.set('prompt', 'select_account')
 
-  return NextResponse.redirect(authUrl.toString())
+  // Set cookie on the redirect response directly — cookies().set() does not
+  // attach to a NextResponse.redirect() returned from the same handler.
+  const response = NextResponse.redirect(authUrl.toString())
+  response.cookies.set('ms_oauth_state', state, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 600,
+    path: '/',
+  })
+  return response
 }
