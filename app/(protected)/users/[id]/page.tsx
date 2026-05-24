@@ -10,7 +10,6 @@ import { getMeetingsForUser } from '@/lib/services/meetingsService'
 import { getUserMessages } from '@/lib/services/messagesService'
 import { getNotesByUser, getNotesByMeetingId } from '@/lib/airtable/notes'
 import { getTasksByUser } from '@/lib/airtable/tasks'
-import { getPortalEventsByClientEmail } from '@/lib/airtable/meetings'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
@@ -25,13 +24,11 @@ import UserActionsBar from './UserActionsBar'
 import { getDisplayName, getInitials, isRecordId, SectionHeading } from './sections/helpers'
 import ProfileCardSection from './sections/ProfileCardSection'
 import MostRecentSessionSection from './sections/MostRecentSessionSection'
-import SessionNotesFromCalendarSection from './sections/SessionNotesFromCalendarSection'
 import PersonalityStrengthsSection from './sections/PersonalityStrengthsSection'
 import ProfileDetailsSection from './sections/ProfileDetailsSection'
 import CoachNotesSection from './sections/CoachNotesSection'
 import TeamSection from './sections/TeamSection'
 import TheirTeamSection from './sections/TheirTeamSection'
-import MeetingsSection from './sections/MeetingsSection'
 import MessagesSection from './sections/MessagesSection'
 import TasksSection from './sections/TasksSection'
 import RelationshipsSection from './sections/RelationshipsSection'
@@ -87,7 +84,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   const displayName = getDisplayName(user)
 
   const [
-    { upcoming, past },
+    { past },
     messages,
     sessionNotes,
     tasks,
@@ -96,7 +93,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     teamLead,
     teamMemberResults,
     relationshipContext,
-    portalSessionEvents,
     theirTeamReports,
     allPersonRelationships,
     allUsersForPicker,
@@ -117,9 +113,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     currentUserRecord.airtableId
       ? getRelationshipContext(currentUserRecord.airtableId, id).catch(() => null)
       : Promise.resolve(null),
-    contactEmail
-      ? getPortalEventsByClientEmail(contactEmail, currentUserRecord.email || undefined, displayName).catch(() => [])
-      : Promise.resolve([]),
     getDirectReports(id).catch(() => []),
     getRelationshipsForPerson(id).catch(() => []),
     getAllUsers().catch(() => [] as User[]),
@@ -135,14 +128,9 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   )
   const userCanWrite = canWrite(permissionLevel)
 
-  const upcomingSorted = [...upcoming].sort(
-    (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
-  )
   const pastSorted = [...past].sort(
     (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
   )
-  const allMeetings = upcomingSorted.length + pastSorted.length
-  const nextMeeting = upcomingSorted[0] ?? null
   const lastMeeting = pastSorted[0] ?? null
   const recentMeetings = pastSorted.slice(1)
 
@@ -279,9 +267,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         userId={id}
       />
 
-      {/* ── Session Notes (from Calendar) ─────────────────────────────────── */}
-      <SessionNotesFromCalendarSection portalSessionEvents={portalSessionEvents} />
-
       {/* ── Personality & Strengths ───────────────────────────────────────── */}
       <PersonalityStrengthsSection user={user} />
 
@@ -321,15 +306,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         directReports={directReports}
         nextTrail={nextTrail}
         canDrillDeeper={canDrillDeeper}
-      />
-
-      {/* ── Meetings ─────────────────────────────────────────────────────── */}
-      <MeetingsSection
-        nextMeeting={nextMeeting}
-        lastMeeting={lastMeeting}
-        recentMeetings={recentMeetings}
-        allMeetings={allMeetings}
-        userId={id}
       />
 
       {/* ── Messages & Follow-ups ────────────────────────────────────────── */}
