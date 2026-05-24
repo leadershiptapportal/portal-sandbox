@@ -122,7 +122,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   const teamMembers = teamMemberResults.filter((u): u is User => u !== null)
   // Only show notes not attached to a meeting in the standalone Notes section.
   // Meeting-linked notes belong to their interaction's detail view.
-  const standaloneNotes = sessionNotes.filter((n) => !n.meetingId)
+  const standaloneNotes = sessionNotes.filter((n) => n.noteType !== 'meeting_note')
 
   const permissionLevel = await getPermissionLevel(
     currentUserRecord.airtableId,
