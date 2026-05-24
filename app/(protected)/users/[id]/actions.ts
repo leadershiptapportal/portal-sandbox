@@ -180,7 +180,7 @@ export async function saveInkNoteAction(
       subjectPersonId,
       clientId: subjectPersonId,
       relationshipContextId: rc.id,
-      noteType: 'general_context',
+      noteType: 'general_note',
     })
     revalidatePath(`/users/${subjectPersonId}`)
     return { success: true }
@@ -279,7 +279,7 @@ export async function updateSessionNotesAction(
         clientId: userId,
         relationshipContextId: rc.id,
         meetingId,
-        noteType: 'meeting_note',
+        noteType: 'interaction_note',
       })
     }
     revalidatePath(`/users/${userId}`)
@@ -291,7 +291,7 @@ export async function updateSessionNotesAction(
 }
 
 // Coach-Person Context table is deprecated. Coaching context (Quick Notes,
-// Family Details) is now captured as Notes with note_type='general_context'.
+// Family Details) is now captured as Notes with note_type='general_note'.
 // upsertCoachContextAction has been removed.
 
 // ── Upload Profile Photo ──────────────────────────────────────────────────────
@@ -370,7 +370,7 @@ export async function logManualSessionAction(params: {
       clientId: params.subjectPersonId,
       relationshipContextId: rc.id,
       meetingId,
-      noteType: 'meeting_note',
+      noteType: 'interaction_note',
     })
   }
 

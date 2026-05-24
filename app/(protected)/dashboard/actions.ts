@@ -127,7 +127,7 @@ export async function dashboardLogNoteAction(params: {
       clientId: params.clientId,
       relationshipContextId: rc.id,
       meetingId: params.meetingId,
-      noteType: params.meetingId ? 'meeting_note' : 'general_context',
+      noteType: params.meetingId ? 'interaction_note' : 'general_note',
     })
     revalidatePath('/dashboard')
     if (params.meetingId) revalidatePath(`/users/${params.clientId}`)
@@ -218,7 +218,7 @@ export async function savePortalEventNotesAction(
       clientId,
       relationshipContextId: rc.id,
       meetingId,
-      noteType: 'meeting_note',
+      noteType: 'interaction_note',
     })
     revalidatePath('/dashboard')
     revalidatePath(`/users/${clientId}`)

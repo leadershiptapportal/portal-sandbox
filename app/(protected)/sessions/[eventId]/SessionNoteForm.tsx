@@ -51,7 +51,7 @@ export default function SessionNoteForm({
             meetingId,
             subjectPersonId,
             clientId: subjectPersonId,
-            noteType: 'meeting_note',
+            noteType: 'interaction_note',
           }),
         })
       }

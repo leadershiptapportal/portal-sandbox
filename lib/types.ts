@@ -100,7 +100,7 @@ export interface Note {
   authorPersonId?: string;
   subjectPersonId?: string;
   meetingId?: string;
-  noteType?: 'general_context' | 'meeting_note';
+  noteType?: 'general_note' | 'interaction_note';
   visibility: 'private_to_author';
 }
 

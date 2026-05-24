@@ -14,8 +14,8 @@ interface Props {
   subjectPersonId: string
   /**
    * Optional Airtable record ID of the Meeting this note is attached to.
-   * When provided the note is saved with note_type='meeting_note' AND linked
-   * to the meeting; otherwise it's a general_context note on the profile.
+   * When provided the note is saved with note_type='interaction_note' AND linked
+   * to the interaction; otherwise it's a general_note on the profile.
    */
   meetingId?: string
   /** Initial textarea text (used when editing an existing draft). */

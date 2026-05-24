@@ -14,17 +14,17 @@ function getCredentials() {
 type AirtableRecord = { id: string; fields: Record<string, unknown> }
 
 /**
- * Simplified to two types after audit:
- *   - meeting_note: notes attached to a specific Meeting (Calendar Event).
- *   - general_context: everything else (profile-level coaching context, ink
- *     notes, free-form observations).
+ * Two note types:
+ *   - general_note: standalone coaching observations not tied to a specific
+ *     interaction (profile-level context, ink notes, free-form observations).
+ *   - interaction_note: notes attached to a specific Interaction record.
  *
- * The legacy values `follow_up` and `private_observation` are not written by
- * any current code path. Existing Airtable records that still carry them will
- * round-trip safely (TypeScript widens to string at the boundary), but new
- * UIs only offer the two values above.
+ * Legacy values `general_context`, `meeting_note`, `follow_up`, and
+ * `private_observation` may still exist on older Airtable records and
+ * round-trip safely (TypeScript widens to string at the boundary), but all
+ * new writes use the two canonical values above.
  */
-export type NoteType = 'general_context' | 'meeting_note'
+export type NoteType = 'general_note' | 'interaction_note'
 
 export interface Note {
   id: string
@@ -194,7 +194,7 @@ export async function createNote(data: CreateNoteData): Promise<Note> {
     [FIELDS.NOTES.BODY]: data.content,
     [FIELDS.NOTES.DATE]: data.date ?? new Date().toISOString().split('T')[0],
     [FIELDS.NOTES.VISIBILITY]: 'private_to_author',
-    [FIELDS.NOTES.NOTE_TYPE]: data.noteType ?? 'general_context',
+    [FIELDS.NOTES.NOTE_TYPE]: data.noteType ?? 'general_note',
   }
   if (data.clientId) fields[FIELDS.NOTES.CLIENT] = [data.clientId]
   if (data.authorPersonId) fields[FIELDS.NOTES.AUTHOR_PERSON] = [data.authorPersonId]
