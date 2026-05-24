@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { FileText, CheckSquare, Calendar, History } from 'lucide-react'
 import AddTaskDashboardDialog from './AddTaskDashboardDialog'
 import AddInteractionDialog from '@/components/AddInteractionDialog'
+import LogNoteDialog from '@/app/(protected)/users/[id]/LogNoteDialog'
 
 interface Client {
   id: string
@@ -64,17 +65,19 @@ export default function DashboardQuickActions({ clients, coaches }: Props) {
       {/* 2-up through iPad portrait, 4-up at lg+. Keeps the description text
           readable instead of crushing it into a narrow strip next to the icon. */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <ActionCard
-          icon={<FileText className="w-5 h-5 text-blue-600" />}
-          iconBg="bg-blue-100"
-          label="Log a Note"
-          description="Record coaching observations"
-        >
-          <Link
-            href="/sessions/new"
-            className="block w-full min-h-[72px] rounded-xl border border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50/40 transition-colors"
-          />
-        </ActionCard>
+        <LogNoteDialog
+          clients={clients}
+          trigger={
+            <ActionCard
+              icon={<FileText className="w-5 h-5 text-blue-600" />}
+              iconBg="bg-blue-100"
+              label="Log a Note"
+              description="Record coaching observations"
+            >
+              <button className="w-full min-h-[72px] rounded-xl border border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50/40 transition-colors" />
+            </ActionCard>
+          }
+        />
 
         <AddInteractionDialog
           clients={clients}
