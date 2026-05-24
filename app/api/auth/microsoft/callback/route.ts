@@ -15,24 +15,30 @@ export async function GET(req: NextRequest) {
   const oauthError = searchParams.get('error')
 
   if (oauthError || !code || !state) {
+    console.error('[ms-callback] step1-params: missing code/state or oauth error:', { oauthError, hasCode: !!code, hasState: !!state })
     return NextResponse.redirect(failureUrl)
   }
+  console.log('[ms-callback] step1-params: ok')
 
   // Validate CSRF state cookie
   const cookieStore = await cookies()
   const savedState = cookieStore.get('ms_oauth_state')?.value
   cookieStore.delete('ms_oauth_state')
   if (!savedState || savedState !== state) {
+    console.error('[ms-callback] step2-state: mismatch — savedState present:', !!savedState)
     return NextResponse.redirect(failureUrl)
   }
+  console.log('[ms-callback] step2-state: ok')
 
   const tenantId = process.env.MICROSOFT_TENANT_ID
   const clientId = process.env.MICROSOFT_CLIENT_ID
   const clientSecret = process.env.MICROSOFT_CLIENT_SECRET
   const redirectUri = process.env.MICROSOFT_REDIRECT_URI
   if (!tenantId || !clientId || !clientSecret || !redirectUri) {
+    console.error('[ms-callback] step3-env: missing vars:', { tenantId: !!tenantId, clientId: !!clientId, clientSecret: !!clientSecret, redirectUri: !!redirectUri })
     return NextResponse.redirect(failureUrl)
   }
+  console.log('[ms-callback] step3-env: ok')
 
   // Exchange authorization code for tokens
   let accessToken: string
