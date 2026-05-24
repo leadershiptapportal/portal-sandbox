@@ -180,12 +180,10 @@ function buildCoachContextMap(
 
 async function getGraphToken(): Promise<string> {
   const tenantId = process.env.AZURE_TENANT_ID
-  // Cron sync uses its own app registration (client_credentials / Application permissions).
-  // Falls back to AZURE_CLIENT_ID so local dev with a single app still works.
-  const clientId = process.env.AZURE_CALENDAR_CLIENT_ID ?? process.env.AZURE_CLIENT_ID
-  const clientSecret = process.env.AZURE_CALENDAR_CLIENT_SECRET ?? process.env.AZURE_CLIENT_SECRET
+  const clientId = process.env.AZURE_CLIENT_ID
+  const clientSecret = process.env.AZURE_CLIENT_SECRET
   if (!tenantId || !clientId || !clientSecret) {
-    throw new Error('Missing AZURE_TENANT_ID, AZURE_CALENDAR_CLIENT_ID, or AZURE_CALENDAR_CLIENT_SECRET')
+    throw new Error('Missing AZURE_TENANT_ID, AZURE_CLIENT_ID, or AZURE_CLIENT_SECRET')
   }
 
   const controller = new AbortController()
