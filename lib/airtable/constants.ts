@@ -24,7 +24,8 @@ export const TABLES = {
   PERMISSION_PROFILES: 'tbl1XeWzXjE41fSSE',     // "Permission Profiles"
   CONNECTED_CALENDARS: 'tblJs7uabNEOsgyoF',     // "Connected Calendars"
   RELATIONSHIP_CONTEXTS: 'tblYdLi7dp2RmhNjh',   // "Relationship Contexts"
-  MEETINGS: 'tblUm3dEvQqQBhxSE',                // "Meetings"
+  INTERACTIONS: 'tblUm3dEvQqQBhxSE',            // "Interactions" (formerly "Meetings")
+  MEETINGS: 'tblUm3dEvQqQBhxSE',                // alias → INTERACTIONS, kept for backwards compatibility
   NOTES: 'tblSTELdCWLYk5dq4',                   // "Notes"
   TASKS: 'tbleG9GWJEB9jd6yt',                   // "Tasks"
   COACH_SESSION: 'tblPFj41wHQXZVzzZ',           // "Coach Session"
@@ -60,6 +61,8 @@ export const FIELDS = {
     NOTES_TEXT: 'fldyTf8tVlyfmNT5S',            // "Notes" (coach-written notes — multilineText)
     NOTE_NAME: 'fldhYmaFzYM86fi1O',             // "Note Name" (auto-set by sync as YYYY-MM-DD // Attendee)
     ICAL_UID: 'fldFCmcfx1vGgXdBl',              // "iCal UID"
+    INTERACTION_TYPE: 'fldqlSsJO1b5DMhRu',      // "Interaction Type" (singleSelect: "Calendar Event" | "Email" | "Text" | "In-Person" | "Phone Call" | "Video Call" | "Mail" | "Other")
+    SOURCE: 'fld3ypgDTQTDV36KX',                // "Source" (singleSelect: "Synced" | "Manual")
   },
   NOTES: {
     BODY: 'fldCT8P7Da1INkG0T',                  // "Content" (primary text field)
@@ -204,6 +207,10 @@ export const FIELDS = {
     ENVIRONMENT: 'fldt01pqCMveUGus4',           // "Environment" (singleSelect: "Production" | "Test" | "Local")
     CLERK_USER_ID: 'fldmQRycM725Y8yGD',         // "Clerk User ID"
     CLERK_EMAIL: 'fld3iesrZfNJhWXXk',           // "Clerk Email"
+    // ── Fields to add in Airtable — replace TODO values with real field IDs ──
+    SELECTED_CALENDAR_IDS: 'TODO_fld_selected_calendar_ids', // "Selected Calendar IDs" (multilineText — one Graph calendar ID per line)
+    SYNC_PAST_DAYS: 'TODO_fld_sync_past_days',               // "Sync Past Days" (number, default 90)
+    SYNC_FUTURE_DAYS: 'TODO_fld_sync_future_days',           // "Sync Future Days" (number, default 60)
   },
   PERMISSION_PROFILES: {
     PROFILE_NAME: 'fldnGsXftdue5s0Ws',               // "Profile Name"
