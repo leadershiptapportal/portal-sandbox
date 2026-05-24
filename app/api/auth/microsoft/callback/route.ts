@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   const tenantId = process.env.MICROSOFT_TENANT_ID
   const clientId = process.env.MICROSOFT_CLIENT_ID
   const clientSecret = process.env.MICROSOFT_CLIENT_SECRET
-  const redirectUri = process.env.MICROSOFT_REDIRECT_URL
+  const redirectUri = process.env.MICROSOFT_REDIRECT_URI
   if (!tenantId || !clientId || !clientSecret || !redirectUri) {
     return NextResponse.redirect(failureUrl)
   }
