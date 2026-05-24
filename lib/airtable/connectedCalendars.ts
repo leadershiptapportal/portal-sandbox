@@ -25,10 +25,10 @@ export interface ConnectedCalendar {
   tokenExpiresAt?: string     // ISO 8601 dateTime
   scopes?: string
   deltaLink?: string          // Outlook incremental sync cursor
-  syncStatus?: string         // "Active" | "Error" | "Paused"
+  syncStatus?: string         // "Connected" | "Needs Reauth" | "Error" | "Paused" | "Disconnected" | "Active"
   lastSyncedAt?: string       // ISO 8601 dateTime
   lastSyncError?: string
-  environment?: string        // "production" | "sandbox"
+  environment?: string        // "Production" | "Test" | "Local"
   clerkUserId?: string
   clerkEmail?: string
 }
@@ -143,10 +143,10 @@ export async function upsertConnectedCalendar(
     [CC.ACCESS_TOKEN]: data.accessToken,
     [CC.REFRESH_TOKEN]: data.refreshToken,
     [CC.TOKEN_EXPIRES_AT]: data.tokenExpiresAt,
-    [CC.SYNC_STATUS]: data.syncStatus ?? 'Active',
+    [CC.SYNC_STATUS]: data.syncStatus ?? 'Connected',
     [CC.CLERK_USER_ID]: data.clerkUserId,
     [CC.CLERK_EMAIL]: data.clerkEmail,
-    [CC.ENVIRONMENT]: data.environment ?? process.env.NODE_ENV ?? 'production',
+    [CC.ENVIRONMENT]: data.environment ?? (process.env.NODE_ENV === 'production' ? 'Production' : 'Local'),
   }
   if (data.providerUserId) fields[CC.PROVIDER_USER_ID] = data.providerUserId
   if (data.providerTenantId) fields[CC.PROVIDER_TENANT_ID] = data.providerTenantId

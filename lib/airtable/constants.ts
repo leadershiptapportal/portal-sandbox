@@ -198,10 +198,10 @@ export const FIELDS = {
     TOKEN_EXPIRES_AT: 'flduBUEM43LTfY6j0',      // "Token Expires At" (dateTime)
     SCOPES: 'fldau0POzcX3lAhj5',                // "Scopes" (multilineText)
     DELTA_LINK: 'fld0p9fniyXx1xee8',            // "Delta Link" (multilineText — Outlook incremental sync)
-    SYNC_STATUS: 'fldh0yPUYzkBR5U2a',           // "Sync Status" (singleSelect: "Active", "Error", "Paused")
+    SYNC_STATUS: 'fldh0yPUYzkBR5U2a',           // "Sync Status" (singleSelect: "Connected" | "Needs Reauth" | "Error" | "Paused" | "Disconnected" | "Active")
     LAST_SYNCED_AT: 'fldGpI3ftPAQLYXwP',        // "Last Synced At" (dateTime)
     LAST_SYNC_ERROR: 'fldQrI8nZci0u00BV',       // "Last Sync Error" (multilineText)
-    ENVIRONMENT: 'fldt01pqCMveUGus4',           // "Environment" (singleSelect: "production", "sandbox")
+    ENVIRONMENT: 'fldt01pqCMveUGus4',           // "Environment" (singleSelect: "Production" | "Test" | "Local")
     CLERK_USER_ID: 'fldmQRycM725Y8yGD',         // "Clerk User ID"
     CLERK_EMAIL: 'fld3iesrZfNJhWXXk',           // "Clerk Email"
   },

@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
   // Persist the connection
   try {
     const tokenExpiresAt = new Date(Date.now() + expiresIn * 1000).toISOString()
-    const environment = process.env.NODE_ENV === 'production' ? 'production' : 'sandbox'
+    const environment = process.env.NODE_ENV === 'production' ? 'Production' : 'Local'
     await upsertConnectedCalendar({
       clerkUserId: person.clerkUserId,
       clerkEmail: person.email,
@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
       refreshToken,
       tokenExpiresAt,
       scopes: scope,
-      syncStatus: 'Active',
+      syncStatus: 'Connected',
       environment,
     })
   } catch (err) {
