@@ -102,9 +102,13 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
 
   return (
     <>
-      {/* ── Today: past + future chips ───────────────────────────────────────── */}
+      {/* ── Today's Agenda chips ─────────────────────────────────────────────── */}
       {allTodayItems.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1 mb-4 md:mb-5 scrollbar-none">
+        <div className="mb-4 md:mb-5">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
+            Today&apos;s Agenda
+          </p>
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
           {allTodayItems.map((item) => {
             const needsNotes = item.isPast && !item.hasNote
             const inner = (
@@ -137,6 +141,7 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
               </Link>
             )
           })}
+          </div>
         </div>
       )}
 

@@ -33,7 +33,7 @@ export default function UpcomingSessionsCard({ items, emptyMessage }: Props) {
   if (items.length === 0) {
     return (
       <p className="text-sm text-slate-400">
-        {emptyMessage ?? 'No meetings scheduled in the next 7 days.'}
+        {emptyMessage ?? 'No upcoming interactions.'}
       </p>
     )
   }
@@ -76,7 +76,7 @@ export default function UpcomingSessionsCard({ items, emptyMessage }: Props) {
                 ) : item.displayLabel ? (
                   <p className="text-xs text-slate-400 mt-0.5">{item.displayLabel}</p>
                 ) : (
-                  <p className="text-xs text-slate-300 italic mt-0.5">Internal meeting</p>
+                  <p className="text-xs text-slate-300 italic mt-0.5">No person linked</p>
                 )}
               </div>
 
