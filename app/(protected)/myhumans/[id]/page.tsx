@@ -14,7 +14,6 @@ import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import {
-  getRelationshipContext,
   getDirectReports,
   getRelationshipsForPerson,
 } from '@/lib/airtable/relationships'
@@ -91,7 +90,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     coach,
     teamLead,
     teamMemberResults,
-    relationshipContext,
     theirTeamReports,
     allPersonRelationships,
     allUsersForPicker,
@@ -109,9 +107,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     coachId ? getUserById(coachId).catch(() => null) : Promise.resolve(null),
     teamLeadId ? getUserById(teamLeadId).catch(() => null) : Promise.resolve(null),
     Promise.all(teamMemberIdList.map((tid) => getUserById(tid).catch(() => null))),
-    currentUserRecord.airtableId
-      ? getRelationshipContext(currentUserRecord.airtableId, id).catch(() => null)
-      : Promise.resolve(null),
     getDirectReports(id).catch(() => []),
     getRelationshipsForPerson(id).catch(() => []),
     getAllUsers().catch(() => [] as User[]),
@@ -218,40 +213,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
           })}
           <span className="font-semibold text-slate-900">{name}</span>
         </nav>
-      )}
-
-      {/* ── Relationship context badge ────────────────────────────────────── */}
-      {currentUserRecord.role !== 'admin' && (
-        relationshipContext ? (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700">
-            <span className="font-semibold capitalize">
-              {relationshipContext.relationshipType?.replace(/_/g, ' ') || 'Relationship'}
-            </span>
-            {relationshipContext.startDate && (
-              <>
-                <span className="text-emerald-300">·</span>
-                <span>
-                  Active since{' '}
-                  {new Date(relationshipContext.startDate + 'T12:00:00').toLocaleDateString(
-                    'en-US',
-                    { month: 'short', year: 'numeric' },
-                  )}
-                </span>
-              </>
-            )}
-          </div>
-        ) : trailEntries.length > 0 ? (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700">
-            <span className="font-semibold">
-              Reached via your coaching with {trailEntries[trailEntries.length - 1].name}
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-700">
-            <span>⚠️</span>
-            <span>No formal relationship context — you&apos;re seeing this person via legacy access</span>
-          </div>
-        )
       )}
 
       {/* ── Actions bar ──────────────────────────────────────────────────── */}
