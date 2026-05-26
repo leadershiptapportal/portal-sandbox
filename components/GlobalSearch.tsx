@@ -180,7 +180,7 @@ export default function GlobalSearch({ collapsed }: { collapsed: boolean }) {
     setInlineResults([])
     setDialogQuery('')
     setDialogResults([])
-    router.push(`/users/${id}`)
+    router.push(`/myhumans/${id}`)
   }
 
   function handleInlineKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {

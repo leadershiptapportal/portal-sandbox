@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { FileText, CheckSquare, Calendar, History } from 'lucide-react'
 import AddTaskDashboardDialog from './AddTaskDashboardDialog'
 import AddInteractionDialog from '@/components/AddInteractionDialog'
-import LogNoteDialog from '@/app/(protected)/users/[id]/LogNoteDialog'
+import LogNoteDialog from '@/app/(protected)/myhumans/[id]/LogNoteDialog'
 
 interface Client {
   id: string

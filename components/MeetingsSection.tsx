@@ -27,7 +27,7 @@ function MeetingRow({
 
   return (
     <Link
-      href={`/users/${userId}/meetings/${meeting.id}`}
+      href={`/myhumans/${userId}/meetings/${meeting.id}`}
       className={`flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 group ${
         upcoming ? 'border-l-2 border-l-indigo-400' : ''
       }`}

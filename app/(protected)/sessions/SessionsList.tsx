@@ -235,7 +235,7 @@ export default function SessionsList({ items, initialFilter }: Props) {
                   const subjectName = item.clientName ?? item.displayLabel ?? 'Unknown'
                   const needsNotes = item.isPast && !item.hasNote
                   const href = item.clientId
-                    ? `/users/${item.clientId}/sessions/${item.meetingId}`
+                    ? `/myhumans/${item.clientId}/sessions/${item.meetingId}`
                     : `/sessions/${item.meetingId}`
                   const itype = item.interactionType ?? 'Calendar Event'
                   return (

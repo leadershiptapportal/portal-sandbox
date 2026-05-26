@@ -138,7 +138,7 @@ export default function ClientRowWithNotes({
 
         {/* Profile link — covers avatar + name + subtitle + note preview */}
         <Link
-          href={`/users/${clientId}`}
+          href={`/myhumans/${clientId}`}
           className="flex items-center gap-3 flex-1 min-w-0 py-[18px]"
         >
           {/* Avatar */}
@@ -352,7 +352,7 @@ export default function ClientRowWithNotes({
           {/* View all notes link */}
           <div className="mt-2">
             <Link
-              href={`/users/${clientId}`}
+              href={`/myhumans/${clientId}`}
               className="text-xs font-medium text-[hsl(213,70%,30%)] hover:underline"
             >
               {totalNoteCount > 3

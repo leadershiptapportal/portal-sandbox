@@ -80,7 +80,7 @@ export default function UsersList({ users }: UsersListProps) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           {filtered.map((user) => (
-            <Link key={user.id} href={`/users/${user.id}`} className="block group">
+            <Link key={user.id} href={`/myhumans/${user.id}`} className="block group">
               <div className="bg-white rounded-xl border border-gray-200 p-5 hover:border-indigo-300 hover:shadow-md transition-all duration-200">
                 <div className="flex items-start gap-4">
                   {/* Avatar */}

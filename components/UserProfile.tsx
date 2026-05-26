@@ -45,8 +45,8 @@ export default function UserProfile({ user }: UserProfileProps) {
     <div>
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <Link href="/users" className="hover:text-gray-700 transition-colors">
-          Users
+        <Link href="/myhumans" className="hover:text-gray-700 transition-colors">
+          My Humans
         </Link>
         <span>/</span>
         <span className="text-gray-900">{name}</span>

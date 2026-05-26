@@ -130,7 +130,7 @@ export async function dashboardLogNoteAction(params: {
       noteType: params.meetingId ? 'interaction_note' : 'general_note',
     })
     revalidatePath('/dashboard')
-    if (params.meetingId) revalidatePath(`/users/${params.clientId}`)
+    if (params.meetingId) revalidatePath(`/myhumans/${params.clientId}`)
     return { success: true }
   } catch (err) {
     console.error('[dashboardLogNoteAction]', err)
@@ -221,7 +221,7 @@ export async function savePortalEventNotesAction(
       noteType: 'interaction_note',
     })
     revalidatePath('/dashboard')
-    revalidatePath(`/users/${clientId}`)
+    revalidatePath(`/myhumans/${clientId}`)
     return { success: true }
   } catch (err) {
     console.error('[savePortalEventNotesAction]', err)

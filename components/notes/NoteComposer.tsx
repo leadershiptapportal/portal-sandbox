@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { PenLine } from 'lucide-react'
-import { saveNoteAction, updateSessionNotesAction } from '@/app/(protected)/users/[id]/actions'
+import { saveNoteAction, updateSessionNotesAction } from '@/app/(protected)/myhumans/[id]/actions'
 
 const MIN_CHARS = 5
 
@@ -98,7 +98,7 @@ export default function NoteComposer({
     ? 'Session observations, follow-up items, coaching themes…'
     : 'Coaching context, observations, themes…'
 
-  const inkHref = `/users/${subjectPersonId}/notes/new/ink`
+  const inkHref = `/myhumans/${subjectPersonId}/notes/new/ink`
 
   const wrapperCls =
     variant === 'card'

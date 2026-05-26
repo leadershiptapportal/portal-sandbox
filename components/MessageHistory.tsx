@@ -54,7 +54,7 @@ function MessageRow({ msg, userId }: { msg: Message; userId: string }) {
   if (msg.meetingId) {
     return (
       <Link
-        href={`/users/${userId}/meetings/${msg.meetingId}`}
+        href={`/myhumans/${userId}/meetings/${msg.meetingId}`}
         className="block"
       >
         {inner}

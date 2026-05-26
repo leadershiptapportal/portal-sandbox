@@ -226,7 +226,7 @@ export default function NewPersonForm({ coaches, allUsers, companies }: Props) {
         setSaving(false)
         return
       }
-      router.push(`/users/${data.id}`)
+      router.push(`/myhumans/${data.id}`)
     } catch {
       setError('Failed to create person — please try again')
       setSaving(false)

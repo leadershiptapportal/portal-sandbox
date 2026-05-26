@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { logManualSessionAction } from '@/app/(protected)/users/[id]/actions'
+import { logManualSessionAction } from '@/app/(protected)/myhumans/[id]/actions'
 
 // Types that have a duration (synchronous interactions)
 const SYNC_TYPES = ['In-Person', 'Phone Call', 'Video Call']

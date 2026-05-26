@@ -147,7 +147,7 @@ export default function SessionNotePanel({
                 </p>
                 {event.clientId && (
                   <Link
-                    href={`/users/${event.clientId}`}
+                    href={`/myhumans/${event.clientId}`}
                     className="text-xs font-medium text-[hsl(213,70%,30%)] hover:underline"
                     onClick={onClose}
                   >

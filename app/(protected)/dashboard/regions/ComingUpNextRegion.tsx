@@ -203,7 +203,7 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
           {nextItem.clientId && (
             <div className="mt-4">
               <Link
-                href={`/users/${nextItem.clientId}`}
+                href={`/myhumans/${nextItem.clientId}`}
                 className="inline-flex items-center justify-center gap-1.5 h-12 px-6 w-full md:w-auto rounded-lg bg-[hsl(213,70%,30%)] text-white text-base font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
               >
                 Open Profile
@@ -243,7 +243,7 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
               </span>
             )
             const href = item.clientId
-              ? `/users/${item.clientId}/sessions/${item.meetingId}`
+              ? `/myhumans/${item.clientId}/sessions/${item.meetingId}`
               : `/sessions/${item.meetingId}`
             return (
               <Link key={item.meetingId} href={href}>
