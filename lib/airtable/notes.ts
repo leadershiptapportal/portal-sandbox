@@ -24,11 +24,12 @@ type AirtableRecord = { id: string; fields: Record<string, unknown> }
  * round-trip safely (TypeScript widens to string at the boundary), but all
  * new writes use the two canonical values above.
  */
-export type NoteType = 'general_note' | 'interaction_note'
+export type NoteType = 'general_note' | 'interaction_note' | 'ink_note'
 
 export interface Note {
   id: string
   content: string
+  inkImageUrl?: string
   date: string
   clientId?: string
   coachName?: string
@@ -48,6 +49,7 @@ function mapRecord(r: AirtableRecord): Note {
   return {
     id: r.id,
     content: (r.fields[FIELDS.NOTES.BODY] as string) ?? '',
+    inkImageUrl: (r.fields[FIELDS.NOTES.INK_IMAGE_URL] as string) || undefined,
     date: (r.fields[FIELDS.NOTES.DATE] as string) ?? '',
     clientId: firstLinkedId(r.fields[FIELDS.NOTES.CLIENT]),
     coachName: (r.fields[FIELDS.NOTES.COACH_NAME] as string) || undefined,
@@ -178,6 +180,7 @@ export const getNotesByUser = getNotesByClient
 
 export interface CreateNoteData {
   content: string
+  inkImageUrl?: string
   date?: string
   clientId?: string
   authorPersonId?: string
@@ -207,6 +210,7 @@ export async function createNote(data: CreateNoteData): Promise<Note> {
   }
   if (data.relationshipContextId) fields[FIELDS.NOTES.RELATIONSHIP_CONTEXT] = [data.relationshipContextId]
   if (data.coachName) fields[FIELDS.NOTES.COACH_NAME] = data.coachName
+  if (data.inkImageUrl) fields[FIELDS.NOTES.INK_IMAGE_URL] = data.inkImageUrl
 
   const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}`, {
     method: 'POST',

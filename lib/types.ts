@@ -94,13 +94,14 @@ export interface Meeting {
 export interface Note {
   id: string;
   content: string;
+  inkImageUrl?: string;
   date: string;
   clientId?: string;
   coachName?: string;
   authorPersonId?: string;
   subjectPersonId?: string;
   meetingId?: string;
-  noteType?: 'general_note' | 'interaction_note';
+  noteType?: 'general_note' | 'interaction_note' | 'ink_note';
   visibility: 'private_to_author';
 }
 

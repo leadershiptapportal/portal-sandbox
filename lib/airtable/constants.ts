@@ -76,6 +76,7 @@ export const FIELDS = {
     NOTE_TYPE: 'fldRCz98Sppbgbq5e',             // "Note Type"
     VISIBILITY: 'fldan9xqdso86TKBv',            // "Visibility"
     RELATIONSHIP_CONTEXT: 'fldltUsIa9P0U73li',  // "Relationship Context" (linked)
+    INK_IMAGE_URL: 'fldxHSSkmAvFsgBKR',         // "Ink Image URL" (url — Cloudinary image for ink notes)
   },
   TASKS: {
     TITLE: 'fldRgrskNdZharknP',                 // "Title"

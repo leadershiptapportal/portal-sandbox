@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { MessageSquare, PenLine } from 'lucide-react'
+import { MessageSquare, NotebookPen } from 'lucide-react'
 import LogNoteDialog from './LogNoteDialog'
 import AddTaskDialog from './AddTaskDialog'
 import AddInteractionDialog from '@/components/AddInteractionDialog'
@@ -21,16 +21,16 @@ export default function UserActionsBar({ userId }: UserActionsBarProps) {
         </Link>
       </Button>
 
+      <Button asChild size="sm" variant="outline">
+        <Link href={`/myhumans/${userId}/take-notes`}>
+          <NotebookPen className="h-4 w-4" />
+          Take Notes
+        </Link>
+      </Button>
+
       <LogNoteDialog userId={userId} />
       <AddInteractionDialog defaultPersonId={userId} />
       <AddTaskDialog userId={userId} />
-
-      <Button asChild variant="outline" size="sm">
-        <Link href={`/myhumans/${userId}/notes/new/ink`}>
-          <PenLine />
-          Ink Note
-        </Link>
-      </Button>
     </div>
   )
 }

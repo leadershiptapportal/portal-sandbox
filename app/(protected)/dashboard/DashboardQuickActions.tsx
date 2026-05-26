@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { FileText, CheckSquare, Calendar, History } from 'lucide-react'
+import { FileText, CheckSquare, Calendar, History, NotebookPen } from 'lucide-react'
 import AddTaskDashboardDialog from './AddTaskDashboardDialog'
 import AddInteractionDialog from '@/components/AddInteractionDialog'
 import LogNoteDialog from '@/app/(protected)/myhumans/[id]/LogNoteDialog'
+import TakeNotesDialog from './TakeNotesDialog'
 
 interface Client {
   id: string
@@ -62,9 +63,22 @@ export default function DashboardQuickActions({ clients, coaches }: Props) {
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-4 md:mb-6">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Quick Actions</p>
-      {/* 2-up through iPad portrait, 4-up at lg+. Keeps the description text
-          readable instead of crushing it into a narrow strip next to the icon. */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* 2-up on mobile, 3-up on md, 5-up on xl */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
+        <TakeNotesDialog
+          clients={clients}
+          trigger={
+            <ActionCard
+              icon={<NotebookPen className="w-5 h-5 text-[hsl(213,70%,40%)]" />}
+              iconBg="bg-[hsl(213,60%,94%)]"
+              label="Take Notes"
+              description="Handwrite session notes"
+            >
+              <button className="w-full min-h-[72px] rounded-xl border border-slate-200 bg-white hover:border-[hsl(213,70%,70%)] hover:bg-[hsl(213,60%,97%)] transition-colors" />
+            </ActionCard>
+          }
+        />
+
         <LogNoteDialog
           clients={clients}
           trigger={

@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import { NotebookPen } from 'lucide-react'
 import BackLink from '@/components/BackLink'
 import { getMeetingById } from '@/lib/airtable/meetings'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
@@ -83,6 +85,17 @@ export default async function SessionPage({ params }: Props) {
           <p className="text-sm font-medium text-[hsl(213,70%,30%)] mt-1">
             with {meeting.clientName}
           </p>
+        )}
+        {userCanWrite && clientAirtableId && (
+          <div className="pt-2">
+            <Link
+              href={`/myhumans/${clientAirtableId}/take-notes?interactionId=${eventId}`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
+            >
+              <NotebookPen className="h-3.5 w-3.5" />
+              Take Notes
+            </Link>
+          </div>
         )}
       </div>
 

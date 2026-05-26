@@ -1,19 +1,17 @@
 /**
- * Renders a note's body as plain text + inline ink images. Ink notes are
- * stored as standard markdown image syntax:
+ * Renders a note body. Supports two storage formats:
  *
- *   Optional caption text on top
+ * New (ink_note): inkImageUrl is a separate field; content holds only the
+ * optional caption. Pass both props and the image renders below the caption.
  *
- *   ![Ink note](https://res.cloudinary.com/.../ink-note.png)
- *
- * The display layer extracts each ![]( ) image, renders an <img> for it, and
- * shows whatever text remains as plain paragraph text. We deliberately do NOT
- * pull in a markdown parser — these notes only contain text + image syntax,
- * and the regex stays auditable.
+ * Legacy: image URL embedded in content as ![Ink note](url). Still parsed
+ * for backward compatibility with notes written before the schema change.
  */
 
 interface Props {
   content: string
+  /** Cloudinary URL from the dedicated Ink Image URL field (new format). */
+  inkImageUrl?: string
   /** Tailwind classes applied to the wrapping text block. */
   className?: string
   /** Limit ink image height so it doesn't dominate small note cards. */
@@ -47,9 +45,27 @@ function parse(content: string): Segment[] {
 
 export default function NoteBody({
   content,
+  inkImageUrl,
   className = 'text-sm text-slate-700 whitespace-pre-wrap leading-relaxed',
   imageMaxHeightClass = 'max-h-80',
 }: Props) {
+  // New format: image lives in inkImageUrl; content is caption-only (no markdown).
+  if (inkImageUrl) {
+    const caption = content.replace(/^\n+|\n+$/g, '')
+    return (
+      <div className="space-y-2">
+        {caption && <p className={className}>{caption}</p>}
+        <img
+          src={inkImageUrl}
+          alt="Ink note"
+          className={`block w-full object-contain rounded-md border border-slate-200 bg-white ${imageMaxHeightClass}`}
+          loading="lazy"
+        />
+      </div>
+    )
+  }
+
+  // Legacy format: image URL embedded as markdown inside content.
   const segments = parse(content)
   return (
     <div className="space-y-2">

@@ -45,20 +45,28 @@ export default function NoteItem({ note }: { note: Note }) {
   // Editing tracks the typed caption separately from any embedded ink images.
   // This way edit mode preserves attached images instead of forcing the user
   // to retype + re-attach.
+  // New format: inkImageUrl is a dedicated field; legacy: embedded in content.
+  const hasNewFormatInk = !!note.inkImageUrl
   const initialSplit = splitNoteBody(note.content)
-  const [caption, setCaption] = useState(initialSplit.caption)
+  const [caption, setCaption] = useState(
+    hasNewFormatInk ? note.content : initialSplit.caption
+  )
   const [content, setContent] = useState(note.content)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
 
-  const hasInkImage = initialSplit.images.length > 0
+  const hasInkImage = hasNewFormatInk || initialSplit.images.length > 0
 
   async function handleSave() {
-    const body = hasInkImage
-      ? rebuildNoteBody(caption, initialSplit.images)
-      : caption
-    if (!body.trim()) { setError('Note cannot be empty.'); return }
+    // New-format ink notes: body is caption-only; image lives in inkImageUrl field.
+    // Legacy ink notes: rebuild body with embedded markdown image.
+    const body = hasNewFormatInk
+      ? caption
+      : hasInkImage
+        ? rebuildNoteBody(caption, initialSplit.images)
+        : caption
+    if (!body.trim() && !hasInkImage) { setError('Note cannot be empty.'); return }
     setSaving(true)
     setError('')
     const result = await updateNoteAction(note.id, body.trim())
@@ -111,7 +119,7 @@ export default function NoteItem({ note }: { note: Note }) {
         </div>
 
         <div className="pr-20">
-          <NoteBody content={content} />
+          <NoteBody content={content} inkImageUrl={note.inkImageUrl} />
         </div>
         {note.date && (
           <p className="text-xs font-medium text-slate-400 mt-2">
@@ -129,14 +137,22 @@ export default function NoteItem({ note }: { note: Note }) {
         {hasInkImage && (
           <div className="mb-3">
             <p className="text-xs font-semibold text-slate-500 mb-1.5">Ink (preserved)</p>
-            {initialSplit.images.map((img, i) => (
+            {hasNewFormatInk ? (
               <img
-                key={i}
-                src={img.url}
-                alt={img.alt}
+                src={note.inkImageUrl}
+                alt="Ink note"
                 className="block w-full object-contain rounded-md border border-slate-200 bg-white max-h-60 mb-1.5"
               />
-            ))}
+            ) : (
+              initialSplit.images.map((img, i) => (
+                <img
+                  key={i}
+                  src={img.url}
+                  alt={img.alt}
+                  className="block w-full object-contain rounded-md border border-slate-200 bg-white max-h-60 mb-1.5"
+                />
+              ))
+            )}
             <p className="text-xs text-slate-400">
               The ink stays attached. To redraw, delete this note and create a new ink note.
             </p>

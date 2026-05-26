@@ -22,6 +22,7 @@ import {
   type CreateRCInput,
   type UpdateRCInput,
 } from '@/lib/airtable/relationships'
+import { upsertCoachPersonContext } from '@/lib/airtable/coachPersonContext'
 
 // ── Edit Profile ──────────────────────────────────────────────────────────────
 
@@ -145,14 +146,15 @@ export async function saveNoteAction(
 // ── Save Ink Note ─────────────────────────────────────────────────────────────
 
 /**
- * Persists a handwritten note. The image was already uploaded to Cloudinary by
- * the caller; we embed its URL in the note body using standard markdown image
- * syntax so the display layer can render it inline.
+ * Persists a handwritten ink note. The image is already uploaded to Cloudinary
+ * by the caller. Caption goes to the Body field; image URL goes to the
+ * dedicated Ink Image URL field (no embedded markdown).
  */
 export async function saveInkNoteAction(
   subjectPersonId: string,
   imageUrl: string,
   caption?: string,
+  meetingId?: string,
 ): Promise<{ success: true } | { error: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
@@ -165,22 +167,16 @@ export async function saveInkNoteAction(
       return { error: 'No active coaching or reporting relationship reaches this person.' }
     }
 
-    const cleanCaption = (caption ?? '').trim()
-    // Body convention: optional caption, then a blank line, then the markdown
-    // image. The NoteBody display helper looks for the image syntax and
-    // renders <img> inline.
-    const body = cleanCaption
-      ? `${cleanCaption}\n\n![Ink note](${imageUrl})`
-      : `![Ink note](${imageUrl})`
-
     await createNote({
-      content: body,
+      content: (caption ?? '').trim(),
+      inkImageUrl: imageUrl,
       authorPersonId: userRecord.airtableId,
       coachName: userRecord.name || undefined,
       subjectPersonId,
       clientId: subjectPersonId,
       relationshipContextId: rc.id,
-      noteType: 'general_note',
+      meetingId: meetingId || undefined,
+      noteType: 'ink_note',
     })
     revalidatePath(`/myhumans/${subjectPersonId}`)
     return { success: true }
@@ -290,9 +286,23 @@ export async function updateSessionNotesAction(
   }
 }
 
-// Coach-Person Context table is deprecated. Coaching context (Quick Notes,
-// Family Details) is now captured as Notes with note_type='general_note'.
-// upsertCoachContextAction has been removed.
+// ── Coach-Person Context (Quick Notes / Family Details) ──────────────────────
+
+export async function updateCoachContextAction(
+  personId: string,
+  fields: { quickNotes?: string; familyDetails?: string },
+): Promise<{ success: true } | { error: string }> {
+  try {
+    const userRecord = await getCurrentUserRecord()
+    if (!userRecord.airtableId) return { error: 'Could not resolve your user record.' }
+    await upsertCoachPersonContext(userRecord.airtableId, personId, fields)
+    revalidatePath(`/myhumans/${personId}`)
+    return { success: true }
+  } catch (err) {
+    console.error('[updateCoachContextAction]', err)
+    return { error: err instanceof Error ? err.message : String(err) }
+  }
+}
 
 // ── Upload Profile Photo ──────────────────────────────────────────────────────
 
