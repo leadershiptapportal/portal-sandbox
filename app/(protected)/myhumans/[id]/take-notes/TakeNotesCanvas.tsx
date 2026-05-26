@@ -13,6 +13,7 @@ interface Props {
   meetings: Meeting[]
   initialInteraction: Meeting | null
   onSaveComplete: () => void
+  onCancel: () => void
   onStrokeCountChange?: (count: number) => void
 }
 
@@ -50,6 +51,7 @@ export default function TakeNotesCanvas({
   meetings,
   initialInteraction,
   onSaveComplete,
+  onCancel,
   onStrokeCountChange,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -335,6 +337,13 @@ export default function TakeNotesCanvas({
             className="flex-1 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
             disabled={saving}
           />
+          <button
+            onClick={onCancel}
+            disabled={saving}
+            className="px-4 h-10 rounded-md border border-[hsl(213,70%,30%)] bg-white text-[hsl(213,70%,30%)] text-sm font-medium hover:bg-[hsl(213,70%,97%)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          >
+            Cancel
+          </button>
           <button
             onClick={handleSave}
             disabled={!canSave}

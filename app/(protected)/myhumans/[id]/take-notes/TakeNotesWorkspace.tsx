@@ -79,12 +79,6 @@ export default function TakeNotesWorkspace({
             {displayName}
           </p>
         </div>
-        <button
-          onClick={handleCancel}
-          className="flex-shrink-0 px-3 py-1.5 rounded-md text-sm text-slate-500 hover:bg-slate-100 transition-colors"
-        >
-          Cancel
-        </button>
       </header>
 
       {/* Two-panel body */}
@@ -108,6 +102,7 @@ export default function TakeNotesWorkspace({
             meetings={meetings}
             initialInteraction={initialInteraction}
             onSaveComplete={handleSaveComplete}
+            onCancel={handleCancel}
             onStrokeCountChange={(count) => setHasStrokes(count > 0)}
           />
         </div>
