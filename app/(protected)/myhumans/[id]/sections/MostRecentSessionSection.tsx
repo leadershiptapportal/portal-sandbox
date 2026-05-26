@@ -4,14 +4,19 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Calendar, NotebookPen, FileText } from 'lucide-react'
 import SessionNotesPopout from '../SessionNotesPopout'
-import LogNoteDialog from '../LogNoteDialog'
 import { formatEastern } from '@/lib/utils/dateFormat'
 import type { Meeting } from '@/lib/types'
+
+interface NoteStatus {
+  hasNotes: boolean
+  hasInk: boolean
+}
 
 interface Props {
   topMeetings: Meeting[]
   totalMeetingCount: number
   userId: string
+  noteStatusByMeetingId?: Record<string, NoteStatus>
 }
 
 function formatMeetingDate(m: Meeting): string {
@@ -23,7 +28,7 @@ function formatMeetingDate(m: Meeting): string {
   )
 }
 
-export default function MostRecentSessionSection({ topMeetings, totalMeetingCount, userId }: Props) {
+export default function MostRecentSessionSection({ topMeetings, totalMeetingCount, userId, noteStatusByMeetingId }: Props) {
   const [popoutMeetingId, setPopoutMeetingId] = useState<string | null>(null)
 
   const popoutMeeting = topMeetings.find((m) => m.id === popoutMeetingId) ?? null
@@ -49,6 +54,7 @@ export default function MostRecentSessionSection({ topMeetings, totalMeetingCoun
           {topMeetings.map((meeting, idx) => {
             const isMostRecent = idx === 0
             const dateStr = formatMeetingDate(meeting)
+            const noteStatus = noteStatusByMeetingId?.[meeting.id] ?? { hasNotes: false, hasInk: false }
 
             return (
               <div
@@ -83,25 +89,15 @@ export default function MostRecentSessionSection({ topMeetings, totalMeetingCoun
                     className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
                   >
                     <FileText className="h-3 w-3" />
-                    View Notes
+                    {noteStatus.hasNotes ? 'Edit Notes' : 'Add Notes'}
                   </button>
-
-                  <LogNoteDialog
-                    userId={userId}
-                    trigger={
-                      <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors">
-                        <FileText className="h-3 w-3 text-blue-500" />
-                        Log Note
-                      </button>
-                    }
-                  />
 
                   <Link
                     href={`/myhumans/${userId}/take-notes?interactionId=${meeting.id}`}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
                   >
                     <NotebookPen className="h-3 w-3 text-[hsl(213,70%,40%)]" />
-                    Take Notes
+                    {noteStatus.hasInk ? 'Continue Taking Notes' : 'Take Notes'}
                   </Link>
                 </div>
               </div>

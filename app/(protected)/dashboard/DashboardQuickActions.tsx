@@ -85,7 +85,7 @@ export default function DashboardQuickActions({ clients, coaches }: Props) {
             <ActionCard
               icon={<FileText className="w-5 h-5 text-blue-600" />}
               iconBg="bg-blue-100"
-              label="Log a Note"
+              label="Add Note"
               description="Record coaching observations"
             >
               <button className="w-full min-h-[72px] rounded-xl border border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50/40 transition-colors" />

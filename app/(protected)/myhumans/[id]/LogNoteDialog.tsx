@@ -84,7 +84,7 @@ export default function LogNoteDialog({ userId, clients, trigger }: Props) {
   ) : (
     <Button variant="outline" size="sm" onClick={handleOpen}>
       <FileText />
-      Log a Note
+      Add Note
     </Button>
   )
 
@@ -95,7 +95,7 @@ export default function LogNoteDialog({ userId, clients, trigger }: Props) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Log a Note</DialogTitle>
+            <DialogTitle>Add Note</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">

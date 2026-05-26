@@ -136,6 +136,21 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   const topMeetings = pastSorted.slice(0, 3)
   const totalMeetingCount = pastSorted.length
 
+  const noteStatusByMeetingId = sessionNotes.reduce<Record<string, { hasNotes: boolean; hasInk: boolean }>>(
+    (acc, note) => {
+      if (!note.meetingId) return acc
+      const prev = acc[note.meetingId] ?? { hasNotes: false, hasInk: false }
+      return {
+        ...acc,
+        [note.meetingId]: {
+          hasNotes: prev.hasNotes || note.noteType === 'interaction_note',
+          hasInk: prev.hasInk || note.noteType === 'ink_note',
+        },
+      }
+    },
+    {},
+  )
+
   const name = getDisplayName(user)
   const initials = getInitials(user)
 
@@ -261,6 +276,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         topMeetings={topMeetings}
         totalMeetingCount={totalMeetingCount}
         userId={id}
+        noteStatusByMeetingId={noteStatusByMeetingId}
       />
 
       {/* ── Personality & Strengths ───────────────────────────────────────── */}

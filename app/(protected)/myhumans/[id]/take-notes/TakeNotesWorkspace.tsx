@@ -39,6 +39,7 @@ export default function TakeNotesWorkspace({
 }: Props) {
   const router = useRouter()
   const [savedPersonData, setSavedPersonData] = useState(person)
+  const [hasStrokes, setHasStrokes] = useState(false)
 
   const displayName =
     savedPersonData.preferredName ||
@@ -49,6 +50,14 @@ export default function TakeNotesWorkspace({
   function handleSaveComplete() {
     router.push(`/myhumans/${person.id}`)
     router.refresh()
+  }
+
+  function handleCancel() {
+    if (hasStrokes) {
+      const confirmed = window.confirm('You have unsaved notes. Are you sure you want to leave?')
+      if (!confirmed) return
+    }
+    router.back()
   }
 
   return (
@@ -62,14 +71,20 @@ export default function TakeNotesWorkspace({
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-xs uppercase tracking-wide text-slate-400 leading-none font-medium">
-            Take Notes
+            {hasStrokes ? 'Continue Taking Notes' : 'Take Notes'}
           </p>
           <p className="text-sm font-semibold text-slate-900 truncate leading-tight">
             {displayName}
           </p>
         </div>
+        <button
+          onClick={handleCancel}
+          className="flex-shrink-0 px-3 py-1.5 rounded-md text-sm text-slate-500 hover:bg-slate-100 transition-colors"
+        >
+          Cancel
+        </button>
       </header>
 
       {/* Two-panel body */}
@@ -93,6 +108,7 @@ export default function TakeNotesWorkspace({
             meetings={meetings}
             initialInteraction={initialInteraction}
             onSaveComplete={handleSaveComplete}
+            onStrokeCountChange={(count) => setHasStrokes(count > 0)}
           />
         </div>
       </div>

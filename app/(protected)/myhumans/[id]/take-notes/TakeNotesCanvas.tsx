@@ -13,6 +13,7 @@ interface Props {
   meetings: Meeting[]
   initialInteraction: Meeting | null
   onSaveComplete: () => void
+  onStrokeCountChange?: (count: number) => void
 }
 
 const COLORS = [
@@ -49,6 +50,7 @@ export default function TakeNotesCanvas({
   meetings,
   initialInteraction,
   onSaveComplete,
+  onStrokeCountChange,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const controlsRef = useRef<{ undo: () => void; clear: () => void; isEmpty: () => boolean } | null>(null)
@@ -272,7 +274,10 @@ export default function TakeNotesCanvas({
             penOnly={penOnly}
             canvasRef={canvasRef}
             controlsRef={controlsRef}
-            onStrokesChange={setStrokeCount}
+            onStrokesChange={(count) => {
+              setStrokeCount(count)
+              onStrokeCountChange?.(count)
+            }}
             className="w-full h-full"
           />
         </div>
