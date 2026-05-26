@@ -44,7 +44,7 @@ export default function MeetingsSection({
               const label = relativeDays(nextMeeting.startTime)
               return (
                 <Link
-                  href={`/myhumans/${userId}/sessions/${nextMeeting.id}`}
+                  href={`/myhumans/${userId}/interactions/${nextMeeting.id}`}
                   className="flex items-start gap-4 p-4 rounded-xl border-2 border-[hsl(213,60%,90%)] bg-[hsl(213,60%,97%)] hover:bg-[hsl(213,60%,95%)] transition-colors group"
                 >
                   <div className="flex-shrink-0 w-12 text-center bg-[hsl(213,70%,30%)] text-white rounded-lg py-2 px-1">
@@ -80,7 +80,7 @@ export default function MeetingsSection({
               return (
                 <div className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
                   <Link
-                    href={`/myhumans/${userId}/sessions/${lastMeeting.id}`}
+                    href={`/myhumans/${userId}/interactions/${lastMeeting.id}`}
                     className="flex items-start gap-4 p-4 hover:bg-slate-100 transition-colors group"
                   >
                     <div className="flex-shrink-0 w-12 text-center bg-slate-200 text-slate-600 rounded-lg py-2 px-1">
@@ -145,7 +145,7 @@ export default function MeetingsSection({
                       )}
                     </div>
                     <Link
-                      href={`/myhumans/${userId}/sessions/${m.id}`}
+                      href={`/myhumans/${userId}/interactions/${m.id}`}
                       className="flex-shrink-0 mt-0.5 text-xs font-medium text-[hsl(213,70%,30%)] hover:underline whitespace-nowrap"
                     >
                       View Full Notes

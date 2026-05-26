@@ -37,7 +37,7 @@ export default function MostRecentSessionSection({
             {recentMeetings.slice(0, 5).map((m) => (
               <Link
                 key={m.id}
-                href={`/myhumans/${userId}/sessions/${m.id}`}
+                href={`/myhumans/${userId}/interactions/${m.id}`}
                 className="flex items-center justify-between p-3 border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors group"
               >
                 <div className="min-w-0">
@@ -59,7 +59,7 @@ export default function MostRecentSessionSection({
           </div>
           {recentMeetings.length > 5 && (
             <Link
-              href={`/myhumans/${userId}/sessions`}
+              href={`/myhumans/${userId}/interactions`}
               className="text-sm text-blue-600 hover:underline mt-3 block"
             >
               View all {recentMeetings.length + 1} interactions →

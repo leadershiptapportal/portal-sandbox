@@ -49,8 +49,8 @@ export default function UpcomingSessionsCard({ items, emptyMessage }: Props) {
           // fall back to the generic session detail.
           href={
             item.clientId
-              ? `/myhumans/${item.clientId}/sessions/${item.meetingId}`
-              : `/sessions/${item.meetingId}`
+              ? `/myhumans/${item.clientId}/interactions/${item.meetingId}`
+              : `/interactions/${item.meetingId}`
           }
           className="flex items-center gap-4 px-4 py-4 min-h-[64px] rounded-lg border border-slate-100 hover:border-slate-200 hover:bg-slate-50 transition-colors"
         >

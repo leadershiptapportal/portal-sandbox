@@ -91,7 +91,7 @@ export default function MostRecentSessionNotes({ meeting, userId, meetingNotes }
           )}
         </div>
         <Link
-          href={`/myhumans/${userId}/sessions/${meeting.id}`}
+          href={`/myhumans/${userId}/interactions/${meeting.id}`}
           className="text-xs text-blue-600 hover:underline whitespace-nowrap flex-shrink-0"
         >
           Full interaction →

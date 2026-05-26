@@ -18,7 +18,7 @@ import GlobalSearch from '@/components/GlobalSearch'
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'My Dashboard', enabled: true },
   { href: '/myhumans', icon: Users, label: 'My Humans', enabled: true },
-  { href: '/sessions', icon: Calendar, label: 'My Interactions', enabled: true },
+  { href: '/interactions', icon: Calendar, label: 'My Interactions', enabled: true },
   { href: '/settings', icon: Settings, label: 'Settings', enabled: true },
 ]
 

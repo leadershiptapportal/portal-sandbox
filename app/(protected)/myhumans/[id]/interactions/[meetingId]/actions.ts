@@ -22,7 +22,7 @@ export async function updateSessionNotes(
     await upsertCoachSession(userRecord.airtableId, meetingId, userId, {
       sessionNotes: notes,
     })
-    revalidatePath(`/myhumans/${userId}/sessions/${meetingId}`)
+    revalidatePath(`/myhumans/${userId}/interactions/${meetingId}`)
     revalidatePath(`/myhumans/${userId}`)
     return { success: true }
   } catch (err) {

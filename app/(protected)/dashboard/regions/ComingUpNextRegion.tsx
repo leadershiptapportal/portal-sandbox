@@ -243,8 +243,8 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
               </span>
             )
             const href = item.clientId
-              ? `/myhumans/${item.clientId}/sessions/${item.meetingId}`
-              : `/sessions/${item.meetingId}`
+              ? `/myhumans/${item.clientId}/interactions/${item.meetingId}`
+              : `/interactions/${item.meetingId}`
             return (
               <Link key={item.meetingId} href={href}>
                 {inner}

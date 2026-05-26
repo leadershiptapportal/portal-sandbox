@@ -67,7 +67,7 @@ export default async function UpcomingThisWeekRegion({ userRecord }: Props) {
               : `${items.length} ${items.length === 1 ? 'meeting' : 'meetings'}`}
           </span>
           <Link
-            href="/sessions?filter=upcoming"
+            href="/interactions?filter=upcoming"
             className="text-xs font-medium text-[hsl(213,70%,30%)] hover:underline"
           >
             View all →
