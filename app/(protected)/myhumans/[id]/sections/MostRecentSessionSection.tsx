@@ -1,72 +1,136 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
-import { ChevronRight } from 'lucide-react'
-import MostRecentSessionNotes from '../MostRecentSessionNotes'
+import { Calendar, NotebookPen, FileText } from 'lucide-react'
+import SessionNotesPopout from '../SessionNotesPopout'
+import LogNoteDialog from '../LogNoteDialog'
 import { formatEastern } from '@/lib/utils/dateFormat'
-import type { Meeting, Note } from '@/lib/types'
+import type { Meeting } from '@/lib/types'
 
 interface Props {
-  lastMeeting: Meeting | null
-  lastMeetingNotes: Note[]
-  recentMeetings: Meeting[]
+  topMeetings: Meeting[]
+  totalMeetingCount: number
   userId: string
 }
 
-export default function MostRecentSessionSection({
-  lastMeeting,
-  lastMeetingNotes,
-  recentMeetings,
-  userId,
-}: Props) {
-  return (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 space-y-5">
-      <MostRecentSessionNotes
-        meeting={lastMeeting}
-        userId={userId}
-        meetingNotes={lastMeetingNotes}
-      />
+function formatMeetingDate(m: Meeting): string {
+  if (!m.startTime) return ''
+  return formatEastern(
+    m.startTime,
+    { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true },
+    m.timezone,
+  )
+}
 
-      {recentMeetings.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
-            Past Interactions
-            <span className="text-xs font-normal text-slate-400">
-              ({recentMeetings.length} more)
-            </span>
-          </h3>
-          <div className="space-y-2">
-            {recentMeetings.slice(0, 5).map((m) => (
-              <Link
-                key={m.id}
-                href={`/myhumans/${userId}/interactions/${m.id}`}
-                className="flex items-center justify-between p-3 border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors group"
+export default function MostRecentSessionSection({ topMeetings, totalMeetingCount, userId }: Props) {
+  const [popoutMeetingId, setPopoutMeetingId] = useState<string | null>(null)
+
+  const popoutMeeting = topMeetings.find((m) => m.id === popoutMeetingId) ?? null
+
+  if (topMeetings.length === 0) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-3">Most Recent Interactions</h2>
+        <div className="border border-dashed border-slate-200 rounded-xl p-6 text-center">
+          <Calendar className="h-6 w-6 text-slate-300 mx-auto mb-2" />
+          <p className="text-sm text-slate-400">No interactions recorded yet.</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">Most Recent Interactions</h2>
+
+        <div className="space-y-2.5">
+          {topMeetings.map((meeting, idx) => {
+            const isMostRecent = idx === 0
+            const dateStr = formatMeetingDate(meeting)
+
+            return (
+              <div
+                key={meeting.id}
+                className={`rounded-xl border px-4 py-3.5 transition-colors ${
+                  isMostRecent
+                    ? 'border-[hsl(213,70%,30%)]/20 bg-[hsl(213,60%,98%)]'
+                    : 'border-slate-100 bg-white hover:border-slate-200'
+                }`}
               >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">{m.title || 'Untitled Meeting'}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    {formatEastern(m.startTime, { month: 'short', day: 'numeric', year: 'numeric' }, m.timezone)}
+                {/* Header row: title + most-recent badge */}
+                <div className="flex items-start gap-2 justify-between">
+                  <p className="text-sm font-semibold text-slate-900 leading-snug truncate">
+                    {meeting.title || 'Untitled Interaction'}
                   </p>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {m.notes && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                      Has notes
+                  {isMostRecent && (
+                    <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[hsl(213,70%,30%)] text-white">
+                      Most Recent
                     </span>
                   )}
-                  <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
                 </div>
-              </Link>
-            ))}
-          </div>
-          {recentMeetings.length > 5 && (
-            <Link
-              href={`/myhumans/${userId}/interactions`}
-              className="text-sm text-blue-600 hover:underline mt-3 block"
-            >
-              View all {recentMeetings.length + 1} interactions →
-            </Link>
-          )}
+
+                {/* Date */}
+                {dateStr && (
+                  <p className="text-xs text-slate-400 mt-0.5">{dateStr}</p>
+                )}
+
+                {/* Action buttons */}
+                <div className="flex items-center gap-1.5 mt-3 flex-wrap">
+                  <button
+                    onClick={() => setPopoutMeetingId(meeting.id)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                  >
+                    <FileText className="h-3 w-3" />
+                    View Notes
+                  </button>
+
+                  <LogNoteDialog
+                    userId={userId}
+                    trigger={
+                      <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors">
+                        <FileText className="h-3 w-3 text-blue-500" />
+                        Log Note
+                      </button>
+                    }
+                  />
+
+                  <Link
+                    href={`/myhumans/${userId}/take-notes?interactionId=${meeting.id}`}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                  >
+                    <NotebookPen className="h-3 w-3 text-[hsl(213,70%,40%)]" />
+                    Take Notes
+                  </Link>
+                </div>
+              </div>
+            )
+          })}
         </div>
+
+        {/* View all link */}
+        {totalMeetingCount > 0 && (
+          <Link
+            href={`/myhumans/${userId}/interactions`}
+            className="inline-flex items-center gap-1 text-sm text-[hsl(213,70%,35%)] hover:text-[hsl(213,70%,25%)] mt-4 font-medium transition-colors"
+          >
+            View all {totalMeetingCount} interaction{totalMeetingCount !== 1 ? 's' : ''} →
+          </Link>
+        )}
+      </div>
+
+      {/* Notes popout dialog */}
+      {popoutMeeting && (
+        <SessionNotesPopout
+          open={!!popoutMeetingId}
+          onOpenChange={(open) => { if (!open) setPopoutMeetingId(null) }}
+          meetingId={popoutMeeting.id}
+          meetingTitle={popoutMeeting.title || 'Untitled Interaction'}
+          meetingDate={formatMeetingDate(popoutMeeting)}
+          personId={userId}
+        />
       )}
-    </div>
+    </>
   )
 }

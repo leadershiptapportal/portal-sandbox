@@ -242,6 +242,10 @@ export async function updateTaskStatusAction(
 
 // ── Session Notes ─────────────────────────────────────────────────────────────
 
+export async function getNotesByMeetingIdAction(meetingId: string) {
+  return getNotesByMeetingId(meetingId).catch(() => [])
+}
+
 export async function updateSessionNotesAction(
   meetingId: string,
   notes: string,

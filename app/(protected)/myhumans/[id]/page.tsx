@@ -8,7 +8,7 @@ import BackLink from '@/components/BackLink'
 import { getUserById } from '@/lib/services/usersService'
 import { getMeetingsForUser } from '@/lib/services/meetingsService'
 import { getUserMessages } from '@/lib/services/messagesService'
-import { getNotesByUser, getNotesByMeetingId } from '@/lib/airtable/notes'
+import { getNotesByUser } from '@/lib/airtable/notes'
 import { getTasksByUser } from '@/lib/airtable/tasks'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
@@ -27,7 +27,6 @@ import MostRecentSessionSection from './sections/MostRecentSessionSection'
 import PersonalityStrengthsSection from './sections/PersonalityStrengthsSection'
 import ProfileDetailsSection from './sections/ProfileDetailsSection'
 import CoachNotesSection from './sections/CoachNotesSection'
-import TeamSection from './sections/TeamSection'
 import TheirTeamSection from './sections/TheirTeamSection'
 import MessagesSection from './sections/MessagesSection'
 import TasksSection from './sections/TasksSection'
@@ -134,13 +133,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   const pastSorted = [...past].sort(
     (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
   )
-  const lastMeeting = pastSorted[0] ?? null
-  const recentMeetings = pastSorted.slice(1)
-
-  // Fetch meeting-linked notes for the most recent session
-  const lastMeetingNotes = lastMeeting
-    ? await getNotesByMeetingId(lastMeeting.id).catch(() => [])
-    : []
+  const topMeetings = pastSorted.slice(0, 3)
+  const totalMeetingCount = pastSorted.length
 
   const name = getDisplayName(user)
   const initials = getInitials(user)
@@ -262,11 +256,10 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         userCanWrite={userCanWrite}
       />
 
-      {/* ── Most Recent Session ───────────────────────────────────────────── */}
+      {/* ── Most Recent Interactions ──────────────────────────────────────── */}
       <MostRecentSessionSection
-        lastMeeting={lastMeeting}
-        lastMeetingNotes={lastMeetingNotes}
-        recentMeetings={recentMeetings}
+        topMeetings={topMeetings}
+        totalMeetingCount={totalMeetingCount}
         userId={id}
       />
 
@@ -292,16 +285,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
             u.email,
         }))}
         canEdit={userCanWrite}
-      />
-
-      {/* ── Team ─────────────────────────────────────────────────────────── */}
-      <TeamSection
-        userId={id}
-        manager={manager}
-        directReports={directReports}
-        teamMembers={teamMembers}
-        teamMemberIdList={teamMemberIdList}
-        userCanWrite={userCanWrite}
       />
 
       {/* ── Their Team ───────────────────────────────────────────────────── */}
