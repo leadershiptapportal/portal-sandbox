@@ -56,10 +56,10 @@ export default async function UpcomingThisWeekRegion({ userRecord }: Props) {
   const clientCount = items.filter((i) => i.clientId).length
 
   return (
-    <div id="upcoming" className="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-4 md:mb-6">
-      <div className="flex items-center gap-2 mb-5">
-        <Calendar className="h-5 w-5 text-slate-400" />
-        <h2 className="text-lg font-semibold text-slate-900">Upcoming This Week</h2>
+    <div id="upcoming" className="bg-white rounded-xl shadow-sm p-4 md:p-5 h-full">
+      <div className="flex items-center gap-2 mb-4">
+        <Calendar className="h-4 w-4 text-slate-400" />
+        <h2 className="text-sm font-semibold text-slate-900">My Upcoming Interactions</h2>
         <div className="ml-auto flex items-center gap-3">
           <span className="text-xs text-slate-400 font-medium">
             {clientCount > 0
@@ -70,11 +70,13 @@ export default async function UpcomingThisWeekRegion({ userRecord }: Props) {
             href="/interactions?filter=upcoming"
             className="text-xs font-medium text-[hsl(213,70%,30%)] hover:underline"
           >
-            View all →
+            View All Interactions →
           </Link>
         </div>
       </div>
-      <UpcomingSessionsCard items={items} />
+      <div className="max-h-[400px] overflow-y-auto -mr-1 pr-1">
+        <UpcomingSessionsCard items={items} />
+      </div>
     </div>
   )
 }

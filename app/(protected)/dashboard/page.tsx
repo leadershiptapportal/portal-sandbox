@@ -3,6 +3,7 @@ import { getUsers, getClientsByRelationship } from '@/lib/services/usersService'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getHourInTimezone } from '@/lib/utils/dateFormat'
+import QuickActionsRegion from './regions/QuickActionsRegion'
 import ComingUpNextRegion from './regions/ComingUpNextRegion'
 import OpenTasksRegion from './regions/OpenTasksRegion'
 import UpcomingThisWeekRegion from './regions/UpcomingThisWeekRegion'
@@ -33,7 +34,6 @@ export default async function DashboardPage() {
 
   const isAdmin = userRecord.role === 'admin'
 
-  // Fetch just users for greeting — lightweight, fast
   const users = await (isAdmin || !userRecord.airtableId
     ? getUsers(sessionUser)
     : getClientsByRelationship(userRecord.airtableId))
@@ -55,7 +55,7 @@ export default async function DashboardPage() {
     <div className="p-4 md:p-6 lg:p-8">
 
       {/* ── Greeting ─────────────────────────────────────────────────────────── */}
-      <div className="mb-6">
+      <div className="mb-5">
         <h1 className="text-2xl font-bold text-slate-900">
           Good {getTimeOfDay().label}, {firstName} {getTimeOfDay().emoji}
         </h1>
@@ -64,20 +64,25 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* ── Coming Up Next + Today chips + Quick Actions ────────────────────── */}
+      {/* ── Quick Actions ────────────────────────────────────────────────────── */}
+      <Suspense fallback={<div className="h-[68px] bg-white rounded-xl shadow-sm mb-4 md:mb-5 animate-pulse" />}>
+        <QuickActionsRegion userRecord={userRecord} />
+      </Suspense>
+
+      {/* ── Today chips + admin calendar ─────────────────────────────────────── */}
       <Suspense fallback={<ComingUpNextSkeleton />}>
         <ComingUpNextRegion userRecord={userRecord} />
       </Suspense>
 
-      {/* ── Open Tasks ─────────────────────────────────────────────────────── */}
-      <Suspense fallback={<TasksSkeleton />}>
-        <OpenTasksRegion userRecord={userRecord} />
-      </Suspense>
-
-      {/* ── Upcoming This Week (calendar overview) ─────────────────────────── */}
-      <Suspense fallback={<UpcomingThisWeekSkeleton />}>
-        <UpcomingThisWeekRegion userRecord={userRecord} />
-      </Suspense>
+      {/* ── My Upcoming Interactions (left) + Open Tasks (right) ─────────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+        <Suspense fallback={<UpcomingThisWeekSkeleton />}>
+          <UpcomingThisWeekRegion userRecord={userRecord} />
+        </Suspense>
+        <Suspense fallback={<TasksSkeleton />}>
+          <OpenTasksRegion userRecord={userRecord} />
+        </Suspense>
+      </div>
 
     </div>
   )

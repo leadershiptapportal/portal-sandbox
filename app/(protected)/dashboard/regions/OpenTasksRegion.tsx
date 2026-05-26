@@ -50,10 +50,10 @@ export default async function OpenTasksRegion({ userRecord }: Props) {
   const coachesForActions = coachUsers.map((u) => ({ id: u.id, name: getDisplayName(u) }))
 
   return (
-    <div className="mb-4 md:mb-6 bg-white rounded-xl shadow-sm p-4 md:p-6">
+    <div className="bg-white rounded-xl shadow-sm p-4 md:p-5 h-full">
       <div className="flex items-center gap-2 mb-4">
-        <CheckSquare className="h-5 w-5 text-slate-400" />
-        <h2 className="text-lg font-semibold text-slate-900">Open Tasks</h2>
+        <CheckSquare className="h-4 w-4 text-slate-400" />
+        <h2 className="text-sm font-semibold text-slate-900">Open Tasks</h2>
         {openTasks.length > 0 && (
           <span className="ml-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
             {openTasks.length}
