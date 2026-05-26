@@ -1,4 +1,5 @@
 import { findClientForMeeting } from '@/lib/services/meetingsService'
+import { resolveDisplayTz } from '@/lib/utils/dateFormat'
 import type { Meeting, User } from '@/lib/types'
 import type { UpcomingItem } from '../UpcomingSessionsCard'
 
@@ -56,7 +57,7 @@ export function meetingsToUpcomingItems(
       (meeting.senderEmail
         ? (emailToUser.get(meeting.senderEmail.toLowerCase().trim()) ?? null)
         : null)
-    const tz = meeting.timezone || 'America/New_York'
+    const tz = resolveDisplayTz(meeting.timezone)
     const fmt = (iso: string) =>
       new Date(iso).toLocaleString('en-US', { timeZone: tz, hour: 'numeric', minute: '2-digit', hour12: true })
     const timeRange = meeting.endTime

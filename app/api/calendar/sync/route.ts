@@ -121,7 +121,7 @@ async function upsertInteraction(
     [F.ATTENDEES]: attendeesString,
     [F.MEETING_STATUS]: new Date(end).getTime() < Date.now() ? 'Completed' : 'Scheduled',
     [F.CALENDAR_PROVIDER]: 'Outlook',
-    [F.TIMEZONE]: event.start.timeZone ?? 'America/New_York',
+    [F.TIMEZONE]: 'America/New_York',
     [F.INTERACTION_TYPE]: 'Calendar Event',
     [F.SOURCE]: 'Synced',
   }

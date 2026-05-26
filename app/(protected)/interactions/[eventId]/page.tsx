@@ -6,14 +6,14 @@ import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import { getNotesByMeetingId } from '@/lib/airtable/notes'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
-import { formatEastern } from '@/lib/utils/dateFormat'
+import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import SessionNoteForm from './SessionNoteForm'
 
 interface Props {
   params: Promise<{ eventId: string }>
 }
 
-function formatDateTime(iso: string, timezone: string = 'America/New_York'): string {
+function formatDateTime(iso: string, timezone?: string): string {
   return formatEastern(iso, {
     weekday: 'long',
     month: 'long',
@@ -22,7 +22,7 @@ function formatDateTime(iso: string, timezone: string = 'America/New_York'): str
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-  }, timezone) + ' ET'
+  }, resolveDisplayTz(timezone)) + ' ET'
 }
 
 export default async function SessionPage({ params }: Props) {

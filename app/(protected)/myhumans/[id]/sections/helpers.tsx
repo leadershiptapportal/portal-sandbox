@@ -1,5 +1,5 @@
 import type { User } from '@/lib/types'
-import { formatEastern } from '@/lib/utils/dateFormat'
+import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
 
 export function getDisplayName(user: User): string {
   if (user.fullName) return user.fullName
@@ -14,7 +14,7 @@ export function getInitials(user: User): string {
   return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase() || user.email[0].toUpperCase()
 }
 
-export function formatMeetingDate(iso: string, timezone: string = 'America/New_York'): string {
+export function formatMeetingDate(iso: string, timezone?: string): string {
   return formatEastern(iso, {
     weekday: 'short',
     month: 'short',
@@ -23,7 +23,7 @@ export function formatMeetingDate(iso: string, timezone: string = 'America/New_Y
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-  }, timezone).replace(',', '').replace(/(\d{4}),/, '$1 at') + ' ET'
+  }, resolveDisplayTz(timezone)).replace(',', '').replace(/(\d{4}),/, '$1 at') + ' ET'
 }
 
 export function formatMessageDate(iso: string): string {
@@ -34,12 +34,13 @@ export function formatMessageDate(iso: string): string {
   })
 }
 
-export function formatMeetingDay(iso: string, timezone: string = 'America/New_York'): { weekday: string; day: number; month: string; time: string } {
+export function formatMeetingDay(iso: string, timezone?: string): { weekday: string; day: number; month: string; time: string } {
+  const tz = resolveDisplayTz(timezone)
   return {
-    weekday: formatEastern(iso, { weekday: 'short' }, timezone),
-    day: parseInt(formatEastern(iso, { day: 'numeric' }, timezone), 10),
-    month: formatEastern(iso, { month: 'short' }, timezone),
-    time: formatEastern(iso, { hour: 'numeric', minute: '2-digit', hour12: true }, timezone) + ' ET',
+    weekday: formatEastern(iso, { weekday: 'short' }, tz),
+    day: parseInt(formatEastern(iso, { day: 'numeric' }, tz), 10),
+    month: formatEastern(iso, { month: 'short' }, tz),
+    time: formatEastern(iso, { hour: 'numeric', minute: '2-digit', hour12: true }, tz) + ' ET',
   }
 }
 

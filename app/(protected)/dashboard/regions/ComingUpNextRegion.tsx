@@ -9,7 +9,7 @@ import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getAllUpcomingMeetings, getRecentPastMeetings } from '@/lib/airtable/meetings'
 import { buildEmailToUserMap } from '@/lib/services/meetingsService'
 import { getNotesByAuthor } from '@/lib/airtable/notes'
-import { getDateInTimezone } from '@/lib/utils/dateFormat'
+import { getDateInTimezone, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import { meetingsToUpcomingItems } from './meetingMappers'
 import type { CurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 
@@ -45,7 +45,7 @@ async function getUpcomingPortalEvents(ownerEmail: string): Promise<PortalCalend
       id: r.id,
       subject: (r.fields[FIELDS.MEETINGS.TITLE] as string) ?? '(No Subject)',
       start: (r.fields[FIELDS.MEETINGS.START] as string) ?? '',
-      timezone: (r.fields[FIELDS.MEETINGS.TIMEZONE] as string) || 'America/New_York',
+      timezone: resolveDisplayTz(r.fields[FIELDS.MEETINGS.TIMEZONE] as string | undefined),
     })).filter((e: PortalCalendarEvent) => e.start)
   } catch {
     return []
@@ -89,10 +89,10 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
 
   const todayStr = getDateInTimezone(now.toISOString())
   const futureToday = upcomingItems.filter(
-    (item) => getDateInTimezone(item.startTime, item.timezone || undefined) === todayStr,
+    (item) => getDateInTimezone(item.startTime, resolveDisplayTz(item.timezone)) === todayStr,
   )
   const pastToday = pastDayItems.filter(
-    (item) => getDateInTimezone(item.startTime, item.timezone || undefined) === todayStr,
+    (item) => getDateInTimezone(item.startTime, resolveDisplayTz(item.timezone)) === todayStr,
   )
 
   const allTodayItems = [

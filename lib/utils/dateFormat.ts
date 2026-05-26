@@ -1,3 +1,23 @@
+/**
+ * Graph returns event.start.timeZone as "UTC" when no Prefer header is set.
+ * "UTC" is truthy so it bypasses all || fallbacks. This normalises it (and
+ * Windows timezone names) to a valid IANA name for Intl.DateTimeFormat.
+ */
+export function resolveDisplayTz(tz: string | undefined): string {
+  if (!tz || tz === 'UTC') return 'America/New_York'
+  const WIN_TO_IANA: Record<string, string> = {
+    'Eastern Standard Time': 'America/New_York',
+    'Eastern Daylight Time': 'America/New_York',
+    'Central Standard Time': 'America/Chicago',
+    'Central Daylight Time': 'America/Chicago',
+    'Mountain Standard Time': 'America/Denver',
+    'Mountain Daylight Time': 'America/Denver',
+    'Pacific Standard Time': 'America/Los_Angeles',
+    'Pacific Daylight Time': 'America/Los_Angeles',
+  }
+  return WIN_TO_IANA[tz] ?? tz
+}
+
 export function formatEastern(
   dateString: string,
   options?: Intl.DateTimeFormatOptions,

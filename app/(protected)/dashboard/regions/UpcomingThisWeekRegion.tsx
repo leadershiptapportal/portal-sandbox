@@ -6,7 +6,7 @@ import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getAllUpcomingMeetings } from '@/lib/airtable/meetings'
 import { buildEmailToUserMap } from '@/lib/services/meetingsService'
 import { getNotesByAuthor } from '@/lib/airtable/notes'
-import { getDateInTimezone } from '@/lib/utils/dateFormat'
+import { getDateInTimezone, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import UpcomingSessionsCard from '../UpcomingSessionsCard'
 import { meetingsToUpcomingItems } from './meetingMappers'
 import type { CurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
@@ -48,7 +48,7 @@ export default async function UpcomingThisWeekRegion({ userRecord }: Props) {
   // Hide today (those are in the Today chip row in ComingUpNextRegion).
   const todayStr = getDateInTimezone(new Date().toISOString())
   const items = allItems.filter(
-    (item) => getDateInTimezone(item.startTime, item.timezone || undefined) !== todayStr,
+    (item) => getDateInTimezone(item.startTime, resolveDisplayTz(item.timezone)) !== todayStr,
   )
 
   if (items.length === 0) return null

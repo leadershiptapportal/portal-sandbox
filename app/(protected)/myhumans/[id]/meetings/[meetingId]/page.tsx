@@ -5,14 +5,14 @@ import { getMeetingDetail } from '@/lib/services/meetingsService'
 import { getMeetingMessages } from '@/lib/services/messagesService'
 import NotesEditor from '@/components/NotesEditor'
 import FollowUpSection from '@/components/FollowUpSection'
-import { formatEastern } from '@/lib/utils/dateFormat'
+import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import { saveNotes, createDraft, updateDraft, markSent } from './actions'
 
 interface Props {
   params: Promise<{ id: string; meetingId: string }>
 }
 
-function formatDateTime(iso: string, timezone: string = 'America/New_York'): string {
+function formatDateTime(iso: string, timezone?: string): string {
   return formatEastern(iso, {
     weekday: 'short',
     month: 'short',
@@ -21,7 +21,7 @@ function formatDateTime(iso: string, timezone: string = 'America/New_York'): str
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-  }, timezone)
+  }, resolveDisplayTz(timezone))
 }
 
 export default async function MeetingDetailPage({ params }: Props) {
@@ -37,7 +37,7 @@ export default async function MeetingDetailPage({ params }: Props) {
   const userName = user?.fullName ?? user?.preferredName ?? user?.firstName ?? 'User'
   const existingMessage = messages[0] ?? null
 
-  const tz = meeting.timezone || 'America/New_York'
+  const tz = resolveDisplayTz(meeting.timezone)
   const formattedDate = meeting.endTime
     ? `${formatDateTime(meeting.startTime, tz)} – ${formatEastern(meeting.endTime, { hour: 'numeric', minute: '2-digit', hour12: true }, tz)} ET`
     : `${formatDateTime(meeting.startTime, tz)} ET`
