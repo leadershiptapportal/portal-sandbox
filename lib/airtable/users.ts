@@ -344,19 +344,30 @@ export async function updateUserProfile(
 export interface ProfileOption {
   id: string
   name: string
+  typeCode?: string     // raw code: type number for Enneagram, MBTI code for 16Personalities
+  descriptor?: string   // long-form descriptor text
+}
+
+interface FetchTableConfig {
+  filterFormula?: string
+  codeField?: string       // extra field to fetch as typeCode
+  descriptorField?: string // field to fetch as descriptor
+  nameFormatter?: (name: string, code: string | undefined) => string
 }
 
 async function fetchTableOptions(
   tableName: string,
   nameField: string,
-  filterFormula?: string,
+  config?: FetchTableConfig,
 ): Promise<ProfileOption[]> {
   try {
     const { apiKey, baseId } = getCredentials()
     const params = new URLSearchParams()
     params.append('fields[]', nameField)
+    if (config?.codeField) params.append('fields[]', config.codeField)
+    if (config?.descriptorField) params.append('fields[]', config.descriptorField)
     params.set('maxRecords', '200')
-    if (filterFormula) params.set('filterByFormula', filterFormula)
+    if (config?.filterFormula) params.set('filterByFormula', config.filterFormula)
     const res = await airtableFetch(
       `${API_BASE}/${baseId}/${encodeURIComponent(tableName)}?${params}`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
@@ -367,15 +378,47 @@ async function fetchTableOptions(
     }
     const data = await res.json()
     return (data.records ?? [])
-      .map((r: { id: string; fields: Record<string, unknown> }) => ({
-        id: r.id,
-        name: (r.fields[nameField] as string) ?? '',
-      }))
+      .map((r: { id: string; fields: Record<string, unknown> }) => {
+        const rawName = (r.fields[nameField] as string) ?? ''
+        const typeCode = config?.codeField
+          ? String(r.fields[config.codeField] ?? '').trim() || undefined
+          : undefined
+        const descriptor = config?.descriptorField
+          ? (r.fields[config.descriptorField] as string) || undefined
+          : undefined
+        const name = config?.nameFormatter ? config.nameFormatter(rawName, typeCode) : rawName
+        return { id: r.id, name, typeCode, descriptor }
+      })
       .filter((r: ProfileOption) => r.name)
   } catch (e) {
     console.warn(`[fetchTableOptions] ${tableName} error:`, e)
     return []
   }
+}
+
+// Lightweight fetch of personality type options with formatted display labels.
+// Used by the profile page to resolve display labels without loading all options.
+export async function fetchPersonalityOptions(): Promise<{
+  enneagrams: ProfileOption[]
+  mbtis: ProfileOption[]
+  strengths: ProfileOption[]
+}> {
+  const [enneagrams, mbtis, strengths] = await Promise.all([
+    fetchTableOptions('Enneagram', FIELDS.ENNEAGRAM.NAME, {
+      codeField: FIELDS.ENNEAGRAM.TYPE_NUMBER,
+      descriptorField: FIELDS.ENNEAGRAM.DESCRIPTOR,
+      nameFormatter: (name, code) => (code ? `Type ${code} | ${name}` : name),
+    }),
+    fetchTableOptions('16Personalities', FIELDS.PERSONALITIES_16.NAME, {
+      codeField: FIELDS.PERSONALITIES_16.MBTI_CODE,
+      descriptorField: FIELDS.PERSONALITIES_16.DESCRIPTOR,
+      nameFormatter: (name, code) => (code ? `${code.split('-')[0]} | ${name}` : name),
+    }),
+    fetchTableOptions('Strengths', FIELDS.STRENGTHS.NAME, {
+      descriptorField: FIELDS.STRENGTHS.DESCRIPTOR,
+    }),
+  ])
+  return { enneagrams, mbtis, strengths }
 }
 
 export async function fetchProfileOptions(allUsers: User[]): Promise<{
@@ -390,14 +433,28 @@ export async function fetchProfileOptions(allUsers: User[]): Promise<{
 }> {
   const [companies, enneagrams, mbtis, conflictPostures, apologyLanguages, strengths] =
     await Promise.all([
-      // Companies primary field is "Company Name", not "Name". Restrict to
-      // Active orgs only — spec Section 5 Table 2.
-      fetchTableOptions(TABLES.ORGANIZATIONS, FIELDS.COMPANIES.NAME, `{${FIELDS.COMPANIES.STATUS}}="Active"`),
-      fetchTableOptions('Enneagram', FIELDS.ENNEAGRAM.NAME),
-      fetchTableOptions('16Personalities', FIELDS.PERSONALITIES_16.NAME),
-      fetchTableOptions('Conflict Postures', FIELDS.CONFLICT_POSTURES.NAME),
-      fetchTableOptions('Apology Languages', FIELDS.APOLOGY_LANGUAGES.NAME),
-      fetchTableOptions('Strengths', FIELDS.STRENGTHS.NAME),
+      fetchTableOptions(TABLES.ORGANIZATIONS, FIELDS.COMPANIES.NAME, {
+        filterFormula: `{${FIELDS.COMPANIES.STATUS}}="Active"`,
+      }),
+      fetchTableOptions('Enneagram', FIELDS.ENNEAGRAM.NAME, {
+        codeField: FIELDS.ENNEAGRAM.TYPE_NUMBER,
+        descriptorField: FIELDS.ENNEAGRAM.DESCRIPTOR,
+        nameFormatter: (name, code) => (code ? `Type ${code} | ${name}` : name),
+      }),
+      fetchTableOptions('16Personalities', FIELDS.PERSONALITIES_16.NAME, {
+        codeField: FIELDS.PERSONALITIES_16.MBTI_CODE,
+        descriptorField: FIELDS.PERSONALITIES_16.DESCRIPTOR,
+        nameFormatter: (name, code) => (code ? `${code.split('-')[0]} | ${name}` : name),
+      }),
+      fetchTableOptions('Conflict Postures', FIELDS.CONFLICT_POSTURES.NAME, {
+        descriptorField: FIELDS.CONFLICT_POSTURES.DESCRIPTOR,
+      }),
+      fetchTableOptions('Apology Languages', FIELDS.APOLOGY_LANGUAGES.NAME, {
+        descriptorField: FIELDS.APOLOGY_LANGUAGES.DESCRIPTOR,
+      }),
+      fetchTableOptions('Strengths', FIELDS.STRENGTHS.NAME, {
+        descriptorField: FIELDS.STRENGTHS.DESCRIPTOR,
+      }),
     ])
 
   const nameOf = (u: User) =>

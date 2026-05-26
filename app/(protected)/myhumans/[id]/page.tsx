@@ -17,7 +17,7 @@ import {
   getDirectReports,
   getRelationshipsForPerson,
 } from '@/lib/airtable/relationships'
-import { getAllUsers } from '@/lib/airtable/users'
+import { getAllUsers, fetchPersonalityOptions } from '@/lib/airtable/users'
 import PlaceholderSection from '@/components/ui/PlaceholderSection'
 import UserActionsBar from './UserActionsBar'
 import { getDisplayName, getInitials, isRecordId, SectionHeading } from './sections/helpers'
@@ -93,6 +93,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     theirTeamReports,
     allPersonRelationships,
     allUsersForPicker,
+    personalityOptions,
   ] = await Promise.all([
     // Every fetch is wrapped in `.catch(...)` so a single failing Airtable
     // call (permission, rate limit, transient network) can't reject the
@@ -110,6 +111,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     getDirectReports(id).catch(() => []),
     getRelationshipsForPerson(id).catch(() => []),
     getAllUsers().catch(() => [] as User[]),
+    fetchPersonalityOptions().catch(() => null),
   ])
 
   const directReports = theirTeamReports
@@ -149,6 +151,24 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   const name = getDisplayName(user)
   const initials = getInitials(user)
 
+  // Resolve formatted personality display labels from the options tables.
+  // e.g. "Type 1 | The Reformer", "INTJ | Architect"
+  const enneagramOption = personalityOptions?.enneagrams.find(
+    (o) => user.enneagramIds?.includes(o.id),
+  )
+  const mbtiOption = personalityOptions?.mbtis.find(
+    (o) => user.mbtiIds?.includes(o.id),
+  )
+  const enneagramLabel = enneagramOption?.name
+  const mbtiLabel = mbtiOption?.name
+  const strengthDescriptors: Record<string, string> = {}
+  if (personalityOptions?.strengths && user.strengths) {
+    for (const s of user.strengths) {
+      const opt = personalityOptions.strengths.find((o) => o.name === s.name)
+      if (opt?.descriptor) strengthDescriptors[s.name] = opt.descriptor
+    }
+  }
+
   // Build the next trail segment for downstream drill-down links
   const nextTrail = [...trailEntries, { id, name }]
     .map((e) => `${e.id}:${encodeURIComponent(e.name)}`)
@@ -166,13 +186,15 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     !isRecordId(user.preferredName)
 
   const badges = [
-    user.enneagramType
-      ? { label: user.enneagramType, className: 'bg-blue-50 text-blue-700' }
+    enneagramLabel
+      ? { label: enneagramLabel, className: 'bg-blue-50 text-blue-700' }
       : user.enneagram && !isRecordId(user.enneagram)
       ? { label: `Enneagram ${user.enneagram}`, className: 'bg-blue-50 text-blue-700' }
       : null,
-    user.mbtiType
-      ? { label: user.mbtiType, className: 'bg-violet-50 text-violet-700' }
+    mbtiLabel
+      ? { label: mbtiLabel, className: 'bg-violet-50 text-violet-700' }
+      : user.mbtiType
+      ? { label: user.mbtiType.split('-')[0], className: 'bg-violet-50 text-violet-700' }
       : user.mbti && !isRecordId(user.mbti)
       ? { label: user.mbti, className: 'bg-violet-50 text-violet-700' }
       : null,
@@ -241,7 +263,12 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
       />
 
       {/* ── Personality & Strengths ───────────────────────────────────────── */}
-      <PersonalityStrengthsSection user={user} />
+      <PersonalityStrengthsSection
+        user={user}
+        enneagramLabel={enneagramLabel}
+        mbtiLabel={mbtiLabel}
+        strengthDescriptors={Object.keys(strengthDescriptors).length > 0 ? strengthDescriptors : undefined}
+      />
 
       {/* ── Profile Details ──────────────────────────────────────────────── */}
       <ProfileDetailsSection user={user} />

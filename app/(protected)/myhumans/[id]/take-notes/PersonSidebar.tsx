@@ -426,66 +426,74 @@ export default function PersonSidebar({
 
       {/* ── Personality ───────────────────────────────────────────────────── */}
       <Section title="Personality">
-        <InlineSelect
-          label="Enneagram"
-          currentId={person.enneagramIds?.[0]}
-          currentLabel={
-            enneagramCurrent?.name ||
-            (person.enneagramType
-              ? `${person.enneagramType}${person.enneagramDescriptor ? ` · ${person.enneagramDescriptor}` : ''}`
-              : undefined)
-          }
-          options={profileOptions.enneagrams}
-          placeholder="Not set"
-          onSave={async (id) => {
-            await saveProfile({ 'Enneagram': id ? [id] : [] })
-          }}
-        />
-        <InlineSelect
-          label="MBTI"
-          currentId={person.mbtiIds?.[0]}
-          currentLabel={
-            mbtiCurrent?.name ||
-            (person.mbtiType
-              ? `${person.mbtiType}${person.mbtiDescriptor ? ` · ${person.mbtiDescriptor}` : ''}`
-              : undefined)
-          }
-          options={profileOptions.mbtis}
-          placeholder="Not set"
-          onSave={async (id) => {
-            await saveProfile({ 'MBTI': id ? [id] : [] })
-          }}
-        />
-        <InlineSelect
-          label="Conflict Posture"
-          currentId={person.conflictPostureIds?.[0]}
-          currentLabel={
-            conflictCurrent?.name ||
-            (person.conflictPosture
-              ? `${person.conflictPosture}${person.conflictPostureDescriptor ? ` · ${person.conflictPostureDescriptor}` : ''}`
-              : undefined)
-          }
-          options={profileOptions.conflictPostures}
-          placeholder="Not set"
-          onSave={async (id) => {
-            await saveProfile({ 'Conflict Posture': id ? [id] : [] })
-          }}
-        />
-        <InlineSelect
-          label="Apology Language"
-          currentId={person.apologyLanguageIds?.[0]}
-          currentLabel={
-            apologyCurrent?.name ||
-            (person.apologyLanguage
-              ? `${person.apologyLanguage}${person.apologyLanguageDescriptor ? ` · ${person.apologyLanguageDescriptor}` : ''}`
-              : undefined)
-          }
-          options={profileOptions.apologyLanguages}
-          placeholder="Not set"
-          onSave={async (id) => {
-            await saveProfile({ 'Apology Language': id ? [id] : [] })
-          }}
-        />
+        <div className="space-y-1">
+          <InlineSelect
+            label="Enneagram"
+            currentId={person.enneagramIds?.[0]}
+            currentLabel={enneagramCurrent?.name || person.enneagramType || undefined}
+            options={profileOptions.enneagrams}
+            placeholder="Not set"
+            onSave={async (id) => {
+              await saveProfile({ 'Enneagram': id ? [id] : [] })
+            }}
+          />
+          {(enneagramCurrent?.descriptor || person.enneagramDescriptor) && (
+            <p className="text-xs text-slate-500 leading-relaxed pl-0.5">
+              {enneagramCurrent?.descriptor ?? person.enneagramDescriptor}
+            </p>
+          )}
+        </div>
+        <div className="space-y-1">
+          <InlineSelect
+            label="16 Personalities"
+            currentId={person.mbtiIds?.[0]}
+            currentLabel={mbtiCurrent?.name || (person.mbtiType ? person.mbtiType.split('-')[0] : undefined)}
+            options={profileOptions.mbtis}
+            placeholder="Not set"
+            onSave={async (id) => {
+              await saveProfile({ 'MBTI': id ? [id] : [] })
+            }}
+          />
+          {(mbtiCurrent?.descriptor || person.mbtiDescriptor) && (
+            <p className="text-xs text-slate-500 leading-relaxed pl-0.5">
+              {mbtiCurrent?.descriptor ?? person.mbtiDescriptor}
+            </p>
+          )}
+        </div>
+        <div className="space-y-1">
+          <InlineSelect
+            label="Conflict Posture"
+            currentId={person.conflictPostureIds?.[0]}
+            currentLabel={conflictCurrent?.name || person.conflictPosture || undefined}
+            options={profileOptions.conflictPostures}
+            placeholder="Not set"
+            onSave={async (id) => {
+              await saveProfile({ 'Conflict Posture': id ? [id] : [] })
+            }}
+          />
+          {(conflictCurrent?.descriptor || person.conflictPostureDescriptor) && (
+            <p className="text-xs text-slate-500 leading-relaxed pl-0.5">
+              {conflictCurrent?.descriptor ?? person.conflictPostureDescriptor}
+            </p>
+          )}
+        </div>
+        <div className="space-y-1">
+          <InlineSelect
+            label="Apology Language"
+            currentId={person.apologyLanguageIds?.[0]}
+            currentLabel={apologyCurrent?.name || person.apologyLanguage || undefined}
+            options={profileOptions.apologyLanguages}
+            placeholder="Not set"
+            onSave={async (id) => {
+              await saveProfile({ 'Apology Language': id ? [id] : [] })
+            }}
+          />
+          {(apologyCurrent?.descriptor || person.apologyLanguageDescriptor) && (
+            <p className="text-xs text-slate-500 leading-relaxed pl-0.5">
+              {apologyCurrent?.descriptor ?? person.apologyLanguageDescriptor}
+            </p>
+          )}
+        </div>
 
         {/* Strengths — read-only list (complex multi-select) */}
         {person.strengths && person.strengths.length > 0 && (

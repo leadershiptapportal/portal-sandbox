@@ -168,18 +168,25 @@ export const FIELDS = {
   },
   ENNEAGRAM: {
     NAME: 'fldDHEcTx28Dpnccp',                  // "Name"
+    TYPE_NUMBER: 'fldSgVRsdnNyK0HgN',           // "Type" (number 1–9)
+    DESCRIPTOR: 'fldEeNLu9MW947rVL',            // "Descriptor"
   },
   PERSONALITIES_16: {
     NAME: 'fldPBfoiEuRsDFQr9',                  // "Name"
+    MBTI_CODE: 'fldbRR957E0X0bQgf',             // "MBTI" (e.g. "INTJ-A")
+    DESCRIPTOR: 'fldaroTONh1ZcZvd3',            // "Descriptor"
   },
   CONFLICT_POSTURES: {
     NAME: 'fldtdKv50CBpFe7V8',                  // "Conflict Posture"
+    DESCRIPTOR: 'fld5Z2cHIrC9guXgO',            // "Descriptor"
   },
   APOLOGY_LANGUAGES: {
     NAME: 'fldS441fSkXjaFdO9',                  // "Apology Language"
+    DESCRIPTOR: 'fldUrCuGaonOKDsck',            // "Descriptor"
   },
   STRENGTHS: {
     NAME: 'fldO3GPrkGxC1ldZi',                  // "Strength"
+    DESCRIPTOR: 'fldA4m8V4MfsI6oKY',            // "Descriptor"
   },
   COACH_PERSON_CONTEXT: {
     COACH: 'fldMidd750nvVaOuD',                 // "Coach"
