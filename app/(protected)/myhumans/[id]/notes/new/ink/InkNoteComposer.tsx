@@ -32,18 +32,12 @@ const WIDTHS = [
   { value: 8,   label: 'Bold',       dot: 'w-2.5 h-2.5' },
 ]
 
-const PEN_STYLES = [
-  { value: 'draw'  as const, label: 'Pen',    title: 'Freehand pen (natural stroke)' },
-  { value: 'solid' as const, label: 'Marker', title: 'Solid marker (clean line)'     },
-]
-
 export default function InkNoteComposer({ subjectPersonId, subjectName }: Props) {
   const router    = useRouter()
   const canvasRef = useRef<TldrawNoteCanvasHandle | null>(null)
 
   const [color,    setColor]    = useState(COLORS[0].value)
   const [width,    setWidth]    = useState(WIDTHS[2].value)   // default: Medium
-  const [penStyle, setPenStyle] = useState<'draw' | 'solid'>('draw')
   const [tool,     setTool]     = useState<'pen' | 'eraser'>('pen')
   const [hasShapes, setHasShapes] = useState(false)
   const [caption,  setCaption]  = useState('')
@@ -170,27 +164,6 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
           <>
             <div className="h-5 w-px bg-slate-200 flex-shrink-0" />
 
-            {/* Pen style */}
-            <div className="inline-flex rounded-md border border-slate-200 overflow-hidden flex-shrink-0">
-              {PEN_STYLES.map((ps) => (
-                <button
-                  key={ps.value}
-                  onClick={() => setPenStyle(ps.value)}
-                  aria-pressed={penStyle === ps.value}
-                  title={ps.title}
-                  className={`px-2.5 h-8 text-xs font-medium transition-colors first:border-0 border-l border-slate-200 ${
-                    penStyle === ps.value
-                      ? 'bg-[hsl(213,70%,30%)] text-white'
-                      : 'bg-white text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  {ps.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="h-5 w-px bg-slate-200 flex-shrink-0" />
-
             {/* Color */}
             <div className="flex items-center gap-1 flex-shrink-0">
               {COLORS.map((c) => (
@@ -235,7 +208,6 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
           color={color}
           width={width}
           tool={tool}
-          penStyle={penStyle}
           penOnly={true}
           onShapeCountChange={handleShapeCountChange}
           className="w-full h-full"

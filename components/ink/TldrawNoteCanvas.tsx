@@ -20,7 +20,6 @@ import {
   Editor,
   DefaultColorStyle,
   DefaultSizeStyle,
-  DefaultDashStyle,
   defaultShapeUtils,
   defaultBindingUtils,
   type TLComponents,
@@ -79,26 +78,6 @@ const HIDDEN_COMPONENTS: TLComponents = {
  */
 const TLDRAW_OPTIONS = {
   maxFontsToLoadBeforeRender: 0,
-  camera: {
-    isLocked:     false,
-    panSpeed:     1,
-    zoomSpeed:    1,
-    // Narrow zoom range — enough to zoom in for fine detail but prevents
-    // accidentally zooming all the way out to a tiny speck.
-    zoomSteps:    [0.5, 1, 2] as number[],
-    wheelBehavior: 'none' as 'zoom' | 'pan' | 'none',
-    constraints: {
-      bounds:      { x: 0, y: 0, w: 800, h: 100_000 },
-      padding:     { x: 0, y: 0 },
-      origin:      { x: 0, y: 0 },
-      initialZoom: 'fit-x' as const,
-      baseZoom:    'fit-x' as const,
-      behavior: {
-        x: 'fixed'   as const,   // ← no horizontal pan at all
-        y: 'contain' as const,   // ← vertical scroll within bounds
-      },
-    },
-  },
 }
 
 // ── Public handle type ─────────────────────────────────────────────────────────
@@ -116,8 +95,6 @@ export interface TldrawNoteCanvasProps {
   color:    string
   width:    number
   tool:     'pen' | 'eraser'
-  /** 'draw' = freehand/pressure-sensitive; 'solid' = clean geometric line */
-  penStyle: 'draw' | 'solid'
   penOnly:  boolean
   onShapeCountChange: (count: number) => void
   className?: string
@@ -126,7 +103,7 @@ export interface TldrawNoteCanvasProps {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 function TldrawNoteCanvasInner(
-  { color, width, tool, penStyle, penOnly, onShapeCountChange, className }: TldrawNoteCanvasProps,
+  { color, width, tool, penOnly, onShapeCountChange, className }: TldrawNoteCanvasProps,
   ref: React.ForwardedRef<TldrawNoteCanvasHandle>,
 ) {
   /**
@@ -147,14 +124,12 @@ function TldrawNoteCanvasInner(
   const editorRef = useRef<Editor | null>(null)
 
   // Prop → ref mirrors so the stable onMount callback reads current values.
-  const colorRef    = useRef(color)
-  const widthRef    = useRef(width)
-  const penStyleRef = useRef(penStyle)
-  const penOnlyRef  = useRef(penOnly)
-  useEffect(() => { colorRef.current    = color    }, [color])
-  useEffect(() => { widthRef.current    = width    }, [width])
-  useEffect(() => { penStyleRef.current = penStyle }, [penStyle])
-  useEffect(() => { penOnlyRef.current  = penOnly  }, [penOnly])
+  const colorRef   = useRef(color)
+  const widthRef   = useRef(width)
+  const penOnlyRef = useRef(penOnly)
+  useEffect(() => { colorRef.current  = color   }, [color])
+  useEffect(() => { widthRef.current  = width   }, [width])
+  useEffect(() => { penOnlyRef.current = penOnly }, [penOnly])
 
   // ── Sync prop changes → live editor ─────────────────────────────────────────
 
@@ -169,12 +144,6 @@ function TldrawNoteCanvasInner(
     if (!editor) return
     editor.setStyleForNextShapes(DefaultSizeStyle, (SIZE_MAP[width] ?? 'm') as never)
   }, [width])
-
-  useEffect(() => {
-    const editor = editorRef.current
-    if (!editor) return
-    editor.setStyleForNextShapes(DefaultDashStyle, penStyle as never)
-  }, [penStyle])
 
   useEffect(() => {
     const editor = editorRef.current
@@ -220,6 +189,32 @@ function TldrawNoteCanvasInner(
     (editor: Editor) => {
       editorRef.current = editor
 
+      // ── Camera: locked at exactly 0.5× (fit-x of a canvas 2× the viewport width) ──
+      // Computing bounds at mount time lets us use the actual device width rather
+      // than a hard-coded 800-unit assumption. fit-x with w = 2 × screenWidth
+      // lands the zoom at exactly 0.5 on every screen size.
+      const vp = editor.getViewportScreenBounds()
+      editor.setCameraOptions({
+        isLocked:      false,
+        panSpeed:      1,
+        zoomSpeed:     1,
+        zoomSteps:     [0.5],          // single step = no zooming in or out
+        wheelBehavior: 'none',
+        constraints: {
+          bounds:      { x: 0, y: 0, w: vp.width * 2, h: 100_000 },
+          padding:     { x: 0, y: 0 },
+          origin:      { x: 0, y: 0 },
+          initialZoom: 'fit-x',
+          baseZoom:    'fit-x',
+          behavior: {
+            x: 'fixed',    // no horizontal pan
+            y: 'contain',  // vertical scroll within bounds
+          },
+        },
+      })
+      // Apply the new constraints immediately (reset to fit-x = 0.5×).
+      editor.resetZoom()
+
       editor.setCurrentTool('draw')
       editor.setStyleForNextShapes(
         DefaultColorStyle,
@@ -229,7 +224,6 @@ function TldrawNoteCanvasInner(
         DefaultSizeStyle,
         (SIZE_MAP[widthRef.current] ?? 'm') as never,
       )
-      editor.setStyleForNextShapes(DefaultDashStyle, penStyleRef.current as never)
 
       // isPenMode: finger pans the canvas vertically; stylus draws.
       editor.updateInstanceState({ isPenMode: penOnlyRef.current })
