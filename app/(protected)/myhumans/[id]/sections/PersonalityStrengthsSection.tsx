@@ -14,6 +14,41 @@ interface Props {
   strengthDescriptors?: Record<string, string>
 }
 
+// ── Shared card shell ─────────────────────────────────────────────────────────
+
+function AttributeCard({
+  label,
+  name,
+  descriptor,
+  bg,
+  border,
+  nameColor,
+  children,
+}: {
+  label: string
+  name?: string
+  descriptor?: string
+  bg: string
+  border: string
+  nameColor: string
+  children?: React.ReactNode
+}) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">{label}</p>
+      <div className={`rounded-lg border px-4 py-3 space-y-1.5 ${bg} ${border}`}>
+        {name && (
+          <p className={`text-sm font-semibold leading-snug ${nameColor}`}>{name}</p>
+        )}
+        {descriptor && <DescriptorText text={descriptor} />}
+        {children}
+      </div>
+    </div>
+  )
+}
+
+// ── Main section ──────────────────────────────────────────────────────────────
+
 export default function PersonalityStrengthsSection({
   user,
   enneagramLabel,
@@ -21,100 +56,105 @@ export default function PersonalityStrengthsSection({
   conflictPostureLabel,
   strengthDescriptors,
 }: Props) {
+  const enneagramDisplay = enneagramLabel ?? user.enneagramType ?? user.enneagram
+  const mbtiDisplay = mbtiLabel ?? user.mbtiType ?? user.mbti
+  const conflictDisplay = conflictPostureLabel ?? user.conflictPosture
+
   const hasPersonality =
-    !!(user.enneagramType || user.enneagram || user.mbtiType || user.mbti ||
-       user.conflictPosture || user.conflictPostureDescriptor ||
+    !!(enneagramDisplay || mbtiDisplay ||
+       conflictDisplay || user.conflictPostureDescriptor ||
        user.apologyLanguage ||
        (user.strengths && user.strengths.length > 0))
 
   if (!hasPersonality) return null
 
-  const enneagramDisplay = enneagramLabel ?? user.enneagramType ?? user.enneagram
-  const mbtiDisplay = mbtiLabel ?? user.mbtiType ?? user.mbti
-
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
       <SectionHeading icon={Brain} title="Personality & Strengths" />
-      <div className="space-y-5">
 
+      <div className="space-y-4">
+
+        {/* Enneagram ── blue */}
         {enneagramDisplay && (
-          <div className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Enneagram</p>
-            <p className="text-sm font-medium text-slate-800">
-              {enneagramDisplay}
-            </p>
-            {user.enneagramDescriptor && (
-              <DescriptorText text={user.enneagramDescriptor} />
-            )}
-          </div>
+          <AttributeCard
+            label="Enneagram"
+            name={enneagramDisplay}
+            descriptor={user.enneagramDescriptor}
+            bg="bg-blue-50"
+            border="border-blue-100"
+            nameColor="text-blue-800"
+          />
         )}
 
+        {/* 16 Personalities ── violet */}
         {mbtiDisplay && (
-          <div className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">16 Personalities</p>
-            <p className="text-sm font-medium text-slate-800">
-              {mbtiDisplay}
-            </p>
-            {user.mbtiDescriptor && (
-              <DescriptorText text={user.mbtiDescriptor} />
-            )}
-          </div>
+          <AttributeCard
+            label="16 Personalities"
+            name={mbtiDisplay}
+            descriptor={user.mbtiDescriptor}
+            bg="bg-violet-50"
+            border="border-violet-100"
+            nameColor="text-violet-800"
+          />
         )}
 
-        {(conflictPostureLabel || user.conflictPosture || user.conflictPostureDescriptor) && (
-          <div className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Conflict Posture</p>
-            <div className="rounded-lg bg-amber-50 border border-amber-100 px-3 py-2.5 space-y-1.5">
-              {(conflictPostureLabel || user.conflictPosture) && (
-                <p className="text-sm font-semibold text-amber-800">
-                  {conflictPostureLabel ?? user.conflictPosture}
-                </p>
-              )}
-              {user.conflictPostureDescriptor && (
-                <DescriptorText text={user.conflictPostureDescriptor} />
-              )}
-            </div>
-          </div>
+        {/* Conflict Posture ── amber */}
+        {(conflictDisplay || user.conflictPostureDescriptor) && (
+          <AttributeCard
+            label="Conflict Posture"
+            name={conflictDisplay}
+            descriptor={user.conflictPostureDescriptor}
+            bg="bg-amber-50"
+            border="border-amber-100"
+            nameColor="text-amber-800"
+          />
         )}
 
+        {/* Apology Language ── emerald */}
         {user.apologyLanguage && (
-          <div className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Apology Language</p>
-            <p className="text-sm font-medium text-slate-800">{user.apologyLanguage}</p>
-            {user.apologyLanguageDescriptor && (
-              <DescriptorText text={user.apologyLanguageDescriptor} />
-            )}
-          </div>
+          <AttributeCard
+            label="Apology Language"
+            name={user.apologyLanguage}
+            descriptor={user.apologyLanguageDescriptor}
+            bg="bg-emerald-50"
+            border="border-emerald-100"
+            nameColor="text-emerald-800"
+          />
         )}
 
+        {/* CliftonStrengths ── indigo, numbered list */}
         {user.strengths && user.strengths.length > 0 && (
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">CliftonStrengths</p>
-            <ol className="space-y-2">
-              {user.strengths.map((s, i) => {
-                const descriptor = strengthDescriptors?.[s.name]
-                return (
-                  <li key={i}>
-                    <div className="flex items-center gap-2">
-                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center">
-                        {i + 1}
-                      </span>
-                      <span className="text-sm text-slate-800 font-medium">{s.name}</span>
-                      {s.domain && (
-                        <span className="text-xs text-slate-400 px-1.5 py-0.5 bg-slate-50 rounded">
-                          {s.domain}
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
+              CliftonStrengths
+            </p>
+            <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 px-4 py-3">
+              <ol className="space-y-3">
+                {user.strengths.map((s, i) => {
+                  const descriptor = strengthDescriptors?.[s.name]
+                  return (
+                    <li key={i}>
+                      <div className="flex items-center gap-2">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold flex items-center justify-center">
+                          {i + 1}
                         </span>
-                      )}
-                    </div>
-                    {descriptor && (
-                      <div className="ml-7 mt-0.5">
-                        <DescriptorText text={descriptor} />
+                        <span className="text-sm font-semibold text-indigo-900">{s.name}</span>
+                        {s.domain && (
+                          <span className="text-xs font-medium text-indigo-600 px-1.5 py-0.5 bg-indigo-100 rounded">
+                            {s.domain}
+                          </span>
+                        )}
                       </div>
-                    )}
-                  </li>
-                )
-              })}
-            </ol>
+                      {descriptor && (
+                        <div className="ml-7 mt-0.5">
+                          <DescriptorText text={descriptor} />
+                        </div>
+                      )}
+                    </li>
+                  )
+                })}
+              </ol>
+            </div>
           </div>
         )}
 
