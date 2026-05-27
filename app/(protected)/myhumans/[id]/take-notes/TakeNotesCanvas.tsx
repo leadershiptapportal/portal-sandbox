@@ -1,11 +1,18 @@
 'use client'
 
 import { useRef, useState, useMemo } from 'react'
+import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
-import { Pencil, Undo2, Trash2, Hand, Eraser, Link2 } from 'lucide-react'
-import InkCanvas, { type InkTool } from '@/components/ink/InkCanvas'
+import { Pencil, Undo2, Trash2, Eraser, Link2 } from 'lucide-react'
+import type { TldrawNoteCanvasHandle } from '@/components/ink/TldrawNoteCanvas'
 import { saveInkNoteAction } from '../actions'
 import type { Interaction } from '@/lib/types'
+
+// Dynamic import prevents tldraw's browser-only code from running during SSR.
+const TldrawNoteCanvas = dynamic(
+  () => import('@/components/ink/TldrawNoteCanvas'),
+  { ssr: false, loading: () => <div className="w-full h-full bg-white animate-pulse rounded-xl" /> },
+)
 
 interface Props {
   personId: string
@@ -17,23 +24,19 @@ interface Props {
   onStrokeCountChange?: (count: number) => void
 }
 
+// ── Toolbar options ────────────────────────────────────────────────────────────
+
 const COLORS = [
   { value: '#0f172a', label: 'Black',  swatch: 'bg-slate-900' },
-  { value: '#1d4ed8', label: 'Blue',   swatch: 'bg-blue-700' },
-  { value: '#be123c', label: 'Red',    swatch: 'bg-rose-700' },
+  { value: '#1d4ed8', label: 'Blue',   swatch: 'bg-blue-700'  },
+  { value: '#be123c', label: 'Red',    swatch: 'bg-rose-700'  },
   { value: '#15803d', label: 'Green',  swatch: 'bg-emerald-700' },
 ]
 
 const WIDTHS = [
-  { value: 1.8, label: 'Fine',   dot: 'w-1 h-1' },
+  { value: 1.8, label: 'Fine',   dot: 'w-1 h-1'     },
   { value: 3,   label: 'Medium', dot: 'w-1.5 h-1.5' },
   { value: 5,   label: 'Bold',   dot: 'w-2.5 h-2.5' },
-]
-
-const ERASER_SIZES = [
-  { value: 10, label: 'Small',  dot: 'w-2 h-2' },
-  { value: 18, label: 'Medium', dot: 'w-3 h-3' },
-  { value: 32, label: 'Large',  dot: 'w-4 h-4' },
 ]
 
 function formatInteractionLabel(m: Interaction): string {
@@ -45,6 +48,8 @@ function formatInteractionLabel(m: Interaction): string {
   return `${name}${title}${date ? ` — ${date}` : ''}`
 }
 
+// ── Component ──────────────────────────────────────────────────────────────────
+
 export default function TakeNotesCanvas({
   personId,
   personName,
@@ -54,18 +59,15 @@ export default function TakeNotesCanvas({
   onCancel,
   onStrokeCountChange,
 }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const controlsRef = useRef<{ undo: () => void; clear: () => void; isEmpty: () => boolean } | null>(null)
+  const canvasRef = useRef<TldrawNoteCanvasHandle | null>(null)
 
-  const [color, setColor] = useState(COLORS[0].value)
-  const [width, setWidth] = useState(WIDTHS[1].value)
-  const [tool, setTool] = useState<InkTool>('pen')
-  const [eraserSize, setEraserSize] = useState(ERASER_SIZES[1].value)
-  const [penOnly, setPenOnly] = useState(true)
-  const [strokeCount, setStrokeCount] = useState(0)
-  const [caption, setCaption] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [color,    setColor]    = useState(COLORS[0].value)
+  const [width,    setWidth]    = useState(WIDTHS[1].value)
+  const [tool,     setTool]     = useState<'pen' | 'eraser'>('pen')
+  const [hasShapes, setHasShapes] = useState(false)
+  const [caption,  setCaption]  = useState('')
+  const [saving,   setSaving]   = useState(false)
+  const [error,    setError]    = useState<string | null>(null)
 
   // Interaction linking
   const [selectedMeetingId, setSelectedMeetingId] = useState<string>(
@@ -78,7 +80,9 @@ export default function TakeNotesCanvas({
     [meetings, selectedMeetingId, initialInteraction],
   )
 
-  const canSave = strokeCount > 0 && !saving
+  const canSave = hasShapes && !saving
+
+  // ── Save flow ────────────────────────────────────────────────────────────────
 
   async function handleSave() {
     if (!canvasRef.current) return
@@ -86,9 +90,7 @@ export default function TakeNotesCanvas({
     setError(null)
 
     try {
-      const blob = await new Promise<Blob | null>((resolve) => {
-        canvasRef.current!.toBlob((b) => resolve(b), 'image/png', 0.92)
-      })
+      const blob = await canvasRef.current.exportBlob()
       if (!blob) {
         setError('Could not export the canvas. Try again.')
         setSaving(false)
@@ -99,7 +101,7 @@ export default function TakeNotesCanvas({
       fd.append('file', new File([blob], `ink-note-${Date.now()}.png`, { type: 'image/png' }))
       fd.append('folder', 'leadershiptap/ink-notes')
 
-      const uploadRes = await fetch('/api/upload-image', { method: 'POST', body: fd })
+      const uploadRes  = await fetch('/api/upload-image', { method: 'POST', body: fd })
       const uploadJson = await uploadRes.json()
       if (!uploadJson.success) {
         setError(`Upload failed: ${uploadJson.error ?? 'unknown error'}`)
@@ -128,11 +130,14 @@ export default function TakeNotesCanvas({
     }
   }
 
+  // ── Render ───────────────────────────────────────────────────────────────────
+
   return (
     <div className="flex flex-col h-full">
 
-      {/* Tool strip */}
+      {/* ── Tool strip ─────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 px-3 py-2 bg-white border-b border-slate-200 flex-shrink-0 overflow-x-auto">
+
         {/* Pen / Eraser toggle */}
         <div className="inline-flex rounded-md border border-slate-200 overflow-hidden flex-shrink-0">
           <button
@@ -163,6 +168,7 @@ export default function TakeNotesCanvas({
 
         <div className="h-5 w-px bg-slate-200 mx-0.5" />
 
+        {/* Color + size (pen mode only) */}
         {tool === 'pen' && (
           <>
             <span className="text-xs font-medium text-slate-500 whitespace-nowrap">Color</span>
@@ -201,52 +207,11 @@ export default function TakeNotesCanvas({
           </>
         )}
 
-        {tool === 'eraser' && (
-          <>
-            <span className="text-xs font-medium text-slate-500 whitespace-nowrap">
-              Eraser size
-            </span>
-            <div className="flex items-center gap-1">
-              {ERASER_SIZES.map((s) => (
-                <button
-                  key={s.value}
-                  onClick={() => setEraserSize(s.value)}
-                  aria-label={s.label}
-                  title={s.label}
-                  className={`w-8 h-8 rounded-md flex items-center justify-center border transition-colors ${
-                    eraserSize === s.value
-                      ? 'border-rose-600 bg-rose-50'
-                      : 'border-slate-200 hover:bg-slate-50'
-                  }`}
-                >
-                  <span className={`rounded-full bg-rose-600 ${s.dot}`} />
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        <div className="h-5 w-px bg-slate-200 mx-0.5" />
-
-        {/* Palm rejection */}
-        <button
-          onClick={() => setPenOnly((v) => !v)}
-          title="Ignore touch input so your palm doesn't draw"
-          className={`flex items-center gap-1.5 px-2.5 h-8 rounded-md text-xs font-medium border transition-colors flex-shrink-0 ${
-            penOnly
-              ? 'border-[hsl(213,70%,30%)] bg-[hsl(213,60%,94%)] text-[hsl(213,70%,30%)]'
-              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-          }`}
-        >
-          <Hand className="h-3.5 w-3.5" />
-          Pen only
-        </button>
-
-        {/* Undo / Clear */}
+        {/* Undo / Clear — pushed to the right */}
         <div className="ml-auto flex items-center gap-1 flex-shrink-0">
           <button
-            onClick={() => controlsRef.current?.undo()}
-            disabled={strokeCount === 0}
+            onClick={() => canvasRef.current?.undo()}
+            disabled={!hasShapes}
             aria-label="Undo"
             title="Undo"
             className="p-2 rounded-md text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
@@ -254,8 +219,8 @@ export default function TakeNotesCanvas({
             <Undo2 className="h-4 w-4" />
           </button>
           <button
-            onClick={() => controlsRef.current?.clear()}
-            disabled={strokeCount === 0}
+            onClick={() => canvasRef.current?.clear()}
+            disabled={!hasShapes}
             aria-label="Clear"
             title="Clear"
             className="p-2 rounded-md text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
@@ -265,28 +230,25 @@ export default function TakeNotesCanvas({
         </div>
       </div>
 
-      {/* Canvas — fills remaining vertical space */}
-      <div className="flex-1 min-h-0 p-3">
-        <div className="w-full h-full rounded-xl border border-slate-200 shadow-sm overflow-hidden bg-white">
-          <InkCanvas
-            color={color}
-            width={width}
-            tool={tool}
-            eraserSize={eraserSize}
-            penOnly={penOnly}
-            canvasRef={canvasRef}
-            controlsRef={controlsRef}
-            onStrokesChange={(count) => {
-              setStrokeCount(count)
-              onStrokeCountChange?.(count)
-            }}
-            className="w-full h-full"
-          />
-        </div>
+      {/* ── Infinite canvas — fills all remaining vertical space ────────────── */}
+      <div className="flex-1 min-h-0">
+        <TldrawNoteCanvas
+          ref={canvasRef}
+          color={color}
+          width={width}
+          tool={tool}
+          penOnly={true}
+          onShapeCountChange={(count) => {
+            setHasShapes(count > 0)
+            onStrokeCountChange?.(count)
+          }}
+          className="w-full h-full"
+        />
       </div>
 
-      {/* Footer: interaction + caption + save */}
+      {/* ── Footer: interaction picker + caption + save ──────────────────────── */}
       <div className="flex-shrink-0 bg-white border-t border-slate-200 px-3 py-3 space-y-2">
+
         {/* Interaction row */}
         <div className="flex items-center gap-2">
           <Link2 className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
@@ -328,7 +290,7 @@ export default function TakeNotesCanvas({
           )}
         </div>
 
-        {/* Caption + save */}
+        {/* Caption + save / cancel */}
         <div className="flex gap-2">
           <input
             value={caption}
