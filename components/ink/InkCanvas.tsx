@@ -415,11 +415,23 @@ export default function InkCanvas({
     const cur = currentRef.current
     if (!cur) return
     // High-frequency Pencil samples arrive in batches via getCoalescedEvents.
+    // Distance-threshold thinning: only record a new point if the pen has
+    // moved ≥1.5 CSS px from the last recorded point. At 240 Hz the Pencil
+    // fires events for sub-pixel movements that bloat the point array without
+    // adding visible detail — getStroke() runs over the entire array on every
+    // frame, so keeping it short is the primary lag fix.
+    const MIN_DIST = 1.5
+    function addIfMoved(pt: InkPoint) {
+      const last = cur!.points.at(-1)
+      if (!last || Math.hypot(pt.x - last.x, pt.y - last.y) >= MIN_DIST) {
+        cur!.points.push(pt)
+      }
+    }
     const coalesced = e.getCoalescedEvents?.() ?? []
     if (coalesced.length > 0) {
-      for (const sub of coalesced) cur.points.push(eventToPoint(sub))
+      for (const sub of coalesced) addIfMoved(eventToPoint(sub))
     } else {
-      cur.points.push(eventToPoint(e))
+      addIfMoved(eventToPoint(e))
     }
     // Paint synchronously: rAF added up to one frame of latency before the
     // new point reached the screen, which is what made fast handwriting feel
@@ -546,7 +558,7 @@ export default function InkCanvas({
   }, [controlsRef, onStrokesChange])
 
   return (
-    <div ref={containerRef} className={`relative bg-white ${className ?? ''}`}>
+    <div ref={containerRef} className={`relative bg-white touch-none ${className ?? ''}`} style={{ touchAction: 'none' }}>
       <canvas
         ref={ref}
         // touch-action: none keeps the browser from stealing the gesture for
