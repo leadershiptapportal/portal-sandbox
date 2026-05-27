@@ -25,9 +25,17 @@ import {
   addRelationshipAction,
   updateRelationshipAction,
   deleteRelationshipAction,
+  addRelationshipWithNewPersonAction,
 } from './actions'
+import type { RelationshipType } from '@/lib/airtable/relationships'
 
-export type RelationshipRole = 'coach' | 'coachee' | 'manager' | 'report'
+export type RelationshipRole =
+  | 'coach'
+  | 'coachee'
+  | 'manager'
+  | 'report'
+  | 'client_of'
+  | 'personal'
 
 interface Person {
   id: string
@@ -38,7 +46,7 @@ interface AddProps {
   mode: 'add'
   subjectPersonId: string
   subjectName: string
-  people: Person[]                  // pool to pick from
+  people: Person[]
   trigger?: React.ReactNode
 }
 
@@ -47,7 +55,7 @@ interface EditProps {
   rcId: string
   subjectPersonId: string
   subjectName: string
-  otherPersonId: string   // needed so we can swap Person/Lead when role changes
+  otherPersonId: string
   otherName: string
   initialRole: RelationshipRole
   initialStartDate?: string
@@ -60,25 +68,25 @@ type Props = AddProps | EditProps
 // ── role helpers ──────────────────────────────────────────────────────────────
 
 const ROLE_LABELS: Record<RelationshipRole, string> = {
-  coach: 'Coach (someone coaches the subject)',
-  coachee: 'Coachee (subject coaches them)',
-  manager: 'Manager (subject reports to them)',
-  report: 'Direct Report (they report to subject)',
+  coach: 'Coach — someone coaches the subject',
+  coachee: 'Coachee — subject coaches them',
+  manager: 'Manager — subject reports to them',
+  report: 'Direct Report — they report to subject',
+  client_of: 'Client — they are subject\'s client',
+  personal: 'Personal — family, partner, or other personal connection',
 }
 
 function roleToTypeAndDirection(role: RelationshipRole): {
-  type: 'coaching' | 'reports_to'
+  type: RelationshipType
   subjectIs: 'person' | 'lead'
 } {
   switch (role) {
-    case 'coach':
-      return { type: 'coaching', subjectIs: 'person' }
-    case 'coachee':
-      return { type: 'coaching', subjectIs: 'lead' }
-    case 'manager':
-      return { type: 'reports_to', subjectIs: 'person' }
-    case 'report':
-      return { type: 'reports_to', subjectIs: 'lead' }
+    case 'coach':    return { type: 'coaching',   subjectIs: 'person' }
+    case 'coachee':  return { type: 'coaching',   subjectIs: 'lead' }
+    case 'manager':  return { type: 'reports_to', subjectIs: 'person' }
+    case 'report':   return { type: 'reports_to', subjectIs: 'lead' }
+    case 'client_of':return { type: 'client',     subjectIs: 'lead' }
+    case 'personal': return { type: 'personal',   subjectIs: 'lead' }
   }
 }
 
@@ -90,12 +98,23 @@ export default function RelationshipDialog(props: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Form state — initialized per mode
-  const [otherPersonId, setOtherPersonId] = useState<string>('')
+  // Add-mode: toggle between picking an existing person or creating a new one
+  const [addMode, setAddMode] = useState<'find' | 'create'>('find')
+
+  // Find-existing state
+  const [otherPersonId, setOtherPersonId] = useState('')
+
+  // Create-new state
+  const [newFirstName, setNewFirstName] = useState('')
+  const [newLastName, setNewLastName] = useState('')
+  const [newTitle, setNewTitle] = useState('')
+  const [newEmail, setNewEmail] = useState('')
+
+  // Shared state
   const [role, setRole] = useState<RelationshipRole>(
     props.mode === 'edit' ? props.initialRole : 'coachee',
   )
-  const [startDate, setStartDate] = useState<string>(
+  const [startDate, setStartDate] = useState(
     props.mode === 'edit' ? (props.initialStartDate ?? '') : '',
   )
   const [status, setStatus] = useState<'Active' | 'Inactive' | 'Paused' | 'Ended'>(
@@ -104,7 +123,12 @@ export default function RelationshipDialog(props: Props) {
 
   function handleOpen() {
     if (props.mode === 'add') {
+      setAddMode('find')
       setOtherPersonId('')
+      setNewFirstName('')
+      setNewLastName('')
+      setNewTitle('')
+      setNewEmail('')
       setRole('coachee')
       setStartDate('')
       setStatus('Active')
@@ -122,60 +146,53 @@ export default function RelationshipDialog(props: Props) {
     setError(null)
     try {
       if (props.mode === 'add') {
-        if (!otherPersonId) {
-          setError('Pick a person.')
-          setSaving(false)
-          return
-        }
         const { type, subjectIs } = roleToTypeAndDirection(role)
-        const result = await addRelationshipAction({
-          subjectPersonId: props.subjectPersonId,
-          otherPersonId,
-          type,
-          role: subjectIs === 'person' ? 'subject_is_person' : 'subject_is_lead',
-          startDate: startDate || undefined,
-        })
-        if (!result.success) {
-          setError(result.error ?? 'Failed to add relationship.')
-          setSaving(false)
-          return
+        const role2 = subjectIs === 'person' ? 'subject_is_person' : 'subject_is_lead'
+
+        if (addMode === 'find') {
+          if (!otherPersonId) { setError('Pick a person.'); setSaving(false); return }
+          const result = await addRelationshipAction({
+            subjectPersonId: props.subjectPersonId,
+            otherPersonId,
+            type,
+            role: role2,
+            startDate: startDate || undefined,
+          })
+          if (!result.success) { setError(result.error ?? 'Failed to add.'); setSaving(false); return }
+        } else {
+          if (!newFirstName.trim()) { setError('First name is required.'); setSaving(false); return }
+          const result = await addRelationshipWithNewPersonAction({
+            subjectPersonId: props.subjectPersonId,
+            firstName: newFirstName.trim(),
+            lastName: newLastName.trim() || undefined,
+            title: newTitle.trim() || undefined,
+            email: newEmail.trim() || undefined,
+            type,
+            role: role2,
+            startDate: startDate || undefined,
+          })
+          if (!result.success) { setError(result.error ?? 'Failed to create.'); setSaving(false); return }
         }
+
         toast.success('Relationship added')
         setOpen(false)
         await new Promise((r) => setTimeout(r, 400))
         router.refresh()
         return
-      } else {
-        // Recompute Person/Lead from the new role so direction changes
-        // (e.g. coachee → coach, manager → report) actually move the pill
-        // into the right bucket on the profile. Patching `type` alone won't
-        // do it because both ends of each pair share the same type.
-        const { type, subjectIs } = roleToTypeAndDirection(role)
-        const personId =
-          subjectIs === 'person' ? props.subjectPersonId : props.otherPersonId
-        const leadId =
-          subjectIs === 'person' ? props.otherPersonId : props.subjectPersonId
-        const result = await updateRelationshipAction({
-          rcId: props.rcId,
-          subjectPersonId: props.subjectPersonId,
-          fields: {
-            type,
-            status,
-            startDate: startDate || null,
-            personId,
-            leadId,
-          },
-        })
-        if (!result.success) {
-          setError(result.error ?? 'Failed to update relationship.')
-          setSaving(false)
-          return
-        }
-        toast.success('Relationship updated')
       }
+
+      // Edit mode
+      const { type, subjectIs } = roleToTypeAndDirection(role)
+      const personId = subjectIs === 'person' ? props.subjectPersonId : props.otherPersonId
+      const leadId   = subjectIs === 'person' ? props.otherPersonId  : props.subjectPersonId
+      const result = await updateRelationshipAction({
+        rcId: props.rcId,
+        subjectPersonId: props.subjectPersonId,
+        fields: { type, status, startDate: startDate || null, personId, leadId },
+      })
+      if (!result.success) { setError(result.error ?? 'Failed to update.'); setSaving(false); return }
+      toast.success('Relationship updated')
       setOpen(false)
-      // Brief pause before refreshing so Airtable has time to propagate
-      // the write before the server component re-fetches.
       await new Promise((r) => setTimeout(r, 400))
       router.refresh()
     } catch (err) {
@@ -187,18 +204,11 @@ export default function RelationshipDialog(props: Props) {
 
   async function handleDelete() {
     if (props.mode !== 'edit') return
-    if (!confirm('Remove this relationship? Notes and meetings already linked to it stay; only the relationship row is removed.')) return
+    if (!confirm('Remove this relationship? Notes already linked to it stay; only the relationship row is removed.')) return
     setSaving(true)
     try {
-      const result = await deleteRelationshipAction({
-        rcId: props.rcId,
-        subjectPersonId: props.subjectPersonId,
-      })
-      if (!result.success) {
-        setError(result.error ?? 'Failed to remove.')
-        setSaving(false)
-        return
-      }
+      const result = await deleteRelationshipAction({ rcId: props.rcId, subjectPersonId: props.subjectPersonId })
+      if (!result.success) { setError(result.error ?? 'Failed to remove.'); setSaving(false); return }
       toast.success('Relationship removed')
       setOpen(false)
       await new Promise((r) => setTimeout(r, 400))
@@ -219,11 +229,7 @@ export default function RelationshipDialog(props: Props) {
 
   return (
     <>
-      {props.trigger ? (
-        <span onClick={handleOpen}>{props.trigger}</span>
-      ) : (
-        triggerEl
-      )}
+      {props.trigger ? <span onClick={handleOpen}>{props.trigger}</span> : triggerEl}
 
       <Dialog open={open} onOpenChange={(v) => { if (!v && !saving) setOpen(false) }}>
         <DialogContent className="sm:max-w-md">
@@ -234,37 +240,109 @@ export default function RelationshipDialog(props: Props) {
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Person picker (add mode only) */}
-            {props.mode === 'add' ? (
+
+            {/* Person selection (add mode only) */}
+            {props.mode === 'add' && (
+              <>
+                {/* Toggle find / create */}
+                <div className="flex rounded-md border border-slate-200 overflow-hidden text-sm">
+                  <button
+                    type="button"
+                    onClick={() => setAddMode('find')}
+                    className={`flex-1 py-1.5 font-medium transition-colors ${addMode === 'find' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    Find existing
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAddMode('create')}
+                    className={`flex-1 py-1.5 font-medium transition-colors ${addMode === 'create' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    Create new person
+                  </button>
+                </div>
+
+                {addMode === 'find' ? (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="rel-person">
+                      Person <span className="text-destructive">*</span>
+                    </Label>
+                    <Select value={otherPersonId} onValueChange={setOtherPersonId} disabled={saving}>
+                      <SelectTrigger id="rel-person">
+                        <SelectValue placeholder="Select a person…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {props.people
+                          .filter((p) => p.id !== props.subjectPersonId)
+                          .map((p) => (
+                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="new-first">
+                          First name <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          id="new-first"
+                          value={newFirstName}
+                          onChange={(e) => setNewFirstName(e.target.value)}
+                          disabled={saving}
+                          placeholder="First"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="new-last">Last name</Label>
+                        <Input
+                          id="new-last"
+                          value={newLastName}
+                          onChange={(e) => setNewLastName(e.target.value)}
+                          disabled={saving}
+                          placeholder="Last"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="new-title">Title / relation</Label>
+                      <Input
+                        id="new-title"
+                        value={newTitle}
+                        onChange={(e) => setNewTitle(e.target.value)}
+                        disabled={saving}
+                        placeholder="e.g. Senior Manager, Husband, Owner of Bakery"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="new-email">Email (optional)</Label>
+                      <Input
+                        id="new-email"
+                        type="email"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                        disabled={saving}
+                        placeholder="email@example.com"
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Other person label (edit mode) */}
+            {props.mode === 'edit' && (
               <div className="space-y-1.5">
-                <Label htmlFor="rel-person">
-                  Other person <span className="text-destructive">*</span>
-                </Label>
-                <Select value={otherPersonId} onValueChange={setOtherPersonId} disabled={saving}>
-                  <SelectTrigger id="rel-person">
-                    <SelectValue placeholder="Select a person…" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {props.people
-                      .filter((p) => p.id !== props.subjectPersonId)
-                      .map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
-              <div className="space-y-1.5">
-                <Label>Other person</Label>
+                <Label>Person</Label>
                 <p className="text-sm font-medium text-slate-700">{props.otherName}</p>
               </div>
             )}
 
-            {/* Role */}
+            {/* Role / relationship type */}
             <div className="space-y-1.5">
-              <Label htmlFor="rel-role">Relationship</Label>
+              <Label htmlFor="rel-role">Relationship type</Label>
               <Select value={role} onValueChange={(v) => setRole(v as RelationshipRole)} disabled={saving}>
                 <SelectTrigger id="rel-role">
                   <SelectValue />
@@ -274,14 +352,10 @@ export default function RelationshipDialog(props: Props) {
                   <SelectItem value="coachee">{ROLE_LABELS.coachee}</SelectItem>
                   <SelectItem value="manager">{ROLE_LABELS.manager}</SelectItem>
                   <SelectItem value="report">{ROLE_LABELS.report}</SelectItem>
+                  <SelectItem value="client_of">{ROLE_LABELS.client_of}</SelectItem>
+                  <SelectItem value="personal">{ROLE_LABELS.personal}</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-slate-400">
-                {role === 'coach' && `Someone coaches ${props.subjectName}.`}
-                {role === 'coachee' && `${props.subjectName} coaches this person.`}
-                {role === 'manager' && `${props.subjectName} reports to this person.`}
-                {role === 'report' && `This person reports to ${props.subjectName}.`}
-              </p>
             </div>
 
             {/* Status (edit mode only) */}
@@ -290,12 +364,10 @@ export default function RelationshipDialog(props: Props) {
                 <Label htmlFor="rel-status">Status</Label>
                 <Select
                   value={status}
-                  onValueChange={(v) => setStatus(v as 'Active' | 'Inactive' | 'Paused' | 'Ended')}
+                  onValueChange={(v) => setStatus(v as typeof status)}
                   disabled={saving}
                 >
-                  <SelectTrigger id="rel-status">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger id="rel-status"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Active">Active</SelectItem>
                     <SelectItem value="Paused">Paused</SelectItem>
@@ -323,7 +395,12 @@ export default function RelationshipDialog(props: Props) {
 
           <DialogFooter className="gap-2 sm:gap-0">
             {props.mode === 'edit' && (
-              <Button variant="outline" onClick={handleDelete} disabled={saving} className="mr-auto text-rose-600 hover:text-rose-700">
+              <Button
+                variant="outline"
+                onClick={handleDelete}
+                disabled={saving}
+                className="mr-auto text-rose-600 hover:text-rose-700"
+              >
                 Remove
               </Button>
             )}

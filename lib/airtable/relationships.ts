@@ -12,13 +12,17 @@ function getCredentials() {
   return { apiKey, baseId }
 }
 
+export type RelationshipType = 'coaching' | 'reports_to' | 'client' | 'personal'
+
 export interface RelationshipContext {
   id: string
-  personId: string        // the coachee / direct report (Person field)
+  personId: string        // the coachee / direct report / contact (Person field)
   personName: string
-  leadId: string          // the coach / manager (Lead field)
+  personTitle?: string
+  leadId: string          // the coach / manager / professional (Lead field)
   leadName: string
-  relationshipType: 'coaching' | 'reports_to'
+  leadTitle?: string
+  relationshipType: RelationshipType
   status: string
   organizationId?: string
   startDate?: string
@@ -41,31 +45,36 @@ export interface OnboardingData {
  * or "manager" maps to reports_to; anything that mentions "coach" maps to
  * coaching; anything else falls back to coaching (and is logged so we notice).
  */
-function normalizeRelationshipType(raw: unknown): 'coaching' | 'reports_to' {
+function normalizeRelationshipType(raw: unknown): RelationshipType {
   const s = (typeof raw === 'string' ? raw : '').toLowerCase().trim()
   if (!s) return 'coaching'
-  if (s === 'coaching' || s === 'reports_to') return s
+  if (s === 'coaching' || s === 'reports_to' || s === 'client' || s === 'personal') return s
   if (s.includes('report') || s.includes('manager')) return 'reports_to'
   if (s.includes('coach')) return 'coaching'
+  if (s.includes('client')) return 'client'
+  if (s.includes('personal') || s.includes('family')) return 'personal'
   console.warn(`[RC] non-spec Relationship Type "${raw}" — defaulting to coaching`)
   return 'coaching'
 }
 
+interface PersonData { name: string; title?: string }
+
 /**
- * Fetches a name map for all Users (ID → display name).
- * Used to populate personName / leadName without per-record lookups.
+ * Fetches name + title for all People records.
+ * Used to populate personName/leadName/personTitle/leadTitle without per-record lookups.
  */
-async function buildNameMap(apiKey: string, baseId: string): Promise<Map<string, string>> {
+async function buildPersonDataMap(apiKey: string, baseId: string): Promise<Map<string, PersonData>> {
   const usersTable = encodeURIComponent(TABLES.PEOPLE)
   const res = await airtableFetch(
     `${API_BASE}/${baseId}/${usersTable}` +
       `?fields[]=${encodeURIComponent(FIELDS.USERS.FULL_NAME)}` +
       `&fields[]=${encodeURIComponent(FIELDS.USERS.FIRST_NAME)}` +
       `&fields[]=${encodeURIComponent(FIELDS.USERS.LAST_NAME)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.USERS.TITLE)}` +
       `&maxRecords=5000`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
-  const map = new Map<string, string>()
+  const map = new Map<string, PersonData>()
   if (!res.ok) return map
   const data = await res.json()
   for (const r of data.records ?? []) {
@@ -74,14 +83,15 @@ async function buildNameMap(apiKey: string, baseId: string): Promise<Map<string,
     const first = (f[FIELDS.USERS.FIRST_NAME] as string | undefined)?.trim()
     const last = (f[FIELDS.USERS.LAST_NAME] as string | undefined)?.trim()
     const name = full || [first, last].filter(Boolean).join(' ') || (r.id as string)
-    map.set(r.id as string, name)
+    const title = (f[FIELDS.USERS.TITLE] as string | undefined)?.trim() || undefined
+    map.set(r.id as string, { name, title })
   }
   return map
 }
 
 function mapRecord(
   r: { id: string; fields: Record<string, unknown> },
-  nameMap: Map<string, string>,
+  personDataMap: Map<string, PersonData>,
 ): RelationshipContext | null {
   const personIds = Array.isArray(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.PERSON])
     ? (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.PERSON] as string[])
@@ -93,12 +103,16 @@ function mapRecord(
 
   const personId = personIds[0]
   const leadId = leadIds[0]
+  const personData = personDataMap.get(personId)
+  const leadData = personDataMap.get(leadId)
   return {
     id: r.id,
     personId,
-    personName: nameMap.get(personId) ?? personId,
+    personName: personData?.name ?? personId,
+    personTitle: personData?.title,
     leadId,
-    leadName: nameMap.get(leadId) ?? leadId,
+    leadName: leadData?.name ?? leadId,
+    leadTitle: leadData?.title,
     relationshipType: normalizeRelationshipType(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.TYPE]),
     status: (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.STATUS] as string) ?? '',
     organizationId: undefined,
@@ -129,7 +143,7 @@ export async function getRelationshipContexts(
       `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${formula}&maxRecords=1000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
-    buildNameMap(apiKey, baseId),
+    buildPersonDataMap(apiKey, baseId),
   ])
 
   if (!res.ok) {
@@ -176,7 +190,7 @@ export async function getUpstreamContexts(
       `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${formula}&maxRecords=1000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
-    buildNameMap(apiKey, baseId),
+    buildPersonDataMap(apiKey, baseId),
   ])
 
   if (!res.ok) {
@@ -206,7 +220,7 @@ export async function getAllRelationshipContexts(): Promise<RelationshipContext[
         `&sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.RELATIONSHIP_CONTEXTS.STATUS)}&sort%5B0%5D%5Bdirection%5D=asc`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
-    buildNameMap(apiKey, baseId),
+    buildPersonDataMap(apiKey, baseId),
   ])
 
   if (!res.ok) {
@@ -389,7 +403,7 @@ export async function resolveContextForSubject(
       `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${formula}&maxRecords=2000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
-    buildNameMap(apiKey, baseId),
+    buildPersonDataMap(apiKey, baseId),
   ])
 
   if (!res.ok) return null
@@ -549,7 +563,7 @@ export async function generateRelationshipRows(data: OnboardingData): Promise<vo
 export interface CreateRCInput {
   personId: string
   leadId: string
-  type: 'coaching' | 'reports_to'
+  type: RelationshipType
   status?: 'Active' | 'Inactive' | 'Paused' | 'Ended'
   startDate?: string  // YYYY-MM-DD
 }
@@ -605,7 +619,7 @@ export async function createRelationshipContext(input: CreateRCInput): Promise<s
 }
 
 export interface UpdateRCInput {
-  type?: 'coaching' | 'reports_to'
+  type?: RelationshipType
   status?: 'Active' | 'Inactive' | 'Paused' | 'Ended'
   startDate?: string | null
   endDate?: string | null
@@ -668,7 +682,7 @@ export async function getRelationshipsForPerson(personId: string): Promise<Relat
       headers: { Authorization: `Bearer ${apiKey}` },
       cache: 'no-store',
     }),
-    buildNameMap(apiKey, baseId),
+    buildPersonDataMap(apiKey, baseId),
   ])
   if (!res.ok) return []
   const data = await res.json()

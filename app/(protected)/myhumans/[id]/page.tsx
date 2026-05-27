@@ -8,7 +8,7 @@ import BackLink from '@/components/BackLink'
 import { getUserById } from '@/lib/services/usersService'
 import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getUserMessages } from '@/lib/services/messagesService'
-import { getNotesByUser } from '@/lib/airtable/notes'
+import { getNotesByUser, getGeneralNotesByRCIds } from '@/lib/airtable/notes'
 import { getTasksByUser } from '@/lib/airtable/tasks'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
@@ -113,6 +113,13 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     getAllUsers().catch(() => [] as User[]),
     fetchPersonalityOptions().catch(() => null),
   ])
+
+  const rcNotes = currentUserRecord.airtableId
+    ? await getGeneralNotesByRCIds(
+        allPersonRelationships.map((rc) => rc.id),
+        currentUserRecord.airtableId,
+      ).catch(() => new Map())
+    : new Map()
 
   const directReports = theirTeamReports
   const teamMembers = teamMemberResults.filter((u): u is User => u !== null)
@@ -271,6 +278,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
             u.email,
         }))}
         canEdit={userCanWrite}
+        rcNotes={rcNotes}
+        currentCoachId={currentUserRecord.airtableId ?? ''}
       />
 
       {/* ── Most Recent Interactions ──────────────────────────────────────── */}

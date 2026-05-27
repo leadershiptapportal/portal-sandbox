@@ -21,12 +21,14 @@ import {
   updateCoachContextAction,
   linkExistingTeamMember,
   searchUsersAction,
+  upsertRCNoteAction,
 } from '../actions'
 import RelationshipDialog from '../RelationshipDialog'
 import type { User } from '@/lib/types'
 import type { CoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import type { ProfileOption } from '@/lib/airtable/users'
 import type { RelationshipContext } from '@/lib/airtable/relationships'
+import type { Note } from '@/lib/airtable/notes'
 
 interface ProfileOptions {
   enneagrams: ProfileOption[]
@@ -45,6 +47,8 @@ interface Props {
   userCanWrite: boolean
   onPersonUpdate?: (partial: Partial<User>) => void
   relationships?: RelationshipContext[]
+  rcNotes?: Map<string, Note>
+  currentCoachId?: string
 }
 
 // ── Relationship classification (mirrors RelationshipsSection) ────────────────
@@ -53,18 +57,26 @@ interface BucketItem {
   rc: RelationshipContext
   otherPersonId: string
   otherName: string
-  role: 'coach' | 'coachee' | 'manager' | 'report'
+  otherTitle?: string
+  role: 'coach' | 'coachee' | 'manager' | 'report' | 'client' | 'personal'
 }
 
 function classifyRelationship(rc: RelationshipContext, subjectId: string): BucketItem | null {
   const subjectIsPerson = rc.personId === subjectId
   const otherPersonId = subjectIsPerson ? rc.leadId : rc.personId
-  const otherName = subjectIsPerson ? rc.leadName : rc.personName
+  const otherName     = subjectIsPerson ? rc.leadName : rc.personName
+  const otherTitle    = subjectIsPerson ? rc.leadTitle : rc.personTitle
   if (rc.relationshipType === 'coaching') {
-    return { rc, otherPersonId, otherName, role: subjectIsPerson ? 'coach' : 'coachee' }
+    return { rc, otherPersonId, otherName, otherTitle, role: subjectIsPerson ? 'coach' : 'coachee' }
   }
   if (rc.relationshipType === 'reports_to') {
-    return { rc, otherPersonId, otherName, role: subjectIsPerson ? 'manager' : 'report' }
+    return { rc, otherPersonId, otherName, otherTitle, role: subjectIsPerson ? 'manager' : 'report' }
+  }
+  if (rc.relationshipType === 'client') {
+    return { rc, otherPersonId, otherName, otherTitle, role: 'client' }
+  }
+  if (rc.relationshipType === 'personal') {
+    return { rc, otherPersonId, otherName, otherTitle, role: 'personal' }
   }
   return null
 }
@@ -354,28 +366,101 @@ function QuickNotesAccordion({
 
 // ── Compact relationships section ─────────────────────────────────────────────
 
+function CompactRCNote({
+  rcId,
+  subjectPersonId,
+  initialNote,
+}: {
+  rcId: string
+  subjectPersonId: string
+  initialNote: string
+}) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(initialNote)
+  const [saved, setSaved] = useState(initialNote)
+  const [saving, setSaving] = useState(false)
+
+  async function handleSave() {
+    if (draft === saved) { setEditing(false); return }
+    setSaving(true)
+    const result = await upsertRCNoteAction({ rcId, subjectPersonId, content: draft })
+    setSaving(false)
+    if (!('error' in result) || !result.error) {
+      setSaved(draft)
+      setEditing(false)
+    }
+  }
+
+  if (editing) {
+    return (
+      <div className="mt-1">
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') { setDraft(saved); setEditing(false) }
+            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSave()
+          }}
+          disabled={saving}
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus
+          rows={3}
+          placeholder="Quick note…"
+          className="w-full text-[11px] text-slate-700 border border-[hsl(213,70%,30%)] rounded px-1.5 py-1 resize-none focus:outline-none"
+        />
+        <div className="flex items-center gap-2 mt-0.5">
+          <button onClick={handleSave} disabled={saving} className="text-[10px] text-emerald-700 font-medium">
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+          <button onClick={() => { setDraft(saved); setEditing(false) }} className="text-[10px] text-slate-400">
+            Cancel
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (saved) {
+    return (
+      <button onClick={() => setEditing(true)} className="mt-0.5 w-full text-left" title="Edit note">
+        <p className="text-[11px] text-slate-500 line-clamp-2 hover:text-slate-700 transition-colors">{saved}</p>
+      </button>
+    )
+  }
+
+  return (
+    <button onClick={() => setEditing(true)} className="mt-0.5 text-[10px] text-slate-300 hover:text-slate-500 transition-colors">
+      + note
+    </button>
+  )
+}
+
 function CompactRelationshipsSection({
   relationships,
   subjectPersonId,
   subjectName,
   allPeople,
   canEdit,
+  rcNotes = new Map(),
 }: {
   relationships: RelationshipContext[]
   subjectPersonId: string
   subjectName: string
   allPeople: { id: string; name: string }[]
   canEdit: boolean
+  rcNotes?: Map<string, Note>
 }) {
   const classified = relationships
     .map((rc) => classifyRelationship(rc, subjectPersonId))
     .filter((b): b is BucketItem => b !== null)
 
   const roleOrder: Array<{ key: BucketItem['role']; label: string }> = [
-    { key: 'coach', label: 'Coach' },
-    { key: 'coachee', label: 'Coachee' },
-    { key: 'manager', label: 'Reports to' },
-    { key: 'report', label: 'Direct Report' },
+    { key: 'coach',    label: 'Coach' },
+    { key: 'coachee',  label: 'Coachee' },
+    { key: 'manager',  label: 'Reports to' },
+    { key: 'report',   label: 'Direct Report' },
+    { key: 'client',   label: 'Client' },
+    { key: 'personal', label: 'Personal' },
   ]
 
   const groups = roleOrder
@@ -396,36 +481,48 @@ function CompactRelationshipsSection({
               <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-1">
                 {label}
               </p>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {items.map((item) => (
-                  <div key={item.rc.id} className="flex items-center gap-2 py-0.5">
-                    <div className="w-5 h-5 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center">
+                  <div key={item.rc.id} className="flex items-start gap-2 py-0.5">
+                    <div className="w-5 h-5 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center mt-0.5">
                       <span className="text-[9px] font-bold text-slate-500 uppercase">
                         {item.otherName[0]}
                       </span>
                     </div>
-                    <span className="text-sm text-slate-700 truncate flex-1">{item.otherName}</span>
-                    {canEdit && (
-                      <RelationshipDialog
-                        mode="edit"
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm text-slate-700 truncate">{item.otherName}</span>
+                        {canEdit && (
+                          <RelationshipDialog
+                            mode="edit"
+                            rcId={item.rc.id}
+                            subjectPersonId={subjectPersonId}
+                            subjectName={subjectName}
+                            otherPersonId={item.otherPersonId}
+                            otherName={item.otherName}
+                            initialRole={item.role === 'client' ? 'client_of' : item.role === 'personal' ? 'personal' : item.role}
+                            initialStartDate={item.rc.startDate}
+                            initialStatus={item.rc.status as 'Active' | 'Inactive' | 'Paused' | 'Ended'}
+                            trigger={
+                              <button
+                                className="p-0.5 rounded text-slate-300 hover:text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0"
+                                aria-label="Edit relationship"
+                              >
+                                <Pencil className="h-3 w-3" />
+                              </button>
+                            }
+                          />
+                        )}
+                      </div>
+                      {item.otherTitle && (
+                        <p className="text-[11px] text-slate-400 truncate">{item.otherTitle}</p>
+                      )}
+                      <CompactRCNote
                         rcId={item.rc.id}
-                        subjectPersonId={subjectPersonId}
-                        subjectName={subjectName}
-                        otherPersonId={item.otherPersonId}
-                        otherName={item.otherName}
-                        initialRole={item.role}
-                        initialStartDate={item.rc.startDate}
-                        initialStatus={item.rc.status as 'Active' | 'Inactive' | 'Paused' | 'Ended'}
-                        trigger={
-                          <button
-                            className="p-1 rounded text-slate-300 hover:text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0"
-                            aria-label="Edit relationship"
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </button>
-                        }
+                        subjectPersonId={item.otherPersonId}
+                        initialNote={rcNotes.get(item.rc.id)?.content ?? ''}
                       />
-                    )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -773,6 +870,7 @@ export default function PersonSidebar({
   userCanWrite,
   onPersonUpdate,
   relationships = [],
+  rcNotes = new Map(),
 }: Props) {
   const [teamMemberIds, setTeamMemberIds] = useState<string[]>(person.teamMemberIds ?? [])
   const [teamMemberNames, setTeamMemberNames] = useState<string[]>(
@@ -929,6 +1027,7 @@ export default function PersonSidebar({
           subjectName={displayName}
           allPeople={allPeopleForPicker}
           canEdit={userCanWrite}
+          rcNotes={rcNotes}
         />
       </Section>
 

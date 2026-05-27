@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createNote, updateNote, getNotesByInteractionId } from '@/lib/airtable/notes'
+import { createNote, updateNote, getNotesByInteractionId, upsertGeneralNoteForRC } from '@/lib/airtable/notes'
 import { createTask, updateTaskStatus } from '@/lib/airtable/tasks'
 import {
   updateUserProfile,
@@ -21,6 +21,7 @@ import {
   deleteRelationshipContext,
   type CreateRCInput,
   type UpdateRCInput,
+  type RelationshipType,
 } from '@/lib/airtable/relationships'
 import { upsertCoachPersonContext } from '@/lib/airtable/coachPersonContext'
 
@@ -403,7 +404,7 @@ export async function logManualSessionAction(params: {
 export async function addRelationshipAction(params: {
   subjectPersonId: string
   otherPersonId: string
-  type: 'coaching' | 'reports_to'
+  type: RelationshipType
   role: 'subject_is_person' | 'subject_is_lead'
   startDate?: string
 }): Promise<{ success: boolean; error?: string }> {
@@ -459,6 +460,77 @@ export async function deleteRelationshipAction(params: {
     return { success: true }
   } catch (err) {
     console.error('[deleteRelationshipAction]', err)
+    return { success: false, error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+/**
+ * Creates a new People record and immediately links it to the subject via an RC.
+ * Used when adding a relationship to a person who doesn't yet exist in the system.
+ */
+export async function addRelationshipWithNewPersonAction(params: {
+  subjectPersonId: string
+  firstName: string
+  lastName?: string
+  title?: string
+  email?: string
+  type: RelationshipType
+  role: 'subject_is_person' | 'subject_is_lead'
+  startDate?: string
+}): Promise<{ success: boolean; newPersonId?: string; error?: string }> {
+  try {
+    const userRecord = await getCurrentUserRecord()
+    if (!userRecord.airtableId) return { success: false, error: 'Could not resolve your user record.' }
+
+    const newPersonId = await createUserRecord({
+      'First Name': params.firstName,
+      ...(params.lastName ? { 'Last Name': params.lastName } : {}),
+      ...(params.title ? { 'Title': params.title } : {}),
+      ...(params.email ? { 'Work Email': params.email } : {}),
+    })
+
+    const personId = params.role === 'subject_is_person' ? params.subjectPersonId : newPersonId
+    const leadId = params.role === 'subject_is_person' ? newPersonId : params.subjectPersonId
+
+    const input: CreateRCInput = {
+      personId,
+      leadId,
+      type: params.type,
+      status: 'Active',
+    }
+    if (params.startDate) input.startDate = params.startDate
+
+    await createRelationshipContext(input)
+    revalidatePath(`/myhumans/${params.subjectPersonId}`)
+    return { success: true, newPersonId }
+  } catch (err) {
+    console.error('[addRelationshipWithNewPersonAction]', err)
+    return { success: false, error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+/**
+ * Upserts the single general note for a Relationship Context.
+ * Creates one if none exists; patches in place if one already does.
+ */
+export async function upsertRCNoteAction(params: {
+  rcId: string
+  subjectPersonId: string
+  content: string
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const userRecord = await getCurrentUserRecord()
+    if (!userRecord.airtableId) return { success: false, error: 'Could not resolve your user record.' }
+
+    await upsertGeneralNoteForRC(
+      params.rcId,
+      userRecord.airtableId,
+      params.content,
+      params.subjectPersonId,
+    )
+    return { success: true }
+  } catch (err) {
+    console.error('[upsertRCNoteAction]', err)
     return { success: false, error: err instanceof Error ? err.message : String(err) }
   }
 }

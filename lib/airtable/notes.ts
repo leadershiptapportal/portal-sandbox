@@ -277,3 +277,70 @@ export async function deleteNote(
   }
   return { success: true }
 }
+
+/**
+ * Upsert the single general note for a Relationship Context + author pair.
+ * If a general_note already exists for this RC+author, patches it in place.
+ * If not, creates a new one. This gives a mutable "sticky note" per relationship.
+ */
+export async function upsertGeneralNoteForRC(
+  rcId: string,
+  authorPersonId: string,
+  content: string,
+  subjectPersonId?: string,
+): Promise<Note> {
+  const existing = await getNotesByRelationshipContext(rcId, authorPersonId)
+  const generalNotes = existing.filter(
+    (n) => n.noteType === 'general_note' || !n.noteType,
+  )
+
+  if (generalNotes.length > 0) {
+    const latest = generalNotes[0] // sorted date desc
+    const result = await updateNote(latest.id, content)
+    if ('error' in result) throw new Error(result.error)
+    return { ...latest, content }
+  }
+
+  return createNote({
+    content,
+    relationshipContextId: rcId,
+    authorPersonId,
+    subjectPersonId,
+    noteType: 'general_note',
+  })
+}
+
+/**
+ * Batch-fetch the most recent general_note for each RC in `rcIds`, authored
+ * by `authorPersonId`. Returns a Map keyed by RC ID. One Airtable call total.
+ */
+export async function getGeneralNotesByRCIds(
+  rcIds: string[],
+  authorPersonId: string,
+): Promise<Map<string, Note>> {
+  if (rcIds.length === 0) return new Map()
+  const { apiKey, baseId } = getCredentials()
+  const url = `${API_BASE}/${baseId}/${TABLE}?${SORT_DATE_DESC}&maxRecords=1000`
+  const res = await airtableFetch(url, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+    cache: 'no-store',
+  })
+  if (!res.ok) return new Map()
+  const data = await res.json()
+  const rcIdSet = new Set(rcIds)
+  const result = new Map<string, Note>()
+  for (const r of data.records ?? []) {
+    const note = mapRecord(r)
+    if (
+      note.authorPersonId === authorPersonId &&
+      note.relationshipContextId &&
+      rcIdSet.has(note.relationshipContextId) &&
+      (note.noteType === 'general_note' || !note.noteType)
+    ) {
+      if (!result.has(note.relationshipContextId)) {
+        result.set(note.relationshipContextId, note)
+      }
+    }
+  }
+  return result
+}
