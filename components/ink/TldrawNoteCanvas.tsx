@@ -256,6 +256,7 @@ function TldrawNoteCanvasInner(
         // Lock to light mode — prevents useDarkMode() from swapping CSS
         // classes after mount (was causing the slight colour-shift symptom).
         colorScheme={'light' as const}
+        licenseKey={process.env.NEXT_PUBLIC_TLDRAW_LICENSE_KEY}
       />
     </div>
   )
