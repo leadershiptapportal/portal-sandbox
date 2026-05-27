@@ -8,6 +8,8 @@ interface Props {
   // e.g. "Type 1 | The Reformer", "INTJ | Architect"
   enneagramLabel?: string
   mbtiLabel?: string
+  // Resolved from conflictPostureIds + Conflict Postures table (no lookup field in Users)
+  conflictPostureLabel?: string
   // Map of strength name → descriptor text, resolved from the Strengths table.
   strengthDescriptors?: Record<string, string>
 }
@@ -16,6 +18,7 @@ export default function PersonalityStrengthsSection({
   user,
   enneagramLabel,
   mbtiLabel,
+  conflictPostureLabel,
   strengthDescriptors,
 }: Props) {
   const hasPersonality =
@@ -58,15 +61,19 @@ export default function PersonalityStrengthsSection({
           </div>
         )}
 
-        {(user.conflictPosture || user.conflictPostureDescriptor) && (
+        {(conflictPostureLabel || user.conflictPosture || user.conflictPostureDescriptor) && (
           <div className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Conflict Posture</p>
-            {user.conflictPosture && (
-              <p className="text-sm font-medium text-slate-800">{user.conflictPosture}</p>
-            )}
-            {user.conflictPostureDescriptor && (
-              <DescriptorText text={user.conflictPostureDescriptor} />
-            )}
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Conflict Posture</p>
+            <div className="rounded-lg bg-amber-50 border border-amber-100 px-3 py-2.5 space-y-1.5">
+              {(conflictPostureLabel || user.conflictPosture) && (
+                <p className="text-sm font-semibold text-amber-800">
+                  {conflictPostureLabel ?? user.conflictPosture}
+                </p>
+              )}
+              {user.conflictPostureDescriptor && (
+                <DescriptorText text={user.conflictPostureDescriptor} />
+              )}
+            </div>
           </div>
         )}
 

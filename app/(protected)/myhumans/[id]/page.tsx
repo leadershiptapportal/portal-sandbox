@@ -159,8 +159,12 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   const mbtiOption = personalityOptions?.mbtis.find(
     (o) => user.mbtiIds?.includes(o.id),
   )
+  const conflictPostureOption = personalityOptions?.conflictPostures.find(
+    (o) => user.conflictPostureIds?.includes(o.id),
+  )
   const enneagramLabel = enneagramOption?.name
   const mbtiLabel = mbtiOption?.name
+  const conflictPostureLabel = conflictPostureOption?.name
   const strengthDescriptors: Record<string, string> = {}
   if (personalityOptions?.strengths && user.strengths) {
     for (const s of user.strengths) {
@@ -267,6 +271,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         user={user}
         enneagramLabel={enneagramLabel}
         mbtiLabel={mbtiLabel}
+        conflictPostureLabel={conflictPostureLabel}
         strengthDescriptors={Object.keys(strengthDescriptors).length > 0 ? strengthDescriptors : undefined}
       />
 

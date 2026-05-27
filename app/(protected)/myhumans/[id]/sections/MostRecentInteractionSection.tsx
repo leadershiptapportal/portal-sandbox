@@ -59,12 +59,19 @@ export default function MostRecentInteractionSection({ topInteractions, totalInt
             return (
               <div
                 key={interaction.id}
-                className={`rounded-xl border px-4 py-3.5 transition-colors ${
+                className={`relative rounded-xl border px-4 py-3.5 transition-colors cursor-pointer ${
                   isMostRecent
-                    ? 'border-[hsl(213,70%,30%)]/20 bg-[hsl(213,60%,98%)]'
-                    : 'border-slate-100 bg-white hover:border-slate-200'
+                    ? 'border-[hsl(213,70%,30%)]/20 bg-[hsl(213,60%,98%)] hover:border-[hsl(213,70%,30%)]/40'
+                    : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50'
                 }`}
               >
+                {/* Stretched link — covers the whole card; buttons sit above via z-10 */}
+                <Link
+                  href={`/myhumans/${userId}/interactions/${interaction.id}`}
+                  className="absolute inset-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)] focus:ring-offset-1"
+                  aria-label={`View interaction: ${interaction.title || 'Untitled Interaction'}`}
+                />
+
                 {/* Header row: title + most-recent badge */}
                 <div className="flex items-start gap-2 justify-between">
                   <p className="text-sm font-semibold text-slate-900 leading-snug truncate">
@@ -82,11 +89,11 @@ export default function MostRecentInteractionSection({ topInteractions, totalInt
                   <p className="text-xs text-slate-400 mt-0.5">{dateStr}</p>
                 )}
 
-                {/* Action buttons */}
-                <div className="flex items-center gap-1.5 mt-3 flex-wrap">
+                {/* Action buttons — z-10 so they intercept clicks above the card link */}
+                <div className="relative z-10 flex items-center gap-1.5 mt-3 flex-wrap">
                   <button
                     onClick={() => setPopoutInteractionId(interaction.id)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
                   >
                     <FileText className="h-3 w-3" />
                     {noteStatus.hasNotes ? 'Edit Notes' : 'Add Notes'}
@@ -94,7 +101,7 @@ export default function MostRecentInteractionSection({ topInteractions, totalInt
 
                   <Link
                     href={`/myhumans/${userId}/take-notes?interactionId=${interaction.id}`}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
                   >
                     <NotebookPen className="h-3 w-3 text-[hsl(213,70%,40%)]" />
                     {noteStatus.hasInk ? 'Continue Taking Notes' : 'Take Notes'}

@@ -402,8 +402,9 @@ export async function fetchPersonalityOptions(): Promise<{
   enneagrams: ProfileOption[]
   mbtis: ProfileOption[]
   strengths: ProfileOption[]
+  conflictPostures: ProfileOption[]
 }> {
-  const [enneagrams, mbtis, strengths] = await Promise.all([
+  const [enneagrams, mbtis, strengths, conflictPostures] = await Promise.all([
     fetchTableOptions('Enneagram', FIELDS.ENNEAGRAM.NAME, {
       codeField: FIELDS.ENNEAGRAM.TYPE_NUMBER,
       descriptorField: FIELDS.ENNEAGRAM.DESCRIPTOR,
@@ -417,8 +418,11 @@ export async function fetchPersonalityOptions(): Promise<{
     fetchTableOptions('Strengths', FIELDS.STRENGTHS.NAME, {
       descriptorField: FIELDS.STRENGTHS.DESCRIPTOR,
     }),
+    fetchTableOptions('Conflict Postures', FIELDS.CONFLICT_POSTURES.NAME, {
+      descriptorField: FIELDS.CONFLICT_POSTURES.DESCRIPTOR,
+    }),
   ])
-  return { enneagrams, mbtis, strengths }
+  return { enneagrams, mbtis, strengths, conflictPostures }
 }
 
 export async function fetchProfileOptions(allUsers: User[]): Promise<{
