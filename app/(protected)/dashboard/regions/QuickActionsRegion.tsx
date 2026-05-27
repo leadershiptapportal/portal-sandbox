@@ -1,4 +1,4 @@
-import { getUsers, getClientsByRelationship, getPortalCoaches } from '@/lib/services/usersService'
+import { getUsers, getHumansByRelationship, getPortalCoaches } from '@/lib/services/usersService'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import DashboardQuickActions from '../DashboardQuickActions'
 import type { CurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
@@ -22,12 +22,12 @@ export default async function QuickActionsRegion({ userRecord }: Props) {
   const [users, coachUsers] = await Promise.all([
     isAdmin || !userRecord.airtableId
       ? getUsers(sessionUser)
-      : getClientsByRelationship(userRecord.airtableId),
+      : getHumansByRelationship(userRecord.airtableId),
     getPortalCoaches(userRecord.airtableId ?? undefined),
   ])
 
-  const clients = users.map((u) => ({ id: u.id, name: getDisplayName(u) }))
+  const humans = users.map((u) => ({ id: u.id, name: getDisplayName(u) }))
   const coaches = coachUsers.map((u) => ({ id: u.id, name: getDisplayName(u) }))
 
-  return <DashboardQuickActions clients={clients} coaches={coaches} />
+  return <DashboardQuickActions humans={humans} coaches={coaches} />
 }

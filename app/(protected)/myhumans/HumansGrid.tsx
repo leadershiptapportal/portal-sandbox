@@ -7,7 +7,7 @@ import type { User } from '@/lib/types'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export interface EnrichedUser {
+export interface EnrichedHuman {
   user: User
   noteCount: number
   openTaskCount: number
@@ -17,12 +17,12 @@ export interface EnrichedUser {
 }
 
 interface Props {
-  users: EnrichedUser[]
+  users: EnrichedHuman[]
   coaches: Array<{ id: string; name: string }>
   companies: Array<{ id: string; name: string }>
 }
 
-type ViewMode = 'clients' | 'company'
+type ViewMode = 'humans' | 'company'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -76,7 +76,7 @@ function RoleBadge({ role }: { role: string }) {
   return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-500 whitespace-nowrap">{role}</span>
 }
 
-function ClientCard({ enriched }: { enriched: EnrichedUser }) {
+function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
   const { user, interactionCount, noteCount, openTaskCount, lastInteraction, nextInteraction } = enriched
   const name = getDisplayName(user)
   const subtitle = [user.title ?? user.jobTitle, user.companyName].filter(Boolean).join(' · ')
@@ -191,9 +191,9 @@ function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode
   return (
     <div className="inline-flex rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
       <button
-        onClick={() => onChange('clients')}
+        onClick={() => onChange('humans')}
         className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors ${
-          mode === 'clients'
+          mode === 'humans'
             ? 'bg-[hsl(213,70%,30%)] text-white'
             : 'text-slate-600 hover:bg-slate-50'
         }`}
@@ -218,18 +218,18 @@ function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode
 
 // ── Main grid ─────────────────────────────────────────────────────────────────
 
-export default function ClientsGrid({ users, coaches, companies }: Props) {
+export default function HumansGrid({ users, coaches, companies }: Props) {
   const [query, setQuery] = useState('')
   const [selectedRole, setSelectedRole] = useState('all')
   const [selectedCoach, setSelectedCoach] = useState('all')
   const [selectedCompany, setSelectedCompany] = useState('all')
   const [sortBy, setSortBy] = useState('recent')
-  const [viewMode, setViewMode] = useState<ViewMode>('clients')
+  const [viewMode, setViewMode] = useState<ViewMode>('humans')
 
   // Restore view mode from localStorage after mount
   useEffect(() => {
     const saved = localStorage.getItem('clientsViewMode')
-    if (saved === 'clients' || saved === 'company') setViewMode(saved)
+    if (saved === 'humans' || saved === 'company') setViewMode(saved)
   }, [])
 
   function handleViewModeChange(mode: ViewMode) {
@@ -300,7 +300,7 @@ export default function ClientsGrid({ users, coaches, companies }: Props) {
 
   // Group by company for company view
   const groupedByCompany = useMemo(() => {
-    const map = new Map<string, EnrichedUser[]>()
+    const map = new Map<string, EnrichedHuman[]>()
     for (const enriched of filtered) {
       const company = enriched.user.companyName?.trim() || 'Individual'
       if (!map.has(company)) map.set(company, [])
@@ -379,7 +379,7 @@ export default function ClientsGrid({ users, coaches, companies }: Props) {
         {/* View toggle */}
         <ViewToggle mode={viewMode} onChange={handleViewModeChange} />
 
-        {/* Add Client button */}
+        {/* Add Human button */}
         <Link
           href="/people/new"
           className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
@@ -425,7 +425,7 @@ export default function ClientsGrid({ users, coaches, companies }: Props) {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {members.map((enriched) => (
-                  <ClientCard key={enriched.user.id} enriched={enriched} />
+                  <HumanCard key={enriched.user.id} enriched={enriched} />
                 ))}
               </div>
             </div>
@@ -435,7 +435,7 @@ export default function ClientsGrid({ users, coaches, companies }: Props) {
         /* ── Default flat grid ────────────────────────────────────────────── */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((enriched) => (
-            <ClientCard key={enriched.user.id} enriched={enriched} />
+            <HumanCard key={enriched.user.id} enriched={enriched} />
           ))}
         </div>
       )}

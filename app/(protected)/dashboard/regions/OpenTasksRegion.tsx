@@ -1,5 +1,5 @@
 import { CheckSquare } from 'lucide-react'
-import { getUsers, getClientsByRelationship, getPortalCoaches } from '@/lib/services/usersService'
+import { getUsers, getHumansByRelationship, getPortalCoaches } from '@/lib/services/usersService'
 import { getTasks } from '@/lib/airtable/tasks'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import DashboardTaskItem, { type DashboardTask } from '../DashboardTaskItem'
@@ -26,7 +26,7 @@ export default async function OpenTasksRegion({ userRecord }: Props) {
     userRecord.airtableId ? getTasks(userRecord.airtableId) : Promise.resolve([]),
     isAdmin || !userRecord.airtableId
       ? getUsers(sessionUser)
-      : getClientsByRelationship(userRecord.airtableId),
+      : getHumansByRelationship(userRecord.airtableId),
     getPortalCoaches(userRecord.airtableId ?? undefined),
   ])
 
@@ -46,7 +46,7 @@ export default async function OpenTasksRegion({ userRecord }: Props) {
     }
   })
 
-  const clientsForActions = users.map((u) => ({ id: u.id, name: getDisplayName(u) }))
+  const humansForActions = users.map((u) => ({ id: u.id, name: getDisplayName(u) }))
   const coachesForActions = coachUsers.map((u) => ({ id: u.id, name: getDisplayName(u) }))
 
   return (
@@ -60,7 +60,7 @@ export default async function OpenTasksRegion({ userRecord }: Props) {
           </span>
         )}
         <div className="ml-auto">
-          <AddTaskDashboardDialog clients={clientsForActions} coaches={coachesForActions} />
+          <AddTaskDashboardDialog humans={humansForActions} coaches={coachesForActions} />
         </div>
       </div>
       {openTasks.length === 0 ? (

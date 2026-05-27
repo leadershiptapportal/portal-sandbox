@@ -3,7 +3,7 @@ import { CalendarDays, FileText } from 'lucide-react'
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
 import { airtableFetch } from '@/lib/airtable/client'
 import { log } from '@/lib/utils/logger'
-import { getUsers, getClientsByRelationship } from '@/lib/services/usersService'
+import { getUsers, getHumansByRelationship } from '@/lib/services/usersService'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getAllUpcomingInteractions, getRecentPastInteractions } from '@/lib/airtable/interactions'
@@ -65,7 +65,7 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
     await Promise.all([
       isAdmin || !userRecord.airtableId
         ? getUsers(sessionUser)
-        : getClientsByRelationship(userRecord.airtableId),
+        : getHumansByRelationship(userRecord.airtableId),
       getAllUpcomingInteractions(7, ownerEmail),
       getRecentPastInteractions(1, ownerEmail),
       !isAdmin && userRecord.airtableId
@@ -123,7 +123,7 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
                 title={item.title}
               >
                 <span className="text-xs font-medium text-slate-400">{item.timeRange}</span>
-                <span className="font-medium">{item.clientName ?? item.title}</span>
+                <span className="font-medium">{item.humanName ?? item.title}</span>
                 {needsNotes && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide">
                     <FileText className="h-3 w-3" />
@@ -132,8 +132,8 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
                 )}
               </span>
             )
-            const href = item.clientId
-              ? `/myhumans/${item.clientId}/interactions/${item.interactionId}`
+            const href = item.humanId
+              ? `/myhumans/${item.humanId}/interactions/${item.interactionId}`
               : `/interactions/${item.interactionId}`
             return (
               <Link key={item.interactionId} href={href}>

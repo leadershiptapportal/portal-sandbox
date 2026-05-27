@@ -48,7 +48,7 @@ function mapTaskRecord(r: AirtableRecord): Task {
     title: (r.fields[FIELDS.TASKS.TITLE] as string) || 'Untitled',
     status,
     dueDate: (r.fields[FIELDS.TASKS.DUE_DATE] as string) || undefined,
-    clientId: firstLinkedId(r.fields[FIELDS.TASKS.CLIENT]),
+    humanId: firstLinkedId(r.fields[FIELDS.TASKS.CLIENT]),
     notes: (r.fields[FIELDS.TASKS.NOTES] as string) || undefined,
     relationshipContextId: firstLinkedId(r.fields[FIELDS.TASKS.RELATIONSHIP_CONTEXT]),
     createdByPersonId: createdById,
@@ -91,7 +91,7 @@ export async function getTasks(personAirtableId: string): Promise<Task[]> {
       .map(mapTaskRecord)
       .filter((t: Task) => {
         const isInvolved =
-          t.clientId === personAirtableId ||
+          t.humanId === personAirtableId ||
           t.createdByPersonId === personAirtableId ||
           t.assignedToPersonId === personAirtableId
         return isInvolved && OPEN_STATUSES.includes(t.status)
@@ -121,7 +121,7 @@ export async function getTasksByUser(userId: string): Promise<Task[]> {
     const data = await res.json()
     const tasks = (data.records ?? [])
       .map(mapTaskRecord)
-      .filter((t: Task) => t.clientId === userId || t.assignedToPersonId === userId)
+      .filter((t: Task) => t.humanId === userId || t.assignedToPersonId === userId)
     return sortByDueDate(tasks)
   } catch (err) {
     console.warn('[getTasksByUser] unexpected error:', err)
@@ -156,7 +156,7 @@ export interface CreateTaskData {
   title: string
   notes?: string
   dueDate?: string
-  clientId?: string
+  humanId?: string
   createdByPersonId: string
   assignedToPersonId?: string
   relationshipContextId?: string
@@ -164,7 +164,7 @@ export interface CreateTaskData {
 
 /**
  * Create a task. Auto-determines Task Type and Visibility based on assignment.
- * Auto-resolves Relationship Context if clientId + createdByPersonId are provided.
+ * * Auto-resolves Relationship Context if humanId + createdByPersonId are provided.
  */
 export async function createTask(data: CreateTaskData): Promise<string> {
   const { apiKey, baseId } = getCredentials()
@@ -175,10 +175,10 @@ export async function createTask(data: CreateTaskData): Promise<string> {
 
   // Auto-resolve Relationship Context if not provided
   let rcId = data.relationshipContextId
-  if (!rcId && data.clientId && data.createdByPersonId) {
+  if (!rcId && data.humanId && data.createdByPersonId) {
     try {
       const { getRelationshipContext } = await import('@/lib/airtable/relationships')
-      const ctx = await getRelationshipContext(data.createdByPersonId, data.clientId)
+      const ctx = await getRelationshipContext(data.createdByPersonId, data.humanId)
       rcId = ctx?.id
     } catch {
       // Non-critical — proceed without RC
@@ -194,7 +194,7 @@ export async function createTask(data: CreateTaskData): Promise<string> {
   }
   if (data.notes) fields[FIELDS.TASKS.NOTES] = data.notes
   if (data.dueDate) fields[FIELDS.TASKS.DUE_DATE] = data.dueDate
-  if (data.clientId) fields[FIELDS.TASKS.CLIENT] = [data.clientId]
+  if (data.humanId) fields[FIELDS.TASKS.CLIENT] = [data.humanId]
   if (data.assignedToPersonId) fields[FIELDS.TASKS.ASSIGNED_TO_PERSON] = [data.assignedToPersonId]
   if (rcId) fields[FIELDS.TASKS.RELATIONSHIP_CONTEXT] = [rcId]
 

@@ -19,9 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { fetchClientInteractionsAction, dashboardLogNoteAction } from './actions'
+import { fetchHumanInteractionsAction, dashboardLogNoteAction } from './actions'
 
-interface Client {
+interface Human {
   id: string
   name: string
 }
@@ -32,15 +32,15 @@ interface InteractionOption {
 }
 
 interface Props {
-  clients: Client[]
+  humans: Human[]
   /** Optional custom trigger element. If omitted, renders a plain text button. */
   trigger?: React.ReactNode
 }
 
-export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
+export default function GlobalLogNoteDialog({ humans, trigger }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [clientId, setClientId] = useState('')
+  const [humanId, setHumanId] = useState('')
   const [content, setContent] = useState('')
   const [interactionId, setInteractionId] = useState('')
   const [interactions, setInteractions] = useState<InteractionOption[]>([])
@@ -48,11 +48,11 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const canSubmit = clientId.length > 0 && content.trim().length > 0 && !saving
+  const canSubmit = humanId.length > 0 && content.trim().length > 0 && !saving
 
-  // Fetch interactions whenever client changes
+  // Fetch interactions whenever human changes
   useEffect(() => {
-    if (!clientId) {
+    if (!humanId) {
       setInteractions([])
       setInteractionId('')
       return
@@ -60,17 +60,17 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
     let cancelled = false
     setInteractionsLoading(true)
     setInteractionId('')
-    fetchClientInteractionsAction(clientId).then((results) => {
+    fetchHumanInteractionsAction(humanId).then((results) => {
       if (!cancelled) {
         setInteractions(results)
         setInteractionsLoading(false)
       }
     })
     return () => { cancelled = true }
-  }, [clientId])
+  }, [humanId])
 
   function handleOpen() {
-    setClientId('')
+    setHumanId('')
     setContent('')
     setInteractionId('')
     setInteractions([])
@@ -89,7 +89,7 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
     setSaving(true)
     setError('')
     const result = await dashboardLogNoteAction({
-      clientId,
+      humanId,
       content: content.trim(),
       interactionId: (interactionId && interactionId !== '__none__') ? interactionId : undefined,
     })
@@ -126,18 +126,18 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
 
           {/* Scrollable body */}
           <div className="flex-1 overflow-y-auto px-6 pb-2 space-y-4">
-            {/* Client */}
+            {/* Human */}
             <div className="space-y-1.5">
-              <Label htmlFor="log-note-client">
+              <Label htmlFor="log-note-human">
                 Person <span className="text-destructive">*</span>
               </Label>
-              <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger id="log-note-client">
+              <Select value={humanId} onValueChange={setHumanId}>
+                <SelectTrigger id="log-note-human">
                   <SelectValue placeholder="Select a person..." />
                 </SelectTrigger>
                 <SelectContent className="max-h-48 overflow-y-auto">
-                  {clients.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  {humans.map((h) => (
+                    <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -159,7 +159,7 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
             </div>
 
             {/* Interaction link — only shown after a person is selected */}
-            {clientId && (
+            {humanId && (
               <div className="space-y-1.5">
                 <Label htmlFor="log-note-interaction">Link to an interaction</Label>
                 <Select

@@ -15,8 +15,8 @@ export interface UpcomingItem {
   day: number
   month: string
   timeRange: string
-  clientId: string | null
-  clientName: string | null
+  humanId: string | null
+  humanName: string | null
   displayLabel: string | null
   participantEmails: string[]
   hasNote: boolean
@@ -41,8 +41,8 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
   return (
     <div className="space-y-2">
       {items.map((item) => {
-        const href = item.clientId
-          ? `/myhumans/${item.clientId}/interactions/${item.interactionId}`
+        const href = item.humanId
+          ? `/myhumans/${item.humanId}/interactions/${item.interactionId}`
           : `/interactions/${item.interactionId}`
 
         return (
@@ -69,9 +69,9 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
                   {item.title || 'Untitled Interaction'}
                 </p>
                 <p className="text-xs text-slate-400 mt-0.5">{item.timeRange}</p>
-                {item.clientName ? (
+                {item.humanName ? (
                   <p className="text-xs font-medium text-[hsl(213,70%,30%)] mt-0.5">
-                    with {item.clientName}
+                    with {item.humanName}
                   </p>
                 ) : item.displayLabel ? (
                   <p className="text-xs text-slate-400 mt-0.5">{item.displayLabel}</p>
@@ -84,7 +84,7 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
             </Link>
 
             {/* Note actions */}
-            {item.clientId && (
+            {item.humanId && (
               <div className="flex items-center gap-3 px-3 pb-2 border-t border-slate-50">
                 {item.hasNote ? (
                   <Link
@@ -97,7 +97,7 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
                 ) : (
                   <>
                     <LogNoteDialog
-                      userId={item.clientId}
+                      userId={item.humanId}
                       trigger={
                         <button className="text-xs font-medium text-slate-500 flex items-center gap-1 hover:text-slate-700 transition-colors pt-2">
                           <FileText className="h-3 w-3" />
@@ -106,7 +106,7 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
                       }
                     />
                     <Link
-                      href={`/myhumans/${item.clientId}/take-notes`}
+                      href={`/myhumans/${item.humanId}/take-notes`}
                       className="text-xs font-medium text-slate-500 flex items-center gap-1 hover:text-slate-700 transition-colors pt-2"
                     >
                       <NotebookPen className="h-3 w-3" />

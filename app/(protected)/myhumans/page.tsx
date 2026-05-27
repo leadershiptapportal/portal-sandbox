@@ -8,7 +8,7 @@ import { getAllRecentNotes } from '@/lib/airtable/notes'
 import { getAllOpenTasks } from '@/lib/airtable/tasks'
 import { fetchProfileOptions, getAllUsers } from '@/lib/airtable/users'
 import PageHeader from '@/components/layout/PageHeader'
-import ClientsGrid, { type EnrichedUser } from './ClientsGrid'
+import HumansGrid, { type EnrichedHuman } from './HumansGrid'
 import type { User } from '@/lib/types'
 
 function getDisplayName(user: User): string {
@@ -25,7 +25,7 @@ function formatInteractionDate(iso: string): string {
 // Fetch all Interactions for one coach — only the fields needed
 // for last/next interaction computation. One call, filtered server-side.
 interface CoachInteraction {
-  clientName: string
+  humanName: string
   startTime: string
   endTime: string
 }
@@ -47,7 +47,7 @@ async function getCoachCalendarInteractions(ownerEmail: string): Promise<CoachIn
   if (!res.ok) return []
   const data = await res.json()
   return (data.records ?? []).map((r: { fields: Record<string, unknown> }) => ({
-    clientName: (r.fields[FIELDS.MEETINGS.CLIENT_NAME] as string) ?? '',
+    humanName: (r.fields[FIELDS.MEETINGS.CLIENT_NAME] as string) ?? '',
     startTime: (r.fields[FIELDS.MEETINGS.START] as string) ?? '',
     endTime: (r.fields[FIELDS.MEETINGS.END] as string) ?? '',
   }))
@@ -75,7 +75,7 @@ export default async function UsersPage() {
   // ── Notes count per user ─────────────────────────────────────────────────
   const noteCountByUser = new Map<string, number>()
   for (const note of allRecentNotes) {
-    const personId = note.subjectPersonId ?? note.clientId
+    const personId = note.subjectPersonId ?? note.humanId
     if (!personId) continue
     noteCountByUser.set(personId, (noteCountByUser.get(personId) ?? 0) + 1)
   }
@@ -100,7 +100,7 @@ export default async function UsersPage() {
     const start = new Date(interaction.startTime)
     const end = interaction.endTime ? new Date(interaction.endTime) : start
     // Split comma-separated client names (set during sync for multi-client events)
-    const names = interaction.clientName.split(',').map((n) => n.trim().toLowerCase()).filter(Boolean)
+    const names = interaction.humanName.split(',').map((n) => n.trim().toLowerCase()).filter(Boolean)
 
     for (const name of names) {
       if (end < now) {
@@ -116,7 +116,7 @@ export default async function UsersPage() {
   }
 
   // ── Enrich users — interaction count from linked "Associated Meetings" field ──
-  const enrichedUsers: EnrichedUser[] = users.map((user) => {
+  const enrichedHumans: EnrichedHuman[] = users.map((user) => {
     const interactionCount = user.associatedMeetingIds?.length ?? 0
     const displayNameLower = getDisplayName(user).toLowerCase()
     return {
@@ -139,12 +139,12 @@ export default async function UsersPage() {
 
   // ── Header stats (Part G) ────────────────────────────────────────────────
   const coachCount = users.filter((u) => u.role?.toLowerCase() === 'coach').length
-  const clientsWithOpenTasks = users.filter((u) => (openTaskCountByUser.get(u.id) ?? 0) > 0).length
+  const humansWithOpenTasks = users.filter((u) => (openTaskCountByUser.get(u.id) ?? 0) > 0).length
 
   const statParts = [
     `${users.length} ${users.length !== 1 ? 'people' : 'person'}`,
     coachCount > 0 ? `${coachCount} coach${coachCount !== 1 ? 'es' : ''}` : null,
-    clientsWithOpenTasks > 0 ? `${clientsWithOpenTasks} with open tasks` : null,
+    humansWithOpenTasks > 0 ? `${humansWithOpenTasks} with open tasks` : null,
   ].filter(Boolean)
 
   const description =
@@ -165,8 +165,8 @@ export default async function UsersPage() {
         title="My People"
         description={description}
       />
-      <ClientsGrid
-        users={enrichedUsers}
+      <HumansGrid
+        users={enrichedHumans}
         coaches={coaches}
         companies={profileOptions.companies}
       />

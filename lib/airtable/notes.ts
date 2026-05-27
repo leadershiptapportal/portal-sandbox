@@ -31,7 +31,7 @@ export interface Note {
   content: string
   inkImageUrl?: string
   date: string
-  clientId?: string
+  humanId?: string
   coachName?: string
   authorPersonId?: string
   subjectPersonId?: string
@@ -51,7 +51,7 @@ function mapRecord(r: AirtableRecord): Note {
     content: (r.fields[FIELDS.NOTES.BODY] as string) ?? '',
     inkImageUrl: (r.fields[FIELDS.NOTES.INK_IMAGE_URL] as string) || undefined,
     date: (r.fields[FIELDS.NOTES.DATE] as string) ?? '',
-    clientId: firstLinkedId(r.fields[FIELDS.NOTES.CLIENT]),
+    humanId: firstLinkedId(r.fields[FIELDS.NOTES.CLIENT]),
     coachName: (r.fields[FIELDS.NOTES.COACH_NAME] as string) || undefined,
     authorPersonId: firstLinkedId(r.fields[FIELDS.NOTES.AUTHOR_PERSON]),
     subjectPersonId: firstLinkedId(r.fields[FIELDS.NOTES.SUBJECT_PERSON]),
@@ -90,10 +90,10 @@ export async function getAllRecentNotes(limit = 100): Promise<Note[]> {
 }
 
 /**
- * Fetch notes where Subject Person (or Client) = clientAirtableId.
+ * Fetch notes where Subject Person (or Human) = humanAirtableId.
  * JS-filtered because linked record fields can't be filtered by ID in Airtable formulas.
  */
-export async function getNotesByClient(clientAirtableId: string): Promise<Note[]> {
+export async function getNotesByHuman(humanAirtableId: string): Promise<Note[]> {
   const { apiKey, baseId } = getCredentials()
   const url = `${API_BASE}/${baseId}/${TABLE}?${SORT_DATE_DESC}&maxRecords=500`
   const res = await airtableFetch(url, {
@@ -106,7 +106,7 @@ export async function getNotesByClient(clientAirtableId: string): Promise<Note[]
     .map(mapRecord)
     .filter(
       (n: Note) =>
-        n.subjectPersonId === clientAirtableId || n.clientId === clientAirtableId,
+        n.subjectPersonId === humanAirtableId || n.humanId === humanAirtableId,
     )
 }
 
@@ -174,16 +174,16 @@ export async function getNotesByRelationshipContext(
 }
 
 /**
- * Returns the most recent interaction note for a given client, optionally
+ * Returns the most recent interaction note for a given human, optionally
  * excluding a specific interaction (e.g. the one currently open).
  * Only returns notes that are linked to an interaction record.
  */
-export async function getMostRecentInteractionNoteByClient(
-  clientAirtableId: string,
+export async function getMostRecentInteractionNoteByHuman(
+  humanAirtableId: string,
   excludeInteractionId?: string,
 ): Promise<Note | null> {
-  const notes = await getNotesByClient(clientAirtableId)
-  // getNotesByClient returns sorted date desc, so first match is the most recent
+  const notes = await getNotesByHuman(humanAirtableId)
+  // getNotesByHuman returns sorted date desc, so first match is the most recent
   const candidate = notes.find(
     (n) =>
       n.interactionId != null &&
@@ -193,7 +193,7 @@ export async function getMostRecentInteractionNoteByClient(
 }
 
 // Alias for backward compatibility — callers that used getNotesByUser
-export const getNotesByUser = getNotesByClient
+export const getNotesByUser = getNotesByHuman
 
 // ── Write functions ───────────────────────────────────────────────────────────
 
@@ -201,7 +201,7 @@ export interface CreateNoteData {
   content: string
   inkImageUrl?: string
   date?: string
-  clientId?: string
+  humanId?: string
   authorPersonId?: string
   subjectPersonId?: string
   interactionId?: string
@@ -218,7 +218,7 @@ export async function createNote(data: CreateNoteData): Promise<Note> {
     [FIELDS.NOTES.VISIBILITY]: 'private_to_author',
     [FIELDS.NOTES.NOTE_TYPE]: data.noteType ?? 'general_note',
   }
-  if (data.clientId) fields[FIELDS.NOTES.CLIENT] = [data.clientId]
+  if (data.humanId) fields[FIELDS.NOTES.CLIENT] = [data.humanId]
   if (data.authorPersonId) fields[FIELDS.NOTES.AUTHOR_PERSON] = [data.authorPersonId]
   if (data.subjectPersonId) fields[FIELDS.NOTES.SUBJECT_PERSON] = [data.subjectPersonId]
   // Write interactionId to both the linked MEETING_LINK field and the legacy

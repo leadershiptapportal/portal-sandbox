@@ -37,7 +37,7 @@ const ERASER_SIZES = [
 ]
 
 function formatInteractionLabel(m: Interaction): string {
-  const name = m.clientName ? `${m.clientName} · ` : ''
+  const name = m.humanName ? `${m.humanName} · ` : ''
   const title = m.title || 'Untitled'
   const date = m.startTime
     ? new Date(m.startTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })

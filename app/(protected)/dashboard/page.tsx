@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { getUsers, getClientsByRelationship } from '@/lib/services/usersService'
+import { getUsers, getHumansByRelationship } from '@/lib/services/usersService'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getHourInTimezone } from '@/lib/utils/dateFormat'
@@ -36,7 +36,7 @@ export default async function DashboardPage() {
 
   const users = await (isAdmin || !userRecord.airtableId
     ? getUsers(sessionUser)
-    : getClientsByRelationship(userRecord.airtableId))
+    : getHumansByRelationship(userRecord.airtableId))
 
   const coachUser = users.find(
     (u) =>

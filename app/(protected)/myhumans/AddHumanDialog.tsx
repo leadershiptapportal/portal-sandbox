@@ -21,7 +21,7 @@ interface Props {
   currentCoachId?: string
 }
 
-export default function AddClientDialog({ coaches, companies, currentCoachId }: Props) {
+export default function AddHumanDialog({ coaches, companies, currentCoachId }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)

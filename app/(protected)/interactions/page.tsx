@@ -1,5 +1,5 @@
 import { Calendar } from 'lucide-react'
-import { getUsers, getClientsByRelationship } from '@/lib/services/usersService'
+import { getUsers, getHumansByRelationship } from '@/lib/services/usersService'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getAllUpcomingInteractions, getRecentPastInteractions } from '@/lib/airtable/interactions'
@@ -38,7 +38,7 @@ export default async function InteractionsIndexPage({ searchParams }: Props) {
   const [users, upcomingInteractions, pastInteractions, coachContexts, coachNotes] = await Promise.all([
     isAdmin || !userRecord.airtableId
       ? getUsers(sessionUser)
-      : getClientsByRelationship(userRecord.airtableId),
+      : getHumansByRelationship(userRecord.airtableId),
     getAllUpcomingInteractions(FUTURE_DAYS, ownerEmail),
     getRecentPastInteractions(PAST_DAYS, ownerEmail),
     !isAdmin && userRecord.airtableId
@@ -54,8 +54,8 @@ export default async function InteractionsIndexPage({ searchParams }: Props) {
   const activeContextIds = isAdmin ? null : new Set(coachContexts.map((c) => c.id))
   const coachEmail = sessionUser?.email?.toLowerCase() ?? ''
 
-  // Client list for the Log Interaction dialog
-  const clients = users.map((u) => ({
+  // Human list for the Log Interaction dialog
+  const humans = users.map((u) => ({
     id: u.id,
     name: u.fullName || [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email || 'Unknown',
   }))
@@ -92,7 +92,7 @@ export default async function InteractionsIndexPage({ searchParams }: Props) {
         </span>
       </div>
 
-      <InteractionsList items={combined} initialFilter={initialFilter} clients={clients} />
+      <InteractionsList items={combined} initialFilter={initialFilter} humans={humans} />
     </div>
   )
 }

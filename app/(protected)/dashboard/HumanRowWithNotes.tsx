@@ -18,7 +18,7 @@ export interface ClientNote {
 }
 
 export interface ClientRowProps {
-  clientId: string
+  humanId: string
   clientName: string
   subtitle?: string | null         // "VP of Operations · Polaris Marine"
   initials: string
@@ -39,8 +39,8 @@ function formatNoteDate(dateStr: string): string {
   })
 }
 
-export default function ClientRowWithNotes({
-  clientId,
+export default function HumanRowWithNotes({
+  humanId,
   clientName,
   subtitle,
   initials,
@@ -121,7 +121,7 @@ export default function ClientRowWithNotes({
     if (!addContent.trim()) { setAddError('Note cannot be empty.'); return }
     setAddError('')
     setSavingAdd(true)
-    const result = await dashboardSaveNoteAction(clientId, addContent.trim())
+    const result = await dashboardSaveNoteAction(humanId, addContent.trim())
     setSavingAdd(false)
     if (!result.success) { setAddError('Failed to save — try again.'); return }
     setAddOpen(false)
@@ -138,7 +138,7 @@ export default function ClientRowWithNotes({
 
         {/* Profile link — covers avatar + name + subtitle + note preview */}
         <Link
-          href={`/myhumans/${clientId}`}
+          href={`/myhumans/${humanId}`}
           className="flex items-center gap-3 flex-1 min-w-0 py-[18px]"
         >
           {/* Avatar */}
@@ -352,7 +352,7 @@ export default function ClientRowWithNotes({
           {/* View all notes link */}
           <div className="mt-2">
             <Link
-              href={`/myhumans/${clientId}`}
+              href={`/myhumans/${humanId}`}
               className="text-xs font-medium text-[hsl(213,70%,30%)] hover:underline"
             >
               {totalNoteCount > 3

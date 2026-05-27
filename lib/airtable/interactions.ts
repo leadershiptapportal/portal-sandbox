@@ -41,7 +41,7 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Int
     notes: (record.fields[FIELDS.INTERACTIONS.NOTES_TEXT] as string) || undefined,
     sessionStatus: null,
     actionItems: null,
-    clientName: (record.fields[FIELDS.INTERACTIONS.CLIENT_NAME] as string) || undefined,
+    humanName: (record.fields[FIELDS.INTERACTIONS.CLIENT_NAME] as string) || undefined,
     relationshipContextId: firstLinkedId(record.fields[FIELDS.INTERACTIONS.RELATIONSHIP_CONTEXT]),
     interactionType: (record.fields[FIELDS.INTERACTIONS.INTERACTION_TYPE] as string) || undefined,
     source: (record.fields[FIELDS.INTERACTIONS.SOURCE] as string) || undefined,
@@ -218,7 +218,7 @@ export interface CreateManualInteractionData {
   timezone: string
   calendarOwnerEmail: string
   relationshipContextId: string
-  clientName: string
+  humanName: string
   /** Comma-joined participant emails (excluding coach). Required for the
    *  profile page email-match query to pick up this interaction. */
   attendeeEmails?: string
@@ -237,7 +237,7 @@ export async function createManualInteraction(data: CreateManualInteractionData)
     [FIELDS.INTERACTIONS.CALENDAR_OWNER]: data.calendarOwnerEmail,
     [FIELDS.INTERACTIONS.ATTENDEES]: data.attendeeEmails ?? '',
     [FIELDS.INTERACTIONS.RELATIONSHIP_CONTEXT]: [data.relationshipContextId],
-    [FIELDS.INTERACTIONS.CLIENT_NAME]: data.clientName,
+    [FIELDS.INTERACTIONS.CLIENT_NAME]: data.humanName,
     [FIELDS.INTERACTIONS.SOURCE]: 'Manual',
   }
   if (data.interactionType) fields[FIELDS.INTERACTIONS.INTERACTION_TYPE] = data.interactionType

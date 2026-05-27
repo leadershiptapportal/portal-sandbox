@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
-import { getNotesByClient, createNote } from '@/lib/airtable/notes'
+import { getNotesByHuman, createNote } from '@/lib/airtable/notes'
 import type { NoteType } from '@/lib/airtable/notes'
 
 export async function GET(req: Request) {
@@ -14,12 +14,12 @@ export async function GET(req: Request) {
   }
 
   const { searchParams } = new URL(req.url)
-  const clientId = searchParams.get('clientId')
-  if (!clientId) {
-    return NextResponse.json({ error: 'clientId is required' }, { status: 400 })
+  const humanId = searchParams.get('humanId')
+  if (!humanId) {
+    return NextResponse.json({ error: 'humanId is required' }, { status: 400 })
   }
 
-  const notes = await getNotesByClient(clientId)
+  const notes = await getNotesByHuman(humanId)
   return NextResponse.json(notes)
 }
 
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   const body = (await req.json()) as {
     content: string
     date?: string
-    clientId?: string
+    humanId?: string
     subjectPersonId?: string
     interactionId?: string
     noteType?: NoteType
@@ -50,8 +50,8 @@ export async function POST(req: Request) {
     date: body.date,
     authorPersonId: userRecord.airtableId,
     coachName: userRecord.name || undefined,
-    clientId: body.clientId,
-    subjectPersonId: body.subjectPersonId ?? body.clientId,
+    humanId: body.humanId,
+    subjectPersonId: body.subjectPersonId ?? body.humanId,
     interactionId: body.interactionId,
     noteType: body.noteType,
   })

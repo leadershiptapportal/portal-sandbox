@@ -46,7 +46,7 @@ const DURATION_OPTIONS = [
   { value: '120', label: '2 hours' },
 ]
 
-interface Client {
+interface Human {
   id: string
   name: string
 }
@@ -55,7 +55,7 @@ interface Props {
   /** Pre-set person — hides the person picker (use from profile page) */
   defaultPersonId?: string
   /** Shown in the person picker (use from dashboard) */
-  clients?: Client[]
+  humans?: Human[]
   /** Custom trigger element; if omitted a default button is rendered */
   trigger?: React.ReactNode
 }
@@ -75,7 +75,7 @@ function roundedTimeStr() {
 
 const MIN_CHARS = 2
 
-export default function AddInteractionDialog({ defaultPersonId, clients, trigger }: Props) {
+export default function AddInteractionDialog({ defaultPersonId, humans, trigger }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [personId, setPersonId] = useState(defaultPersonId ?? '')
@@ -92,8 +92,8 @@ export default function AddInteractionDialog({ defaultPersonId, clients, trigger
   const searchRef = useRef<HTMLDivElement>(null)
 
   const searchResults =
-    query.trim().length >= MIN_CHARS && clients
-      ? clients.filter((c) =>
+    query.trim().length >= MIN_CHARS && humans
+      ? humans.filter((c) =>
           c.name.toLowerCase().includes(query.trim().toLowerCase()),
         )
       : []
@@ -132,10 +132,10 @@ export default function AddInteractionDialog({ defaultPersonId, clients, trigger
     setOpen(true)
   }
 
-  function selectPerson(client: Client) {
-    setPersonId(client.id)
-    setPersonName(client.name)
-    setQuery(client.name)
+  function selectPerson(human: Human) {
+    setPersonId(human.id)
+    setPersonName(human.name)
+    setQuery(human.name)
     setShowResults(false)
   }
 
@@ -205,7 +205,7 @@ export default function AddInteractionDialog({ defaultPersonId, clients, trigger
 
           <div className="space-y-4">
             {/* Person search — only shown from dashboard (no defaultPersonId) */}
-            {!defaultPersonId && clients && (
+            {!defaultPersonId && humans && (
               <div className="space-y-1.5" ref={searchRef}>
                 <Label>
                   Person <span className="text-destructive">*</span>

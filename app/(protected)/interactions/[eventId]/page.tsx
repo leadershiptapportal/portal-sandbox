@@ -4,7 +4,7 @@ import BackLink from '@/components/BackLink'
 import { getInteractionById } from '@/lib/airtable/interactions'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
-import { getNotesByInteractionId, getMostRecentInteractionNoteByClient } from '@/lib/airtable/notes'
+import { getNotesByInteractionId, getMostRecentInteractionNoteByHuman } from '@/lib/airtable/notes'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import InteractionNoteForm from './InteractionNoteForm'
@@ -67,7 +67,7 @@ export default async function SessionPage({ params }: Props) {
 
   // Last interaction note for this client (for the "previous notes" popup)
   const lastInteractionNote = clientAirtableId
-    ? await getMostRecentInteractionNoteByClient(clientAirtableId, eventId)
+    ? await getMostRecentInteractionNoteByHuman(clientAirtableId, eventId)
     : null
 
   return (
@@ -87,9 +87,9 @@ export default async function SessionPage({ params }: Props) {
         {interaction.startTime && (
           <p className="text-sm text-slate-500">{formatDateTime(interaction.startTime, interaction.timezone)}</p>
         )}
-        {interaction.clientName && (
+        {interaction.humanName && (
           <p className="text-sm font-medium text-[hsl(213,70%,30%)] mt-1">
-            with {interaction.clientName}
+            with {interaction.humanName}
           </p>
         )}
         {(userCanWrite && clientAirtableId) || lastInteractionNote ? (

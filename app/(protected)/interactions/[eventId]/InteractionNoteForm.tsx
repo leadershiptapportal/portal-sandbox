@@ -50,7 +50,7 @@ export default function InteractionNoteForm({
             content: body.trim(),
             interactionId,
             subjectPersonId,
-            clientId: subjectPersonId,
+            humanId: subjectPersonId,
             noteType: 'interaction_note',
           }),
         })

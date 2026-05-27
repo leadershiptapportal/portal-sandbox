@@ -23,7 +23,7 @@ interface Assignee {
 }
 
 interface Props {
-  clients: Assignee[]
+  humans: Assignee[]
   coaches: Assignee[]
   /** Optional custom trigger element. If omitted, renders a default "+ Add Task" button. */
   trigger?: React.ReactNode
@@ -33,7 +33,7 @@ interface Props {
 const PERSONAL_VALUE = '__personal__'
 const MIN_CHARS = 2
 
-export default function AddTaskDashboardDialog({ clients, coaches, trigger }: Props) {
+export default function AddTaskDashboardDialog({ humans, coaches, trigger }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
@@ -48,7 +48,7 @@ export default function AddTaskDashboardDialog({ clients, coaches, trigger }: Pr
   const [error, setError] = useState('')
   const searchRef = useRef<HTMLDivElement>(null)
 
-  const allPeople = [...clients, ...coaches]
+  const allPeople = [...humans, ...coaches]
   const searchResults =
     query.trim().length >= MIN_CHARS
       ? allPeople.filter(

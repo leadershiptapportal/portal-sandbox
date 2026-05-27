@@ -13,7 +13,7 @@ import type { UpcomingItem } from '../dashboard/UpcomingInteractionsCard'
 type Filter = 'needs-notes' | 'upcoming' | 'past' | 'all'
 type TypeFilter = 'all' | string
 
-interface Client {
+interface Human {
   id: string
   name: string
 }
@@ -84,10 +84,10 @@ function groupByMonth(items: ListItem[]): { label: string; rows: ListItem[] }[] 
 interface Props {
   items: ListItem[]
   initialFilter: Filter
-  clients?: Client[]
+  humans?: Human[]
 }
 
-export default function InteractionsList({ items, initialFilter, clients = [] }: Props) {
+export default function InteractionsList({ items, initialFilter, humans = [] }: Props) {
   const [filter, setFilter] = useState<Filter>(initialFilter)
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
   const [query, setQuery] = useState('')
@@ -128,7 +128,7 @@ export default function InteractionsList({ items, initialFilter, clients = [] }:
       const q = query.toLowerCase()
       result = result.filter(
         (i) =>
-          (i.clientName ?? '').toLowerCase().includes(q) ||
+          (i.humanName ?? '').toLowerCase().includes(q) ||
           (i.title ?? '').toLowerCase().includes(q) ||
           (i.displayLabel ?? '').toLowerCase().includes(q),
       )
@@ -171,7 +171,7 @@ export default function InteractionsList({ items, initialFilter, clients = [] }:
 
         {/* Log Interaction button */}
         <AddInteractionDialog
-          clients={clients}
+          humans={humans}
           trigger={
             <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-[hsl(213,70%,30%)] text-white hover:bg-[hsl(213,70%,25%)] transition-colors whitespace-nowrap flex-shrink-0">
               <Plus className="h-3.5 w-3.5" />
@@ -250,13 +250,13 @@ export default function InteractionsList({ items, initialFilter, clients = [] }:
               </p>
               <ul className="bg-white rounded-xl shadow-sm divide-y divide-slate-100 overflow-hidden">
                 {rows.map((item) => {
-                  const subjectName = item.clientName ?? item.displayLabel ?? 'Unknown'
+                  const subjectName = item.humanName ?? item.displayLabel ?? 'Unknown'
                   const needsNotes = item.isPast && !item.hasNote
-                  const href = item.clientId
-                    ? `/myhumans/${item.clientId}/interactions/${item.interactionId}`
+                  const href = item.humanId
+                    ? `/myhumans/${item.humanId}/interactions/${item.interactionId}`
                     : `/interactions/${item.interactionId}`
-                  const takeNotesHref = item.clientId
-                    ? `/myhumans/${item.clientId}/take-notes?interactionId=${item.interactionId}`
+                  const takeNotesHref = item.humanId
+                    ? `/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}`
                     : null
                   const itype = item.interactionType ?? 'Calendar Event'
                   return (
@@ -292,7 +292,7 @@ export default function InteractionsList({ items, initialFilter, clients = [] }:
                           </p>
                         </div>
 
-                        {/* Take Notes — always visible when a client is linked */}
+                        {/* Take Notes — always visible when a human is linked */}
                         {takeNotesHref && (
                           <Link
                             href={takeNotesHref}

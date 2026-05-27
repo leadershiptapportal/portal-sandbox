@@ -7,7 +7,7 @@ import AddInteractionDialog from '@/components/AddInteractionDialog'
 import LogNoteDialog from '@/app/(protected)/myhumans/[id]/LogNoteDialog'
 import TakeNotesDialog from './TakeNotesDialog'
 
-interface Client {
+interface Human {
   id: string
   name: string
 }
@@ -18,7 +18,7 @@ interface Coach {
 }
 
 interface Props {
-  clients: Client[]
+  humans: Human[]
   coaches: Coach[]
 }
 
@@ -51,14 +51,14 @@ function ActionCard({
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export default function DashboardQuickActions({ clients, coaches }: Props) {
+export default function DashboardQuickActions({ humans, coaches }: Props) {
   return (
     <div className="bg-white rounded-xl shadow-sm px-4 py-3 mb-4 md:mb-5">
       <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Quick Actions</p>
       {/* 2-up on mobile, 3-up on md, 5-up on xl */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
         <TakeNotesDialog
-          clients={clients}
+          humans={humans}
           trigger={
             <ActionCard
               icon={<NotebookPen className="w-3.5 h-3.5 text-[hsl(213,70%,40%)]" />}
@@ -72,7 +72,7 @@ export default function DashboardQuickActions({ clients, coaches }: Props) {
         />
 
         <LogNoteDialog
-          clients={clients}
+          humans={humans}
           trigger={
             <ActionCard
               icon={<FileText className="w-3.5 h-3.5 text-blue-600" />}
@@ -86,7 +86,7 @@ export default function DashboardQuickActions({ clients, coaches }: Props) {
         />
 
         <AddInteractionDialog
-          clients={clients}
+          humans={humans}
           trigger={
             <ActionCard
               icon={<History className="w-3.5 h-3.5 text-amber-600" />}
@@ -100,7 +100,7 @@ export default function DashboardQuickActions({ clients, coaches }: Props) {
         />
 
         <AddTaskDashboardDialog
-          clients={clients}
+          humans={humans}
           coaches={coaches}
           trigger={
             <ActionCard

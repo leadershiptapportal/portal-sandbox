@@ -13,7 +13,7 @@ import { Search, X } from 'lucide-react'
 import { FileText } from 'lucide-react'
 import NoteComposer from '@/components/notes/NoteComposer'
 
-interface Client {
+interface Human {
   id: string
   name: string
 }
@@ -22,12 +22,12 @@ interface Props {
   /** Pre-set person — hides the person search (use from profile page) */
   userId?: string
   /** Shown in the person search (use from dashboard) */
-  clients?: Client[]
+  humans?: Human[]
   /** Custom trigger element; if omitted a default button is rendered */
   trigger?: React.ReactNode
 }
 
-export default function LogNoteDialog({ userId, clients, trigger }: Props) {
+export default function LogNoteDialog({ userId, humans, trigger }: Props) {
   const [open, setOpen] = useState(false)
   const [personId, setPersonId] = useState('')
   const [personName, setPersonName] = useState('')
@@ -41,8 +41,8 @@ export default function LogNoteDialog({ userId, clients, trigger }: Props) {
   const MIN_CHARS = 2
 
   const results =
-    query.trim().length >= MIN_CHARS && clients
-      ? clients.filter((c) =>
+    query.trim().length >= MIN_CHARS && humans
+      ? humans.filter((c) =>
           c.name.toLowerCase().includes(query.trim().toLowerCase()),
         )
       : []
@@ -55,10 +55,10 @@ export default function LogNoteDialog({ userId, clients, trigger }: Props) {
     setOpen(true)
   }
 
-  function selectPerson(client: Client) {
-    setPersonId(client.id)
-    setPersonName(client.name)
-    setQuery(client.name)
+  function selectPerson(human: Human) {
+    setPersonId(human.id)
+    setPersonName(human.name)
+    setQuery(human.name)
     setShowResults(false)
   }
 
@@ -100,7 +100,7 @@ export default function LogNoteDialog({ userId, clients, trigger }: Props) {
 
           <div className="space-y-4">
             {/* Person search — only when no userId pre-set */}
-            {!userId && clients && (
+            {!userId && humans && (
               <div className="space-y-1.5" ref={searchRef}>
                 <Label>Person</Label>
                 <div className="relative">

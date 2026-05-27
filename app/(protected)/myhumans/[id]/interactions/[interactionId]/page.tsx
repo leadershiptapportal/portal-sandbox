@@ -6,7 +6,7 @@ import { getUserById } from '@/lib/services/usersService'
 import { getInteractionById } from '@/lib/airtable/interactions'
 import { getCoachSession } from '@/lib/airtable/coachSessions'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
-import { getMostRecentInteractionNoteByClient } from '@/lib/airtable/notes'
+import { getMostRecentInteractionNoteByHuman } from '@/lib/airtable/notes'
 import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import InteractionNotesEditor from './InteractionNotesEditor'
 import LastInteractionNotesDialog from '@/components/LastInteractionNotesDialog'
@@ -56,7 +56,7 @@ export default async function InteractionDetailPage({ params }: Props) {
     currentUserRecord.airtableId
       ? getCoachSession(currentUserRecord.airtableId, interactionId).catch(() => null)
       : Promise.resolve(null),
-    getMostRecentInteractionNoteByClient(id, interactionId),
+    getMostRecentInteractionNoteByHuman(id, interactionId),
   ])
 
   // Show coach session notes when available; fall back to the Calendar Event's

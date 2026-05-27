@@ -21,8 +21,8 @@ export interface PanelEvent {
   title: string
   startTime: string
   endTime?: string
-  clientId: string | null
-  clientName: string | null
+  humanId: string | null
+  humanName: string | null
   participantEmails: string[]
   notes?: string
 }
@@ -68,11 +68,11 @@ export default function InteractionNotePanel({
   async function handleSave() {
     if (!event || saving) return
     setSaving(true)
-    if (!event.clientId) {
+    if (!event.humanId) {
       toast.error('No person linked to this event')
       return
     }
-    const result = await savePortalEventNotesAction(event.interactionId, notes, event.clientId)
+    const result = await savePortalEventNotesAction(event.interactionId, notes, event.humanId)
     setSaving(false)
     if (!result.success) {
       toast.error('Failed to save notes')
@@ -145,9 +145,9 @@ export default function InteractionNotePanel({
                 <p className="text-xs text-slate-500">
                   {formatPanelDate(event.startTime, event.endTime)}
                 </p>
-                {event.clientId && (
+                {event.humanId && (
                   <Link
-                    href={`/myhumans/${event.clientId}`}
+                    href={`/myhumans/${event.humanId}`}
                     className="text-xs font-medium text-[hsl(213,70%,30%)] hover:underline"
                     onClick={onClose}
                   >

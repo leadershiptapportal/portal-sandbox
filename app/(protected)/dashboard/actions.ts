@@ -52,7 +52,7 @@ export async function dashboardCreateTaskAction(data: {
   notes?: string
   dueDate?: string
   assignedToPersonId?: string   // undefined → self-assign (personal_reminder)
-  clientId?: string
+  humanId?: string
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
@@ -63,7 +63,7 @@ export async function dashboardCreateTaskAction(data: {
       title: data.title,
       notes: data.notes,
       dueDate: data.dueDate,
-      clientId: data.clientId ?? data.assignedToPersonId,
+      humanId: data.humanId ?? data.assignedToPersonId,
       createdByPersonId: userRecord.airtableId,
       assignedToPersonId: data.assignedToPersonId ?? userRecord.airtableId,
     })
@@ -77,12 +77,12 @@ export async function dashboardCreateTaskAction(data: {
 
 // ── Notes ──────────────────────────────────────────────────────────────────────
 
-// Fetch a client's 10 most recent past interactions for the interaction-link dropdown
-export async function fetchClientInteractionsAction(
-  clientId: string,
+// Fetch a human's 10 most recent past interactions for the interaction-link dropdown
+export async function fetchHumanInteractionsAction(
+  humanId: string,
 ): Promise<Array<{ id: string; label: string }>> {
   try {
-    const user = await getUserById(clientId)
+    const user = await getUserById(humanId)
     if (!user) return []
     const email = user.workEmail ?? user.email
     if (!email) return []
@@ -97,14 +97,14 @@ export async function fetchClientInteractionsAction(
         return { id: m.id, label: `${dateLabel} · ${m.title || 'Untitled Interaction'}` }
       })
   } catch (err) {
-    console.error('[fetchClientInteractionsAction]', err)
+    console.error('[fetchHumanInteractionsAction]', err)
     return []
   }
 }
 
 // Save a note — either as a Coach Session record or a general note
 export async function dashboardLogNoteAction(params: {
-  clientId: string
+  humanId: string
   content: string
   interactionId?: string
 }): Promise<{ success: boolean; error?: string }> {
@@ -114,7 +114,7 @@ export async function dashboardLogNoteAction(params: {
       return { success: false, error: 'Could not resolve your coach record.' }
     }
 
-    const rc = await resolveContextForSubject(userRecord.airtableId, params.clientId)
+    const rc = await resolveContextForSubject(userRecord.airtableId, params.humanId)
     if (!rc) {
       return { success: false, error: 'No active coaching or reporting relationship reaches this person.' }
     }
@@ -123,14 +123,14 @@ export async function dashboardLogNoteAction(params: {
       content: params.content,
       authorPersonId: userRecord.airtableId,
       coachName: userRecord.name || undefined,
-      subjectPersonId: params.clientId,
-      clientId: params.clientId,
+      subjectPersonId: params.humanId,
+      humanId: params.humanId,
       relationshipContextId: rc.id,
       interactionId: params.interactionId,
       noteType: params.interactionId ? 'interaction_note' : 'general_note',
     })
     revalidatePath('/dashboard')
-    if (params.interactionId) revalidatePath(`/myhumans/${params.clientId}`)
+    if (params.interactionId) revalidatePath(`/myhumans/${params.humanId}`)
     return { success: true }
   } catch (err) {
     console.error('[dashboardLogNoteAction]', err)
@@ -139,7 +139,7 @@ export async function dashboardLogNoteAction(params: {
 }
 
 export async function dashboardSaveNoteAction(
-  clientId: string,
+  humanId: string,
   content: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
@@ -148,7 +148,7 @@ export async function dashboardSaveNoteAction(
       return { success: false, error: 'Could not resolve your coach record.' }
     }
 
-    const rc = await resolveContextForSubject(userRecord.airtableId, clientId)
+    const rc = await resolveContextForSubject(userRecord.airtableId, humanId)
     if (!rc) {
       return { success: false, error: 'No active coaching or reporting relationship reaches this person.' }
     }
@@ -157,8 +157,8 @@ export async function dashboardSaveNoteAction(
       content,
       authorPersonId: userRecord.airtableId,
       coachName: userRecord.name || undefined,
-      subjectPersonId: clientId,
-      clientId,
+      subjectPersonId: humanId,
+      humanId,
       relationshipContextId: rc.id,
     })
     revalidatePath('/dashboard')
@@ -197,7 +197,7 @@ export async function dashboardDeleteNoteAction(
 export async function savePortalEventNotesAction(
   meetingId: string,
   notes: string,
-  clientId: string,
+  humanId: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
@@ -205,7 +205,7 @@ export async function savePortalEventNotesAction(
       return { success: false, error: 'Could not resolve your coach record.' }
     }
 
-    const rc = await resolveContextForSubject(userRecord.airtableId, clientId)
+    const rc = await resolveContextForSubject(userRecord.airtableId, humanId)
     if (!rc) {
       return { success: false, error: 'No active coaching or reporting relationship reaches this person.' }
     }
@@ -214,14 +214,14 @@ export async function savePortalEventNotesAction(
       content: notes,
       authorPersonId: userRecord.airtableId,
       coachName: userRecord.name || undefined,
-      subjectPersonId: clientId,
-      clientId,
+      subjectPersonId: humanId,
+      humanId,
       relationshipContextId: rc.id,
       interactionId: meetingId,
       noteType: 'interaction_note',
     })
     revalidatePath('/dashboard')
-    revalidatePath(`/myhumans/${clientId}`)
+    revalidatePath(`/myhumans/${humanId}`)
     return { success: true }
   } catch (err) {
     console.error('[savePortalEventNotesAction]', err)

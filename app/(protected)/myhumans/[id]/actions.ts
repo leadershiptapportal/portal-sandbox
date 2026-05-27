@@ -129,7 +129,7 @@ export async function saveNoteAction(
       authorPersonId: userRecord.airtableId,
       coachName: userRecord.name || undefined,
       subjectPersonId,
-      clientId: subjectPersonId,
+      humanId: subjectPersonId,
       relationshipContextId: rc.id,
     })
   } catch (err) {
@@ -173,7 +173,7 @@ export async function saveInkNoteAction(
       authorPersonId: userRecord.airtableId,
       coachName: userRecord.name || undefined,
       subjectPersonId,
-      clientId: subjectPersonId,
+      humanId: subjectPersonId,
       relationshipContextId: rc.id,
       interactionId: interactionId || undefined,
       noteType: 'ink_note',
@@ -276,7 +276,7 @@ export async function updateInteractionNotesAction(
         authorPersonId: userRecord.airtableId,
         coachName: userRecord.name || undefined,
         subjectPersonId: userId,
-        clientId: userId,
+        humanId: userId,
         relationshipContextId: rc.id,
         interactionId,
         noteType: 'interaction_note',
@@ -324,7 +324,7 @@ export async function saveTaskAction(
     title: taskName,
     notes: notes ?? undefined,
     dueDate: dueDate ?? undefined,
-    clientId: subjectPersonId,
+    humanId: subjectPersonId,
     createdByPersonId: userRecord.airtableId,
     assignedToPersonId: subjectPersonId,
   })
@@ -370,7 +370,7 @@ export async function logManualSessionAction(params: {
     timezone: 'America/New_York',
     calendarOwnerEmail: userRecord.email,
     relationshipContextId: rc.id,
-    clientName: subjectName,
+    humanName: subjectName,
     attendeeEmails: subjectEmail || undefined,
     interactionType: params.interactionType,
   })
@@ -381,7 +381,7 @@ export async function logManualSessionAction(params: {
       authorPersonId: userRecord.airtableId,
       coachName: userRecord.name || undefined,
       subjectPersonId: params.subjectPersonId,
-      clientId: params.subjectPersonId,
+      humanId: params.subjectPersonId,
       relationshipContextId: rc.id,
       interactionId,
       noteType: 'interaction_note',

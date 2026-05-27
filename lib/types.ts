@@ -85,7 +85,7 @@ export interface Interaction {
   sessionStatus?: string | null;
   actionItems?: string | null;
   // Set during calendar sync when a participant matches a known Relationship Context
-  clientName?: string;
+  humanName?: string;
   relationshipContextId?: string;
   interactionType?: string;
   source?: string;
@@ -99,7 +99,7 @@ export interface Note {
   content: string;
   inkImageUrl?: string;
   date: string;
-  clientId?: string;
+  humanId?: string;
   coachName?: string;
   authorPersonId?: string;
   subjectPersonId?: string;
@@ -115,7 +115,7 @@ export interface Task {
   title: string;
   status: TaskStatus;
   dueDate?: string;
-  clientId?: string;
+  humanId?: string;
   notes?: string;
   relationshipContextId?: string;
   createdByPersonId?: string;

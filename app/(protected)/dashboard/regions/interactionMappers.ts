@@ -79,8 +79,8 @@ export function interactionsToUpcomingItems(
       day: parseInt(new Date(interaction.startTime).toLocaleString('en-US', { timeZone: tz, day: 'numeric' }), 10),
       month: new Date(interaction.startTime).toLocaleString('en-US', { timeZone: tz, month: 'short' }),
       timeRange,
-      clientId: client?.id ?? null,
-      clientName: interaction.clientName ?? (client ? getDisplayName(client) : null),
+      humanId: client?.id ?? null,
+      humanName: interaction.humanName ?? (client ? getDisplayName(client) : null),
       displayLabel: client ? null : (() => {
         const allEmails = [interaction.senderEmail, ...interaction.participantEmails]
           .filter(Boolean)

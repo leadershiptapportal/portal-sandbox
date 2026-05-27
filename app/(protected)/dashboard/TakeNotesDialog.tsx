@@ -11,19 +11,19 @@ import {
 import { Label } from '@/components/ui/label'
 import { Search, X } from 'lucide-react'
 
-interface Client {
+interface Human {
   id: string
   name: string
 }
 
 interface Props {
-  clients: Client[]
+  humans: Human[]
   trigger: React.ReactNode
 }
 
 const MIN_CHARS = 2
 
-export default function TakeNotesDialog({ clients, trigger }: Props) {
+export default function TakeNotesDialog({ humans, trigger }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -34,7 +34,7 @@ export default function TakeNotesDialog({ clients, trigger }: Props) {
 
   const results =
     query.trim().length >= MIN_CHARS
-      ? clients.filter((c) =>
+      ? humans.filter((c) =>
           c.name.toLowerCase().includes(query.trim().toLowerCase()),
         )
       : []
@@ -47,10 +47,10 @@ export default function TakeNotesDialog({ clients, trigger }: Props) {
     setOpen(true)
   }
 
-  function selectPerson(client: Client) {
-    setPersonId(client.id)
-    setPersonName(client.name)
-    setQuery(client.name)
+  function selectPerson(human: Human) {
+    setPersonId(human.id)
+    setPersonName(human.name)
+    setQuery(human.name)
     setShowResults(false)
   }
 

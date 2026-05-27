@@ -6,7 +6,7 @@ import { getAllUsers, fetchProfileOptions } from '@/lib/airtable/users'
 import { getCoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getInteractionById } from '@/lib/airtable/interactions'
-import { getMostRecentInteractionNoteByClient } from '@/lib/airtable/notes'
+import { getMostRecentInteractionNoteByHuman } from '@/lib/airtable/notes'
 import { getRelationshipsForPerson } from '@/lib/airtable/relationships'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import TakeNotesWorkspace from './TakeNotesWorkspace'
@@ -52,7 +52,7 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
       getRelationshipsForPerson(id).catch(() => []),
     ])
 
-  const lastInteractionNote = await getMostRecentInteractionNoteByClient(
+  const lastInteractionNote = await getMostRecentInteractionNoteByHuman(
     id,
     interactionId ?? undefined,
   ).catch(() => null)
