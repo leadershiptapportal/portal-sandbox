@@ -59,7 +59,11 @@ const HIDDEN_COMPONENTS: TLComponents = {
   NavigationPanel:   null,
   HelpMenu:          null,
   DebugMenu:         null,
-  // Override with plain white background — no tldraw dot pattern.
+  // HelperButtons renders the "Exit pen mode" button. Hiding it prevents
+  // anything from calling the exit-pen-mode action and resetting isPenMode
+  // back to false after we set it on mount.
+  HelperButtons:     null,
+  // Plain white background — no tldraw dot pattern.
   Background: () => (
     <div style={{ position: 'absolute', inset: 0, background: '#ffffff' }} />
   ),
