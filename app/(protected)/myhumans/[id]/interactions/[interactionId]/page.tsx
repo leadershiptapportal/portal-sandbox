@@ -6,8 +6,10 @@ import { getUserById } from '@/lib/services/usersService'
 import { getInteractionById } from '@/lib/airtable/interactions'
 import { getCoachSession } from '@/lib/airtable/coachSessions'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
+import { getMostRecentInteractionNoteByClient } from '@/lib/airtable/notes'
 import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import InteractionNotesEditor from './InteractionNotesEditor'
+import LastInteractionNotesDialog from '@/components/LastInteractionNotesDialog'
 
 interface Props {
   params: Promise<{ id: string; interactionId: string }>
@@ -50,9 +52,12 @@ export default async function InteractionDetailPage({ params }: Props) {
 
   if (!interaction) notFound()
 
-  const coachSession = currentUserRecord.airtableId
-    ? await getCoachSession(currentUserRecord.airtableId, interactionId).catch(() => null)
-    : null
+  const [coachSession, lastInteractionNote] = await Promise.all([
+    currentUserRecord.airtableId
+      ? getCoachSession(currentUserRecord.airtableId, interactionId).catch(() => null)
+      : Promise.resolve(null),
+    getMostRecentInteractionNoteByClient(id, interactionId),
+  ])
 
   // Show coach session notes when available; fall back to the Calendar Event's
   // Notes field so that notes entered before the Coach Session table existed
@@ -119,8 +124,8 @@ export default async function InteractionDetailPage({ params }: Props) {
           )}
         </div>
 
-        {/* Take Notes shortcut */}
-        <div className="pt-3 border-t border-slate-100 mt-4">
+        {/* Action buttons */}
+        <div className="pt-3 border-t border-slate-100 mt-4 flex flex-wrap gap-2">
           <Link
             href={`/myhumans/${id}/take-notes?interactionId=${interactionId}`}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
@@ -128,6 +133,7 @@ export default async function InteractionDetailPage({ params }: Props) {
             <NotebookPen className="h-3.5 w-3.5" />
             Take Notes
           </Link>
+          <LastInteractionNotesDialog note={lastInteractionNote} />
         </div>
       </div>
 

@@ -6,6 +6,7 @@ import { getAllUsers, fetchProfileOptions } from '@/lib/airtable/users'
 import { getCoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getInteractionById } from '@/lib/airtable/interactions'
+import { getMostRecentInteractionNoteByClient } from '@/lib/airtable/notes'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import TakeNotesWorkspace from './TakeNotesWorkspace'
 import type { Interaction } from '@/lib/types'
@@ -49,6 +50,11 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
       getPermissionLevel(currentUserRecord.airtableId, currentUserRecord.role, id),
     ])
 
+  const lastInteractionNote = await getMostRecentInteractionNoteByClient(
+    id,
+    interactionId ?? undefined,
+  ).catch(() => null)
+
   const userCanWrite = canWrite(permissionLevel)
 
   // Combine upcoming + recent past for the interaction picker (capped for perf)
@@ -65,6 +71,7 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
       meetings={allInteractions}
       initialInteraction={initialInteraction ?? null}
       userCanWrite={userCanWrite}
+      lastInteractionNote={lastInteractionNote}
     />
   )
 }

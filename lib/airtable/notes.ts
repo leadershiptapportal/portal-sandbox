@@ -173,6 +173,25 @@ export async function getNotesByRelationshipContext(
     )
 }
 
+/**
+ * Returns the most recent interaction note for a given client, optionally
+ * excluding a specific interaction (e.g. the one currently open).
+ * Only returns notes that are linked to an interaction record.
+ */
+export async function getMostRecentInteractionNoteByClient(
+  clientAirtableId: string,
+  excludeInteractionId?: string,
+): Promise<Note | null> {
+  const notes = await getNotesByClient(clientAirtableId)
+  // getNotesByClient returns sorted date desc, so first match is the most recent
+  const candidate = notes.find(
+    (n) =>
+      n.interactionId != null &&
+      (excludeInteractionId == null || n.interactionId !== excludeInteractionId),
+  )
+  return candidate ?? null
+}
+
 // Alias for backward compatibility — callers that used getNotesByUser
 export const getNotesByUser = getNotesByClient
 

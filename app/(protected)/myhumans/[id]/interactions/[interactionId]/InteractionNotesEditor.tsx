@@ -65,7 +65,7 @@ export default function InteractionNotesEditor({ interactionId, userId, initialN
               onClick={handleEdit}
               className="text-xs font-medium text-[hsl(213,70%,30%)] hover:underline"
             >
-              Edit Notes
+              {initialNotes ? 'Edit Notes' : 'Add Notes'}
             </button>
           </div>
         </div>
@@ -77,7 +77,7 @@ export default function InteractionNotesEditor({ interactionId, userId, initialN
         ) : (
           <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center">
             <p className="text-sm text-slate-400">No notes yet for this interaction.</p>
-            <p className="text-xs text-slate-300 mt-1">Click Edit Notes to add some.</p>
+            <p className="text-xs text-slate-300 mt-1">Click Add Notes to get started.</p>
           </div>
         )}
       </div>

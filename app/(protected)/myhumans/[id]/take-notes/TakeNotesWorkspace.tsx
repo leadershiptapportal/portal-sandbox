@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import PersonSidebar from './PersonSidebar'
 import TakeNotesCanvas from './TakeNotesCanvas'
+import LastInteractionNotesDialog from '@/components/LastInteractionNotesDialog'
 import type { User, Interaction } from '@/lib/types'
 import type { CoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import type { ProfileOption } from '@/lib/airtable/users'
+import type { LastNoteData } from '@/components/LastInteractionNotesDialog'
 
 interface ProfileOptions {
   enneagrams: ProfileOption[]
@@ -27,6 +29,7 @@ interface Props {
   meetings: Interaction[]
   initialInteraction: Interaction | null
   userCanWrite: boolean
+  lastInteractionNote?: LastNoteData | null
 }
 
 export default function TakeNotesWorkspace({
@@ -36,10 +39,12 @@ export default function TakeNotesWorkspace({
   meetings,
   initialInteraction,
   userCanWrite,
+  lastInteractionNote,
 }: Props) {
   const router = useRouter()
   const [savedPersonData, setSavedPersonData] = useState(person)
   const [hasStrokes, setHasStrokes] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   const displayName =
     savedPersonData.preferredName ||
@@ -83,15 +88,53 @@ export default function TakeNotesWorkspace({
 
       {/* Two-panel body */}
       <div className="flex flex-1 min-h-0">
-        {/* Left: person details sidebar */}
-        <aside className="w-72 xl:w-80 flex-shrink-0 border-r border-slate-200 overflow-y-auto bg-slate-50">
-          <PersonSidebar
-            person={savedPersonData}
-            coachContext={coachContext}
-            profileOptions={profileOptions}
-            userCanWrite={userCanWrite}
-            onPersonUpdate={(updated) => setSavedPersonData((prev) => ({ ...prev, ...updated }))}
-          />
+        {/* Left: collapsible person details sidebar */}
+        <aside
+          className={`flex-shrink-0 border-r border-slate-200 bg-slate-50 transition-all duration-200 ${
+            sidebarCollapsed ? 'w-10 overflow-hidden' : 'w-72 xl:w-80 overflow-y-auto'
+          }`}
+        >
+          {/* Collapse / expand toggle strip */}
+          <div
+            className={`flex border-b border-slate-100 py-1.5 px-1.5 ${
+              sidebarCollapsed ? 'justify-center' : 'justify-end'
+            }`}
+          >
+            <button
+              onClick={() => setSidebarCollapsed((v) => !v)}
+              className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
+              title={sidebarCollapsed ? 'Show profile panel' : 'Hide profile panel'}
+            >
+              {sidebarCollapsed ? (
+                <ChevronRight className="h-4 w-4" />
+              ) : (
+                <ChevronLeft className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+
+          {!sidebarCollapsed && (
+            <>
+              {/* "View last interaction notes" — prominent button at top of sidebar */}
+              {lastInteractionNote && (
+                <div className="px-3 pt-3 pb-2 border-b border-slate-100">
+                  <LastInteractionNotesDialog
+                    note={lastInteractionNote}
+                    variant="prominent"
+                    label="View last interaction notes"
+                  />
+                </div>
+              )}
+
+              <PersonSidebar
+                person={savedPersonData}
+                coachContext={coachContext}
+                profileOptions={profileOptions}
+                userCanWrite={userCanWrite}
+                onPersonUpdate={(updated) => setSavedPersonData((prev) => ({ ...prev, ...updated }))}
+              />
+            </>
+          )}
         </aside>
 
         {/* Right: ink canvas */}

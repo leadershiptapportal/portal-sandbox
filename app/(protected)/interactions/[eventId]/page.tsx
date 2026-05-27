@@ -4,10 +4,11 @@ import BackLink from '@/components/BackLink'
 import { getInteractionById } from '@/lib/airtable/interactions'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
-import { getNotesByInteractionId } from '@/lib/airtable/notes'
+import { getNotesByInteractionId, getMostRecentInteractionNoteByClient } from '@/lib/airtable/notes'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import InteractionNoteForm from './InteractionNoteForm'
+import LastInteractionNotesDialog from '@/components/LastInteractionNotesDialog'
 
 interface Props {
   params: Promise<{ eventId: string }>
@@ -64,6 +65,11 @@ export default async function SessionPage({ params }: Props) {
     ? allMeetingNotes.find((n) => n.authorPersonId === userRecord.airtableId) ?? null
     : null
 
+  // Last interaction note for this client (for the "previous notes" popup)
+  const lastInteractionNote = clientAirtableId
+    ? await getMostRecentInteractionNoteByClient(clientAirtableId, eventId)
+    : null
+
   return (
     <div className="px-4 py-5 md:p-8 max-w-2xl mx-auto space-y-6">
 
@@ -86,23 +92,26 @@ export default async function SessionPage({ params }: Props) {
             with {interaction.clientName}
           </p>
         )}
-        {userCanWrite && clientAirtableId && (
-          <div className="pt-2">
-            <Link
-              href={`/myhumans/${clientAirtableId}/take-notes?interactionId=${eventId}`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
-            >
-              <NotebookPen className="h-3.5 w-3.5" />
-              Take Notes
-            </Link>
+        {(userCanWrite && clientAirtableId) || lastInteractionNote ? (
+          <div className="pt-2 flex flex-wrap gap-2">
+            {userCanWrite && clientAirtableId && (
+              <Link
+                href={`/myhumans/${clientAirtableId}/take-notes?interactionId=${eventId}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
+              >
+                <NotebookPen className="h-3.5 w-3.5" />
+                Take Notes
+              </Link>
+            )}
+            <LastInteractionNotesDialog note={lastInteractionNote} />
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Interaction note — create or edit */}
       <div className="bg-white rounded-xl shadow-sm p-5">
         <h2 className="text-base font-semibold text-slate-900 mb-1">
-          {existingNote ? 'Interaction Note' : 'Add an Interaction Note'}
+          {existingNote ? 'Edit Interaction Note' : 'Add Interaction Note'}
         </h2>
         {existingNote && (
           <p className="text-xs text-slate-400 mb-5">
