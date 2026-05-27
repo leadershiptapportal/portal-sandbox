@@ -1,4 +1,5 @@
-import { Calendar, Clock, Users, CheckSquare } from 'lucide-react'
+import Link from 'next/link'
+import { Calendar, Clock, Users, CheckSquare, NotebookPen } from 'lucide-react'
 import BackLink from '@/components/BackLink'
 import { notFound } from 'next/navigation'
 import { getUserById } from '@/lib/services/usersService'
@@ -116,6 +117,17 @@ export default async function InteractionDetailPage({ params }: Props) {
               Organised by {interaction.senderEmail}
             </div>
           )}
+        </div>
+
+        {/* Take Notes shortcut */}
+        <div className="pt-3 border-t border-slate-100 mt-4">
+          <Link
+            href={`/myhumans/${id}/take-notes?interactionId=${interactionId}`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
+          >
+            <NotebookPen className="h-3.5 w-3.5" />
+            Take Notes
+          </Link>
         </div>
       </div>
 

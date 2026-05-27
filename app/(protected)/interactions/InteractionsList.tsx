@@ -2,14 +2,21 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
-  Search, ChevronRight, FileText, Calendar, X,
+  Search, ChevronRight, FileText, Calendar, X, NotebookPen, Plus,
   Users, Phone, Video, MessageSquare, Mail, Package, MoreHorizontal,
 } from 'lucide-react'
+import AddInteractionDialog from '@/components/AddInteractionDialog'
 import type { UpcomingItem } from '../dashboard/UpcomingInteractionsCard'
 
 type Filter = 'needs-notes' | 'upcoming' | 'past' | 'all'
 type TypeFilter = 'all' | string
+
+interface Client {
+  id: string
+  name: string
+}
 
 interface ListItem extends UpcomingItem {
   startMs: number
@@ -81,12 +88,14 @@ function groupByMonth(items: ListItem[]): { label: string; rows: ListItem[] }[] 
 interface Props {
   items: ListItem[]
   initialFilter: Filter
+  clients?: Client[]
 }
 
-export default function InteractionsList({ items, initialFilter }: Props) {
+export default function InteractionsList({ items, initialFilter, clients = [] }: Props) {
   const [filter, setFilter] = useState<Filter>(initialFilter)
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
   const [query, setQuery] = useState('')
+  const router = useRouter()
 
   useEffect(() => {
     const url = new URL(window.location.href)
@@ -138,9 +147,10 @@ export default function InteractionsList({ items, initialFilter }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Row 1: status filter + search */}
+      {/* Row 1: status filter + log button + search */}
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+        {/* Status filter pills */}
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-none items-center">
           {FILTER_LABELS.map(({ key, label }) => {
             const count = counts[key]
             const active = filter === key
@@ -163,6 +173,18 @@ export default function InteractionsList({ items, initialFilter }: Props) {
           })}
         </div>
 
+        {/* Log Interaction button */}
+        <AddInteractionDialog
+          clients={clients}
+          trigger={
+            <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-[hsl(213,70%,30%)] text-white hover:bg-[hsl(213,70%,25%)] transition-colors whitespace-nowrap flex-shrink-0">
+              <Plus className="h-3.5 w-3.5" />
+              Log Interaction
+            </button>
+          }
+        />
+
+        {/* Search */}
         <div className="relative sm:ml-auto sm:max-w-xs sm:flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
           <input
@@ -225,6 +247,15 @@ export default function InteractionsList({ items, initialFilter }: Props) {
         </div>
       ) : (
         <div className="space-y-6">
+          {/* Column header — TYPE label, sm+ only */}
+          <div className="hidden sm:flex items-center gap-3 px-4 -mb-4">
+            <div className="w-20 flex-shrink-0" />
+            <div className="flex-1" />
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 pr-1">
+              Type
+            </span>
+          </div>
+
           {grouped.map(({ label, rows }) => (
             <div key={label}>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2 px-1">
@@ -237,12 +268,22 @@ export default function InteractionsList({ items, initialFilter }: Props) {
                   const href = item.clientId
                     ? `/myhumans/${item.clientId}/interactions/${item.interactionId}`
                     : `/interactions/${item.interactionId}`
+                  const takeNotesHref = item.clientId
+                    ? `/myhumans/${item.clientId}/take-notes?interactionId=${item.interactionId}`
+                    : null
                   const itype = item.interactionType ?? 'Calendar Event'
                   return (
-                    <li key={item.interactionId}>
-                      <Link
-                        href={href}
-                        className="flex items-center gap-3 py-3 px-4 hover:bg-slate-50 transition-colors group"
+                    <li key={item.interactionId} className="group">
+                      {/*
+                        Row uses a plain div + router.push so we can include a
+                        separate <Link> for Take Notes without nesting <a> in <a>.
+                      */}
+                      <div
+                        role="link"
+                        tabIndex={0}
+                        onClick={() => router.push(href)}
+                        onKeyDown={(e) => e.key === 'Enter' && router.push(href)}
+                        className="flex items-center gap-3 py-3 px-4 hover:bg-slate-50 transition-colors cursor-pointer"
                       >
                         <div className="text-xs font-medium text-slate-400 w-20 flex-shrink-0">
                           {formatRowDate(item)}
@@ -266,6 +307,18 @@ export default function InteractionsList({ items, initialFilter }: Props) {
                           {TYPE_OPTIONS.find((t) => t.key === itype)?.label ?? itype}
                         </span>
 
+                        {/* Take Notes — appears on row hover, only when a client is linked */}
+                        {takeNotesHref && (
+                          <Link
+                            href={takeNotesHref}
+                            onClick={(e) => e.stopPropagation()}
+                            className="hidden group-hover:inline-flex items-center gap-1 text-xs font-medium text-[hsl(213,70%,40%)] hover:text-[hsl(213,70%,25%)] whitespace-nowrap transition-colors"
+                          >
+                            <NotebookPen className="h-3 w-3" />
+                            Take Notes
+                          </Link>
+                        )}
+
                         {needsNotes ? (
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full whitespace-nowrap">
                             <FileText className="h-3 w-3" />
@@ -276,7 +329,7 @@ export default function InteractionsList({ items, initialFilter }: Props) {
                         ) : null}
 
                         <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 flex-shrink-0" />
-                      </Link>
+                      </div>
                     </li>
                   )
                 })}

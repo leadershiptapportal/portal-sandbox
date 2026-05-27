@@ -54,6 +54,12 @@ export default async function InteractionsIndexPage({ searchParams }: Props) {
   const activeContextIds = isAdmin ? null : new Set(coachContexts.map((c) => c.id))
   const coachEmail = sessionUser?.email?.toLowerCase() ?? ''
 
+  // Client list for the Log Interaction dialog
+  const clients = users.map((u) => ({
+    id: u.id,
+    name: u.fullName || [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email || 'Unknown',
+  }))
+
   const upcomingItems = interactionsToUpcomingItems(upcomingInteractions, {
     emailToUser,
     notedInteractionIds,
@@ -86,7 +92,7 @@ export default async function InteractionsIndexPage({ searchParams }: Props) {
         </span>
       </div>
 
-      <InteractionsList items={combined} initialFilter={initialFilter} />
+      <InteractionsList items={combined} initialFilter={initialFilter} clients={clients} />
     </div>
   )
 }
