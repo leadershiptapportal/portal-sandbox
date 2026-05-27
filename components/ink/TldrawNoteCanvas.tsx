@@ -14,15 +14,17 @@
  * avoid Next.js SSR issues with tldraw's browser-only APIs.
  */
 
-import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
+import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle, useState } from 'react'
 import {
   Tldraw,
   Editor,
   DefaultColorStyle,
   DefaultSizeStyle,
+  defaultShapeUtils,
+  defaultBindingUtils,
   type TLComponents,
-  type TLUiComponents,
 } from 'tldraw'
+import { createTLStore } from '@tldraw/editor'
 import 'tldraw/tldraw.css'
 
 // ── Type mapping ───────────────────────────────────────────────────────────────
@@ -63,8 +65,8 @@ const HIDDEN_COMPONENTS: TLComponents = {
   // anything from calling the exit-pen-mode action and resetting isPenMode
   // back to false after we set it on mount.
   HelperButtons:     null,
-  // Remove the loading screen — the canvas becomes interactive immediately
-  // (combined with maxFontsToLoadBeforeRender: 0 below).
+  // Remove the loading screen — we bypass loading state entirely with a
+  // pre-created store (see below).
   LoadingScreen:     null,
   // Plain white background — no tldraw dot pattern.
   Background: () => (
@@ -73,12 +75,10 @@ const HIDDEN_COMPONENTS: TLComponents = {
 }
 
 /**
- * Skip tldraw's font-loading wait entirely. By default tldraw sets
- * maxFontsToLoadBeforeRender to Infinity, which means it shows a non-interactive
- * placeholder div for ~2 seconds while fonts load. Setting it to 0 makes the
- * real canvas render immediately on mount. Defined at module scope so the
- * reference is stable across renders (tldraw requires this to be memoised or
- * top-level to avoid re-mounting the editor).
+ * Skip tldraw's font-loading wait entirely. With a pre-created store the editor
+ * reaches TldrawEditorWithReadyStore directly, so this is belt-and-suspenders —
+ * it also prevents any font-load re-render cycle inside that component.
+ * Defined at module scope so the reference is stable.
  */
 const TLDRAW_OPTIONS = { maxFontsToLoadBeforeRender: 0 } as const
 
@@ -118,6 +118,33 @@ function TldrawNoteCanvasInner(
   { color, width, tool, penOnly, onShapeCountChange, className }: Props,
   ref: React.ForwardedRef<TldrawNoteCanvasHandle>,
 ) {
+  /**
+   * Pre-create the store synchronously so tldraw can skip its async
+   * useLocalStore initialisation cycle entirely.
+   *
+   * Without this, tldraw's internal useLocalStore hook starts with
+   * { status: 'loading' }, then transitions to { status: 'not-synced' }
+   * inside a useEffect (fires after paint). That transition causes
+   * TldrawEditorWithLoadingStore to flip from rendering null → rendering
+   * TldrawEditorWithReadyStore, which in turn disposes and recreates the
+   * editor.  The brief window between those two renders is why the canvas
+   * appeared to "work briefly then die" — the first editor was disposed, the
+   * bg-slate-100 parent showed through (light blue-grey), and our editorRef
+   * pointed at a dead editor.
+   *
+   * Passing a TLStore instance triggers the `store instanceof Store` branch in
+   * TldrawEditor which routes directly to TldrawEditorWithReadyStore — no
+   * loading state, no async transition, editor created once and stable.
+   *
+   * useState (not useMemo) guarantees the initialiser runs exactly once.
+   */
+  const [store] = useState(() =>
+    createTLStore({
+      shapeUtils:   defaultShapeUtils,
+      bindingUtils: defaultBindingUtils,
+    })
+  )
+
   const editorRef = useRef<Editor | null>(null)
 
   // Mirror latest prop values into refs so the stable onMount callback always
@@ -222,13 +249,13 @@ function TldrawNoteCanvasInner(
       style={{ WebkitTouchCallout: 'none', userSelect: 'none', touchAction: 'none' }}
     >
       <Tldraw
+        store={store}
         onMount={handleMount}
         components={HIDDEN_COMPONENTS}
         options={TLDRAW_OPTIONS}
-        // Lock to light mode — prevents the dark-mode CSS class swap that
-        // causes the slight colour change symptom after font loading.
+        // Lock to light mode — prevents useDarkMode() from swapping CSS
+        // classes after mount (was causing the slight colour-shift symptom).
         colorScheme={'light' as const}
-        forceMobile={false}
       />
     </div>
   )
