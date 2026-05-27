@@ -359,6 +359,16 @@ export default function InkCanvas({
       activeKindRef.current = null
     }
 
+    // Apple Pencil on iOS always reuses the same pointer ID. If we still have
+    // it recorded here, we missed a pointerup — pointer capture was unreliable
+    // and the canvas never received the lift event. Reset and start a fresh
+    // stroke rather than silently blocking all subsequent input.
+    if (activePointerRef.current === e.pointerId) {
+      currentRef.current = null
+      activePointerRef.current = null
+      activeKindRef.current = null
+    }
+
     if (activePointerRef.current !== null) return
 
     activePointerRef.current = e.pointerId
@@ -443,7 +453,10 @@ export default function InkCanvas({
 
   function handleUp(e: PointerEvent) {
     if (activePointerRef.current !== e.pointerId) return
-    ref.current?.releasePointerCapture(e.pointerId)
+    // releasePointerCapture can throw if the pointer is no longer active
+    // (e.g. when this fires from the document-level fallback listener after
+    // the browser already released capture implicitly on pointerup).
+    try { ref.current?.releasePointerCapture(e.pointerId) } catch { /* no-op */ }
     if (toolRef.current === 'eraser') {
       eraserCursorRef.current = null
       activePointerRef.current = null
@@ -487,7 +500,12 @@ export default function InkCanvas({
     canvas.addEventListener('pointermove', move, { passive: true })
     canvas.addEventListener('pointerup', up, { passive: true })
     canvas.addEventListener('pointercancel', cancel, { passive: true })
-    canvas.addEventListener('pointerleave', cancel, { passive: true })
+    // Document-level fallback: catches pen lifts when setPointerCapture is
+    // unreliable on iOS Safari (the canvas may not receive pointerup/cancel
+    // even with capture active). The handlers guard on pointerId so double-
+    // firing when capture IS working is a safe no-op.
+    document.addEventListener('pointerup', up, { passive: true })
+    document.addEventListener('pointercancel', cancel, { passive: true })
 
     return () => {
       obs.disconnect()
@@ -495,7 +513,8 @@ export default function InkCanvas({
       canvas.removeEventListener('pointermove', move)
       canvas.removeEventListener('pointerup', up)
       canvas.removeEventListener('pointercancel', cancel)
-      canvas.removeEventListener('pointerleave', cancel)
+      document.removeEventListener('pointerup', up)
+      document.removeEventListener('pointercancel', cancel)
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
