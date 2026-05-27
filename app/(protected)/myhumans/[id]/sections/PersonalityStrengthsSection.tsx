@@ -126,7 +126,7 @@ export default function PersonalityStrengthsSection({
         {user.strengths && user.strengths.length > 0 && (
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
-              CliftonStrengths
+              Clifton Strengths
             </p>
             <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 px-4 py-3">
               <ol className="space-y-3">

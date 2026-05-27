@@ -258,6 +258,21 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         userCanWrite={userCanWrite}
       />
 
+      {/* ── Relationships (coaches, coachees, manager, reports) ──────────── */}
+      <RelationshipsSection
+        subjectPersonId={id}
+        subjectName={name}
+        relationships={allPersonRelationships}
+        allPeople={allUsersForPicker.map((u) => ({
+          id: u.id,
+          name:
+            u.fullName ||
+            [u.firstName, u.lastName].filter(Boolean).join(' ') ||
+            u.email,
+        }))}
+        canEdit={userCanWrite}
+      />
+
       {/* ── Most Recent Interactions ──────────────────────────────────────── */}
       <MostRecentInteractionSection
         topInteractions={topInteractions}
@@ -280,21 +295,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
 
       {/* ── Coach Notes ──────────────────────────────────────────────────── */}
       <CoachNotesSection sessionNotes={standaloneNotes} userCanWrite={userCanWrite} />
-
-      {/* ── Relationships (coaches, coachees, manager, reports) ──────────── */}
-      <RelationshipsSection
-        subjectPersonId={id}
-        subjectName={name}
-        relationships={allPersonRelationships}
-        allPeople={allUsersForPicker.map((u) => ({
-          id: u.id,
-          name:
-            u.fullName ||
-            [u.firstName, u.lastName].filter(Boolean).join(' ') ||
-            u.email,
-        }))}
-        canEdit={userCanWrite}
-      />
 
       {/* ── Their Team ───────────────────────────────────────────────────── */}
       <TheirTeamSection

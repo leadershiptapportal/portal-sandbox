@@ -11,6 +11,7 @@ import type { User, Interaction } from '@/lib/types'
 import type { CoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import type { ProfileOption } from '@/lib/airtable/users'
 import type { LastNoteData } from '@/components/LastInteractionNotesDialog'
+import type { RelationshipContext } from '@/lib/airtable/relationships'
 
 interface ProfileOptions {
   enneagrams: ProfileOption[]
@@ -30,6 +31,7 @@ interface Props {
   initialInteraction: Interaction | null
   userCanWrite: boolean
   lastInteractionNote?: LastNoteData | null
+  relationships?: RelationshipContext[]
 }
 
 export default function TakeNotesWorkspace({
@@ -40,6 +42,7 @@ export default function TakeNotesWorkspace({
   initialInteraction,
   userCanWrite,
   lastInteractionNote,
+  relationships = [],
 }: Props) {
   const router = useRouter()
   const [savedPersonData, setSavedPersonData] = useState(person)
@@ -132,6 +135,7 @@ export default function TakeNotesWorkspace({
                 profileOptions={profileOptions}
                 userCanWrite={userCanWrite}
                 onPersonUpdate={(updated) => setSavedPersonData((prev) => ({ ...prev, ...updated }))}
+                relationships={relationships}
               />
             </>
           )}

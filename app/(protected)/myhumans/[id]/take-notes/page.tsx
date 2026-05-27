@@ -7,6 +7,7 @@ import { getCoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getInteractionById } from '@/lib/airtable/interactions'
 import { getMostRecentInteractionNoteByClient } from '@/lib/airtable/notes'
+import { getRelationshipsForPerson } from '@/lib/airtable/relationships'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import TakeNotesWorkspace from './TakeNotesWorkspace'
 import type { Interaction } from '@/lib/types'
@@ -33,7 +34,7 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
     user.fullName ??
     ([user.firstName, user.lastName].filter(Boolean).join(' ') || user.email)
 
-  const [profileOptions, coachContext, interactions, initialInteraction, permissionLevel] =
+  const [profileOptions, coachContext, interactions, initialInteraction, permissionLevel, relationships] =
     await Promise.all([
       getAllUsers().then((allUsers) => fetchProfileOptions(allUsers)),
       currentUserRecord.airtableId
@@ -48,6 +49,7 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
       ).catch(() => ({ upcoming: [] as Interaction[], past: [] as Interaction[] })),
       interactionId ? getInteractionById(interactionId).catch(() => null) : Promise.resolve(null),
       getPermissionLevel(currentUserRecord.airtableId, currentUserRecord.role, id),
+      getRelationshipsForPerson(id).catch(() => []),
     ])
 
   const lastInteractionNote = await getMostRecentInteractionNoteByClient(
@@ -72,6 +74,7 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
       initialInteraction={initialInteraction ?? null}
       userCanWrite={userCanWrite}
       lastInteractionNote={lastInteractionNote}
+      relationships={relationships}
     />
   )
 }
