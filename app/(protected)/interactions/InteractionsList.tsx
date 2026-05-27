@@ -42,10 +42,6 @@ const TYPE_OPTIONS: { key: string; label: string; icon: React.ReactNode }[] = [
   { key: 'Other', label: 'Other', icon: <MoreHorizontal className="h-3.5 w-3.5" /> },
 ]
 
-function typeIcon(interactionType: string | undefined) {
-  const match = TYPE_OPTIONS.find((t) => t.key === interactionType)
-  return match?.icon ?? <Calendar className="h-3.5 w-3.5" />
-}
 
 const EMPTY_COPY: Record<Filter, { title: string; message: string }> = {
   'needs-notes': {
@@ -247,15 +243,6 @@ export default function InteractionsList({ items, initialFilter, clients = [] }:
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Column header — TYPE label, sm+ only */}
-          <div className="hidden sm:flex items-center gap-3 px-4 -mb-4">
-            <div className="w-20 flex-shrink-0" />
-            <div className="flex-1" />
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 pr-1">
-              Type
-            </span>
-          </div>
-
           {grouped.map(({ label, rows }) => (
             <div key={label}>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2 px-1">
@@ -273,7 +260,7 @@ export default function InteractionsList({ items, initialFilter, clients = [] }:
                     : null
                   const itype = item.interactionType ?? 'Calendar Event'
                   return (
-                    <li key={item.interactionId} className="group">
+                    <li key={item.interactionId}>
                       {/*
                         Row uses a plain div + router.push so we can include a
                         separate <Link> for Take Notes without nesting <a> in <a>.
@@ -299,20 +286,18 @@ export default function InteractionsList({ items, initialFilter, clients = [] }:
                             )}
                           </p>
                           <p className="text-xs text-slate-400 mt-0.5">{item.timeRange}</p>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            <span className="text-slate-400">Interaction Type: </span>
+                            {TYPE_OPTIONS.find((t) => t.key === itype)?.label ?? itype}
+                          </p>
                         </div>
 
-                        {/* Type badge */}
-                        <span className="hidden sm:inline-flex items-center gap-1 text-xs text-slate-400 whitespace-nowrap">
-                          {typeIcon(itype)}
-                          {TYPE_OPTIONS.find((t) => t.key === itype)?.label ?? itype}
-                        </span>
-
-                        {/* Take Notes — appears on row hover, only when a client is linked */}
+                        {/* Take Notes — always visible when a client is linked */}
                         {takeNotesHref && (
                           <Link
                             href={takeNotesHref}
                             onClick={(e) => e.stopPropagation()}
-                            className="hidden group-hover:inline-flex items-center gap-1 text-xs font-medium text-[hsl(213,70%,40%)] hover:text-[hsl(213,70%,25%)] whitespace-nowrap transition-colors"
+                            className="inline-flex items-center gap-1 text-xs font-medium text-[hsl(213,70%,40%)] hover:text-[hsl(213,70%,25%)] whitespace-nowrap transition-colors"
                           >
                             <NotebookPen className="h-3 w-3" />
                             Take Notes
@@ -328,7 +313,7 @@ export default function InteractionsList({ items, initialFilter, clients = [] }:
                           <span className="text-xs text-slate-400 whitespace-nowrap">Noted</span>
                         ) : null}
 
-                        <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 flex-shrink-0" />
+                        <ChevronRight className="h-4 w-4 text-slate-300 flex-shrink-0" />
                       </div>
                     </li>
                   )
