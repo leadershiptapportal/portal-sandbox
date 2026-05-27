@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -45,6 +45,12 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
   const [error,     setError]     = useState<string | null>(null)
 
   const canSave = hasShapes && !saving
+
+  // Stable reference — prevents tldraw's onMount from re-running on each render.
+  const handleShapeCountChange = useCallback(
+    (count: number) => setHasShapes(count > 0),
+    [],
+  )
 
   async function handleSave() {
     if (!canvasRef.current) return
@@ -216,7 +222,7 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
           width={width}
           tool={tool}
           penOnly={true}
-          onShapeCountChange={(count) => setHasShapes(count > 0)}
+          onShapeCountChange={handleShapeCountChange}
           className="w-full h-full"
         />
       </div>

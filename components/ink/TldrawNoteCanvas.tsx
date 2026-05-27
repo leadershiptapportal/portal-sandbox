@@ -63,11 +63,24 @@ const HIDDEN_COMPONENTS: TLComponents = {
   // anything from calling the exit-pen-mode action and resetting isPenMode
   // back to false after we set it on mount.
   HelperButtons:     null,
+  // Remove the loading screen — the canvas becomes interactive immediately
+  // (combined with maxFontsToLoadBeforeRender: 0 below).
+  LoadingScreen:     null,
   // Plain white background — no tldraw dot pattern.
   Background: () => (
     <div style={{ position: 'absolute', inset: 0, background: '#ffffff' }} />
   ),
 }
+
+/**
+ * Skip tldraw's font-loading wait entirely. By default tldraw sets
+ * maxFontsToLoadBeforeRender to Infinity, which means it shows a non-interactive
+ * placeholder div for ~2 seconds while fonts load. Setting it to 0 makes the
+ * real canvas render immediately on mount. Defined at module scope so the
+ * reference is stable across renders (tldraw requires this to be memoised or
+ * top-level to avoid re-mounting the editor).
+ */
+const TLDRAW_OPTIONS = { maxFontsToLoadBeforeRender: 0 } as const
 
 // ── Public handle type ─────────────────────────────────────────────────────────
 
@@ -211,7 +224,10 @@ function TldrawNoteCanvasInner(
       <Tldraw
         onMount={handleMount}
         components={HIDDEN_COMPONENTS}
-        // Force light mode so the canvas is always white.
+        options={TLDRAW_OPTIONS}
+        // Lock to light mode — prevents the dark-mode CSS class swap that
+        // causes the slight colour change symptom after font loading.
+        colorScheme={'light' as const}
         forceMobile={false}
       />
     </div>

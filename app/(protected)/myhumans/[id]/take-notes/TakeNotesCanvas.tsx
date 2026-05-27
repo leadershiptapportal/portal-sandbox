@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useMemo } from 'react'
+import { useRef, useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { Pencil, Undo2, Trash2, Eraser, Link2 } from 'lucide-react'
@@ -81,6 +81,15 @@ export default function TakeNotesCanvas({
   )
 
   const canSave = hasShapes && !saving
+
+  // Stable reference — avoids triggering tldraw's onMount re-run on every render.
+  const handleShapeCountChange = useCallback(
+    (count: number) => {
+      setHasShapes(count > 0)
+      onStrokeCountChange?.(count)
+    },
+    [onStrokeCountChange],
+  )
 
   // ── Save flow ────────────────────────────────────────────────────────────────
 
@@ -238,10 +247,7 @@ export default function TakeNotesCanvas({
           width={width}
           tool={tool}
           penOnly={true}
-          onShapeCountChange={(count) => {
-            setHasShapes(count > 0)
-            onStrokeCountChange?.(count)
-          }}
+          onShapeCountChange={handleShapeCountChange}
           className="w-full h-full"
         />
       </div>
