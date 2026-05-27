@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createTask, updateTask, updateTaskStatus, deleteTask, type UpdateTaskData } from '@/lib/airtable/tasks'
 import type { TaskStatus } from '@/lib/types'
 import { createNote, updateNote, deleteNote } from '@/lib/airtable/notes'
-import { getMeetingsByUserEmail } from '@/lib/airtable/meetings'
+import { getInteractionsByUserEmail } from '@/lib/airtable/interactions'
 import { getUserById } from '@/lib/services/usersService'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { resolveContextForSubject } from '@/lib/airtable/relationships'
@@ -86,7 +86,7 @@ export async function fetchClientSessionsAction(
     if (!user) return []
     const email = user.workEmail ?? user.email
     if (!email) return []
-    const meetings = await getMeetingsByUserEmail(email)
+    const meetings = await getInteractionsByUserEmail(email)
     const now = new Date()
     return meetings
       .filter((m) => m.startTime && new Date(m.startTime) < now)
@@ -94,7 +94,7 @@ export async function fetchClientSessionsAction(
       .map((m) => {
         const d = new Date(m.startTime)
         const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        return { id: m.id, label: `${dateLabel} · ${m.title || 'Untitled Meeting'}` }
+        return { id: m.id, label: `${dateLabel} · ${m.title || 'Untitled Interaction'}` }
       })
   } catch (err) {
     console.error('[fetchClientSessionsAction]', err)

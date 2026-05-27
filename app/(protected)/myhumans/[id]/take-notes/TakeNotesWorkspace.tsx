@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import PersonSidebar from './PersonSidebar'
 import TakeNotesCanvas from './TakeNotesCanvas'
-import type { User, Meeting } from '@/lib/types'
+import type { User, Interaction } from '@/lib/types'
 import type { CoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import type { ProfileOption } from '@/lib/airtable/users'
 
@@ -24,8 +24,8 @@ interface Props {
   person: User
   coachContext: CoachPersonContext | null
   profileOptions: ProfileOptions
-  meetings: Meeting[]
-  initialInteraction: Meeting | null
+  meetings: Interaction[]
+  initialInteraction: Interaction | null
   userCanWrite: boolean
 }
 

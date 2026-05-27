@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { NotebookPen } from 'lucide-react'
 import BackLink from '@/components/BackLink'
-import { getMeetingById } from '@/lib/airtable/meetings'
+import { getInteractionById } from '@/lib/airtable/interactions'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import { getNotesByMeetingId } from '@/lib/airtable/notes'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
-import SessionNoteForm from './SessionNoteForm'
+import InteractionNoteForm from './InteractionNoteForm'
 
 interface Props {
   params: Promise<{ eventId: string }>
@@ -31,7 +31,7 @@ export default async function SessionPage({ params }: Props) {
   const userRecord = await getCurrentUserRecord()
 
   const [meeting, contexts] = await Promise.all([
-    getMeetingById(eventId),
+    getInteractionById(eventId),
     userRecord.airtableId
       ? getRelationshipContexts(userRecord.airtableId)
       : Promise.resolve([]),
@@ -76,7 +76,7 @@ export default async function SessionPage({ params }: Props) {
           Interaction
         </p>
         <h1 className="text-xl font-bold text-slate-900 leading-snug">
-          {meeting.title || 'Untitled Meeting'}
+          {meeting.title || 'Untitled Interaction'}
         </h1>
         {meeting.startTime && (
           <p className="text-sm text-slate-500">{formatDateTime(meeting.startTime, meeting.timezone)}</p>
@@ -99,7 +99,7 @@ export default async function SessionPage({ params }: Props) {
         )}
       </div>
 
-      {/* Session note — create or edit */}
+      {/* Interaction note — create or edit */}
       <div className="bg-white rounded-xl shadow-sm p-5">
         <h2 className="text-base font-semibold text-slate-900 mb-1">
           {existingNote ? 'Interaction Note' : 'Add an Interaction Note'}
@@ -118,7 +118,7 @@ export default async function SessionPage({ params }: Props) {
         )}
 
         {userCanWrite ? (
-          <SessionNoteForm
+          <InteractionNoteForm
             meetingId={eventId}
             subjectPersonId={clientAirtableId}
             relationshipContextId={matchedContext?.id}

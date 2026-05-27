@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import BackLink from '@/components/BackLink'
 import { getUserById } from '@/lib/services/usersService'
-import { getMeetingsForUser } from '@/lib/services/meetingsService'
+import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getUserMessages } from '@/lib/services/messagesService'
 import { getNotesByUser } from '@/lib/airtable/notes'
 import { getTasksByUser } from '@/lib/airtable/tasks'
@@ -22,7 +22,7 @@ import PlaceholderSection from '@/components/ui/PlaceholderSection'
 import UserActionsBar from './UserActionsBar'
 import { getDisplayName, getInitials, isRecordId, SectionHeading } from './sections/helpers'
 import ProfileCardSection from './sections/ProfileCardSection'
-import MostRecentSessionSection from './sections/MostRecentSessionSection'
+import MostRecentInteractionSection from './sections/MostRecentInteractionSection'
 import PersonalityStrengthsSection from './sections/PersonalityStrengthsSection'
 import ProfileDetailsSection from './sections/ProfileDetailsSection'
 import CoachNotesSection from './sections/CoachNotesSection'
@@ -76,8 +76,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   const coachId = user.coachIds?.[0] ?? null
   const teamLeadId = user.teamLeadIds?.[0] ?? null
   const teamMemberIdList = user.teamMemberIds ?? []
-  // Resolved display name — passed to getMeetingsForUser so the lookup can
-  // also match meetings via the {Client Name} field (set by sync), not just
+  // Resolved display name — passed to getInteractionsForUser so the lookup can
+  // also match interactions via the {Client Name} field (set by sync), not just
   // by email substring in {Attendees}. Belt-and-suspenders for sparse data.
   const displayName = getDisplayName(user)
 
@@ -99,7 +99,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     // call (permission, rate limit, transient network) can't reject the
     // whole Promise.all and crash the page. The UI handles empty/null for
     // each piece of data individually.
-    getMeetingsForUser(contactEmail, sessionUser, id, currentUserRecord.email || undefined, displayName)
+    getInteractionsForUser(contactEmail, sessionUser, id, currentUserRecord.email || undefined, displayName)
       .catch(() => ({ upcoming: [], past: [] })),
     getUserMessages(id).catch(() => []),
     getNotesByUser(id).catch(() => [] as Note[]),
@@ -130,10 +130,10 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   const pastSorted = [...past].sort(
     (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
   )
-  const topMeetings = pastSorted.slice(0, 3)
-  const totalMeetingCount = pastSorted.length
+  const topInteractions = pastSorted.slice(0, 3)
+  const totalInteractionCount = pastSorted.length
 
-  const noteStatusByMeetingId = sessionNotes.reduce<Record<string, { hasNotes: boolean; hasInk: boolean }>>(
+  const noteStatusByInteractionId = sessionNotes.reduce<Record<string, { hasNotes: boolean; hasInk: boolean }>>(
     (acc, note) => {
       if (!note.meetingId) return acc
       const prev = acc[note.meetingId] ?? { hasNotes: false, hasInk: false }
@@ -255,11 +255,11 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
       />
 
       {/* ── Most Recent Interactions ──────────────────────────────────────── */}
-      <MostRecentSessionSection
-        topMeetings={topMeetings}
-        totalMeetingCount={totalMeetingCount}
+      <MostRecentInteractionSection
+        topInteractions={topInteractions}
+        totalInteractionCount={totalInteractionCount}
         userId={id}
-        noteStatusByMeetingId={noteStatusByMeetingId}
+        noteStatusByInteractionId={noteStatusByInteractionId}
       />
 
       {/* ── Personality & Strengths ───────────────────────────────────────── */}

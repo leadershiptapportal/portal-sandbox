@@ -1,10 +1,10 @@
 import { getUsers, getClientsByRelationship } from '@/lib/services/usersService'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
-import { getAllUpcomingMeetings, getRecentPastMeetings } from '@/lib/airtable/meetings'
-import { buildEmailToUserMap } from '@/lib/services/meetingsService'
+import { getAllUpcomingInteractions, getRecentPastInteractions } from '@/lib/airtable/interactions'
+import { buildEmailToUserMap } from '@/lib/services/interactionsService'
 import { getNotesByAuthor } from '@/lib/airtable/notes'
-import { meetingsToUpcomingItems } from './meetingMappers'
+import { interactionsToUpcomingItems } from './interactionMappers'
 import InteractionsCard from '../InteractionsCard'
 import type { CurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 
@@ -21,8 +21,8 @@ export default async function UpcomingThisWeekRegion({ userRecord }: Props) {
     isAdmin || !userRecord.airtableId
       ? getUsers(sessionUser)
       : getClientsByRelationship(userRecord.airtableId),
-    getAllUpcomingMeetings(30, ownerEmail),
-    getRecentPastMeetings(30, ownerEmail),
+    getAllUpcomingInteractions(30, ownerEmail),
+    getRecentPastInteractions(30, ownerEmail),
     !isAdmin && userRecord.airtableId
       ? getRelationshipContexts(userRecord.airtableId)
       : Promise.resolve([]),
@@ -39,11 +39,11 @@ export default async function UpcomingThisWeekRegion({ userRecord }: Props) {
   const mapOpts = { emailToUser, notedMeetingIds, coachEmail, activeContextIds }
   const now = new Date()
 
-  const upcomingItems = meetingsToUpcomingItems(upcomingMeetings, mapOpts)
+  const upcomingItems = interactionsToUpcomingItems(upcomingMeetings, mapOpts)
     .filter((item) => new Date(item.startTime) >= now)
     .slice(0, 10)
 
-  const recentItems = meetingsToUpcomingItems(recentMeetings, mapOpts)
+  const recentItems = interactionsToUpcomingItems(recentMeetings, mapOpts)
     .filter((item) => new Date(item.startTime) < now)
     .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
     .slice(0, 10)

@@ -6,11 +6,11 @@ import { log } from '@/lib/utils/logger'
 import { getUsers, getClientsByRelationship } from '@/lib/services/usersService'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
-import { getAllUpcomingMeetings, getRecentPastMeetings } from '@/lib/airtable/meetings'
-import { buildEmailToUserMap } from '@/lib/services/meetingsService'
+import { getAllUpcomingInteractions, getRecentPastInteractions } from '@/lib/airtable/interactions'
+import { buildEmailToUserMap } from '@/lib/services/interactionsService'
 import { getNotesByAuthor } from '@/lib/airtable/notes'
 import { getDateInTimezone, resolveDisplayTz } from '@/lib/utils/dateFormat'
-import { meetingsToUpcomingItems } from './meetingMappers'
+import { interactionsToUpcomingItems } from './interactionMappers'
 import type { CurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 
 interface PortalCalendarEvent {
@@ -29,11 +29,11 @@ async function getUpcomingPortalEvents(ownerEmail: string): Promise<PortalCalend
   const cutoff = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
   const safeOwner = ownerEmail.toLowerCase().replace(/"/g, '\\"')
   const formula = encodeURIComponent(
-    `AND(IS_AFTER({${FIELDS.MEETINGS.START}}, "${now.toISOString()}"), IS_BEFORE({${FIELDS.MEETINGS.START}}, "${cutoff.toISOString()}"), LOWER({${FIELDS.MEETINGS.CALENDAR_OWNER}}) = "${safeOwner}")`,
+    `AND(IS_AFTER({${FIELDS.INTERACTIONS.START}}, "${now.toISOString()}"), IS_BEFORE({${FIELDS.INTERACTIONS.START}}, "${cutoff.toISOString()}"), LOWER({${FIELDS.INTERACTIONS.CALENDAR_OWNER}}) = "${safeOwner}")`,
   )
   try {
     const res = await airtableFetch(
-      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(TABLES.MEETINGS)}?filterByFormula=${formula}&sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.MEETINGS.START)}&sort%5B0%5D%5Bdirection%5D=asc&maxRecords=10`,
+      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(TABLES.INTERACTIONS)}?filterByFormula=${formula}&sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.INTERACTIONS.START)}&sort%5B0%5D%5Bdirection%5D=asc&maxRecords=10`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     )
     if (!res.ok) {
@@ -43,9 +43,9 @@ async function getUpcomingPortalEvents(ownerEmail: string): Promise<PortalCalend
     const data = await res.json()
     return (data.records ?? []).map((r: { id: string; fields: Record<string, unknown> }) => ({
       id: r.id,
-      subject: (r.fields[FIELDS.MEETINGS.TITLE] as string) ?? '(No Subject)',
-      start: (r.fields[FIELDS.MEETINGS.START] as string) ?? '',
-      timezone: resolveDisplayTz(r.fields[FIELDS.MEETINGS.TIMEZONE] as string | undefined),
+      subject: (r.fields[FIELDS.INTERACTIONS.TITLE] as string) ?? '(No Subject)',
+      start: (r.fields[FIELDS.INTERACTIONS.START] as string) ?? '',
+      timezone: resolveDisplayTz(r.fields[FIELDS.INTERACTIONS.TIMEZONE] as string | undefined),
     })).filter((e: PortalCalendarEvent) => e.start)
   } catch {
     return []
@@ -61,13 +61,13 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
   const isAdmin = userRecord.role === 'admin'
   const ownerEmail = userRecord.email || undefined
 
-  const [users, upcomingMeetings, pastDay, coachContexts, coachNotes, portalEvents] =
+  const [users, upcomingInteractions, pastDay, coachContexts, coachNotes, portalEvents] =
     await Promise.all([
       isAdmin || !userRecord.airtableId
         ? getUsers(sessionUser)
         : getClientsByRelationship(userRecord.airtableId),
-      getAllUpcomingMeetings(7, ownerEmail),
-      getRecentPastMeetings(1, ownerEmail),
+      getAllUpcomingInteractions(7, ownerEmail),
+      getRecentPastInteractions(1, ownerEmail),
       !isAdmin && userRecord.airtableId
         ? getRelationshipContexts(userRecord.airtableId)
         : Promise.resolve([]),
@@ -84,8 +84,8 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
   const coachEmail = sessionUser?.email?.toLowerCase() ?? ''
 
   const mapOpts = { emailToUser, notedMeetingIds, coachEmail, activeContextIds }
-  const upcomingItems = meetingsToUpcomingItems(upcomingMeetings, mapOpts)
-  const pastDayItems = meetingsToUpcomingItems(pastDay, mapOpts)
+  const upcomingItems = interactionsToUpcomingItems(upcomingInteractions, mapOpts)
+  const pastDayItems = interactionsToUpcomingItems(pastDay, mapOpts)
 
   const todayStr = getDateInTimezone(now.toISOString())
   const futureToday = upcomingItems.filter(

@@ -2,12 +2,12 @@ import { Calendar } from 'lucide-react'
 import { getUsers, getClientsByRelationship } from '@/lib/services/usersService'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
-import { getAllUpcomingMeetings, getRecentPastMeetings } from '@/lib/airtable/meetings'
-import { buildEmailToUserMap } from '@/lib/services/meetingsService'
+import { getAllUpcomingInteractions, getRecentPastInteractions } from '@/lib/airtable/interactions'
+import { buildEmailToUserMap } from '@/lib/services/interactionsService'
 import { getNotesByAuthor } from '@/lib/airtable/notes'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
-import { meetingsToUpcomingItems } from '../dashboard/regions/meetingMappers'
-import SessionsList from './SessionsList'
+import { interactionsToUpcomingItems } from '../dashboard/regions/interactionMappers'
+import InteractionsList from './InteractionsList'
 
 const PAST_DAYS = 90
 const FUTURE_DAYS = 60
@@ -23,7 +23,7 @@ interface Props {
   searchParams: Promise<{ filter?: string }>
 }
 
-export default async function SessionsIndexPage({ searchParams }: Props) {
+export default async function InteractionsIndexPage({ searchParams }: Props) {
   const { filter: filterParam } = await searchParams
   const initialFilter = parseFilter(filterParam)
 
@@ -35,12 +35,12 @@ export default async function SessionsIndexPage({ searchParams }: Props) {
   const isAdmin = userRecord.role === 'admin'
   const ownerEmail = userRecord.email || undefined
 
-  const [users, upcomingMeetings, pastMeetings, coachContexts, coachNotes] = await Promise.all([
+  const [users, upcomingInteractions, pastInteractions, coachContexts, coachNotes] = await Promise.all([
     isAdmin || !userRecord.airtableId
       ? getUsers(sessionUser)
       : getClientsByRelationship(userRecord.airtableId),
-    getAllUpcomingMeetings(FUTURE_DAYS, ownerEmail),
-    getRecentPastMeetings(PAST_DAYS, ownerEmail),
+    getAllUpcomingInteractions(FUTURE_DAYS, ownerEmail),
+    getRecentPastInteractions(PAST_DAYS, ownerEmail),
     !isAdmin && userRecord.airtableId
       ? getRelationshipContexts(userRecord.airtableId)
       : Promise.resolve([]),
@@ -54,14 +54,14 @@ export default async function SessionsIndexPage({ searchParams }: Props) {
   const activeContextIds = isAdmin ? null : new Set(coachContexts.map((c) => c.id))
   const coachEmail = sessionUser?.email?.toLowerCase() ?? ''
 
-  const upcomingItems = meetingsToUpcomingItems(upcomingMeetings, {
+  const upcomingItems = interactionsToUpcomingItems(upcomingInteractions, {
     emailToUser,
     notedMeetingIds,
     coachEmail,
     activeContextIds,
   }).map((i) => ({ ...i, startMs: new Date(i.startTime).getTime(), isPast: false }))
 
-  const pastItems = meetingsToUpcomingItems(pastMeetings, {
+  const pastItems = interactionsToUpcomingItems(pastInteractions, {
     emailToUser,
     notedMeetingIds,
     coachEmail,
@@ -86,7 +86,7 @@ export default async function SessionsIndexPage({ searchParams }: Props) {
         </span>
       </div>
 
-      <SessionsList items={combined} initialFilter={initialFilter} />
+      <InteractionsList items={combined} initialFilter={initialFilter} />
     </div>
   )
 }

@@ -240,7 +240,7 @@ export async function updateTaskStatusAction(
   return { success: true }
 }
 
-// ── Session Notes ─────────────────────────────────────────────────────────────
+// ── Interaction Notes ──────────────────────────────────────────────────────────
 
 export async function getNotesByMeetingIdAction(meetingId: string) {
   return getNotesByMeetingId(meetingId).catch(() => [])
@@ -264,7 +264,7 @@ export async function updateSessionNotesAction(
 
     // Upsert: find an existing note for this meeting authored by this coach;
     // PATCH it if found, POST a new one if not. Prevents accumulating duplicate
-    // notes records every time a session note is saved.
+    // notes records every time an interaction note is saved.
     const existingNotes = await getNotesByMeetingId(meetingId)
     const myNote = existingNotes.find((n) => n.authorPersonId === userRecord.airtableId)
     if (myNote) {
@@ -362,8 +362,8 @@ export async function logManualSessionAction(params: {
   // Populate Attendees so the profile-page email-match query picks this up.
   const subjectEmail = subject?.workEmail ?? subject?.email ?? ''
 
-  const { createManualMeeting } = await import('@/lib/airtable/meetings')
-  const meetingId = await createManualMeeting({
+  const { createManualInteraction } = await import('@/lib/airtable/interactions')
+  const meetingId = await createManualInteraction({
     title: `${coachFirst} / ${subjectName} — ${typeLabel}`,
     startIso: start.toISOString(),
     endIso: end.toISOString(),

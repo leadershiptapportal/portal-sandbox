@@ -45,6 +45,26 @@ export const FIELDS = {
     TASKS_LINKED: 'fld9UnUYXwKCEBKrT',          // "Tasks" (linked → Tasks)
     NOTES_LINKED: 'fld3omA1BHtk6k1cK',          // "Notes" (linked → Notes)
   },
+  INTERACTIONS: {
+    TITLE: 'fldAk4BCE60mYBv4I',                 // "Subject"
+    START: 'fldvUrf7tG2xQ8Q1E',                 // "Start Time"
+    END: 'fldfdh1Tq2Xmsp68X',                   // "End Time"
+    PROVIDER_EVENT_ID: 'fldcugcsHlIPbEgna',     // "Provider Event ID"
+    ATTENDEES: 'fldpCCYTuIOXuqqCd',             // "Attendees"
+    CALENDAR_OWNER: 'fld790fAzn86Lquig',        // "Calendar Owner" (text email)
+    CALENDAR_OWNER_PERSON: 'fldj13l8IStVOJeq1', // "Calendar Owner Person" (linked → People)
+    CLIENT_NAME: 'fldK2TOXuqUOSWdk9',           // "Client Name"
+    RELATIONSHIP_CONTEXT: 'fldwLPj5ahMVI9mam',  // "Relationship Context" (linked)
+    TIMEZONE: 'fld0MYHtXEbwJ0EFe',              // "Timezone"
+    MEETING_STATUS: 'fldj6d4eqytFAjg56',        // "Meeting Status"
+    CALENDAR_PROVIDER: 'fldBhVB6jjJZVER4o',     // "Calendar Provider"
+    NOTES_TEXT: 'fldyTf8tVlyfmNT5S',            // "Notes" (coach-written notes — multilineText)
+    NOTE_NAME: 'fldhYmaFzYM86fi1O',             // "Note Name" (auto-set by sync as YYYY-MM-DD // Attendee)
+    ICAL_UID: 'fldFCmcfx1vGgXdBl',              // "iCal UID"
+    INTERACTION_TYPE: 'fldqlSsJO1b5DMhRu',      // "Interaction Type" (singleSelect: "Calendar Event" | "Email" | "Text" | "In-Person" | "Phone Call" | "Video Call" | "Mail" | "Other")
+    SOURCE: 'fld3ypgDTQTDV36KX',                // "Source" (singleSelect: "Synced" | "Manual")
+  },
+  /** @deprecated Use FIELDS.INTERACTIONS instead */
   MEETINGS: {
     TITLE: 'fldAk4BCE60mYBv4I',                 // "Subject"
     START: 'fldvUrf7tG2xQ8Q1E',                 // "Start Time"

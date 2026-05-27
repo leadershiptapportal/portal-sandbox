@@ -3,18 +3,18 @@ import { notFound } from 'next/navigation'
 import { ChevronRight, Calendar, NotebookPen, FileText } from 'lucide-react'
 import BackLink from '@/components/BackLink'
 import { getUserById } from '@/lib/services/usersService'
-import { getMeetingsForUser } from '@/lib/services/meetingsService'
+import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import { formatEastern } from '@/lib/utils/dateFormat'
-import type { Meeting } from '@/lib/types'
+import type { Interaction } from '@/lib/types'
 
 interface Props {
   params: Promise<{ id: string }>
 }
 
-function formatRowDate(m: Meeting): string {
+function formatRowDate(m: Interaction): string {
   if (!m.startTime) return ''
   return formatEastern(
     m.startTime,
@@ -23,10 +23,10 @@ function formatRowDate(m: Meeting): string {
   )
 }
 
-function groupByMonth(meetings: Meeting[]): { label: string; items: Meeting[] }[] {
-  const groups = new Map<string, Meeting[]>()
+function groupByMonth(interactions: Interaction[]): { label: string; items: Interaction[] }[] {
+  const groups = new Map<string, Interaction[]>()
   const labels = new Map<string, string>()
-  for (const m of meetings) {
+  for (const m of interactions) {
     if (!m.startTime) continue
     const d = new Date(m.startTime)
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
@@ -56,13 +56,13 @@ export default async function PersonInteractionsPage({ params }: Props) {
     ([user.firstName, user.lastName].filter(Boolean).join(' ') || user.email)
 
   const [{ past, upcoming }, permissionLevel] = await Promise.all([
-    getMeetingsForUser(
+    getInteractionsForUser(
       contactEmail,
       sessionUser,
       id,
       currentUserRecord.email || undefined,
       displayName,
-    ).catch(() => ({ upcoming: [] as Meeting[], past: [] as Meeting[] })),
+    ).catch(() => ({ upcoming: [] as Interaction[], past: [] as Interaction[] })),
     getPermissionLevel(currentUserRecord.airtableId, currentUserRecord.role, id),
   ])
 
@@ -78,7 +78,8 @@ export default async function PersonInteractionsPage({ params }: Props) {
   const totalCount = pastSorted.length + upcomingSorted.length
   const pastGroups = groupByMonth(pastSorted)
 
-  function InteractionRow({ meeting, isFirst }: { meeting: Meeting; isFirst?: boolean }) {
+  function InteractionRow({ interaction, isFirst }: { interaction: Interaction; isFirst?: boolean }) {
+    const meeting = interaction
     return (
       <li className={`relative flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors group ${isFirst ? 'bg-[hsl(213,60%,98%)]' : ''}`}>
         <div className="flex-1 min-w-0">
@@ -138,7 +139,7 @@ export default async function PersonInteractionsPage({ params }: Props) {
           </p>
           <ul className="bg-white rounded-xl shadow-sm divide-y divide-slate-100 overflow-hidden">
             {upcomingSorted.map((m) => (
-              <InteractionRow key={m.id} meeting={m} />
+              <InteractionRow key={m.id} interaction={m} />
             ))}
           </ul>
         </div>
@@ -156,7 +157,7 @@ export default async function PersonInteractionsPage({ params }: Props) {
                 {items.map((m, itemIdx) => (
                   <InteractionRow
                     key={m.id}
-                    meeting={m}
+                    interaction={m}
                     isFirst={groupIdx === 0 && itemIdx === 0}
                   />
                 ))}

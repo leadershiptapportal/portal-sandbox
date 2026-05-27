@@ -34,10 +34,10 @@ interface Props {
 }
 
 /**
- * Single source of truth for creating a typed note (or a meeting note).
+ * Single source of truth for creating a typed note (or an interaction note).
  * Used by:
  *   - LogNoteDialog (profile "Log a Note" modal)
- *   - SessionNoteForm (note panel on a meeting page — meetingId is set)
+ *   - InteractionNoteForm (note panel on an interaction page — meetingId is set)
  *
  * For handwritten ink notes, the user is sent to the full-screen ink page
  * because the canvas needs real estate. The link is rendered as a sibling
@@ -69,14 +69,14 @@ export default function NoteComposer({
       if (meetingId) {
         const result = await updateSessionNotesAction(meetingId, content, subjectPersonId)
         if (!result.success) {
-          setError(result.error ?? 'Failed to save session note.')
+          setError(result.error ?? 'Failed to save interaction note.')
           setSaving(false)
           return
         }
       } else {
         await saveNoteAction(subjectPersonId, content)
       }
-      toast.success(meetingId ? 'Session note saved' : 'Note saved')
+      toast.success(meetingId ? 'Interaction note saved' : 'Note saved')
       setContent('')
       router.refresh()
       onSaved?.()

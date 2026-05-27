@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Calendar } from 'lucide-react'
-import UpcomingSessionsCard from './UpcomingSessionsCard'
-import type { UpcomingItem } from './UpcomingSessionsCard'
+import UpcomingInteractionsCard from './UpcomingInteractionsCard'
+import type { UpcomingItem } from './UpcomingInteractionsCard'
 
 interface Props {
   recentItems: UpcomingItem[]
@@ -59,7 +59,7 @@ export default function InteractionsCard({ recentItems, upcomingItems }: Props) 
       </div>
 
       <div className="max-h-[430px] overflow-y-auto -mr-1 pr-1">
-        <UpcomingSessionsCard
+        <UpcomingInteractionsCard
           items={items}
           emptyMessage={
             tab === 'recent' ? 'No recent interactions.' : 'No upcoming interactions.'
