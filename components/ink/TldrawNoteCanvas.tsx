@@ -4,14 +4,14 @@
  * TldrawNoteCanvas — tldraw v5-backed ink canvas for coaching notes.
  *
  * Design goals:
- *   • Infinite scrollable canvas — finger pans, Apple Pencil draws (isPenMode)
- *   • No iOS selection / Scribble interference — all tldraw UI hidden, context
- *     menu suppressed, tldraw owns all pointer event handling
- *   • Clean white background with subtle grid-free look
- *   • Exports to PNG blob for upload to Cloudinary (same save flow as before)
+ *   • Notebook-mode camera — full-width page, finger scrolls vertically only,
+ *     no horizontal drift, no accidental zoom-out
+ *   • Finger pans / Apple Pencil draws (isPenMode)
+ *   • No iOS selection / Scribble interference — all tldraw UI hidden
+ *   • Clean white background
+ *   • Exports to PNG blob for upload to Cloudinary
  *
- * Usage: dynamically imported with { ssr: false } from the parent component to
- * avoid Next.js SSR issues with tldraw's browser-only APIs.
+ * Usage: dynamically imported with { ssr: false } from the parent component.
  */
 
 import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle, useState } from 'react'
@@ -20,6 +20,7 @@ import {
   Editor,
   DefaultColorStyle,
   DefaultSizeStyle,
+  DefaultDashStyle,
   defaultShapeUtils,
   defaultBindingUtils,
   type TLComponents,
@@ -38,21 +39,15 @@ const COLOR_MAP: Record<string, string> = {
 }
 
 /** Maps our numeric width values → tldraw size tokens. */
-const SIZE_MAP: Record<number, 's' | 'm' | 'l'> = {
+const SIZE_MAP: Record<number, 's' | 'm' | 'l' | 'xl'> = {
   1.8: 's',
   3:   'm',
   5:   'l',
+  8:   'xl',
 }
 
 // ── Component overrides ────────────────────────────────────────────────────────
 
-/**
- * Suppress all tldraw built-in UI. We render our own minimal toolbar outside
- * the tldraw tree. Removing the context menu prevents iOS long-press from
- * triggering the system selection / copy-paste popover.
- * Defined outside the component so the reference is stable (tldraw requires
- * this to be memoised or top-level).
- */
 const HIDDEN_COMPONENTS: TLComponents = {
   Toolbar:           null,
   MainMenu:          null,
@@ -61,53 +56,69 @@ const HIDDEN_COMPONENTS: TLComponents = {
   NavigationPanel:   null,
   HelpMenu:          null,
   DebugMenu:         null,
-  // HelperButtons renders the "Exit pen mode" button. Hiding it prevents
-  // anything from calling the exit-pen-mode action and resetting isPenMode
-  // back to false after we set it on mount.
   HelperButtons:     null,
-  // Remove the loading screen — we bypass loading state entirely with a
-  // pre-created store (see below).
   LoadingScreen:     null,
-  // Plain white background — no tldraw dot pattern.
   Background: () => (
     <div style={{ position: 'absolute', inset: 0, background: '#ffffff' }} />
   ),
 }
 
+// ── tldraw options ─────────────────────────────────────────────────────────────
+
 /**
- * Skip tldraw's font-loading wait entirely. With a pre-created store the editor
- * reaches TldrawEditorWithReadyStore directly, so this is belt-and-suspenders —
- * it also prevents any font-load re-render cycle inside that component.
- * Defined at module scope so the reference is stable.
+ * Static options passed to Tldraw.
+ *
+ * camera.constraints gives us "notebook" behaviour:
+ *   • bounds 800 × 100 000 — full-width, effectively infinite height
+ *   • fit-x initialZoom — zoom is set so the page width exactly fills the
+ *     screen; no need to zoom in to see content at a natural writing scale
+ *   • behavior.x = 'fixed' — the page never drifts left/right; finger
+ *     panning is constrained to the Y axis only
+ *   • behavior.y = 'contain' — finger can scroll the full page height but
+ *     can't scroll past the top or bottom edge
  */
-const TLDRAW_OPTIONS = { maxFontsToLoadBeforeRender: 0 } as const
+const TLDRAW_OPTIONS = {
+  maxFontsToLoadBeforeRender: 0,
+  camera: {
+    isLocked:     false,
+    panSpeed:     1,
+    zoomSpeed:    1,
+    // Narrow zoom range — enough to zoom in for fine detail but prevents
+    // accidentally zooming all the way out to a tiny speck.
+    zoomSteps:    [0.5, 1, 2] as number[],
+    wheelBehavior: 'none' as 'zoom' | 'pan' | 'none',
+    constraints: {
+      bounds:      { x: 0, y: 0, w: 800, h: 100_000 },
+      padding:     { x: 0, y: 0 },
+      origin:      { x: 0, y: 0 },
+      initialZoom: 'fit-x' as const,
+      baseZoom:    'fit-x' as const,
+      behavior: {
+        x: 'fixed'   as const,   // ← no horizontal pan at all
+        y: 'contain' as const,   // ← vertical scroll within bounds
+      },
+    },
+  },
+}
 
 // ── Public handle type ─────────────────────────────────────────────────────────
 
 export interface TldrawNoteCanvasHandle {
-  /** Export the current canvas content as a PNG Blob, or null if empty. */
   exportBlob: () => Promise<Blob | null>
-  undo:  () => void
-  clear: () => void
+  undo:    () => void
+  clear:   () => void
   isEmpty: () => boolean
 }
 
 // ── Props ──────────────────────────────────────────────────────────────────────
 
-interface Props {
-  /** Hex colour from the parent toolbar. */
-  color:   string
-  /** Numeric width from the parent toolbar (maps to tldraw size token). */
-  width:   number
-  /** 'pen' activates tldraw's draw tool; 'eraser' activates the eraser. */
-  tool:    'pen' | 'eraser'
-  /**
-   * When true (default), touches pan the canvas and only the stylus draws.
-   * Maps to tldraw's built-in isPenMode. Removes the need for a manual
-   * "pen only" toggle — this is just how Apple Notes / OneNote behave.
-   */
-  penOnly: boolean
-  /** Fired whenever the number of shapes on the canvas changes. */
+export interface TldrawNoteCanvasProps {
+  color:    string
+  width:    number
+  tool:     'pen' | 'eraser'
+  /** 'draw' = freehand/pressure-sensitive; 'solid' = clean geometric line */
+  penStyle: 'draw' | 'solid'
+  penOnly:  boolean
   onShapeCountChange: (count: number) => void
   className?: string
 }
@@ -115,28 +126,16 @@ interface Props {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 function TldrawNoteCanvasInner(
-  { color, width, tool, penOnly, onShapeCountChange, className }: Props,
+  { color, width, tool, penStyle, penOnly, onShapeCountChange, className }: TldrawNoteCanvasProps,
   ref: React.ForwardedRef<TldrawNoteCanvasHandle>,
 ) {
   /**
-   * Pre-create the store synchronously so tldraw can skip its async
-   * useLocalStore initialisation cycle entirely.
-   *
-   * Without this, tldraw's internal useLocalStore hook starts with
-   * { status: 'loading' }, then transitions to { status: 'not-synced' }
-   * inside a useEffect (fires after paint). That transition causes
-   * TldrawEditorWithLoadingStore to flip from rendering null → rendering
-   * TldrawEditorWithReadyStore, which in turn disposes and recreates the
-   * editor.  The brief window between those two renders is why the canvas
-   * appeared to "work briefly then die" — the first editor was disposed, the
-   * bg-slate-100 parent showed through (light blue-grey), and our editorRef
-   * pointed at a dead editor.
-   *
-   * Passing a TLStore instance triggers the `store instanceof Store` branch in
-   * TldrawEditor which routes directly to TldrawEditorWithReadyStore — no
-   * loading state, no async transition, editor created once and stable.
-   *
-   * useState (not useMemo) guarantees the initialiser runs exactly once.
+   * Pre-create the store synchronously. Without this, tldraw's internal
+   * useLocalStore starts with { status:'loading' }, fires a useEffect to
+   * transition to { status:'not-synced' }, and disposes + recreates the editor
+   * during that async flip — causing the "works for 2 seconds then dies" bug.
+   * Passing a TLStore instance routes straight to TldrawEditorWithReadyStore,
+   * no loading cycle.
    */
   const [store] = useState(() =>
     createTLStore({
@@ -147,16 +146,17 @@ function TldrawNoteCanvasInner(
 
   const editorRef = useRef<Editor | null>(null)
 
-  // Mirror latest prop values into refs so the stable onMount callback always
-  // reads fresh data without needing to re-run.
-  const colorRef   = useRef(color)
-  const widthRef   = useRef(width)
-  const penOnlyRef = useRef(penOnly)
-  useEffect(() => { colorRef.current   = color   }, [color])
-  useEffect(() => { widthRef.current   = width   }, [width])
-  useEffect(() => { penOnlyRef.current = penOnly }, [penOnly])
+  // Prop → ref mirrors so the stable onMount callback reads current values.
+  const colorRef    = useRef(color)
+  const widthRef    = useRef(width)
+  const penStyleRef = useRef(penStyle)
+  const penOnlyRef  = useRef(penOnly)
+  useEffect(() => { colorRef.current    = color    }, [color])
+  useEffect(() => { widthRef.current    = width    }, [width])
+  useEffect(() => { penStyleRef.current = penStyle }, [penStyle])
+  useEffect(() => { penOnlyRef.current  = penOnly  }, [penOnly])
 
-  // ── Sync prop changes → editor ───────────────────────────────────────────────
+  // ── Sync prop changes → live editor ─────────────────────────────────────────
 
   useEffect(() => {
     const editor = editorRef.current
@@ -173,6 +173,12 @@ function TldrawNoteCanvasInner(
   useEffect(() => {
     const editor = editorRef.current
     if (!editor) return
+    editor.setStyleForNextShapes(DefaultDashStyle, penStyle as never)
+  }, [penStyle])
+
+  useEffect(() => {
+    const editor = editorRef.current
+    if (!editor) return
     editor.setCurrentTool(tool === 'pen' ? 'draw' : 'eraser')
   }, [tool])
 
@@ -182,7 +188,7 @@ function TldrawNoteCanvasInner(
     editor.updateInstanceState({ isPenMode: penOnly })
   }, [penOnly])
 
-  // ── Imperative handle for parent toolbar ─────────────────────────────────────
+  // ── Imperative handle ────────────────────────────────────────────────────────
 
   useImperativeHandle(ref, () => ({
     exportBlob: async () => {
@@ -214,7 +220,6 @@ function TldrawNoteCanvasInner(
     (editor: Editor) => {
       editorRef.current = editor
 
-      // Set initial tool and styles from current prop values.
       editor.setCurrentTool('draw')
       editor.setStyleForNextShapes(
         DefaultColorStyle,
@@ -224,13 +229,11 @@ function TldrawNoteCanvasInner(
         DefaultSizeStyle,
         (SIZE_MAP[widthRef.current] ?? 'm') as never,
       )
+      editor.setStyleForNextShapes(DefaultDashStyle, penStyleRef.current as never)
 
-      // isPenMode: finger pans the infinite canvas; stylus draws. This is the
-      // core behaviour that makes it feel like Apple Notes / OneNote.
+      // isPenMode: finger pans the canvas vertically; stylus draws.
       editor.updateInstanceState({ isPenMode: penOnlyRef.current })
 
-      // Keep parent informed of shape count for save-button enabled state.
-      // We return the unsubscribe function so tldraw cleans up on unmount.
       return editor.store.listen(() => {
         onShapeCountChange(editor.getCurrentPageShapeIds().size)
       })
@@ -243,9 +246,6 @@ function TldrawNoteCanvasInner(
   return (
     <div
       className={`relative ${className ?? ''}`}
-      // Prevent the iOS system context menu / callout on long press. tldraw
-      // handles pointer events internally but this belt-and-suspenders CSS
-      // stops Safari from stealing events before tldraw sees them.
       style={{ WebkitTouchCallout: 'none', userSelect: 'none', touchAction: 'none' }}
     >
       <Tldraw
@@ -253,8 +253,6 @@ function TldrawNoteCanvasInner(
         onMount={handleMount}
         components={HIDDEN_COMPONENTS}
         options={TLDRAW_OPTIONS}
-        // Lock to light mode — prevents useDarkMode() from swapping CSS
-        // classes after mount (was causing the slight colour-shift symptom).
         colorScheme={'light' as const}
         licenseKey={process.env.NEXT_PUBLIC_TLDRAW_LICENSE_KEY}
       />

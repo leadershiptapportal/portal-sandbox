@@ -8,7 +8,6 @@ import { Pencil, Undo2, Trash2, X, Eraser } from 'lucide-react'
 import type { TldrawNoteCanvasHandle } from '@/components/ink/TldrawNoteCanvas'
 import { saveInkNoteAction } from '../../../actions'
 
-// Dynamic import keeps tldraw's browser-only code out of SSR.
 const TldrawNoteCanvas = dynamic(
   () => import('@/components/ink/TldrawNoteCanvas'),
   { ssr: false, loading: () => <div className="w-full h-full bg-white animate-pulse" /> },
@@ -27,26 +26,32 @@ const COLORS = [
 ]
 
 const WIDTHS = [
-  { value: 1.8, label: 'Fine',   dot: 'w-1 h-1'     },
-  { value: 3,   label: 'Medium', dot: 'w-1.5 h-1.5' },
-  { value: 5,   label: 'Bold',   dot: 'w-2.5 h-2.5' },
+  { value: 1.8, label: 'Extra Fine', dot: 'w-0.5 h-0.5' },
+  { value: 3,   label: 'Fine',       dot: 'w-1 h-1'     },
+  { value: 5,   label: 'Medium',     dot: 'w-1.5 h-1.5' },
+  { value: 8,   label: 'Bold',       dot: 'w-2.5 h-2.5' },
+]
+
+const PEN_STYLES = [
+  { value: 'draw'  as const, label: 'Pen',    title: 'Freehand pen (natural stroke)' },
+  { value: 'solid' as const, label: 'Marker', title: 'Solid marker (clean line)'     },
 ]
 
 export default function InkNoteComposer({ subjectPersonId, subjectName }: Props) {
-  const router   = useRouter()
+  const router    = useRouter()
   const canvasRef = useRef<TldrawNoteCanvasHandle | null>(null)
 
-  const [color,     setColor]     = useState(COLORS[0].value)
-  const [width,     setWidth]     = useState(WIDTHS[1].value)
-  const [tool,      setTool]      = useState<'pen' | 'eraser'>('pen')
+  const [color,    setColor]    = useState(COLORS[0].value)
+  const [width,    setWidth]    = useState(WIDTHS[2].value)   // default: Medium
+  const [penStyle, setPenStyle] = useState<'draw' | 'solid'>('draw')
+  const [tool,     setTool]     = useState<'pen' | 'eraser'>('pen')
   const [hasShapes, setHasShapes] = useState(false)
-  const [caption,   setCaption]   = useState('')
-  const [saving,    setSaving]    = useState(false)
-  const [error,     setError]     = useState<string | null>(null)
+  const [caption,  setCaption]  = useState('')
+  const [saving,   setSaving]   = useState(false)
+  const [error,    setError]    = useState<string | null>(null)
 
   const canSave = hasShapes && !saving
 
-  // Stable reference — prevents tldraw's onMount from re-running on each render.
   const handleShapeCountChange = useCallback(
     (count: number) => setHasShapes(count > 0),
     [],
@@ -59,11 +64,7 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
 
     try {
       const blob = await canvasRef.current.exportBlob()
-      if (!blob) {
-        setError('Could not export the canvas. Try again.')
-        setSaving(false)
-        return
-      }
+      if (!blob) { setError('Could not export the canvas. Try again.'); setSaving(false); return }
 
       const fd = new FormData()
       fd.append('file', new File([blob], `ink-note-${Date.now()}.png`, { type: 'image/png' }))
@@ -78,11 +79,7 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
       }
 
       const result = await saveInkNoteAction(subjectPersonId, uploadJson.url, caption)
-      if ('error' in result) {
-        setError(result.error)
-        setSaving(false)
-        return
-      }
+      if ('error' in result) { setError(result.error); setSaving(false); return }
 
       toast.success('Ink note saved')
       router.push(`/myhumans/${subjectPersonId}`)
@@ -101,7 +98,7 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
   return (
     <div className="flex flex-col h-[100dvh] bg-white">
 
-      {/* ── Top bar ─────────────────────────────────────────────────────────── */}
+      {/* ── Top bar ─────────────────────────────────────────────────────── */}
       <header className="flex items-center gap-2 px-3 py-2 bg-white border-b border-slate-200 flex-shrink-0">
         <button
           onClick={handleCancel}
@@ -120,7 +117,6 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
             onClick={() => canvasRef.current?.undo()}
             disabled={!hasShapes}
             aria-label="Undo"
-            title="Undo"
             className="p-2 rounded-md text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <Undo2 className="h-5 w-5" />
@@ -129,7 +125,6 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
             onClick={() => canvasRef.current?.clear()}
             disabled={!hasShapes}
             aria-label="Clear"
-            title="Clear"
             className="p-2 rounded-md text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <Trash2 className="h-5 w-5" />
@@ -144,16 +139,16 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
         </div>
       </header>
 
-      {/* ── Tool strip ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 px-3 py-2 bg-white border-b border-slate-100 flex-shrink-0 overflow-x-auto">
+      {/* ── Tool strip ────────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 px-3 py-2 bg-white border-b border-slate-100 flex-shrink-0 overflow-x-auto">
+
+        {/* Pen / Eraser */}
         <div className="inline-flex rounded-md border border-slate-200 overflow-hidden flex-shrink-0">
           <button
             onClick={() => setTool('pen')}
             aria-pressed={tool === 'pen'}
             className={`flex items-center gap-1.5 px-2.5 h-8 text-xs font-medium transition-colors ${
-              tool === 'pen'
-                ? 'bg-[hsl(213,70%,30%)] text-white'
-                : 'bg-white text-slate-600 hover:bg-slate-50'
+              tool === 'pen' ? 'bg-[hsl(213,70%,30%)] text-white' : 'bg-white text-slate-600 hover:bg-slate-50'
             }`}
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -163,9 +158,7 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
             onClick={() => setTool('eraser')}
             aria-pressed={tool === 'eraser'}
             className={`flex items-center gap-1.5 px-2.5 h-8 text-xs font-medium border-l border-slate-200 transition-colors ${
-              tool === 'eraser'
-                ? 'bg-rose-600 text-white border-rose-600'
-                : 'bg-white text-slate-600 hover:bg-slate-50'
+              tool === 'eraser' ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-slate-600 hover:bg-slate-50'
             }`}
           >
             <Eraser className="h-3.5 w-3.5" />
@@ -173,12 +166,33 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
           </button>
         </div>
 
-        <div className="h-5 w-px bg-slate-200 mx-1" />
-
         {tool === 'pen' && (
           <>
-            <span className="text-xs font-medium text-slate-500">Color</span>
-            <div className="flex items-center gap-1">
+            <div className="h-5 w-px bg-slate-200 flex-shrink-0" />
+
+            {/* Pen style */}
+            <div className="inline-flex rounded-md border border-slate-200 overflow-hidden flex-shrink-0">
+              {PEN_STYLES.map((ps) => (
+                <button
+                  key={ps.value}
+                  onClick={() => setPenStyle(ps.value)}
+                  aria-pressed={penStyle === ps.value}
+                  title={ps.title}
+                  className={`px-2.5 h-8 text-xs font-medium transition-colors first:border-0 border-l border-slate-200 ${
+                    penStyle === ps.value
+                      ? 'bg-[hsl(213,70%,30%)] text-white'
+                      : 'bg-white text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {ps.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="h-5 w-px bg-slate-200 flex-shrink-0" />
+
+            {/* Color */}
+            <div className="flex items-center gap-1 flex-shrink-0">
               {COLORS.map((c) => (
                 <button
                   key={c.value}
@@ -191,9 +205,11 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
                 />
               ))}
             </div>
-            <div className="h-5 w-px bg-slate-200 mx-1" />
-            <span className="text-xs font-medium text-slate-500">Size</span>
-            <div className="flex items-center gap-1">
+
+            <div className="h-5 w-px bg-slate-200 flex-shrink-0" />
+
+            {/* Size */}
+            <div className="flex items-center gap-1 flex-shrink-0">
               {WIDTHS.map((w) => (
                 <button
                   key={w.value}
@@ -201,9 +217,7 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
                   aria-label={w.label}
                   title={w.label}
                   className={`w-8 h-8 rounded-md flex items-center justify-center border transition-colors ${
-                    width === w.value
-                      ? 'border-slate-900 bg-slate-100'
-                      : 'border-slate-200 hover:bg-slate-50'
+                    width === w.value ? 'border-slate-900 bg-slate-100' : 'border-slate-200 hover:bg-slate-50'
                   }`}
                 >
                   <span className={`rounded-full bg-slate-900 ${w.dot}`} />
@@ -214,20 +228,21 @@ export default function InkNoteComposer({ subjectPersonId, subjectName }: Props)
         )}
       </div>
 
-      {/* ── Infinite canvas ──────────────────────────────────────────────────── */}
+      {/* ── Canvas ────────────────────────────────────────────────────────── */}
       <div className="flex-1 min-h-0">
         <TldrawNoteCanvas
           ref={canvasRef}
           color={color}
           width={width}
           tool={tool}
+          penStyle={penStyle}
           penOnly={true}
           onShapeCountChange={handleShapeCountChange}
           className="w-full h-full"
         />
       </div>
 
-      {/* ── Caption + status ─────────────────────────────────────────────────── */}
+      {/* ── Caption + status ─────────────────────────────────────────────── */}
       <footer className="px-3 pb-3 pt-2 flex-shrink-0 space-y-2 bg-white border-t border-slate-200">
         <input
           value={caption}

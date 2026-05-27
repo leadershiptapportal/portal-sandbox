@@ -8,7 +8,6 @@ import type { TldrawNoteCanvasHandle } from '@/components/ink/TldrawNoteCanvas'
 import { saveInkNoteAction } from '../actions'
 import type { Interaction } from '@/lib/types'
 
-// Dynamic import prevents tldraw's browser-only code from running during SSR.
 const TldrawNoteCanvas = dynamic(
   () => import('@/components/ink/TldrawNoteCanvas'),
   { ssr: false, loading: () => <div className="w-full h-full bg-white animate-pulse rounded-xl" /> },
@@ -34,9 +33,15 @@ const COLORS = [
 ]
 
 const WIDTHS = [
-  { value: 1.8, label: 'Fine',   dot: 'w-1 h-1'     },
-  { value: 3,   label: 'Medium', dot: 'w-1.5 h-1.5' },
-  { value: 5,   label: 'Bold',   dot: 'w-2.5 h-2.5' },
+  { value: 1.8, label: 'Extra Fine', dot: 'w-0.5 h-0.5' },
+  { value: 3,   label: 'Fine',       dot: 'w-1 h-1'     },
+  { value: 5,   label: 'Medium',     dot: 'w-1.5 h-1.5' },
+  { value: 8,   label: 'Bold',       dot: 'w-2.5 h-2.5' },
+]
+
+const PEN_STYLES = [
+  { value: 'draw'  as const, label: 'Pen',    title: 'Freehand pen (natural stroke)' },
+  { value: 'solid' as const, label: 'Marker', title: 'Solid marker (clean line)'     },
 ]
 
 function formatInteractionLabel(m: Interaction): string {
@@ -62,14 +67,14 @@ export default function TakeNotesCanvas({
   const canvasRef = useRef<TldrawNoteCanvasHandle | null>(null)
 
   const [color,    setColor]    = useState(COLORS[0].value)
-  const [width,    setWidth]    = useState(WIDTHS[1].value)
+  const [width,    setWidth]    = useState(WIDTHS[2].value)   // default: Medium
+  const [penStyle, setPenStyle] = useState<'draw' | 'solid'>('draw')
   const [tool,     setTool]     = useState<'pen' | 'eraser'>('pen')
   const [hasShapes, setHasShapes] = useState(false)
   const [caption,  setCaption]  = useState('')
   const [saving,   setSaving]   = useState(false)
   const [error,    setError]    = useState<string | null>(null)
 
-  // Interaction linking
   const [selectedMeetingId, setSelectedMeetingId] = useState<string>(
     initialInteraction?.id ?? '',
   )
@@ -82,7 +87,6 @@ export default function TakeNotesCanvas({
 
   const canSave = hasShapes && !saving
 
-  // Stable reference — avoids triggering tldraw's onMount re-run on every render.
   const handleShapeCountChange = useCallback(
     (count: number) => {
       setHasShapes(count > 0)
@@ -91,7 +95,7 @@ export default function TakeNotesCanvas({
     [onStrokeCountChange],
   )
 
-  // ── Save flow ────────────────────────────────────────────────────────────────
+  // ── Save ─────────────────────────────────────────────────────────────────────
 
   async function handleSave() {
     if (!canvasRef.current) return
@@ -144,18 +148,16 @@ export default function TakeNotesCanvas({
   return (
     <div className="flex flex-col h-full">
 
-      {/* ── Tool strip ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 px-3 py-2 bg-white border-b border-slate-200 flex-shrink-0 overflow-x-auto">
+      {/* ── Tool strip ────────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 px-3 py-2 bg-white border-b border-slate-200 flex-shrink-0 overflow-x-auto">
 
-        {/* Pen / Eraser toggle */}
+        {/* Pen / Eraser */}
         <div className="inline-flex rounded-md border border-slate-200 overflow-hidden flex-shrink-0">
           <button
             onClick={() => setTool('pen')}
             aria-pressed={tool === 'pen'}
             className={`flex items-center gap-1.5 px-2.5 h-8 text-xs font-medium transition-colors ${
-              tool === 'pen'
-                ? 'bg-[hsl(213,70%,30%)] text-white'
-                : 'bg-white text-slate-600 hover:bg-slate-50'
+              tool === 'pen' ? 'bg-[hsl(213,70%,30%)] text-white' : 'bg-white text-slate-600 hover:bg-slate-50'
             }`}
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -165,9 +167,7 @@ export default function TakeNotesCanvas({
             onClick={() => setTool('eraser')}
             aria-pressed={tool === 'eraser'}
             className={`flex items-center gap-1.5 px-2.5 h-8 text-xs font-medium border-l border-slate-200 transition-colors ${
-              tool === 'eraser'
-                ? 'bg-rose-600 text-white border-rose-600'
-                : 'bg-white text-slate-600 hover:bg-slate-50'
+              tool === 'eraser' ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-slate-600 hover:bg-slate-50'
             }`}
           >
             <Eraser className="h-3.5 w-3.5" />
@@ -175,13 +175,33 @@ export default function TakeNotesCanvas({
           </button>
         </div>
 
-        <div className="h-5 w-px bg-slate-200 mx-0.5" />
-
-        {/* Color + size (pen mode only) */}
         {tool === 'pen' && (
           <>
-            <span className="text-xs font-medium text-slate-500 whitespace-nowrap">Color</span>
-            <div className="flex items-center gap-1">
+            <div className="h-5 w-px bg-slate-200 flex-shrink-0" />
+
+            {/* Pen style: Pen (freehand) / Marker (solid) */}
+            <div className="inline-flex rounded-md border border-slate-200 overflow-hidden flex-shrink-0">
+              {PEN_STYLES.map((ps) => (
+                <button
+                  key={ps.value}
+                  onClick={() => setPenStyle(ps.value)}
+                  aria-pressed={penStyle === ps.value}
+                  title={ps.title}
+                  className={`px-2.5 h-8 text-xs font-medium transition-colors first:border-0 border-l border-slate-200 ${
+                    penStyle === ps.value
+                      ? 'bg-[hsl(213,70%,30%)] text-white'
+                      : 'bg-white text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {ps.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="h-5 w-px bg-slate-200 flex-shrink-0" />
+
+            {/* Color */}
+            <div className="flex items-center gap-1 flex-shrink-0">
               {COLORS.map((c) => (
                 <button
                   key={c.value}
@@ -194,9 +214,11 @@ export default function TakeNotesCanvas({
                 />
               ))}
             </div>
-            <div className="h-5 w-px bg-slate-200 mx-0.5" />
-            <span className="text-xs font-medium text-slate-500 whitespace-nowrap">Size</span>
-            <div className="flex items-center gap-1">
+
+            <div className="h-5 w-px bg-slate-200 flex-shrink-0" />
+
+            {/* Size */}
+            <div className="flex items-center gap-1 flex-shrink-0">
               {WIDTHS.map((w) => (
                 <button
                   key={w.value}
@@ -204,9 +226,7 @@ export default function TakeNotesCanvas({
                   aria-label={w.label}
                   title={w.label}
                   className={`w-8 h-8 rounded-md flex items-center justify-center border transition-colors ${
-                    width === w.value
-                      ? 'border-slate-900 bg-slate-100'
-                      : 'border-slate-200 hover:bg-slate-50'
+                    width === w.value ? 'border-slate-900 bg-slate-100' : 'border-slate-200 hover:bg-slate-50'
                   }`}
                 >
                   <span className={`rounded-full bg-slate-900 ${w.dot}`} />
@@ -216,7 +236,7 @@ export default function TakeNotesCanvas({
           </>
         )}
 
-        {/* Undo / Clear — pushed to the right */}
+        {/* Undo / Clear — pushed right */}
         <div className="ml-auto flex items-center gap-1 flex-shrink-0">
           <button
             onClick={() => canvasRef.current?.undo()}
@@ -239,23 +259,24 @@ export default function TakeNotesCanvas({
         </div>
       </div>
 
-      {/* ── Infinite canvas — fills all remaining vertical space ────────────── */}
+      {/* ── Canvas ────────────────────────────────────────────────────────── */}
       <div className="flex-1 min-h-0">
         <TldrawNoteCanvas
           ref={canvasRef}
           color={color}
           width={width}
           tool={tool}
+          penStyle={penStyle}
           penOnly={true}
           onShapeCountChange={handleShapeCountChange}
           className="w-full h-full"
         />
       </div>
 
-      {/* ── Footer: interaction picker + caption + save ──────────────────────── */}
+      {/* ── Footer ────────────────────────────────────────────────────────── */}
       <div className="flex-shrink-0 bg-white border-t border-slate-200 px-3 py-3 space-y-2">
 
-        {/* Interaction row */}
+        {/* Interaction link */}
         <div className="flex items-center gap-2">
           <Link2 className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
           {showPicker ? (
@@ -264,17 +285,12 @@ export default function TakeNotesCanvas({
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
                 value={selectedMeetingId}
-                onChange={(e) => {
-                  setSelectedMeetingId(e.target.value)
-                  setShowPicker(false)
-                }}
+                onChange={(e) => { setSelectedMeetingId(e.target.value); setShowPicker(false) }}
                 className="flex-1 text-xs border border-[hsl(213,70%,30%)] rounded-md px-2 py-1.5 bg-white focus:outline-none"
               >
                 <option value="">— No linked interaction —</option>
                 {meetings.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {formatInteractionLabel(m)}
-                  </option>
+                  <option key={m.id} value={m.id}>{formatInteractionLabel(m)}</option>
                 ))}
               </select>
               <button
@@ -289,14 +305,12 @@ export default function TakeNotesCanvas({
               onClick={() => setShowPicker(true)}
               className="flex-1 text-left text-xs text-slate-500 hover:text-[hsl(213,70%,30%)] transition-colors truncate"
             >
-              {selectedMeeting
-                ? formatInteractionLabel(selectedMeeting)
-                : 'Link to an interaction (optional)'}
+              {selectedMeeting ? formatInteractionLabel(selectedMeeting) : 'Link to an interaction (optional)'}
             </button>
           )}
         </div>
 
-        {/* Caption + save / cancel */}
+        {/* Caption + actions */}
         <div className="flex gap-2">
           <input
             value={caption}
