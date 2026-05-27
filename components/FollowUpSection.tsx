@@ -7,13 +7,13 @@ import type { Message } from '@/lib/types'
 interface FollowUpSectionProps {
   initialMessage: Message | null
   userId: string
-  meetingId: string
+  interactionId: string
   eventName: string
   startTime: string
   participantEmails: string[]
   createAction: (
     userId: string,
-    meetingId: string,
+    interactionId: string,
     eventName: string,
     startTime: string,
     participantEmails: string[]
@@ -31,7 +31,7 @@ interface FollowUpSectionProps {
 export default function FollowUpSection({
   initialMessage,
   userId,
-  meetingId,
+  interactionId,
   eventName,
   startTime,
   participantEmails,
@@ -46,7 +46,7 @@ export default function FollowUpSection({
   async function handleCreate() {
     setCreating(true)
     setError('')
-    const result = await createAction(userId, meetingId, eventName, startTime, participantEmails)
+    const result = await createAction(userId, interactionId, eventName, startTime, participantEmails)
     if (result.ok) {
       setMessage(result.data)
     } else {

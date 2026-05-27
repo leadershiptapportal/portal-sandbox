@@ -50,29 +50,29 @@ export default async function InteractionsIndexPage({ searchParams }: Props) {
   ])
 
   const emailToUser = buildEmailToUserMap(users)
-  const notedMeetingIds = new Set(coachNotes.map((n) => n.meetingId).filter(Boolean) as string[])
+  const notedInteractionIds = new Set(coachNotes.map((n) => n.interactionId).filter(Boolean) as string[])
   const activeContextIds = isAdmin ? null : new Set(coachContexts.map((c) => c.id))
   const coachEmail = sessionUser?.email?.toLowerCase() ?? ''
 
   const upcomingItems = interactionsToUpcomingItems(upcomingInteractions, {
     emailToUser,
-    notedMeetingIds,
+    notedInteractionIds,
     coachEmail,
     activeContextIds,
   }).map((i) => ({ ...i, startMs: new Date(i.startTime).getTime(), isPast: false }))
 
   const pastItems = interactionsToUpcomingItems(pastInteractions, {
     emailToUser,
-    notedMeetingIds,
+    notedInteractionIds,
     coachEmail,
     activeContextIds,
   }).map((i) => ({ ...i, startMs: new Date(i.startTime).getTime(), isPast: true }))
 
-  // Combined, dedup by meetingId in case sync window overlaps
+  // Combined, dedup by interactionId in case sync window overlaps
   const seen = new Set<string>()
   const combined = [...upcomingItems, ...pastItems].filter((i) => {
-    if (seen.has(i.meetingId)) return false
-    seen.add(i.meetingId)
+    if (seen.has(i.interactionId)) return false
+    seen.add(i.interactionId)
     return true
   })
 

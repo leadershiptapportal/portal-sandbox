@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button'
 import { savePortalEventNotesAction } from './actions'
 
 export interface PanelEvent {
-  meetingId: string
+  interactionId: string
   title: string
   startTime: string
   endTime?: string
@@ -53,12 +53,12 @@ export default function InteractionNotePanel({
   const showPicker = !initialEventId
 
   const [selectedId, setSelectedId] = useState<string>(
-    initialEventId ?? events[0]?.meetingId ?? '',
+    initialEventId ?? events[0]?.interactionId ?? '',
   )
   const [notes, setNotes] = useState<string>('')
   const [saving, setSaving] = useState(false)
 
-  const event = events.find((e) => e.meetingId === selectedId) ?? null
+  const event = events.find((e) => e.interactionId === selectedId) ?? null
 
   // Pre-fill notes when selected event changes
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function InteractionNotePanel({
       toast.error('No person linked to this event')
       return
     }
-    const result = await savePortalEventNotesAction(event.meetingId, notes, event.clientId)
+    const result = await savePortalEventNotesAction(event.interactionId, notes, event.clientId)
     setSaving(false)
     if (!result.success) {
       toast.error('Failed to save notes')
@@ -124,7 +124,7 @@ export default function InteractionNotePanel({
                       const d = new Date(ev.startTime)
                       const label = `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${ev.title || 'Untitled'}`
                       return (
-                        <SelectItem key={ev.meetingId} value={ev.meetingId}>
+                        <SelectItem key={ev.interactionId} value={ev.interactionId}>
                           {label}
                         </SelectItem>
                       )

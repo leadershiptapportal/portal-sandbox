@@ -5,7 +5,7 @@ import { FileText, NotebookPen } from 'lucide-react'
 import LogNoteDialog from '@/app/(protected)/myhumans/[id]/LogNoteDialog'
 
 export interface UpcomingItem {
-  meetingId: string
+  interactionId: string
   providerEventId: string | null
   title: string
   startTime: string
@@ -42,12 +42,12 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
     <div className="space-y-2">
       {items.map((item) => {
         const href = item.clientId
-          ? `/myhumans/${item.clientId}/interactions/${item.meetingId}`
-          : `/interactions/${item.meetingId}`
+          ? `/myhumans/${item.clientId}/interactions/${item.interactionId}`
+          : `/interactions/${item.interactionId}`
 
         return (
           <div
-            key={item.meetingId}
+            key={item.interactionId}
             className="rounded-lg border border-slate-100 hover:border-slate-200 transition-colors overflow-hidden"
           >
             {/* Main row */}

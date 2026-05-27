@@ -35,7 +35,7 @@ export interface Note {
   coachName?: string
   authorPersonId?: string
   subjectPersonId?: string
-  meetingId?: string
+  interactionId?: string
   relationshipContextId?: string
   noteType?: NoteType
   visibility: 'private_to_author'
@@ -57,7 +57,7 @@ function mapRecord(r: AirtableRecord): Note {
     subjectPersonId: firstLinkedId(r.fields[FIELDS.NOTES.SUBJECT_PERSON]),
     // Prefer the linked MEETING_LINK field (multipleRecordLinks); fall back to
     // the legacy singleLineText MEETING field for older records.
-    meetingId: firstLinkedId(r.fields[FIELDS.NOTES.MEETING_LINK]) ||
+    interactionId: firstLinkedId(r.fields[FIELDS.NOTES.MEETING_LINK]) ||
       (r.fields[FIELDS.NOTES.MEETING] as string) || undefined,
     relationshipContextId: firstLinkedId(r.fields[FIELDS.NOTES.RELATIONSHIP_CONTEXT]),
     noteType: (r.fields[FIELDS.NOTES.NOTE_TYPE] as NoteType) || undefined,
@@ -132,10 +132,10 @@ export async function getNotesByAuthor(authorAirtableId: string): Promise<Note[]
 }
 
 /**
- * Fetch notes attached to a specific Meeting.
- * JS-filtered because Meeting is a linked field.
+ * Fetch notes attached to a specific Interaction.
+ * JS-filtered because the link field is not filterable via formula.
  */
-export async function getNotesByMeetingId(meetingId: string): Promise<Note[]> {
+export async function getNotesByInteractionId(interactionId: string): Promise<Note[]> {
   const { apiKey, baseId } = getCredentials()
   const url = `${API_BASE}/${baseId}/${TABLE}?${SORT_DATE_DESC}&maxRecords=500`
   const res = await airtableFetch(url, {
@@ -146,7 +146,7 @@ export async function getNotesByMeetingId(meetingId: string): Promise<Note[]> {
   const data = await res.json()
   return (data.records ?? [])
     .map(mapRecord)
-    .filter((n: Note) => n.meetingId === meetingId)
+    .filter((n: Note) => n.interactionId === interactionId)
 }
 
 /**
@@ -185,7 +185,7 @@ export interface CreateNoteData {
   clientId?: string
   authorPersonId?: string
   subjectPersonId?: string
-  meetingId?: string
+  interactionId?: string
   relationshipContextId?: string
   coachName?: string
   noteType?: NoteType
@@ -202,11 +202,11 @@ export async function createNote(data: CreateNoteData): Promise<Note> {
   if (data.clientId) fields[FIELDS.NOTES.CLIENT] = [data.clientId]
   if (data.authorPersonId) fields[FIELDS.NOTES.AUTHOR_PERSON] = [data.authorPersonId]
   if (data.subjectPersonId) fields[FIELDS.NOTES.SUBJECT_PERSON] = [data.subjectPersonId]
-  // Write meetingId to both the linked MEETING_LINK field and the legacy
+  // Write interactionId to both the linked MEETING_LINK field and the legacy
   // singleLineText MEETING field so older read paths still work.
-  if (data.meetingId) {
-    fields[FIELDS.NOTES.MEETING_LINK] = [data.meetingId]
-    fields[FIELDS.NOTES.MEETING] = data.meetingId
+  if (data.interactionId) {
+    fields[FIELDS.NOTES.MEETING_LINK] = [data.interactionId]
+    fields[FIELDS.NOTES.MEETING] = data.interactionId
   }
   if (data.relationshipContextId) fields[FIELDS.NOTES.RELATIONSHIP_CONTEXT] = [data.relationshipContextId]
   if (data.coachName) fields[FIELDS.NOTES.COACH_NAME] = data.coachName

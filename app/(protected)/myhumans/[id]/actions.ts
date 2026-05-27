@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createNote, updateNote, getNotesByMeetingId } from '@/lib/airtable/notes'
+import { createNote, updateNote, getNotesByInteractionId } from '@/lib/airtable/notes'
 import { createTask, updateTaskStatus } from '@/lib/airtable/tasks'
 import {
   updateUserProfile,
@@ -154,7 +154,7 @@ export async function saveInkNoteAction(
   subjectPersonId: string,
   imageUrl: string,
   caption?: string,
-  meetingId?: string,
+  interactionId?: string,
 ): Promise<{ success: true } | { error: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
@@ -175,7 +175,7 @@ export async function saveInkNoteAction(
       subjectPersonId,
       clientId: subjectPersonId,
       relationshipContextId: rc.id,
-      meetingId: meetingId || undefined,
+      interactionId: interactionId || undefined,
       noteType: 'ink_note',
     })
     revalidatePath(`/myhumans/${subjectPersonId}`)
@@ -242,12 +242,12 @@ export async function updateTaskStatusAction(
 
 // ── Interaction Notes ──────────────────────────────────────────────────────────
 
-export async function getNotesByMeetingIdAction(meetingId: string) {
-  return getNotesByMeetingId(meetingId).catch(() => [])
+export async function getNotesByInteractionIdAction(interactionId: string) {
+  return getNotesByInteractionId(interactionId).catch(() => [])
 }
 
-export async function updateSessionNotesAction(
-  meetingId: string,
+export async function updateInteractionNotesAction(
+  interactionId: string,
   notes: string,
   userId: string,
 ): Promise<{ success: boolean; error?: string }> {
@@ -262,10 +262,10 @@ export async function updateSessionNotesAction(
       return { success: false, error: 'No active coaching or reporting relationship reaches this person.' }
     }
 
-    // Upsert: find an existing note for this meeting authored by this coach;
+    // Upsert: find an existing note for this interaction authored by this coach;
     // PATCH it if found, POST a new one if not. Prevents accumulating duplicate
     // notes records every time an interaction note is saved.
-    const existingNotes = await getNotesByMeetingId(meetingId)
+    const existingNotes = await getNotesByInteractionId(interactionId)
     const myNote = existingNotes.find((n) => n.authorPersonId === userRecord.airtableId)
     if (myNote) {
       const result = await updateNote(myNote.id, notes)
@@ -278,14 +278,14 @@ export async function updateSessionNotesAction(
         subjectPersonId: userId,
         clientId: userId,
         relationshipContextId: rc.id,
-        meetingId,
+        interactionId,
         noteType: 'interaction_note',
       })
     }
     revalidatePath(`/myhumans/${userId}`)
     return { success: true }
   } catch (err) {
-    console.error('[updateSessionNotesAction]', err)
+    console.error('[updateInteractionNotesAction]', err)
     return { success: false, error: 'Failed to save notes — please try again' }
   }
 }
@@ -331,7 +331,7 @@ export async function saveTaskAction(
   revalidatePath(`/myhumans/${subjectPersonId}`)
 }
 
-// ── Log Manual Session ────────────────────────────────────────────────────────
+// ── Log Manual Interaction ────────────────────────────────────────────────────
 
 export async function logManualSessionAction(params: {
   subjectPersonId: string
@@ -363,7 +363,7 @@ export async function logManualSessionAction(params: {
   const subjectEmail = subject?.workEmail ?? subject?.email ?? ''
 
   const { createManualInteraction } = await import('@/lib/airtable/interactions')
-  const meetingId = await createManualInteraction({
+  const interactionId = await createManualInteraction({
     title: `${coachFirst} / ${subjectName} — ${typeLabel}`,
     startIso: start.toISOString(),
     endIso: end.toISOString(),
@@ -383,7 +383,7 @@ export async function logManualSessionAction(params: {
       subjectPersonId: params.subjectPersonId,
       clientId: params.subjectPersonId,
       relationshipContextId: rc.id,
-      meetingId,
+      interactionId,
       noteType: 'interaction_note',
     })
   }

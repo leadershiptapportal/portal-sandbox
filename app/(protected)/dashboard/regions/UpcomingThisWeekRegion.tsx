@@ -32,11 +32,11 @@ export default async function UpcomingThisWeekRegion({ userRecord }: Props) {
   ])
 
   const emailToUser = buildEmailToUserMap(users)
-  const notedMeetingIds = new Set(coachNotes.map((n) => n.meetingId).filter(Boolean) as string[])
+  const notedInteractionIds = new Set(coachNotes.map((n) => n.interactionId).filter(Boolean) as string[])
   const activeContextIds = isAdmin ? null : new Set(coachContexts.map((c) => c.id))
   const coachEmail = sessionUser?.email?.toLowerCase() ?? ''
 
-  const mapOpts = { emailToUser, notedMeetingIds, coachEmail, activeContextIds }
+  const mapOpts = { emailToUser, notedInteractionIds, coachEmail, activeContextIds }
   const now = new Date()
 
   const upcomingItems = interactionsToUpcomingItems(upcomingMeetings, mapOpts)

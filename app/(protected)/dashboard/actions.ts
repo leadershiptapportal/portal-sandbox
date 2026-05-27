@@ -77,8 +77,8 @@ export async function dashboardCreateTaskAction(data: {
 
 // ── Notes ──────────────────────────────────────────────────────────────────────
 
-// Fetch a client's 10 most recent past sessions for the session-link dropdown
-export async function fetchClientSessionsAction(
+// Fetch a client's 10 most recent past interactions for the interaction-link dropdown
+export async function fetchClientInteractionsAction(
   clientId: string,
 ): Promise<Array<{ id: string; label: string }>> {
   try {
@@ -97,7 +97,7 @@ export async function fetchClientSessionsAction(
         return { id: m.id, label: `${dateLabel} · ${m.title || 'Untitled Interaction'}` }
       })
   } catch (err) {
-    console.error('[fetchClientSessionsAction]', err)
+    console.error('[fetchClientInteractionsAction]', err)
     return []
   }
 }
@@ -106,7 +106,7 @@ export async function fetchClientSessionsAction(
 export async function dashboardLogNoteAction(params: {
   clientId: string
   content: string
-  meetingId?: string
+  interactionId?: string
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
@@ -126,11 +126,11 @@ export async function dashboardLogNoteAction(params: {
       subjectPersonId: params.clientId,
       clientId: params.clientId,
       relationshipContextId: rc.id,
-      meetingId: params.meetingId,
-      noteType: params.meetingId ? 'interaction_note' : 'general_note',
+      interactionId: params.interactionId,
+      noteType: params.interactionId ? 'interaction_note' : 'general_note',
     })
     revalidatePath('/dashboard')
-    if (params.meetingId) revalidatePath(`/myhumans/${params.clientId}`)
+    if (params.interactionId) revalidatePath(`/myhumans/${params.clientId}`)
     return { success: true }
   } catch (err) {
     console.error('[dashboardLogNoteAction]', err)
@@ -217,7 +217,7 @@ export async function savePortalEventNotesAction(
       subjectPersonId: clientId,
       clientId,
       relationshipContextId: rc.id,
-      meetingId,
+      interactionId: meetingId,
       noteType: 'interaction_note',
     })
     revalidatePath('/dashboard')

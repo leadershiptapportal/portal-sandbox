@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { PenLine } from 'lucide-react'
-import { saveNoteAction, updateSessionNotesAction } from '@/app/(protected)/myhumans/[id]/actions'
+import { saveNoteAction, updateInteractionNotesAction } from '@/app/(protected)/myhumans/[id]/actions'
 
 const MIN_CHARS = 5
 
@@ -13,11 +13,11 @@ interface Props {
   /** Airtable record ID of the person this note is about. */
   subjectPersonId: string
   /**
-   * Optional Airtable record ID of the Meeting this note is attached to.
+   * Optional Airtable record ID of the Interaction this note is attached to.
    * When provided the note is saved with note_type='interaction_note' AND linked
    * to the interaction; otherwise it's a general_note on the profile.
    */
-  meetingId?: string
+  interactionId?: string
   /** Initial textarea text (used when editing an existing draft). */
   initialContent?: string
   /** Called after a successful save. The dialog wrapper closes itself on this. */
@@ -37,7 +37,7 @@ interface Props {
  * Single source of truth for creating a typed note (or an interaction note).
  * Used by:
  *   - LogNoteDialog (profile "Log a Note" modal)
- *   - InteractionNoteForm (note panel on an interaction page — meetingId is set)
+ *   - InteractionNoteForm (note panel on an interaction page — interactionId is set)
  *
  * For handwritten ink notes, the user is sent to the full-screen ink page
  * because the canvas needs real estate. The link is rendered as a sibling
@@ -45,7 +45,7 @@ interface Props {
  */
 export default function NoteComposer({
   subjectPersonId,
-  meetingId,
+  interactionId,
   initialContent = '',
   onSaved,
   onCancel,
@@ -66,8 +66,8 @@ export default function NoteComposer({
     setSaving(true)
     setError(null)
     try {
-      if (meetingId) {
-        const result = await updateSessionNotesAction(meetingId, content, subjectPersonId)
+      if (interactionId) {
+        const result = await updateInteractionNotesAction(interactionId, content, subjectPersonId)
         if (!result.success) {
           setError(result.error ?? 'Failed to save interaction note.')
           setSaving(false)
@@ -76,7 +76,7 @@ export default function NoteComposer({
       } else {
         await saveNoteAction(subjectPersonId, content)
       }
-      toast.success(meetingId ? 'Interaction note saved' : 'Note saved')
+      toast.success(interactionId ? 'Interaction note saved' : 'Note saved')
       setContent('')
       router.refresh()
       onSaved?.()
@@ -94,8 +94,8 @@ export default function NoteComposer({
     }
   }
 
-  const placeholder = meetingId
-    ? 'Session observations, follow-up items, coaching themes…'
+  const placeholder = interactionId
+    ? 'Interaction observations, follow-up items, coaching themes…'
     : 'Coaching context, observations, themes…'
 
   const inkHref = `/myhumans/${subjectPersonId}/notes/new/ink`
@@ -156,7 +156,7 @@ export default function NoteComposer({
           disabled={!canSubmit}
           className="px-4 h-9 text-sm font-medium bg-[hsl(213,70%,30%)] text-white rounded-md hover:bg-[hsl(213,70%,25%)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
-          {saving ? 'Saving…' : error ? 'Try again' : meetingId ? 'Save Session Note' : 'Save Note'}
+          {saving ? 'Saving…' : error ? 'Try again' : interactionId ? 'Save Interaction Note' : 'Save Note'}
         </button>
       </div>
     </div>

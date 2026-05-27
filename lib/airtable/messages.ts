@@ -24,7 +24,7 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Mes
     status: ((f[FIELDS.MESSAGES.STATUS] as string) === "Sent" ? "Sent" : "Pending"),
     created: f[FIELDS.MESSAGES.CREATED] as string | undefined,
     sentAt: f[FIELDS.MESSAGES.SENT_DATE] as string | undefined,
-    meetingId: meetingLinks?.[0],
+    interactionId: meetingLinks?.[0],
     userIds: userLinks,
   };
 }
@@ -111,10 +111,10 @@ async function getAllMessages(apiKey: string, baseId: string): Promise<Message[]
   return (data.records ?? []).map(mapRecord);
 }
 
-export async function getMessagesByMeeting(meetingId: string): Promise<Message[]> {
+export async function getMessagesByMeeting(interactionId: string): Promise<Message[]> {
   const { apiKey, baseId } = getCredentials();
   const all = await getAllMessages(apiKey, baseId);
-  return all.filter((m) => m.meetingId === meetingId);
+  return all.filter((m) => m.interactionId === interactionId);
 }
 
 export async function getMessagesByUser(userId: string): Promise<Message[]> {

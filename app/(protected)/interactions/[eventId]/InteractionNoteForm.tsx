@@ -7,14 +7,14 @@ import { Textarea } from '@/components/ui/textarea'
 import type { Note } from '@/lib/airtable/notes'
 
 interface Props {
-  meetingId: string            // Airtable record ID of the Meeting
+  interactionId: string        // Airtable record ID of the Interaction
   subjectPersonId?: string
   relationshipContextId?: string
   existingNote?: Note          // present when editing
 }
 
 export default function InteractionNoteForm({
-  meetingId,
+  interactionId,
   subjectPersonId,
   relationshipContextId,
   existingNote,
@@ -48,7 +48,7 @@ export default function InteractionNoteForm({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             content: body.trim(),
-            meetingId,
+            interactionId,
             subjectPersonId,
             clientId: subjectPersonId,
             noteType: 'interaction_note',

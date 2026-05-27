@@ -9,8 +9,8 @@ import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
  * Requires the focal person's Airtable record ID (= the user profile ID, which
  * is always available from the URL on the interaction detail page).
  */
-export async function updateSessionNotes(
-  meetingId: string,
+export async function updateInteractionNotes(
+  interactionId: string,
   notes: string,
   userId: string,
 ): Promise<{ success: true } | { error: string }> {
@@ -19,14 +19,14 @@ export async function updateSessionNotes(
     if (!userRecord.airtableId) {
       return { error: 'Could not resolve your coach record — please try again.' }
     }
-    await upsertCoachSession(userRecord.airtableId, meetingId, userId, {
+    await upsertCoachSession(userRecord.airtableId, interactionId, userId, {
       sessionNotes: notes,
     })
-    revalidatePath(`/myhumans/${userId}/interactions/${meetingId}`)
+    revalidatePath(`/myhumans/${userId}/interactions/${interactionId}`)
     revalidatePath(`/myhumans/${userId}`)
     return { success: true }
   } catch (err) {
-    console.error('[updateSessionNotes]', err)
+    console.error('[updateInteractionNotes]', err)
     return { error: 'Failed to save — please try again' }
   }
 }

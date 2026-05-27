@@ -21,21 +21,21 @@ function formatDateTime(iso: string, timezone: string = 'America/New_York'): str
 }
 
 interface InteractionDetailModalProps {
-  meeting: Interaction | null
+  interaction: Interaction | null
   onClose: () => void
 }
 
-export default function InteractionDetailModal({ meeting, onClose }: InteractionDetailModalProps) {
+export default function InteractionDetailModal({ interaction, onClose }: InteractionDetailModalProps) {
   return (
-    <Dialog open={!!meeting} onOpenChange={(open) => { if (!open) onClose() }}>
+    <Dialog open={!!interaction} onOpenChange={(open) => { if (!open) onClose() }}>
       <DialogContent className="max-w-lg">
-        {meeting && (
+        {interaction && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-lg leading-snug">{meeting.title || 'Untitled Event'}</DialogTitle>
+              <DialogTitle className="text-lg leading-snug">{interaction.title || 'Untitled Event'}</DialogTitle>
               <p className="text-sm text-muted-foreground pt-1">
-                {formatDateTime(meeting.startTime, meeting.timezone)}
-                {meeting.endTime && ` — ${formatDateTime(meeting.endTime, meeting.timezone)}`}
+                {formatDateTime(interaction.startTime, interaction.timezone)}
+                {interaction.endTime && ` — ${formatDateTime(interaction.endTime, interaction.timezone)}`}
               </p>
             </DialogHeader>
 
@@ -45,9 +45,9 @@ export default function InteractionDetailModal({ meeting, onClose }: Interaction
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
                   Participants
                 </h3>
-                {meeting.participantEmails.length > 0 ? (
+                {interaction.participantEmails.length > 0 ? (
                   <ul className="space-y-1">
-                    {meeting.participantEmails.map((email) => (
+                    {interaction.participantEmails.map((email) => (
                       <li key={email} className="text-sm">{email}</li>
                     ))}
                   </ul>
@@ -61,8 +61,8 @@ export default function InteractionDetailModal({ meeting, onClose }: Interaction
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
                   Transcript / Notes
                 </h3>
-                {meeting.notes ? (
-                  <p className="text-sm whitespace-pre-wrap">{meeting.notes}</p>
+                {interaction.notes ? (
+                  <p className="text-sm whitespace-pre-wrap">{interaction.notes}</p>
                 ) : (
                   <p className="text-sm text-muted-foreground italic">
                     Not yet available.

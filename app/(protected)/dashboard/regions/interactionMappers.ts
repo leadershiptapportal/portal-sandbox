@@ -12,7 +12,7 @@ function getDisplayName(user: User): string {
 
 interface MapOpts {
   emailToUser: Map<string, User>
-  notedMeetingIds: Set<string>
+  notedInteractionIds: Set<string>
   coachEmail: string
 }
 
@@ -29,7 +29,7 @@ export function interactionsToUpcomingItems(
   interactions: Interaction[],
   opts: MapOpts & { activeContextIds: Set<string> | null },
 ): UpcomingItem[] {
-  const { emailToUser, notedMeetingIds, coachEmail, activeContextIds } = opts
+  const { emailToUser, notedInteractionIds, coachEmail, activeContextIds } = opts
 
   const ownershipFiltered = activeContextIds
     ? interactions.filter(
@@ -69,7 +69,7 @@ export function interactionsToUpcomingItems(
     )
 
     return {
-      meetingId: interaction.id,
+      interactionId: interaction.id,
       providerEventId: interaction.providerEventId ?? null,
       title: interaction.title,
       startTime: interaction.startTime,
@@ -94,7 +94,7 @@ export function interactionsToUpcomingItems(
         return domains.slice(0, 2).join(', ') || null
       })(),
       participantEmails: externalEmails,
-      hasNote: notedMeetingIds.has(interaction.id),
+      hasNote: notedInteractionIds.has(interaction.id),
       interactionType: interaction.interactionType,
       source: interaction.source,
     }

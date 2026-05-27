@@ -235,11 +235,11 @@ export default function InteractionsList({ items, initialFilter }: Props) {
                   const subjectName = item.clientName ?? item.displayLabel ?? 'Unknown'
                   const needsNotes = item.isPast && !item.hasNote
                   const href = item.clientId
-                    ? `/myhumans/${item.clientId}/interactions/${item.meetingId}`
-                    : `/interactions/${item.meetingId}`
+                    ? `/myhumans/${item.clientId}/interactions/${item.interactionId}`
+                    : `/interactions/${item.interactionId}`
                   const itype = item.interactionType ?? 'Calendar Event'
                   return (
-                    <li key={item.meetingId}>
+                    <li key={item.interactionId}>
                       <Link
                         href={href}
                         className="flex items-center gap-3 py-3 px-4 hover:bg-slate-50 transition-colors group"

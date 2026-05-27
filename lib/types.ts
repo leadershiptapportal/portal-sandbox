@@ -103,7 +103,7 @@ export interface Note {
   coachName?: string;
   authorPersonId?: string;
   subjectPersonId?: string;
-  meetingId?: string;
+  interactionId?: string;
   noteType?: 'general_note' | 'interaction_note' | 'ink_note';
   visibility: 'private_to_author';
 }
@@ -132,6 +132,6 @@ export interface Message {
   status: 'Pending' | 'Sent';
   created?: string;
   sentAt?: string;
-  meetingId?: string; // first linked Calendar Events record ID
+  interactionId?: string; // first linked Calendar Events record ID
   userIds?: string[];  // linked Users record IDs
 }

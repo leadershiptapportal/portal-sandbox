@@ -79,13 +79,12 @@ export default async function PersonInteractionsPage({ params }: Props) {
   const pastGroups = groupByMonth(pastSorted)
 
   function InteractionRow({ interaction, isFirst }: { interaction: Interaction; isFirst?: boolean }) {
-    const meeting = interaction
     return (
       <li className={`relative flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors group ${isFirst ? 'bg-[hsl(213,60%,98%)]' : ''}`}>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium text-slate-900 truncate">
-              {meeting.title || 'Untitled Interaction'}
+              {interaction.title || 'Untitled Interaction'}
             </p>
             {isFirst && (
               <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-[hsl(213,70%,30%)] text-white">
@@ -93,14 +92,14 @@ export default async function PersonInteractionsPage({ params }: Props) {
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">{formatRowDate(meeting)}</p>
+          <p className="text-xs text-slate-400 mt-0.5">{formatRowDate(interaction)}</p>
         </div>
 
         {/* Quick actions */}
         {userCanWrite && (
           <div className="flex items-center gap-1.5 flex-shrink-0 opacity-0 group-hover:opacity-100 sm:opacity-100 transition-opacity">
             <Link
-              href={`/myhumans/${id}/take-notes?interactionId=${meeting.id}`}
+              href={`/myhumans/${id}/take-notes?interactionId=${interaction.id}`}
               className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-200 text-xs text-slate-500 hover:bg-white hover:border-slate-300 transition-colors"
             >
               <NotebookPen className="h-3 w-3 text-[hsl(213,70%,40%)]" />
@@ -111,9 +110,9 @@ export default async function PersonInteractionsPage({ params }: Props) {
 
         {/* Navigate to detail */}
         <Link
-          href={`/myhumans/${id}/interactions/${meeting.id}`}
+          href={`/myhumans/${id}/interactions/${interaction.id}`}
           className="absolute inset-0"
-          aria-label={`View ${meeting.title || 'interaction'}`}
+          aria-label={`View ${interaction.title || 'interaction'}`}
         />
         <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 flex-shrink-0 transition-colors relative z-10 pointer-events-none" />
       </li>

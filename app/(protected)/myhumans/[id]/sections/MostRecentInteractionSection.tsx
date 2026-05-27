@@ -121,7 +121,7 @@ export default function MostRecentInteractionSection({ topInteractions, totalInt
         <InteractionNotesPopout
           open={!!popoutInteractionId}
           onOpenChange={(open) => { if (!open) setPopoutInteractionId(null) }}
-          meetingId={popoutInteraction.id}
+          interactionId={popoutInteraction.id}
           meetingTitle={popoutInteraction.title || 'Untitled Interaction'}
           meetingDate={formatMeetingDate(popoutInteraction)}
           personId={userId}

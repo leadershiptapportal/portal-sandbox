@@ -27,7 +27,7 @@ export default function ProfileLoading() {
         </div>
       </div>
 
-      {/* Most Recent Session */}
+      {/* Most Recent Interaction */}
       <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
         <div className="border-l-4 border-blue-600 bg-blue-50/40 rounded-r-xl p-5 space-y-3">
           <Pulse className="h-3 w-32" />
@@ -77,7 +77,7 @@ export default function ProfileLoading() {
         </div>
       </div>
 
-      {/* Meetings */}
+      {/* Interactions */}
       <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Pulse className="h-5 w-5 rounded" />

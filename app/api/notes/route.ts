@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     date?: string
     clientId?: string
     subjectPersonId?: string
-    meetingId?: string
+    interactionId?: string
     noteType?: NoteType
   }
 
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     coachName: userRecord.name || undefined,
     clientId: body.clientId,
     subjectPersonId: body.subjectPersonId ?? body.clientId,
-    meetingId: body.meetingId,
+    interactionId: body.interactionId,
     noteType: body.noteType,
   })
   return NextResponse.json(note, { status: 201 })

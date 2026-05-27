@@ -15,7 +15,7 @@ function formatDate(iso: string): string {
 }
 
 export async function createFollowUpDraft(
-  meetingId: string,
+  interactionId: string,
   eventName: string,
   startTime: string,
   participantEmails: string[]
@@ -31,8 +31,8 @@ export async function createFollowUpDraft(
   });
 }
 
-export async function getMeetingMessages(meetingId: string): Promise<Message[]> {
-  return getMessagesByMeeting(meetingId);
+export async function getInteractionMessages(interactionId: string): Promise<Message[]> {
+  return getMessagesByMeeting(interactionId);
 }
 
 export async function getUserMessages(userId: string): Promise<Message[]> {

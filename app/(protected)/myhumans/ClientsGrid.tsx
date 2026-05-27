@@ -11,9 +11,9 @@ export interface EnrichedUser {
   user: User
   noteCount: number
   openTaskCount: number
-  meetingCount: number  // from user.associatedMeetingIds.length
-  lastSession: string | null   // "Mar 12" — most recent past session
-  nextSession: string | null   // "May 2"  — nearest upcoming session
+  interactionCount: number  // from user.associatedMeetingIds.length
+  lastInteraction: string | null   // "Mar 12" — most recent past interaction
+  nextInteraction: string | null   // "May 2"  — nearest upcoming interaction
 }
 
 interface Props {
@@ -77,7 +77,7 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 function ClientCard({ enriched }: { enriched: EnrichedUser }) {
-  const { user, meetingCount, noteCount, openTaskCount, lastSession, nextSession } = enriched
+  const { user, interactionCount, noteCount, openTaskCount, lastInteraction, nextInteraction } = enriched
   const name = getDisplayName(user)
   const subtitle = [user.title ?? user.jobTitle, user.companyName].filter(Boolean).join(' · ')
   const role = user.role && !isRecordId(user.role) ? user.role : null
@@ -117,30 +117,30 @@ function ClientCard({ enriched }: { enriched: EnrichedUser }) {
             <p className="text-sm text-slate-500 truncate mt-0.5">{subtitle}</p>
           )}
 
-          {/* Session dates */}
-          {(lastSession || nextSession) && (
+          {/* Interaction dates */}
+          {(lastInteraction || nextInteraction) && (
             <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
-              {lastSession && (
+              {lastInteraction && (
                 <span className="text-xs text-slate-400">
-                  Last: <span className="text-slate-600">{lastSession}</span>
+                  Last: <span className="text-slate-600">{lastInteraction}</span>
                 </span>
               )}
-              {nextSession && (
+              {nextInteraction && (
                 <span className="text-xs text-[hsl(213,70%,40%)] font-medium">
-                  Next: {nextSession}
+                  Next: {nextInteraction}
                 </span>
               )}
-              {lastSession && !nextSession && (
+              {lastInteraction && !nextInteraction && (
                 <span className="text-xs text-slate-300 italic">No upcoming</span>
               )}
             </div>
           )}
 
           {/* Stats row */}
-          {(noteCount > 0 || openTaskCount > 0 || meetingCount > 0) && (
+          {(noteCount > 0 || openTaskCount > 0 || interactionCount > 0) && (
             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-              {meetingCount > 0 && (
-                <span className="text-xs text-slate-400">{meetingCount} interaction{meetingCount !== 1 ? 's' : ''}</span>
+              {interactionCount > 0 && (
+                <span className="text-xs text-slate-400">{interactionCount} interaction{interactionCount !== 1 ? 's' : ''}</span>
               )}
               {noteCount > 0 && (
                 <>
@@ -292,7 +292,7 @@ export default function ClientsGrid({ users, coaches, companies }: Props) {
     } else if (sortBy === 'name-desc') {
       result.sort((a, b) => getDisplayName(b.user).localeCompare(getDisplayName(a.user)))
     } else {
-      result.sort((a, b) => b.meetingCount - a.meetingCount)
+      result.sort((a, b) => b.interactionCount - a.interactionCount)
     }
 
     return result

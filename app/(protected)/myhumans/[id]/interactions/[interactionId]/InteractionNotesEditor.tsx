@@ -2,15 +2,15 @@
 
 import { useState, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateSessionNotes } from './actions'
+import { updateInteractionNotes } from './actions'
 
 interface Props {
-  meetingId: string
+  interactionId: string
   userId: string
   initialNotes: string | undefined
 }
 
-export default function InteractionNotesEditor({ meetingId, userId, initialNotes }: Props) {
+export default function InteractionNotesEditor({ interactionId, userId, initialNotes }: Props) {
   const router = useRouter()
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(initialNotes ?? '')
@@ -35,7 +35,7 @@ export default function InteractionNotesEditor({ meetingId, userId, initialNotes
   function handleSave() {
     setStatus('saving')
     startTransition(async () => {
-      const result = await updateSessionNotes(meetingId, draft, userId)
+      const result = await updateInteractionNotes(interactionId, draft, userId)
       if ('error' in result) {
         setStatus('error')
         setErrorMsg(result.error)

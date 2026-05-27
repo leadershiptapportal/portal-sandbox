@@ -19,14 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { fetchClientSessionsAction, dashboardLogNoteAction } from './actions'
+import { fetchClientInteractionsAction, dashboardLogNoteAction } from './actions'
 
 interface Client {
   id: string
   name: string
 }
 
-interface SessionOption {
+interface InteractionOption {
   id: string
   label: string
 }
@@ -42,28 +42,28 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
   const [open, setOpen] = useState(false)
   const [clientId, setClientId] = useState('')
   const [content, setContent] = useState('')
-  const [meetingId, setMeetingId] = useState('')
-  const [sessions, setSessions] = useState<SessionOption[]>([])
-  const [sessionsLoading, setSessionsLoading] = useState(false)
+  const [interactionId, setInteractionId] = useState('')
+  const [interactions, setInteractions] = useState<InteractionOption[]>([])
+  const [interactionsLoading, setInteractionsLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   const canSubmit = clientId.length > 0 && content.trim().length > 0 && !saving
 
-  // Fetch sessions whenever client changes
+  // Fetch interactions whenever client changes
   useEffect(() => {
     if (!clientId) {
-      setSessions([])
-      setMeetingId('')
+      setInteractions([])
+      setInteractionId('')
       return
     }
     let cancelled = false
-    setSessionsLoading(true)
-    setMeetingId('')
-    fetchClientSessionsAction(clientId).then((results) => {
+    setInteractionsLoading(true)
+    setInteractionId('')
+    fetchClientInteractionsAction(clientId).then((results) => {
       if (!cancelled) {
-        setSessions(results)
-        setSessionsLoading(false)
+        setInteractions(results)
+        setInteractionsLoading(false)
       }
     })
     return () => { cancelled = true }
@@ -72,8 +72,8 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
   function handleOpen() {
     setClientId('')
     setContent('')
-    setMeetingId('')
-    setSessions([])
+    setInteractionId('')
+    setInteractions([])
     setError('')
     setOpen(true)
   }
@@ -91,7 +91,7 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
     const result = await dashboardLogNoteAction({
       clientId,
       content: content.trim(),
-      meetingId: (meetingId && meetingId !== '__none__') ? meetingId : undefined,
+      interactionId: (interactionId && interactionId !== '__none__') ? interactionId : undefined,
     })
     setSaving(false)
     if (!result.success) {
@@ -158,32 +158,32 @@ export default function GlobalLogNoteDialog({ clients, trigger }: Props) {
               />
             </div>
 
-            {/* Session link — only shown after a client is selected */}
+            {/* Interaction link — only shown after a person is selected */}
             {clientId && (
               <div className="space-y-1.5">
-                <Label htmlFor="log-note-session">Link to an interaction</Label>
+                <Label htmlFor="log-note-interaction">Link to an interaction</Label>
                 <Select
-                  value={meetingId}
-                  onValueChange={setMeetingId}
-                  disabled={sessionsLoading || saving}
+                  value={interactionId}
+                  onValueChange={setInteractionId}
+                  disabled={interactionsLoading || saving}
                 >
-                  <SelectTrigger id="log-note-session">
+                  <SelectTrigger id="log-note-interaction">
                     <SelectValue placeholder={
-                      sessionsLoading
+                      interactionsLoading
                         ? 'Loading interactions…'
                         : 'General note (not tied to an interaction)'
                     } />
                   </SelectTrigger>
                   <SelectContent className="max-h-48 overflow-y-auto">
                     <SelectItem value="__none__">General note (not tied to an interaction)</SelectItem>
-                    {sessions.map((s) => (
+                    {interactions.map((s) => (
                       <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-slate-400">
-                  {meetingId && meetingId !== '__none__'
-                    ? 'This note will be saved to the session record'
+                  {interactionId && interactionId !== '__none__'
+                    ? 'This note will be saved to the interaction record'
                     : 'This note will be saved as a general coaching note'}
                 </p>
               </div>

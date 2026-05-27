@@ -51,10 +51,10 @@ function MessageRow({ msg, userId }: { msg: Message; userId: string }) {
     </div>
   )
 
-  if (msg.meetingId) {
+  if (msg.interactionId) {
     return (
       <Link
-        href={`/myhumans/${userId}/meetings/${msg.meetingId}`}
+        href={`/myhumans/${userId}/interactions/${msg.interactionId}`}
         className="block"
       >
         {inner}

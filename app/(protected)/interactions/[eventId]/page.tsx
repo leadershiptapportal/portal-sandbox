@@ -4,7 +4,7 @@ import BackLink from '@/components/BackLink'
 import { getInteractionById } from '@/lib/airtable/interactions'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
-import { getNotesByMeetingId } from '@/lib/airtable/notes'
+import { getNotesByInteractionId } from '@/lib/airtable/notes'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import InteractionNoteForm from './InteractionNoteForm'
@@ -30,14 +30,14 @@ export default async function SessionPage({ params }: Props) {
 
   const userRecord = await getCurrentUserRecord()
 
-  const [meeting, contexts] = await Promise.all([
+  const [interaction, contexts] = await Promise.all([
     getInteractionById(eventId),
     userRecord.airtableId
       ? getRelationshipContexts(userRecord.airtableId)
       : Promise.resolve([]),
   ])
 
-  if (!meeting) {
+  if (!interaction) {
     return (
       <div className="px-4 py-8 max-w-2xl mx-auto">
         <p className="text-slate-500">Interaction not found.</p>
@@ -46,8 +46,8 @@ export default async function SessionPage({ params }: Props) {
   }
 
   // Resolve the client from the matched Relationship Context
-  const matchedContext = meeting.relationshipContextId
-    ? contexts.find((c) => c.id === meeting.relationshipContextId)
+  const matchedContext = interaction.relationshipContextId
+    ? contexts.find((c) => c.id === interaction.relationshipContextId)
     : null
   const clientAirtableId = matchedContext?.personId ?? undefined
 
@@ -58,8 +58,8 @@ export default async function SessionPage({ params }: Props) {
 
   const userCanWrite = canWrite(permissionLevel)
 
-  // Fetch the session note for this meeting written by this author
-  const allMeetingNotes = await getNotesByMeetingId(eventId)
+  // Fetch the interaction note for this interaction written by this author
+  const allMeetingNotes = await getNotesByInteractionId(eventId)
   const existingNote = userRecord.airtableId
     ? allMeetingNotes.find((n) => n.authorPersonId === userRecord.airtableId) ?? null
     : null
@@ -76,14 +76,14 @@ export default async function SessionPage({ params }: Props) {
           Interaction
         </p>
         <h1 className="text-xl font-bold text-slate-900 leading-snug">
-          {meeting.title || 'Untitled Interaction'}
+          {interaction.title || 'Untitled Interaction'}
         </h1>
-        {meeting.startTime && (
-          <p className="text-sm text-slate-500">{formatDateTime(meeting.startTime, meeting.timezone)}</p>
+        {interaction.startTime && (
+          <p className="text-sm text-slate-500">{formatDateTime(interaction.startTime, interaction.timezone)}</p>
         )}
-        {meeting.clientName && (
+        {interaction.clientName && (
           <p className="text-sm font-medium text-[hsl(213,70%,30%)] mt-1">
-            with {meeting.clientName}
+            with {interaction.clientName}
           </p>
         )}
         {userCanWrite && clientAirtableId && (
@@ -119,7 +119,7 @@ export default async function SessionPage({ params }: Props) {
 
         {userCanWrite ? (
           <InteractionNoteForm
-            meetingId={eventId}
+            interactionId={eventId}
             subjectPersonId={clientAirtableId}
             relationshipContextId={matchedContext?.id}
             existingNote={existingNote ?? undefined}

@@ -135,11 +135,11 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
 
   const noteStatusByInteractionId = sessionNotes.reduce<Record<string, { hasNotes: boolean; hasInk: boolean }>>(
     (acc, note) => {
-      if (!note.meetingId) return acc
-      const prev = acc[note.meetingId] ?? { hasNotes: false, hasInk: false }
+      if (!note.interactionId) return acc
+      const prev = acc[note.interactionId] ?? { hasNotes: false, hasInk: false }
       return {
         ...acc,
-        [note.meetingId]: {
+        [note.interactionId]: {
           hasNotes: prev.hasNotes || note.noteType === 'interaction_note',
           hasInk: prev.hasInk || note.noteType === 'ink_note',
         },

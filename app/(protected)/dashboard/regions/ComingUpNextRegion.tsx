@@ -79,11 +79,11 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
 
   const emailToUser = buildEmailToUserMap(users)
   const now = new Date()
-  const notedMeetingIds = new Set(coachNotes.map((n) => n.meetingId).filter(Boolean) as string[])
+  const notedInteractionIds = new Set(coachNotes.map((n) => n.interactionId).filter(Boolean) as string[])
   const activeContextIds = isAdmin ? null : new Set(coachContexts.map((c) => c.id))
   const coachEmail = sessionUser?.email?.toLowerCase() ?? ''
 
-  const mapOpts = { emailToUser, notedMeetingIds, coachEmail, activeContextIds }
+  const mapOpts = { emailToUser, notedInteractionIds, coachEmail, activeContextIds }
   const upcomingItems = interactionsToUpcomingItems(upcomingInteractions, mapOpts)
   const pastDayItems = interactionsToUpcomingItems(pastDay, mapOpts)
 
@@ -133,10 +133,10 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
               </span>
             )
             const href = item.clientId
-              ? `/myhumans/${item.clientId}/interactions/${item.meetingId}`
-              : `/interactions/${item.meetingId}`
+              ? `/myhumans/${item.clientId}/interactions/${item.interactionId}`
+              : `/interactions/${item.interactionId}`
             return (
-              <Link key={item.meetingId} href={href}>
+              <Link key={item.interactionId} href={href}>
                 {inner}
               </Link>
             )

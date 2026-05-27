@@ -3,13 +3,13 @@
 import { useState } from 'react'
 
 interface NotesEditorProps {
-  meetingId: string
+  interactionId: string
   userId: string
   initialNotes?: string
-  saveAction: (userId: string, meetingId: string, notes: string) => Promise<{ ok: true } | { ok: false; error: string }>
+  saveAction: (userId: string, interactionId: string, notes: string) => Promise<{ ok: true } | { ok: false; error: string }>
 }
 
-export default function NotesEditor({ meetingId, userId, initialNotes, saveAction }: NotesEditorProps) {
+export default function NotesEditor({ interactionId, userId, initialNotes, saveAction }: NotesEditorProps) {
   const [editing, setEditing] = useState(!initialNotes)
   const [value, setValue] = useState(initialNotes ?? '')
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
@@ -17,7 +17,7 @@ export default function NotesEditor({ meetingId, userId, initialNotes, saveActio
 
   async function handleSave() {
     setStatus('saving')
-    const result = await saveAction(userId, meetingId, value)
+    const result = await saveAction(userId, interactionId, value)
     if (result.ok) {
       setStatus('saved')
       setEditing(false)

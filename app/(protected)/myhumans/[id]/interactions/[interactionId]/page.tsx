@@ -121,7 +121,7 @@ export default async function InteractionDetailPage({ params }: Props) {
 
       {/* Interaction Notes */}
       <div className="bg-white rounded-xl shadow-sm p-5 md:p-6">
-        <InteractionNotesEditor meetingId={interactionId} userId={id} initialNotes={notesForEditor} />
+        <InteractionNotesEditor interactionId={interactionId} userId={id} initialNotes={notesForEditor} />
       </div>
 
       {/* Action Items — prefer coach session, fall back to Calendar Event */}

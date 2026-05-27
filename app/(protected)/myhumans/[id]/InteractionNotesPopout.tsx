@@ -9,13 +9,13 @@ import {
 } from '@/components/ui/dialog'
 import { FileText, Loader2 } from 'lucide-react'
 import NoteBody from '@/components/notes/NoteBody'
-import { getNotesByMeetingIdAction, updateSessionNotesAction } from './actions'
+import { getNotesByInteractionIdAction, updateInteractionNotesAction } from './actions'
 import type { Note } from '@/lib/types'
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
-  meetingId: string
+  interactionId: string
   meetingTitle: string
   meetingDate: string
   personId: string
@@ -24,7 +24,7 @@ interface Props {
 export default function InteractionNotesPopout({
   open,
   onOpenChange,
-  meetingId,
+  interactionId,
   meetingTitle,
   meetingDate,
   personId,
@@ -43,21 +43,21 @@ export default function InteractionNotesPopout({
   useEffect(() => {
     if (!open || loaded) return
     setLoading(true)
-    getNotesByMeetingIdAction(meetingId).then((fetched) => {
+    getNotesByInteractionIdAction(interactionId).then((fetched) => {
       setNotes(fetched)
       setLoading(false)
       setLoaded(true)
     })
-  }, [open, loaded, meetingId])
+  }, [open, loaded, interactionId])
 
-  // Reset when meetingId changes (different row clicked)
+  // Reset when interactionId changes (different row clicked)
   useEffect(() => {
     setLoaded(false)
     setNotes([])
     setEditing(false)
     setDraft('')
     setSaveError('')
-  }, [meetingId])
+  }, [interactionId])
 
   const existingNote = notes.find((n) => n.noteType !== 'ink_note') ?? notes[0] ?? null
   const hasNotes = notes.length > 0
@@ -72,7 +72,7 @@ export default function InteractionNotesPopout({
     if (!draft.trim()) return
     setSaving(true)
     setSaveError('')
-    const result = await updateSessionNotesAction(meetingId, draft.trim(), personId)
+    const result = await updateInteractionNotesAction(interactionId, draft.trim(), personId)
     setSaving(false)
     if (result.success) {
       // Update local note state so the view reflects the save immediately

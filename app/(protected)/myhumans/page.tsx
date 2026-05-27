@@ -18,19 +18,19 @@ function getDisplayName(user: User): string {
   return user.preferredName ?? user.email
 }
 
-function formatSessionDate(iso: string): string {
+function formatInteractionDate(iso: string): string {
   return formatEastern(iso, { month: 'short', day: 'numeric' })
 }
 
-// Fetch all Meetings for one coach — only the fields needed
-// for last/next session computation. One call, filtered server-side.
-interface CoachSession {
+// Fetch all Interactions for one coach — only the fields needed
+// for last/next interaction computation. One call, filtered server-side.
+interface CoachInteraction {
   clientName: string
   startTime: string
   endTime: string
 }
 
-async function getCoachCalendarSessions(ownerEmail: string): Promise<CoachSession[]> {
+async function getCoachCalendarInteractions(ownerEmail: string): Promise<CoachInteraction[]> {
   const apiKey = process.env.AIRTABLE_API_KEY
   const baseId = process.env.AIRTABLE_BASE_ID
   if (!apiKey || !baseId) return []
@@ -62,12 +62,12 @@ export default async function UsersPage() {
   const isAdmin = userRecord.role === 'admin'
   const filterByCoachId = isAdmin ? undefined : (userRecord.airtableId ?? undefined)
 
-  const [users, allRecentNotes, openTasks, allUsersForOptions, coachSessions] = await Promise.all([
+  const [users, allRecentNotes, openTasks, allUsersForOptions, coachInteractions] = await Promise.all([
     getUsers(sessionUser, filterByCoachId),
     getAllRecentNotes(300),
     getAllOpenTasks(),
     getAllUsers(),
-    userRecord.email ? getCoachCalendarSessions(userRecord.email) : Promise.resolve([]),
+    userRecord.email ? getCoachCalendarInteractions(userRecord.email) : Promise.resolve([]),
   ])
 
   const profileOptions = await fetchProfileOptions(allUsersForOptions)
@@ -87,52 +87,52 @@ export default async function UsersPage() {
     openTaskCountByUser.set(task.assignedToPersonId, (openTaskCountByUser.get(task.assignedToPersonId) ?? 0) + 1)
   }
 
-  // ── Last & next session per client name ──────────────────────────────────
-  // coachSessions is sorted Start DESC: future events first, then past.
-  // For nextSession (nearest upcoming): overwrite on each future event → ends on nearest.
-  // For lastSession (most recent past): only set once on first past event encountered.
+  // ── Last & next interaction per client name ──────────────────────────────────
+  // coachInteractions is sorted Start DESC: future events first, then past.
+  // For nextInteraction (nearest upcoming): overwrite on each future event → ends on nearest.
+  // For lastInteraction (most recent past): only set once on first past event encountered.
   const now = new Date()
-  const lastSessionByName = new Map<string, string>() // name → formatted date
-  const nextSessionByName = new Map<string, string>()
+  const lastInteractionByName = new Map<string, string>() // name → formatted date
+  const nextInteractionByName = new Map<string, string>()
 
-  for (const session of coachSessions) {
-    if (!session.startTime) continue
-    const start = new Date(session.startTime)
-    const end = session.endTime ? new Date(session.endTime) : start
+  for (const interaction of coachInteractions) {
+    if (!interaction.startTime) continue
+    const start = new Date(interaction.startTime)
+    const end = interaction.endTime ? new Date(interaction.endTime) : start
     // Split comma-separated client names (set during sync for multi-client events)
-    const names = session.clientName.split(',').map((n) => n.trim().toLowerCase()).filter(Boolean)
+    const names = interaction.clientName.split(',').map((n) => n.trim().toLowerCase()).filter(Boolean)
 
     for (const name of names) {
       if (end < now) {
         // Past event — first one encountered (DESC order) is most recent
-        if (!lastSessionByName.has(name)) {
-          lastSessionByName.set(name, formatSessionDate(session.startTime))
+        if (!lastInteractionByName.has(name)) {
+          lastInteractionByName.set(name, formatInteractionDate(interaction.startTime))
         }
       } else if (start > now) {
         // Future event — overwrite to keep nearest (we walk from far future → near future)
-        nextSessionByName.set(name, formatSessionDate(session.startTime))
+        nextInteractionByName.set(name, formatInteractionDate(interaction.startTime))
       }
     }
   }
 
-  // ── Enrich users — session count from linked "Associated Meetings" field ──
+  // ── Enrich users — interaction count from linked "Associated Meetings" field ──
   const enrichedUsers: EnrichedUser[] = users.map((user) => {
-    const meetingCount = user.associatedMeetingIds?.length ?? 0
+    const interactionCount = user.associatedMeetingIds?.length ?? 0
     const displayNameLower = getDisplayName(user).toLowerCase()
     return {
       user,
       noteCount: noteCountByUser.get(user.id) ?? 0,
       openTaskCount: openTaskCountByUser.get(user.id) ?? 0,
-      meetingCount,
-      lastSession: lastSessionByName.get(displayNameLower) ?? null,
-      nextSession: nextSessionByName.get(displayNameLower) ?? null,
+      interactionCount,
+      lastInteraction: lastInteractionByName.get(displayNameLower) ?? null,
+      nextInteraction: nextInteractionByName.get(displayNameLower) ?? null,
     }
   })
 
-  console.log('[ClientsPage] Users with session counts:',
+  console.log('[ClientsPage] Users with interaction counts:',
     users.map((u) => ({
       name: getDisplayName(u),
-      sessionCount: u.associatedMeetingIds?.length ?? 0,
+      interactionCount: u.associatedMeetingIds?.length ?? 0,
       associatedMeetings: u.associatedMeetingIds,
     }))
   )

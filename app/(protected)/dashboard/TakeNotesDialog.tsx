@@ -89,7 +89,7 @@ export default function TakeNotesDialog({ clients, trigger }: Props) {
           <div className="space-y-4">
             {/* Person search */}
             <div className="space-y-1.5" ref={searchRef}>
-              <Label>Who is this session for?</Label>
+              <Label>Who is this interaction for?</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
                 <input
