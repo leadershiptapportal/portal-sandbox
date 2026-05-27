@@ -4,11 +4,11 @@ import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getAllUsers, fetchProfileOptions } from '@/lib/airtable/users'
 import { getCoachPersonContext } from '@/lib/airtable/coachPersonContext'
-import { getMeetingsForUser } from '@/lib/services/meetingsService'
-import { getMeetingById } from '@/lib/airtable/meetings'
+import { getInteractionsForUser } from '@/lib/services/interactionsService'
+import { getInteractionById } from '@/lib/airtable/interactions'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import TakeNotesWorkspace from './TakeNotesWorkspace'
-import type { Meeting } from '@/lib/types'
+import type { Interaction } from '@/lib/types'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -32,29 +32,29 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
     user.fullName ??
     ([user.firstName, user.lastName].filter(Boolean).join(' ') || user.email)
 
-  const [profileOptions, coachContext, meetings, initialInteraction, permissionLevel] =
+  const [profileOptions, coachContext, interactions, initialInteraction, permissionLevel] =
     await Promise.all([
       getAllUsers().then((allUsers) => fetchProfileOptions(allUsers)),
       currentUserRecord.airtableId
         ? getCoachPersonContext(currentUserRecord.airtableId, id).catch(() => null)
         : Promise.resolve(null),
-      getMeetingsForUser(
+      getInteractionsForUser(
         contactEmail,
         sessionUser,
         id,
         currentUserRecord.email || undefined,
         displayName,
-      ).catch(() => ({ upcoming: [] as Meeting[], past: [] as Meeting[] })),
-      interactionId ? getMeetingById(interactionId).catch(() => null) : Promise.resolve(null),
+      ).catch(() => ({ upcoming: [] as Interaction[], past: [] as Interaction[] })),
+      interactionId ? getInteractionById(interactionId).catch(() => null) : Promise.resolve(null),
       getPermissionLevel(currentUserRecord.airtableId, currentUserRecord.role, id),
     ])
 
   const userCanWrite = canWrite(permissionLevel)
 
   // Combine upcoming + recent past for the interaction picker (capped for perf)
-  const allMeetings: Meeting[] = [
-    ...meetings.upcoming,
-    ...meetings.past.slice(0, 30),
+  const allInteractions: Interaction[] = [
+    ...interactions.upcoming,
+    ...interactions.past.slice(0, 30),
   ]
 
   return (
@@ -62,7 +62,7 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
       person={user}
       coachContext={coachContext}
       profileOptions={profileOptions}
-      meetings={allMeetings}
+      meetings={allInteractions}
       initialInteraction={initialInteraction ?? null}
       userCanWrite={userCanWrite}
     />

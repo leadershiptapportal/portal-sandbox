@@ -72,7 +72,7 @@ export interface User {
   internalNotes?: string;  // Airtable "Internal Notes" — coaching context on Users table
 }
 
-export interface Meeting {
+export interface Interaction {
   id: string;
   providerEventId?: string; // "Provider Event ID" — stable external calendar ID
   title: string;
@@ -90,6 +90,9 @@ export interface Meeting {
   interactionType?: string;
   source?: string;
 }
+
+/** @deprecated Use Interaction instead */
+export type Meeting = Interaction;
 
 export interface Note {
   id: string;

@@ -5,13 +5,13 @@ import { toast } from 'sonner'
 import { Pencil, Undo2, Trash2, Hand, Eraser, Link2 } from 'lucide-react'
 import InkCanvas, { type InkTool } from '@/components/ink/InkCanvas'
 import { saveInkNoteAction } from '../actions'
-import type { Meeting } from '@/lib/types'
+import type { Interaction } from '@/lib/types'
 
 interface Props {
   personId: string
   personName: string
-  meetings: Meeting[]
-  initialInteraction: Meeting | null
+  meetings: Interaction[]
+  initialInteraction: Interaction | null
   onSaveComplete: () => void
   onCancel: () => void
   onStrokeCountChange?: (count: number) => void
@@ -36,7 +36,7 @@ const ERASER_SIZES = [
   { value: 32, label: 'Large',  dot: 'w-4 h-4' },
 ]
 
-function formatMeetingLabel(m: Meeting): string {
+function formatInteractionLabel(m: Interaction): string {
   const name = m.clientName ? `${m.clientName} · ` : ''
   const title = m.title || 'Untitled'
   const date = m.startTime
@@ -305,7 +305,7 @@ export default function TakeNotesCanvas({
                 <option value="">— No linked interaction —</option>
                 {meetings.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {formatMeetingLabel(m)}
+                    {formatInteractionLabel(m)}
                   </option>
                 ))}
               </select>
@@ -322,7 +322,7 @@ export default function TakeNotesCanvas({
               className="flex-1 text-left text-xs text-slate-500 hover:text-[hsl(213,70%,30%)] transition-colors truncate"
             >
               {selectedMeeting
-                ? formatMeetingLabel(selectedMeeting)
+                ? formatInteractionLabel(selectedMeeting)
                 : 'Link to an interaction (optional)'}
             </button>
           )}
