@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, Pencil, Type } from 'lucide-react'
 import PersonSidebar from './PersonSidebar'
 import TakeNotesCanvas from './TakeNotesCanvas'
+import TakeNotesTyped from './TakeNotesTyped'
 import LastInteractionNotesDialog from '@/components/LastInteractionNotesDialog'
 import type { User, Interaction } from '@/lib/types'
 import type { CoachPersonContext } from '@/lib/airtable/coachPersonContext'
@@ -37,6 +38,9 @@ interface Props {
   existingInkNote?: Note | null
 }
 
+type InputMode = 'type' | 'ink'
+const MODE_KEY = 'notes-input-mode-pref'
+
 export default function TakeNotesWorkspace({
   person,
   coachContext,
@@ -51,8 +55,29 @@ export default function TakeNotesWorkspace({
 }: Props) {
   const router = useRouter()
   const [savedPersonData, setSavedPersonData] = useState(person)
-  const [hasStrokes, setHasStrokes] = useState(false)
+  const [hasUnsavedContent, setHasUnsavedContent] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [inputMode, setInputModeState] = useState<InputMode>('type')
+  const [modeReady, setModeReady] = useState(false)
+
+  // Determine default mode from stored preference or device type
+  useEffect(() => {
+    const stored = localStorage.getItem(MODE_KEY) as InputMode | null
+    if (stored === 'ink' || stored === 'type') {
+      setInputModeState(stored)
+    } else {
+      // Touch/stylus devices default to ink; pointer devices default to type
+      const isTouch = window.matchMedia('(pointer: coarse)').matches
+      setInputModeState(isTouch ? 'ink' : 'type')
+    }
+    setModeReady(true)
+  }, [])
+
+  function setInputMode(mode: InputMode) {
+    setInputModeState(mode)
+    setHasUnsavedContent(false)
+    try { localStorage.setItem(MODE_KEY, mode) } catch {}
+  }
 
   const displayName =
     savedPersonData.preferredName ||
@@ -66,7 +91,7 @@ export default function TakeNotesWorkspace({
   }
 
   function handleCancel() {
-    if (hasStrokes) {
+    if (hasUnsavedContent) {
       const confirmed = window.confirm('You have unsaved notes. Are you sure you want to leave?')
       if (!confirmed) return
     }
@@ -86,12 +111,44 @@ export default function TakeNotesWorkspace({
         </Link>
         <div className="min-w-0 flex-1">
           <p className="text-xs uppercase tracking-wide text-muted-foreground leading-none font-medium">
-            {hasStrokes ? 'Continue Taking Notes' : 'Take Notes'}
+            {hasUnsavedContent ? 'Continue Taking Notes' : 'Take Notes'}
           </p>
           <p className="text-sm font-semibold text-foreground truncate leading-tight">
             {displayName}
           </p>
         </div>
+
+        {/* Input mode toggle */}
+        {modeReady && (
+          <div className="inline-flex rounded-md border border-border overflow-hidden flex-shrink-0">
+            <button
+              onClick={() => setInputMode('type')}
+              aria-pressed={inputMode === 'type'}
+              title="Typed notes"
+              className={`flex items-center gap-1.5 px-2.5 h-8 text-xs font-medium transition-colors ${
+                inputMode === 'type'
+                  ? 'bg-[hsl(213,70%,30%)] text-white'
+                  : 'bg-card text-muted-foreground hover:bg-muted/50'
+              }`}
+            >
+              <Type className="h-3.5 w-3.5" />
+              Type
+            </button>
+            <button
+              onClick={() => setInputMode('ink')}
+              aria-pressed={inputMode === 'ink'}
+              title="Handwritten notes"
+              className={`flex items-center gap-1.5 px-2.5 h-8 text-xs font-medium border-l border-border transition-colors ${
+                inputMode === 'ink'
+                  ? 'bg-[hsl(213,70%,30%)] text-white'
+                  : 'bg-card text-muted-foreground hover:bg-muted/50'
+              }`}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              Draw
+            </button>
+          </div>
+        )}
       </header>
 
       {/* Two-panel body */}
@@ -123,7 +180,6 @@ export default function TakeNotesWorkspace({
 
           {!sidebarCollapsed && (
             <>
-              {/* "View last interaction notes" — prominent button at top of sidebar */}
               {lastInteractionNote && (
                 <div className="px-3 pt-3 pb-2 border-b border-border">
                   <LastInteractionNotesDialog
@@ -147,18 +203,31 @@ export default function TakeNotesWorkspace({
           )}
         </aside>
 
-        {/* Right: ink canvas */}
+        {/* Right: note input area */}
         <div className="flex-1 flex flex-col min-w-0 bg-muted">
-          <TakeNotesCanvas
-            personId={person.id}
-            personName={displayName}
-            meetings={meetings}
-            initialInteraction={initialInteraction}
-            existingInkNote={existingInkNote}
-            onSaveComplete={handleSaveComplete}
-            onCancel={handleCancel}
-            onStrokeCountChange={(count) => setHasStrokes(count > 0)}
-          />
+          {!modeReady ? (
+            <div className="w-full h-full bg-card animate-pulse" />
+          ) : inputMode === 'ink' ? (
+            <TakeNotesCanvas
+              personId={person.id}
+              personName={displayName}
+              meetings={meetings}
+              initialInteraction={initialInteraction}
+              existingInkNote={existingInkNote}
+              onSaveComplete={handleSaveComplete}
+              onCancel={handleCancel}
+              onStrokeCountChange={(count) => setHasUnsavedContent(count > 0)}
+            />
+          ) : (
+            <TakeNotesTyped
+              personId={person.id}
+              meetings={meetings}
+              initialInteraction={initialInteraction}
+              onSaveComplete={handleSaveComplete}
+              onCancel={handleCancel}
+              onContentChange={(hasContent) => setHasUnsavedContent(hasContent)}
+            />
+          )}
         </div>
       </div>
     </div>

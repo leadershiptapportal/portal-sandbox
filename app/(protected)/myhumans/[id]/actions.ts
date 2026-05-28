@@ -197,6 +197,42 @@ export async function saveInkNoteAction(
   }
 }
 
+// ── Save Typed Note ───────────────────────────────────────────────────────────
+
+export async function saveTypedNoteAction(
+  subjectPersonId: string,
+  content: string,
+  interactionId?: string,
+): Promise<{ success: true; noteId: string } | { error: string }> {
+  try {
+    const userRecord = await getCurrentUserRecord()
+    if (!userRecord.airtableId) {
+      return { error: 'Could not resolve your user record.' }
+    }
+
+    const rc = await resolveContextForSubject(userRecord.airtableId, subjectPersonId)
+    if (!rc) {
+      return { error: 'No active coaching or reporting relationship reaches this person.' }
+    }
+
+    const created = await createNote({
+      content,
+      authorPersonId: userRecord.airtableId,
+      coachName: userRecord.name || undefined,
+      subjectPersonId,
+      humanId: subjectPersonId,
+      relationshipContextId: rc.id,
+      interactionId: interactionId || undefined,
+      noteType: interactionId ? 'interaction_note' : 'general_note',
+    })
+    revalidatePath(`/myhumans/${subjectPersonId}`)
+    return { success: true, noteId: created.id }
+  } catch (err) {
+    console.error('[saveTypedNoteAction]', err)
+    return { error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
 // ── Edit / Delete Note ────────────────────────────────────────────────────────
 
 export async function updateNoteAction(
