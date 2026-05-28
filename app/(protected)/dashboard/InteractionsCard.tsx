@@ -18,12 +18,12 @@ export default function InteractionsCard({ recentItems, upcomingItems }: Props) 
   const count = items.length
 
   return (
-    <div id="interactions" className="bg-white rounded-xl shadow-sm p-4 md:p-5 h-full">
+    <div id="interactions" className="bg-card rounded-xl shadow-sm p-4 md:p-5 h-full">
       <div className="flex items-center gap-2 mb-3">
-        <Calendar className="h-4 w-4 text-slate-400" />
-        <h2 className="text-sm font-semibold text-slate-900">My Interactions</h2>
+        <Calendar className="h-4 w-4 text-muted-foreground" />
+        <h2 className="text-sm font-semibold text-foreground">My Interactions</h2>
         <div className="ml-auto flex items-center gap-3">
-          <span className="text-xs text-slate-400 font-medium">
+          <span className="text-xs text-muted-foreground font-medium">
             {count} {count === 1 ? 'interaction' : 'interactions'}
           </span>
           <Link
@@ -41,7 +41,7 @@ export default function InteractionsCard({ recentItems, upcomingItems }: Props) 
           className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
             tab === 'recent'
               ? 'bg-[hsl(213,70%,30%)] text-white'
-              : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+              : 'bg-muted text-muted-foreground hover:bg-muted'
           }`}
         >
           Recent
@@ -51,7 +51,7 @@ export default function InteractionsCard({ recentItems, upcomingItems }: Props) 
           className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
             tab === 'upcoming'
               ? 'bg-[hsl(213,70%,30%)] text-white'
-              : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+              : 'bg-muted text-muted-foreground hover:bg-muted'
           }`}
         >
           Upcoming

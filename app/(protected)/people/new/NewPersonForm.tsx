@@ -71,7 +71,7 @@ function PersonPicker({
     <div className="space-y-2">
       <div>
         <Label>{label}</Label>
-        {hint && <p className="text-xs text-slate-400 mt-0.5">{hint}</p>}
+        {hint && <p className="text-xs text-muted-foreground mt-0.5">{hint}</p>}
       </div>
 
       {selected.length > 0 && (
@@ -106,7 +106,7 @@ function PersonPicker({
           autoComplete="off"
         />
         {showDropdown && (
-          <ul className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-md shadow-md divide-y divide-slate-50">
+          <ul className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto bg-card border border-border rounded-md shadow-md divide-y divide-slate-50">
             {filtered.map((p) => (
               <li key={p.id}>
                 <button
@@ -115,7 +115,7 @@ function PersonPicker({
                     e.preventDefault() // keep input focused so blur doesn't close first
                     add(p)
                   }}
-                  className="w-full text-left px-3 py-2 text-sm text-slate-800 hover:bg-slate-50 transition-colors"
+                  className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors"
                 >
                   {p.name}
                 </button>
@@ -237,7 +237,7 @@ export default function NewPersonForm({ coaches, allUsers, companies }: Props) {
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* ── Section 1: Person Details ───────────────────────────────────── */}
       <section className="space-y-4">
-        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-100 pb-2">
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest border-b border-border pb-2">
           Person Details
         </h2>
 
@@ -314,7 +314,7 @@ export default function NewPersonForm({ coaches, allUsers, companies }: Props) {
 
       {/* ── Section 2: Coaches ──────────────────────────────────────────── */}
       <section className="space-y-4">
-        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-100 pb-2">
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest border-b border-border pb-2">
           Coaches
         </h2>
         <PersonPicker
@@ -329,7 +329,7 @@ export default function NewPersonForm({ coaches, allUsers, companies }: Props) {
 
       {/* ── Section 3: Reports To ───────────────────────────────────────── */}
       <section className="space-y-4">
-        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-100 pb-2">
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest border-b border-border pb-2">
           Reports To
         </h2>
         <PersonPicker
@@ -344,7 +344,7 @@ export default function NewPersonForm({ coaches, allUsers, companies }: Props) {
 
       {/* ── Section 4: Direct Reports ───────────────────────────────────── */}
       <section className="space-y-4">
-        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-100 pb-2">
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest border-b border-border pb-2">
           Direct Reports
         </h2>
         <PersonPicker
@@ -368,7 +368,7 @@ export default function NewPersonForm({ coaches, allUsers, companies }: Props) {
       {/* ── Actions ─────────────────────────────────────────────────────── */}
       {error && <p className="text-sm text-rose-600 font-medium">{error}</p>}
 
-      <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+      <div className="flex items-center gap-3 pt-2 border-t border-border">
         <Button
           type="button"
           variant="outline"

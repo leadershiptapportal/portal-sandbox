@@ -16,15 +16,15 @@ export default function CoachingContextSection({ user, coachContext }: Props) {
   ].filter((s): s is string => s !== null)
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+    <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
       <SectionHeading icon={Heart} title="Coaching Context" />
       {sections.length === 0 ? (
-        <p className="text-sm text-slate-400 italic">No context added yet — use Edit Profile to add notes.</p>
+        <p className="text-sm text-muted-foreground italic">No context added yet — use Edit Profile to add notes.</p>
       ) : (
-        <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+        <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
           {sections.map((text, i) => (
             <div key={i}>
-              {i > 0 && <hr className="my-3 border-slate-100" />}
+              {i > 0 && <hr className="my-3 border-border" />}
               {text}
             </div>
           ))}

@@ -35,7 +35,7 @@ function AttributeCard({
 }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{label}</p>
       <div className={`rounded-lg border px-4 py-3 space-y-1.5 ${bg} ${border}`}>
         {name && (
           <p className={`text-sm font-semibold leading-snug ${nameColor}`}>{name}</p>
@@ -69,7 +69,7 @@ export default function PersonalityStrengthsSection({
   if (!hasPersonality) return null
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+    <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
       <SectionHeading icon={Brain} title="Personality & Strengths" />
 
       <div className="space-y-4">
@@ -125,7 +125,7 @@ export default function PersonalityStrengthsSection({
         {/* CliftonStrengths ── indigo, numbered list */}
         {user.strengths && user.strengths.length > 0 && (
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
               Clifton Strengths
             </p>
             <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 px-4 py-3">

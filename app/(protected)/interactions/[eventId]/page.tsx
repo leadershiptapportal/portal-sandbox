@@ -41,7 +41,7 @@ export default async function SessionPage({ params }: Props) {
   if (!interaction) {
     return (
       <div className="px-4 py-8 max-w-2xl mx-auto">
-        <p className="text-slate-500">Interaction not found.</p>
+        <p className="text-muted-foreground">Interaction not found.</p>
       </div>
     )
   }
@@ -77,15 +77,15 @@ export default async function SessionPage({ params }: Props) {
       <BackLink fallbackHref="/dashboard" label="Back" />
 
       {/* Event header */}
-      <div className="bg-white rounded-xl shadow-sm p-5 space-y-1">
+      <div className="bg-card rounded-xl shadow-sm p-5 space-y-1">
         <p className="text-xs font-semibold uppercase tracking-wide text-[hsl(213,70%,40%)]">
           Interaction
         </p>
-        <h1 className="text-xl font-bold text-slate-900 leading-snug">
+        <h1 className="text-xl font-bold text-foreground leading-snug">
           {interaction.title || 'Untitled Interaction'}
         </h1>
         {interaction.startTime && (
-          <p className="text-sm text-slate-500">{formatDateTime(interaction.startTime, interaction.timezone)}</p>
+          <p className="text-sm text-muted-foreground">{formatDateTime(interaction.startTime, interaction.timezone)}</p>
         )}
         {interaction.humanName && (
           <p className="text-sm font-medium text-[hsl(213,70%,30%)] mt-1">
@@ -109,12 +109,12 @@ export default async function SessionPage({ params }: Props) {
       </div>
 
       {/* Interaction note — create or edit */}
-      <div className="bg-white rounded-xl shadow-sm p-5">
-        <h2 className="text-base font-semibold text-slate-900 mb-1">
+      <div className="bg-card rounded-xl shadow-sm p-5">
+        <h2 className="text-base font-semibold text-foreground mb-1">
           {existingNote ? 'Edit Interaction Note' : 'Add Interaction Note'}
         </h2>
         {existingNote && (
-          <p className="text-xs text-slate-400 mb-5">
+          <p className="text-xs text-muted-foreground mb-5">
             Last updated{' '}
             {existingNote.date
               ? new Date(existingNote.date).toLocaleDateString('en-US', {
@@ -136,12 +136,12 @@ export default async function SessionPage({ params }: Props) {
         ) : existingNote ? (
           // Read-only view for non-coaches
           <div className="space-y-3">
-            <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+            <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
               {existingNote.content}
             </p>
           </div>
         ) : (
-          <p className="text-sm text-slate-400">No interaction note yet.</p>
+          <p className="text-sm text-muted-foreground">No interaction note yet.</p>
         )}
       </div>
 

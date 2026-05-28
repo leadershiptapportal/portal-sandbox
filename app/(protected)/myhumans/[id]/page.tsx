@@ -66,7 +66,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   if (!user) {
     return (
       <div className="p-8">
-        <p className="text-slate-500">User not found.</p>
+        <p className="text-muted-foreground">User not found.</p>
       </div>
     )
   }
@@ -215,7 +215,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
       ? { label: user.mbti, className: 'bg-violet-50 text-violet-700' }
       : null,
     user.role && !isRecordId(user.role)
-      ? { label: user.role, className: 'bg-slate-100 text-slate-600' }
+      ? { label: user.role, className: 'bg-muted text-muted-foreground' }
       : null,
     // Relationship flags badges were sourced from the deprecated Coach-Person
     // Context table. After the Item 11 cutover they're surfaced as Notes with
@@ -230,7 +230,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
 
       {/* Breadcrumb trail for downstream navigation */}
       {trailEntries.length > 0 && (
-        <nav className="flex items-center gap-1 text-sm text-slate-500 flex-wrap" aria-label="Org trail">
+        <nav className="flex items-center gap-1 text-sm text-muted-foreground flex-wrap" aria-label="Org trail">
           {trailEntries.map((entry, i) => {
             // Build partial trail up to this entry
             const partialTrail = trailEntries
@@ -245,11 +245,11 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
                 >
                   {entry.name}
                 </Link>
-                <ChevronRight className="h-3.5 w-3.5 text-slate-300 flex-shrink-0" />
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60 flex-shrink-0" />
               </span>
             )
           })}
-          <span className="font-semibold text-slate-900">{name}</span>
+          <span className="font-semibold text-foreground">{name}</span>
         </nav>
       )}
 
@@ -323,13 +323,13 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
       <MessagesSection messages={messages} userId={id} userCanWrite={userCanWrite} />
 
       {/* ── Tasks ────────────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+      <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
         <SectionHeading icon={CheckSquare} title="Tasks" />
         <TasksSection tasks={tasks} />
       </div>
 
       {/* ── Resources ────────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+      <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
         <SectionHeading icon={Paperclip} title="Resources" />
         <PlaceholderSection
           icon={<Paperclip />}

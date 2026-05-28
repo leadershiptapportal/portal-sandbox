@@ -11,7 +11,7 @@ function StatusBadge({ status }: { status: string }) {
       </span>
     )
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
       {status || 'Unknown'}
     </span>
   )
@@ -35,29 +35,29 @@ export default async function AdminRelationshipsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Relationship Contexts</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-2xl font-bold text-foreground">Relationship Contexts</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           {activeCount} active · {contexts.length} total
         </p>
       </div>
 
       {contexts.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
-          <p className="text-sm text-slate-400">No relationship contexts found in Airtable.</p>
+        <div className="bg-card rounded-xl border border-border p-8 text-center">
+          <p className="text-sm text-muted-foreground">No relationship contexts found in Airtable.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Lead</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Person</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Type</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Since</th>
+              <tr className="border-b border-border bg-muted/50">
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Lead</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Person</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Type</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Since</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {sorted.map((ctx) => {
                 const startDate = ctx.startDate
                   ? new Date(ctx.startDate + 'T12:00:00').toLocaleDateString('en-US', {
@@ -68,16 +68,16 @@ export default async function AdminRelationshipsPage() {
                   : '—'
 
                 return (
-                  <tr key={ctx.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-slate-900">{ctx.leadName}</td>
-                    <td className="px-4 py-3 text-slate-700">{ctx.personName}</td>
-                    <td className="px-4 py-3 text-slate-600 capitalize">
+                  <tr key={ctx.id} className="hover:bg-muted/50 transition-colors">
+                    <td className="px-4 py-3 font-medium text-foreground">{ctx.leadName}</td>
+                    <td className="px-4 py-3 text-foreground">{ctx.personName}</td>
+                    <td className="px-4 py-3 text-muted-foreground capitalize">
                       {ctx.relationshipType?.replace(/_/g, ' ') || '—'}
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={ctx.status} />
                     </td>
-                    <td className="px-4 py-3 text-slate-400 text-xs">{startDate}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">{startDate}</td>
                   </tr>
                 )
               })}

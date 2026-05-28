@@ -248,18 +248,18 @@ export default function RelationshipDialog(props: Props) {
             {props.mode === 'add' && (
               <>
                 {/* Toggle find / create */}
-                <div className="flex rounded-md border border-slate-200 overflow-hidden text-sm">
+                <div className="flex rounded-md border border-border overflow-hidden text-sm">
                   <button
                     type="button"
                     onClick={() => setAddMode('find')}
-                    className={`flex-1 py-1.5 font-medium transition-colors ${addMode === 'find' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                    className={`flex-1 py-1.5 font-medium transition-colors ${addMode === 'find' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     Find existing
                   </button>
                   <button
                     type="button"
                     onClick={() => setAddMode('create')}
-                    className={`flex-1 py-1.5 font-medium transition-colors ${addMode === 'create' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                    className={`flex-1 py-1.5 font-medium transition-colors ${addMode === 'create' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     Add new person
                   </button>
@@ -339,7 +339,7 @@ export default function RelationshipDialog(props: Props) {
             {props.mode === 'edit' && (
               <div className="space-y-1.5">
                 <Label>Person</Label>
-                <p className="text-sm font-medium text-slate-700">{props.otherName}</p>
+                <p className="text-sm font-medium text-foreground">{props.otherName}</p>
               </div>
             )}
 

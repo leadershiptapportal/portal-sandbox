@@ -105,7 +105,7 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
       {/* ── Today's Agenda chips ─────────────────────────────────────────────── */}
       {allTodayItems.length > 0 && (
         <div className="mb-4 md:mb-5">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
             Today&apos;s Agenda
           </p>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
@@ -117,12 +117,12 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
                   item.isPast
                     ? needsNotes
                       ? 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100'
-                      : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
-                    : 'bg-white border-slate-200 hover:border-[hsl(213,60%,70%)] hover:text-[hsl(213,70%,30%)]'
+                      : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'
+                    : 'bg-card border-border hover:border-[hsl(213,60%,70%)] hover:text-[hsl(213,70%,30%)]'
                 }`}
                 title={item.title}
               >
-                <span className="text-xs font-medium text-slate-400">{item.timeRange}</span>
+                <span className="text-xs font-medium text-muted-foreground">{item.timeRange}</span>
                 <span className="font-medium">{item.humanName ?? item.title}</span>
                 {needsNotes && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide">
@@ -147,28 +147,28 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
 
       {/* ── Upcoming Sessions (admin only, from Calendar) ────────────────────── */}
       {isAdmin && portalEvents.length > 0 && (
-        <div className="mb-4 md:mb-5 bg-white rounded-xl shadow-sm p-4 md:p-6">
+        <div className="mb-4 md:mb-5 bg-card rounded-xl shadow-sm p-4 md:p-6">
           <div className="flex items-center gap-2 mb-4">
-            <CalendarDays className="h-5 w-5 text-slate-400" />
-            <h2 className="text-lg font-semibold text-slate-900">Upcoming Interactions (from Calendar)</h2>
-            <span className="ml-auto text-xs text-slate-400 font-medium">
+            <CalendarDays className="h-5 w-5 text-muted-foreground" />
+            <h2 className="text-lg font-semibold text-foreground">Upcoming Interactions (from Calendar)</h2>
+            <span className="ml-auto text-xs text-muted-foreground font-medium">
               {portalEvents.length} {portalEvents.length === 1 ? 'event' : 'events'}
             </span>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-border">
             {portalEvents.map((event) => (
               <div key={event.id} className="py-3 flex items-center gap-3">
                 <div className="flex-shrink-0 text-center w-10">
-                  <p className="text-xs font-medium text-slate-400 uppercase">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">
                     {new Date(event.start).toLocaleString('en-US', { timeZone: event.timezone, month: 'short' })}
                   </p>
-                  <p className="text-lg font-bold text-slate-900 leading-none">
+                  <p className="text-lg font-bold text-foreground leading-none">
                     {new Date(event.start).toLocaleString('en-US', { timeZone: event.timezone, day: 'numeric' })}
                   </p>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">{event.subject}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-sm font-medium text-foreground truncate">{event.subject}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {new Date(event.start).toLocaleString('en-US', {
                       timeZone: event.timezone,
                       weekday: 'short',

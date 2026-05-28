@@ -28,8 +28,8 @@ export default function LinkCalendarButton({ linked = false }: Props) {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-sm text-slate-700 font-medium">Microsoft 365 Calendar</p>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <p className="text-sm text-foreground font-medium">Microsoft 365 Calendar</p>
+        <p className="text-xs text-muted-foreground mt-0.5">
           {linked
             ? 'Your calendar is connected — interactions sync automatically'
             : 'Link your work calendar to enable interaction syncing'}
@@ -45,7 +45,7 @@ export default function LinkCalendarButton({ linked = false }: Props) {
           <button
             onClick={handleUnlink}
             disabled={loading}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 border border-slate-200 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground border border-border hover:bg-muted/50 disabled:opacity-50 transition-colors"
           >
             <CalendarX2 className="h-3.5 w-3.5" />
             Unlink

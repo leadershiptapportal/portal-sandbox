@@ -20,10 +20,10 @@ export default function RecentInteractionCard({ notes, actionItems }: Props) {
     <div className="mt-3 space-y-3">
       {/* Notes */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
           Interaction Notes
         </p>
-        <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+        <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
           {visibleNotes}
         </p>
         {needsTruncation && (

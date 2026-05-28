@@ -32,7 +32,7 @@ interface Props {
 export default function UpcomingInteractionsCard({ items, emptyMessage }: Props) {
   if (items.length === 0) {
     return (
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-muted-foreground">
         {emptyMessage ?? 'No upcoming interactions.'}
       </p>
     )
@@ -48,7 +48,7 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
         return (
           <div
             key={item.interactionId}
-            className="rounded-lg border border-slate-100 hover:border-slate-200 transition-colors overflow-hidden"
+            className="rounded-lg border border-border hover:border-border transition-colors overflow-hidden"
           >
             {/* Main row */}
             <Link href={href} className="flex items-center gap-3 px-3 py-2.5">
@@ -57,35 +57,35 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
                 <p className="text-[10px] font-bold uppercase tracking-wide text-[hsl(213,70%,30%)]">
                   {item.weekday}
                 </p>
-                <p className="text-xl font-bold text-slate-900 leading-none mt-0.5">
+                <p className="text-xl font-bold text-foreground leading-none mt-0.5">
                   {item.day}
                 </p>
-                <p className="text-[10px] text-slate-400 mt-0.5">{item.month}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{item.month}</p>
               </div>
 
               {/* Body */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-900 truncate">
+                <p className="text-sm font-medium text-foreground truncate">
                   {item.title || 'Untitled Interaction'}
                 </p>
-                <p className="text-xs text-slate-400 mt-0.5">{item.timeRange}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{item.timeRange}</p>
                 {item.humanName ? (
                   <p className="text-xs font-medium text-[hsl(213,70%,30%)] mt-0.5">
                     with {item.humanName}
                   </p>
                 ) : item.displayLabel ? (
-                  <p className="text-xs text-slate-400 mt-0.5">{item.displayLabel}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.displayLabel}</p>
                 ) : (
-                  <p className="text-xs text-slate-300 italic mt-0.5">No person linked</p>
+                  <p className="text-xs text-muted-foreground/60 italic mt-0.5">No person linked</p>
                 )}
               </div>
 
-              <span className="flex-shrink-0 text-slate-300 text-sm">›</span>
+              <span className="flex-shrink-0 text-muted-foreground/60 text-sm">›</span>
             </Link>
 
             {/* Note actions */}
             {item.humanId && (
-              <div className="flex items-center gap-3 px-3 pb-2 border-t border-slate-50">
+              <div className="flex items-center gap-3 px-3 pb-2 border-t border-border">
                 {item.hasNote ? (
                   <Link
                     href={href}
@@ -99,7 +99,7 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
                     <LogNoteDialog
                       userId={item.humanId}
                       trigger={
-                        <button className="text-xs font-medium text-slate-500 flex items-center gap-1 hover:text-slate-700 transition-colors pt-2">
+                        <button className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors pt-2">
                           <FileText className="h-3 w-3" />
                           Add Note
                         </button>
@@ -107,7 +107,7 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
                     />
                     <Link
                       href={`/myhumans/${item.humanId}/take-notes`}
-                      className="text-xs font-medium text-slate-500 flex items-center gap-1 hover:text-slate-700 transition-colors pt-2"
+                      className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors pt-2"
                     >
                       <NotebookPen className="h-3 w-3" />
                       Take Notes

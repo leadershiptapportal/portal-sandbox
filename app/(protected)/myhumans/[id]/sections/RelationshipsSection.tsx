@@ -85,15 +85,15 @@ function RelationshipPill({
     <div
       className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
         isInactive
-          ? 'border-slate-100 bg-slate-50 opacity-70'
-          : 'border-slate-200 bg-white hover:border-slate-300'
+          ? 'border-border bg-muted/50 opacity-70'
+          : 'border-border bg-card hover:border-border'
       }`}
     >
       <Link
         href={`/myhumans/${item.otherPersonId}`}
         className="flex items-center gap-3 flex-shrink-0"
       >
-        <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-semibold flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-semibold flex-shrink-0">
           {initials}
         </div>
       </Link>
@@ -103,14 +103,14 @@ function RelationshipPill({
           href={`/myhumans/${item.otherPersonId}`}
           className="group"
         >
-          <p className="text-sm font-medium text-slate-900 truncate group-hover:text-[hsl(213,70%,30%)]">
+          <p className="text-sm font-medium text-foreground truncate group-hover:text-[hsl(213,70%,30%)]">
             {item.otherName}
           </p>
           {item.otherTitle && (
-            <p className="text-xs text-slate-500 truncate">{item.otherTitle}</p>
+            <p className="text-xs text-muted-foreground truncate">{item.otherTitle}</p>
           )}
           {isInactive && (
-            <p className="text-xs text-slate-400">{item.rc.status}</p>
+            <p className="text-xs text-muted-foreground">{item.rc.status}</p>
           )}
         </Link>
 
@@ -139,7 +139,7 @@ function RelationshipPill({
           initialStatus={item.rc.status as 'Active' | 'Inactive' | 'Paused' | 'Ended'}
           trigger={
             <button
-              className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors flex-shrink-0 mt-0.5"
+              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0 mt-0.5"
               aria-label="Edit relationship"
             >
               <Pencil className="h-3.5 w-3.5" />
@@ -175,20 +175,20 @@ function RelationshipGroup({
   if (items.length === 0) {
     return (
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2 flex items-center gap-1.5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
           <Icon className="h-3.5 w-3.5" />
           {label}
         </p>
-        <p className="text-sm text-slate-300 italic">{emptyText}</p>
+        <p className="text-sm text-muted-foreground/60 italic">{emptyText}</p>
       </div>
     )
   }
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2 flex items-center gap-1.5">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
         <Icon className="h-3.5 w-3.5" />
         {label}
-        <span className="ml-1 text-slate-300 font-normal">{items.length}</span>
+        <span className="ml-1 text-muted-foreground/60 font-normal">{items.length}</span>
       </p>
       <div className="space-y-1.5">
         {items.map((item) => (
@@ -231,11 +231,11 @@ export default function RelationshipsSection({
   const groupProps = { subjectPersonId, subjectName, canEdit, rcNotes, currentCoachId }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+    <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
       <div className="flex items-center justify-between gap-2 mb-5">
         <div className="flex items-center gap-2">
-          <Network className="h-5 w-5 text-slate-400" />
-          <h2 className="text-lg font-semibold text-slate-900">Relationships</h2>
+          <Network className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-lg font-semibold text-foreground">Relationships</h2>
         </div>
         {canEdit && (
           <RelationshipDialog

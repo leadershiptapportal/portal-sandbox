@@ -46,7 +46,7 @@ function parse(content: string): Segment[] {
 export default function NoteBody({
   content,
   inkImageUrl,
-  className = 'text-sm text-slate-700 whitespace-pre-wrap leading-relaxed',
+  className = 'text-sm text-foreground whitespace-pre-wrap leading-relaxed',
   imageMaxHeightClass = 'max-h-80',
 }: Props) {
   // New format: image lives in inkImageUrl; content is caption-only (no markdown).
@@ -58,7 +58,7 @@ export default function NoteBody({
         <img
           src={inkImageUrl}
           alt="Ink note"
-          className={`block w-full object-contain rounded-md border border-slate-200 bg-white ${imageMaxHeightClass}`}
+          className={`block w-full object-contain rounded-md border border-border bg-card ${imageMaxHeightClass}`}
           loading="lazy"
         />
       </div>
@@ -76,7 +76,7 @@ export default function NoteBody({
               key={i}
               src={seg.value}
               alt={seg.alt ?? 'Ink note'}
-              className={`block w-full object-contain rounded-md border border-slate-200 bg-white ${imageMaxHeightClass}`}
+              className={`block w-full object-contain rounded-md border border-border bg-card ${imageMaxHeightClass}`}
               loading="lazy"
             />
           )

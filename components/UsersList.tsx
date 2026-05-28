@@ -58,22 +58,22 @@ export default function UsersList({ users }: UsersListProps) {
     <div>
       {/* Search bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
           type="text"
           placeholder="Search by name, organization, or email…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           aria-label="Search users"
-          className="pl-9 pr-4 py-2 w-full max-w-sm rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          className="pl-9 pr-4 py-2 w-full max-w-sm rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
         />
       </div>
 
       {/* Grid or empty state */}
       {filtered.length === 0 ? (
         <div className="mt-16 flex flex-col items-center justify-center text-center">
-          <Users className="h-12 w-12 text-gray-300 mb-3" />
-          <p className="text-gray-500 text-sm font-medium">
+          <Users className="h-12 w-12 text-muted-foreground/60 mb-3" />
+          <p className="text-muted-foreground text-sm font-medium">
             {query ? `No users match "${query}"` : 'No users found'}
           </p>
         </div>
@@ -81,7 +81,7 @@ export default function UsersList({ users }: UsersListProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           {filtered.map((user) => (
             <Link key={user.id} href={`/myhumans/${user.id}`} className="block group">
-              <div className="bg-white rounded-xl border border-gray-200 p-5 hover:border-indigo-300 hover:shadow-md transition-all duration-200">
+              <div className="bg-card rounded-xl border border-border p-5 hover:border-indigo-300 hover:shadow-md transition-all duration-200">
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
                   <div
@@ -91,9 +91,9 @@ export default function UsersList({ users }: UsersListProps) {
                   </div>
                   {/* Info */}
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-gray-900 truncate">{displayName(user)}</p>
-                    <p className="text-sm text-gray-500 truncate">{user.companyName || '—'}</p>
-                    <p className="text-xs text-gray-400 truncate mt-1">{user.email}</p>
+                    <p className="font-semibold text-foreground truncate">{displayName(user)}</p>
+                    <p className="text-sm text-muted-foreground truncate">{user.companyName || '—'}</p>
+                    <p className="text-xs text-muted-foreground truncate mt-1">{user.email}</p>
                   </div>
                 </div>
                 <div className="mt-4 flex justify-end">
@@ -108,7 +108,7 @@ export default function UsersList({ users }: UsersListProps) {
       )}
 
       {/* Count */}
-      <p className="text-sm text-gray-400 mt-6">
+      <p className="text-sm text-muted-foreground mt-6">
         {filtered.length} of {users.length} users
       </p>
     </div>

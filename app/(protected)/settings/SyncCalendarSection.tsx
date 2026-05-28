@@ -38,12 +38,12 @@ export default function SyncCalendarSection({ calendarLinked, calendarSetupCompl
 
       {calendarLinked && (
         <>
-          <div className="border-t border-slate-100" />
+          <div className="border-t border-border" />
 
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-700 font-medium">Sync Now</p>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-sm text-foreground font-medium">Sync Now</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {lastSyncedAt
                   ? `Last synced ${new Date(lastSyncedAt).toLocaleString()}`
                   : calendarSetupComplete
@@ -54,7 +54,7 @@ export default function SyncCalendarSection({ calendarLinked, calendarSetupCompl
             <div className="flex items-center gap-2">
               <a
                 href="/settings/calendar-setup"
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 border border-slate-200 hover:bg-slate-50 transition-colors"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground border border-border hover:bg-muted/50 transition-colors"
                 title="Edit calendar settings"
               >
                 <Settings2 className="h-3.5 w-3.5" />

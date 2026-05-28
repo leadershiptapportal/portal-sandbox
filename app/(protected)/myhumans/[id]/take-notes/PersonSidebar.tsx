@@ -116,7 +116,7 @@ function EditNameDialog({
     <>
       <button
         onClick={handleOpen}
-        className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0"
+        className="p-1 rounded text-muted-foreground hover:text-muted-foreground hover:bg-muted transition-colors flex-shrink-0"
         aria-label="Edit name"
       >
         <Pencil className="h-3 w-3" />
@@ -217,7 +217,7 @@ function InlineDateField({
           onChange={(e) => setDraft(e.target.value)}
           // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus
-          className="text-xs border border-[hsl(213,70%,30%)] rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-white"
+          className="text-xs border border-[hsl(213,70%,30%)] rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-card"
           disabled={saving}
         />
         <button
@@ -229,7 +229,7 @@ function InlineDateField({
         </button>
         <button
           onClick={() => { setDraft(value ?? ''); setEditing(false) }}
-          className="p-0.5 rounded text-slate-400 hover:bg-slate-100"
+          className="p-0.5 rounded text-muted-foreground hover:bg-muted"
         >
           <X className="h-3 w-3" />
         </button>
@@ -242,7 +242,7 @@ function InlineDateField({
       <button
         onClick={() => { setDraft(''); setEditing(true) }}
         title={`Add ${label}`}
-        className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded border border-dashed border-slate-300 text-slate-400 hover:border-slate-400 hover:text-slate-500 transition-colors"
+        className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded border border-dashed border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-muted-foreground transition-colors"
       >
         {icon}
         <span>{label}</span>
@@ -255,7 +255,7 @@ function InlineDateField({
     <button
       onClick={() => { setDraft(value ?? ''); setEditing(true) }}
       title={`Edit ${label}`}
-      className="group inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+      className="group inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground hover:bg-muted transition-colors"
     >
       {icon}
       <span>{formatDisplay(value)}</span>
@@ -316,22 +316,22 @@ function QuickNotesAccordion({
   }
 
   return (
-    <div className="border-b border-slate-100">
+    <div className="border-b border-border">
       {/* Accordion header */}
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/50 transition-colors"
       >
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Quick Notes</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Quick Notes</span>
         <div className="flex items-center gap-2 min-w-0">
           {!isOpen && savedValue.trim() && (
-            <span className="text-xs text-slate-400 truncate max-w-[120px]">
+            <span className="text-xs text-muted-foreground truncate max-w-[120px]">
               {savedValue.slice(0, 28)}{savedValue.length > 28 ? '…' : ''}
             </span>
           )}
           {isOpen
-            ? <ChevronUp className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
-            : <ChevronDown className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+            ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+            : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
           }
         </div>
       </button>
@@ -344,7 +344,7 @@ function QuickNotesAccordion({
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Add quick notes about this person…"
             rows={4}
-            className="w-full text-sm border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-white resize-none text-slate-700 placeholder:text-slate-400"
+            className="w-full text-sm border border-border rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-card resize-none text-foreground placeholder:text-muted-foreground"
           />
           {hasChanges && (
             <button
@@ -365,7 +365,7 @@ function QuickNotesAccordion({
           <DialogHeader>
             <DialogTitle>Save Quick Notes?</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-muted-foreground">
             This will overwrite the existing notes. Are you sure?
           </p>
           <DialogFooter>
@@ -417,13 +417,13 @@ function CompactRCNote({
   return (
     <>
       <div className="mt-0.5">
-        <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">Quick Notes</p>
+        <p className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground mb-0.5">Quick Notes</p>
         {saved ? (
           <button onClick={() => { setDraft(saved); setOpen(true) }} className="w-full text-left" title="View or edit">
-            <p className="text-[11px] text-slate-500 line-clamp-2 hover:text-slate-700 transition-colors">{saved}</p>
+            <p className="text-[11px] text-muted-foreground line-clamp-2 hover:text-foreground transition-colors">{saved}</p>
           </button>
         ) : (
-          <button onClick={() => { setDraft(''); setOpen(true) }} className="flex items-center gap-0.5 text-[10px] text-slate-300 hover:text-slate-500 transition-colors">
+          <button onClick={() => { setDraft(''); setOpen(true) }} className="flex items-center gap-0.5 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">
             <StickyNote className="h-2.5 w-2.5" />
             Add note
           </button>
@@ -445,11 +445,11 @@ function CompactRCNote({
             disabled={saving}
             rows={8}
             placeholder="Add a quick note about this relationship…"
-            className="w-full text-sm text-slate-700 border border-slate-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)] focus:border-transparent disabled:opacity-50"
+            className="w-full text-sm text-foreground border border-border rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)] focus:border-transparent disabled:opacity-50"
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
           />
-          <p className="text-xs text-slate-400">⌘↵ to save</p>
+          <p className="text-xs text-muted-foreground">⌘↵ to save</p>
           <DialogFooter>
             <Button variant="outline" onClick={handleCancel} disabled={saving}>Cancel</Button>
             <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
@@ -499,25 +499,25 @@ function CompactRelationshipsSection({
   return (
     <div className="space-y-3">
       {groups.length === 0 ? (
-        <p className="text-sm text-slate-400 italic">No relationships logged yet.</p>
+        <p className="text-sm text-muted-foreground italic">No relationships logged yet.</p>
       ) : (
         <div className="space-y-3">
           {groups.map(({ label, items }) => (
             <div key={label}>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-1">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
                 {label}
               </p>
               <div className="space-y-2">
                 {items.map((item) => (
                   <div key={item.rc.id} className="flex items-start gap-2 py-0.5">
-                    <div className="w-5 h-5 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center mt-0.5">
-                      <span className="text-[9px] font-bold text-slate-500 uppercase">
+                    <div className="w-5 h-5 rounded-full bg-muted flex-shrink-0 flex items-center justify-center mt-0.5">
+                      <span className="text-[9px] font-bold text-muted-foreground uppercase">
                         {item.otherName[0]}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-sm text-slate-700 truncate">{item.otherName}</span>
+                        <span className="text-sm text-foreground truncate">{item.otherName}</span>
                         {canEdit && (
                           <RelationshipDialog
                             mode="edit"
@@ -535,7 +535,7 @@ function CompactRelationshipsSection({
                             initialStatus={item.rc.status as 'Active' | 'Inactive' | 'Paused' | 'Ended'}
                             trigger={
                               <button
-                                className="p-0.5 rounded text-slate-300 hover:text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0"
+                                className="p-0.5 rounded text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted transition-colors flex-shrink-0"
                                 aria-label="Edit relationship"
                               >
                                 <Pencil className="h-3 w-3" />
@@ -545,7 +545,7 @@ function CompactRelationshipsSection({
                         )}
                       </div>
                       {item.otherTitle && (
-                        <p className="text-[11px] text-slate-400 truncate">{item.otherTitle}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">{item.otherTitle}</p>
                       )}
                       <CompactRCNote
                         rcId={item.rc.id}
@@ -611,10 +611,10 @@ function InlineText({
 
   if (editing) {
     const sharedClass =
-      'w-full text-sm border border-[hsl(213,70%,30%)] rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-white resize-none'
+      'w-full text-sm border border-[hsl(213,70%,30%)] rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-card resize-none'
     return (
       <div className="space-y-1">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{label}</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</p>
         {multiline ? (
           <textarea
             ref={inputRef as React.RefObject<HTMLTextAreaElement>}
@@ -654,7 +654,7 @@ function InlineText({
           <button
             onClick={cancel}
             disabled={saving}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-200 text-slate-600 text-xs"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-border text-muted-foreground text-xs"
           >
             <X className="h-3 w-3" />
             Cancel
@@ -669,8 +669,8 @@ function InlineText({
       onClick={() => { setDraft(value); setEditing(true) }}
       className="w-full text-left group space-y-0.5"
     >
-      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{label}</p>
-      <p className={`text-sm flex items-center gap-1.5 ${value ? 'text-slate-800' : 'text-slate-400 italic'}`}>
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</p>
+      <p className={`text-sm flex items-center gap-1.5 ${value ? 'text-foreground' : 'text-muted-foreground italic'}`}>
         {value || placeholder}
         <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-40 transition-opacity flex-shrink-0" />
       </p>
@@ -711,7 +711,7 @@ function InlineSelect({
   if (editing) {
     return (
       <div className="space-y-1">
-        {label && <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{label}</p>}
+        {label && <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</p>}
         <div className="flex gap-1.5 items-center">
           <select
             // eslint-disable-next-line jsx-a11y/no-autofocus
@@ -719,7 +719,7 @@ function InlineSelect({
             defaultValue={currentId ?? ''}
             onChange={handleChange}
             disabled={saving}
-            className="flex-1 text-sm border border-[hsl(213,70%,30%)] rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
+            className="flex-1 text-sm border border-[hsl(213,70%,30%)] rounded-md px-2 py-1.5 bg-card focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
           >
             <option value="">— Clear —</option>
             {options.map((o) => (
@@ -728,20 +728,20 @@ function InlineSelect({
           </select>
           <button
             onClick={() => setEditing(false)}
-            className="p-1.5 rounded-md border border-slate-200 text-slate-400 hover:bg-slate-50"
+            className="p-1.5 rounded-md border border-border text-muted-foreground hover:bg-muted/50"
           >
             <X className="h-3.5 w-3.5" />
           </button>
         </div>
-        {saving && <p className="text-xs text-slate-400">Saving…</p>}
+        {saving && <p className="text-xs text-muted-foreground">Saving…</p>}
       </div>
     )
   }
 
   return (
     <button onClick={() => setEditing(true)} className="w-full text-left group space-y-0.5">
-      {label && <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{label}</p>}
-      <p className={`text-sm flex items-center gap-1.5 ${currentLabel ? (valueClassName ?? 'text-slate-800') : 'text-slate-400 italic'}`}>
+      {label && <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</p>}
+      <p className={`text-sm flex items-center gap-1.5 ${currentLabel ? (valueClassName ?? 'text-foreground') : 'text-muted-foreground italic'}`}>
         {currentLabel || placeholder}
         <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-40 transition-opacity flex-shrink-0" />
       </p>
@@ -764,7 +764,7 @@ function PersonalityCard({
 }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">{label}</p>
       <div className={`rounded-lg border px-3 py-2.5 space-y-1.5 ${bg} ${border}`}>
         {children}
       </div>
@@ -778,7 +778,7 @@ function PersonalityCard({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-4 pt-4 pb-1.5">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-4 pt-4 pb-1.5">
         {title}
       </p>
       <div className="px-4 pb-4 space-y-3">{children}</div>
@@ -842,7 +842,7 @@ export default function PersonSidebar({
   const allPeopleForPicker = profileOptions.allUsers.map((u) => ({ id: u.id, name: u.name }))
 
   return (
-    <div className="divide-y divide-slate-100">
+    <div className="divide-y divide-border">
 
       {/* ── Identity block ──────────────────────────────────────────────── */}
       <div className="px-4 py-4">
@@ -860,7 +860,7 @@ export default function PersonSidebar({
           <div className="flex-1 min-w-0 space-y-0.5">
             {/* Name row */}
             <div className="flex items-start gap-1 min-w-0">
-              <p className="text-base font-bold text-slate-900 leading-snug min-w-0 truncate flex-1">
+              <p className="text-base font-bold text-foreground leading-snug min-w-0 truncate flex-1">
                 {displayName}
               </p>
               {userCanWrite && (
@@ -883,13 +883,13 @@ export default function PersonSidebar({
               />
             ) : (
               displayTitle && (
-                <p className="text-xs text-slate-500">{displayTitle}</p>
+                <p className="text-xs text-muted-foreground">{displayTitle}</p>
               )
             )}
 
             {/* Company */}
             {person.companyName && (
-              <p className="text-xs text-slate-400">{person.companyName}</p>
+              <p className="text-xs text-muted-foreground">{person.companyName}</p>
             )}
 
             {/* Email */}
@@ -963,7 +963,7 @@ export default function PersonSidebar({
               onSave={async (id) => { await saveProfile({ 'Enneagram': id ? [id] : [] }) }}
             />
             {(enneagramCurrent?.descriptor || person.enneagramDescriptor) && (
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 {enneagramCurrent?.descriptor ?? person.enneagramDescriptor}
               </p>
             )}
@@ -980,7 +980,7 @@ export default function PersonSidebar({
               onSave={async (id) => { await saveProfile({ 'MBTI': id ? [id] : [] }) }}
             />
             {(mbtiCurrent?.descriptor || person.mbtiDescriptor) && (
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 {mbtiCurrent?.descriptor ?? person.mbtiDescriptor}
               </p>
             )}
@@ -997,7 +997,7 @@ export default function PersonSidebar({
               onSave={async (id) => { await saveProfile({ 'Conflict Posture': id ? [id] : [] }) }}
             />
             {(conflictCurrent?.descriptor || person.conflictPostureDescriptor) && (
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 {conflictCurrent?.descriptor ?? person.conflictPostureDescriptor}
               </p>
             )}
@@ -1014,7 +1014,7 @@ export default function PersonSidebar({
               onSave={async (id) => { await saveProfile({ 'Apology Language': id ? [id] : [] }) }}
             />
             {(apologyCurrent?.descriptor || person.apologyLanguageDescriptor) && (
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 {apologyCurrent?.descriptor ?? person.apologyLanguageDescriptor}
               </p>
             )}
@@ -1023,7 +1023,7 @@ export default function PersonSidebar({
           {/* Clifton Strengths — indigo, full display */}
           {person.strengths && person.strengths.length > 0 && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">
                 Clifton Strengths
               </p>
               <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 px-3 py-2.5">
@@ -1046,7 +1046,7 @@ export default function PersonSidebar({
                         </div>
                         {descriptor && (
                           <div className="ml-7 mt-0.5">
-                            <p className="text-xs text-slate-500 leading-relaxed">{descriptor}</p>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{descriptor}</p>
                           </div>
                         )}
                       </li>

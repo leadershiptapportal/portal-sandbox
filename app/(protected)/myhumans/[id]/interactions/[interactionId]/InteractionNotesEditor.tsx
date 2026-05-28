@@ -54,7 +54,7 @@ export default function InteractionNotesEditor({ interactionId, userId, initialN
     return (
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Interaction Notes
           </h2>
           <div className="flex items-center gap-2">
@@ -71,13 +71,13 @@ export default function InteractionNotesEditor({ interactionId, userId, initialN
         </div>
 
         {initialNotes ? (
-          <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
             {initialNotes}
           </p>
         ) : (
-          <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center">
-            <p className="text-sm text-slate-400">No notes yet for this interaction.</p>
-            <p className="text-xs text-slate-300 mt-1">Click Add Notes to get started.</p>
+          <div className="rounded-lg border border-dashed border-border bg-muted/50 px-4 py-6 text-center">
+            <p className="text-sm text-muted-foreground">No notes yet for this interaction.</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Click Add Notes to get started.</p>
           </div>
         )}
       </div>
@@ -89,7 +89,7 @@ export default function InteractionNotesEditor({ interactionId, userId, initialN
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Interaction Notes
         </h2>
         <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export default function InteractionNotesEditor({ interactionId, userId, initialN
           <button
             onClick={handleCancel}
             disabled={isPending}
-            className="text-xs font-medium text-slate-500 hover:text-slate-800 disabled:opacity-50"
+            className="text-xs font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
           >
             Cancel
           </button>
@@ -120,7 +120,7 @@ export default function InteractionNotesEditor({ interactionId, userId, initialN
         disabled={isPending}
         rows={12}
         placeholder="Add interaction notes…"
-        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 leading-relaxed placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,50%)] focus:border-transparent resize-y disabled:opacity-50"
+        className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-foreground leading-relaxed placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,50%)] focus:border-transparent resize-y disabled:opacity-50"
       />
     </div>
   )

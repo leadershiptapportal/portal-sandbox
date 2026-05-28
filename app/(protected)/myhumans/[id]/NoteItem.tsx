@@ -101,18 +101,18 @@ export default function NoteItem({ note }: { note: Note }) {
   // ── VIEW ──────────────────────────────────────────────────────────────────
   if (mode === 'view') {
     return (
-      <div className="group relative rounded-lg border border-slate-100 hover:border-slate-200 p-4 transition-colors">
+      <div className="group relative rounded-lg border border-border hover:border-border p-4 transition-colors">
         {/* Hover action buttons */}
         <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => setMode('edit')}
-            className="text-xs px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-colors"
+            className="text-xs px-2 py-1 rounded border border-border bg-card hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
           >
             Edit
           </button>
           <button
             onClick={() => setMode('confirmDelete')}
-            className="text-xs px-2 py-1 rounded border border-rose-100 bg-white hover:bg-rose-50 text-rose-400 hover:text-rose-600 transition-colors"
+            className="text-xs px-2 py-1 rounded border border-rose-100 bg-card hover:bg-rose-50 text-rose-400 hover:text-rose-600 transition-colors"
           >
             Delete
           </button>
@@ -122,7 +122,7 @@ export default function NoteItem({ note }: { note: Note }) {
           <NoteBody content={content} inkImageUrl={note.inkImageUrl} />
         </div>
         {note.date && (
-          <p className="text-xs font-medium text-slate-400 mt-2">
+          <p className="text-xs font-medium text-muted-foreground mt-2">
             {formatNoteDate(note.date)}
           </p>
         )}
@@ -136,12 +136,12 @@ export default function NoteItem({ note }: { note: Note }) {
       <div className="rounded-lg border border-blue-200 bg-blue-50/30 p-4">
         {hasInkImage && (
           <div className="mb-3">
-            <p className="text-xs font-semibold text-slate-500 mb-1.5">Ink (preserved)</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-1.5">Ink (preserved)</p>
             {hasNewFormatInk ? (
               <img
                 src={note.inkImageUrl}
                 alt="Ink note"
-                className="block w-full object-contain rounded-md border border-slate-200 bg-white max-h-60 mb-1.5"
+                className="block w-full object-contain rounded-md border border-border bg-card max-h-60 mb-1.5"
               />
             ) : (
               initialSplit.images.map((img, i) => (
@@ -149,17 +149,17 @@ export default function NoteItem({ note }: { note: Note }) {
                   key={i}
                   src={img.url}
                   alt={img.alt}
-                  className="block w-full object-contain rounded-md border border-slate-200 bg-white max-h-60 mb-1.5"
+                  className="block w-full object-contain rounded-md border border-border bg-card max-h-60 mb-1.5"
                 />
               ))
             )}
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-muted-foreground">
               The ink stays attached. To redraw, delete this note and create a new ink note.
             </p>
           </div>
         )}
         <div className="mb-3">
-          <label className="text-xs font-semibold text-slate-500 block mb-1">
+          <label className="text-xs font-semibold text-muted-foreground block mb-1">
             {hasInkImage ? 'Caption' : 'Note'}
           </label>
           <textarea
@@ -169,7 +169,7 @@ export default function NoteItem({ note }: { note: Note }) {
             onChange={(e) => setCaption(e.target.value)}
             rows={hasInkImage ? 2 : 5}
             placeholder={hasInkImage ? 'Optional caption…' : undefined}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white resize-y focus:outline-none focus:ring-2 focus:ring-blue-400 leading-relaxed"
+            className="w-full border border-border rounded-lg px-3 py-2.5 text-sm bg-card resize-y focus:outline-none focus:ring-2 focus:ring-blue-400 leading-relaxed"
           />
         </div>
         {error && <p className="text-xs text-rose-500 mb-3">{error}</p>}
@@ -183,7 +183,7 @@ export default function NoteItem({ note }: { note: Note }) {
           </button>
           <button
             onClick={handleCancel}
-            className="px-4 py-2 border border-slate-200 text-sm rounded-lg hover:bg-slate-50 transition-colors text-slate-600"
+            className="px-4 py-2 border border-border text-sm rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground"
           >
             Cancel
           </button>
@@ -195,8 +195,8 @@ export default function NoteItem({ note }: { note: Note }) {
   // ── CONFIRM DELETE ────────────────────────────────────────────────────────
   return (
     <div className="rounded-lg border border-rose-200 bg-rose-50/30 p-4">
-      <p className="text-sm font-semibold text-slate-800 mb-1">Delete this note?</p>
-      <p className="text-sm text-slate-500 mb-4 line-clamp-2">{content}</p>
+      <p className="text-sm font-semibold text-foreground mb-1">Delete this note?</p>
+      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{content}</p>
       {error && <p className="text-xs text-rose-500 mb-3">{error}</p>}
       <div className="flex gap-2">
         <button
@@ -208,7 +208,7 @@ export default function NoteItem({ note }: { note: Note }) {
         </button>
         <button
           onClick={() => { setMode('view'); setError('') }}
-          className="px-4 py-2 border border-slate-200 text-sm rounded-lg hover:bg-slate-50 transition-colors text-slate-600"
+          className="px-4 py-2 border border-border text-sm rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground"
         >
           Cancel
         </button>

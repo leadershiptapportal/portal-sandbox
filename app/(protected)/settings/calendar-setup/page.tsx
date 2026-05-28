@@ -31,8 +31,8 @@ export default async function CalendarSetupPage() {
 
   return (
     <div className="max-w-lg mx-auto px-4 md:px-6 py-8">
-      <h1 className="text-2xl font-bold text-slate-900 mb-2">Set Up Your Calendar</h1>
-      <p className="text-sm text-slate-500 mb-8">
+      <h1 className="text-2xl font-bold text-foreground mb-2">Set Up Your Calendar</h1>
+      <p className="text-sm text-muted-foreground mb-8">
         Choose which calendars to sync and how far back and forward to pull events.
         Only meetings with people in your relationship contexts will be imported.
       </p>
@@ -49,14 +49,14 @@ export default async function CalendarSetupPage() {
           </a>
         </div>
       ) : availableCalendars.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 text-sm text-slate-600">
+        <div className="rounded-xl border border-border bg-muted/50 p-6 text-sm text-muted-foreground">
           <p>No calendars found in your Microsoft account.</p>
           <a href="/settings" className="mt-3 inline-block text-[hsl(213,70%,30%)] hover:underline font-medium">
             ← Back to Settings
           </a>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="bg-card rounded-xl border border-border p-6">
           <CalendarSetupForm
             calendars={availableCalendars}
             defaultSelectedIds={defaultSelectedIds}

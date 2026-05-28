@@ -89,14 +89,14 @@ export default function InteractionNotePanel({
       <div className="absolute inset-0 bg-black/20" onClick={onClose} />
 
       {/* Panel */}
-      <div className="relative bg-white w-full max-w-md flex flex-col shadow-xl h-full overflow-hidden">
+      <div className="relative bg-card w-full max-w-md flex flex-col shadow-xl h-full overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
-          <h2 className="text-base font-semibold text-slate-900">Interaction Notes</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+          <h2 className="text-base font-semibold text-foreground">Interaction Notes</h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -109,11 +109,11 @@ export default function InteractionNotePanel({
           {/* Event picker — only shown when opened from "Log a Note" */}
           {showPicker && (
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Interaction
               </p>
               {events.length === 0 ? (
-                <p className="text-sm text-slate-400">No upcoming interactions this week.</p>
+                <p className="text-sm text-muted-foreground">No upcoming interactions this week.</p>
               ) : (
                 <Select value={selectedId} onValueChange={setSelectedId}>
                   <SelectTrigger>
@@ -138,11 +138,11 @@ export default function InteractionNotePanel({
           {/* Selected event details */}
           {event && (
             <>
-              <div className="rounded-lg bg-slate-50 p-4 space-y-1">
-                <p className="text-sm font-semibold text-slate-900">
+              <div className="rounded-lg bg-muted/50 p-4 space-y-1">
+                <p className="text-sm font-semibold text-foreground">
                   {event.title || 'Untitled Interaction'}
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   {formatPanelDate(event.startTime, event.endTime)}
                 </p>
                 {event.humanId && (
@@ -159,7 +159,7 @@ export default function InteractionNotePanel({
               {/* Participants */}
               {event.participantEmails.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Participants
                   </p>
                   <div className="space-y-1.5">
@@ -167,17 +167,17 @@ export default function InteractionNotePanel({
                       const name = emailToClientName[email.toLowerCase()]
                       return (
                         <div key={email} className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-                            <User className="h-3 w-3 text-slate-400" />
+                          <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                            <User className="h-3 w-3 text-muted-foreground" />
                           </div>
                           <div className="min-w-0">
                             {name ? (
                               <>
-                                <p className="text-sm font-medium text-slate-900 truncate">{name}</p>
-                                <p className="text-xs text-slate-400 truncate">{email}</p>
+                                <p className="text-sm font-medium text-foreground truncate">{name}</p>
+                                <p className="text-xs text-muted-foreground truncate">{email}</p>
                               </>
                             ) : (
-                              <p className="text-sm text-slate-600 truncate">{email}</p>
+                              <p className="text-sm text-muted-foreground truncate">{email}</p>
                             )}
                           </div>
                         </div>
@@ -189,7 +189,7 @@ export default function InteractionNotePanel({
 
               {/* Notes textarea */}
               <div className="space-y-1.5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Notes
                 </p>
                 <Textarea
@@ -206,7 +206,7 @@ export default function InteractionNotePanel({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 shrink-0 flex items-center justify-end gap-2">
+        <div className="px-6 py-4 border-t border-border shrink-0 flex items-center justify-end gap-2">
           <Button variant="outline" onClick={onClose} disabled={saving}>
             Cancel
           </Button>

@@ -12,10 +12,10 @@ export default function TheirTeamSection({ directReports, nextTrail, canDrillDee
   if (directReports.length === 0) return null
 
   return (
-    <div id="their-team" className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+    <div id="their-team" className="bg-card rounded-xl shadow-sm p-4 md:p-6">
       <div className="flex items-center gap-2 mb-4">
-        <Users className="h-5 w-5 text-slate-400" />
-        <h2 className="text-lg font-semibold text-slate-900">
+        <Users className="h-5 w-5 text-muted-foreground" />
+        <h2 className="text-lg font-semibold text-foreground">
           Their Team ({directReports.length})
         </h2>
       </div>
@@ -32,7 +32,7 @@ export default function TheirTeamSection({ directReports, nextTrail, canDrillDee
             return (
               <div
                 key={report.personId}
-                className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-slate-50"
+                className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/50"
               >
                 {report.photoUrl ? (
                   <img
@@ -46,12 +46,12 @@ export default function TheirTeamSection({ directReports, nextTrail, canDrillDee
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-900 truncate">{report.name}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{report.name}</p>
                   {report.title && (
-                    <p className="text-xs text-slate-500 truncate">{report.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{report.title}</p>
                   )}
                 </div>
-                <span className="text-[10px] text-slate-400 flex-shrink-0">View in org chart</span>
+                <span className="text-[10px] text-muted-foreground flex-shrink-0">View in org chart</span>
               </div>
             )
           }
@@ -60,7 +60,7 @@ export default function TheirTeamSection({ directReports, nextTrail, canDrillDee
             <Link
               key={report.personId}
               href={`/myhumans/${report.personId}?trail=${nextTrail}`}
-              className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 hover:border-slate-200 hover:bg-slate-50 transition-colors group"
+              className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-border hover:bg-muted/50 transition-colors group"
             >
               {report.photoUrl ? (
                 <img
@@ -74,12 +74,12 @@ export default function TheirTeamSection({ directReports, nextTrail, canDrillDee
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-900 truncate">{report.name}</p>
+                <p className="text-sm font-medium text-foreground truncate">{report.name}</p>
                 {report.title && (
-                  <p className="text-xs text-slate-500 truncate">{report.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">{report.title}</p>
                 )}
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 flex-shrink-0 transition-colors" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground/60 group-hover:text-muted-foreground flex-shrink-0 transition-colors" />
             </Link>
           )
         })}

@@ -99,7 +99,7 @@ export default function EditTaskDialog({ task, open, onOpenChange, onSuccess }: 
 
         {confirmDelete ? (
           <>
-            <p className="text-sm text-slate-700 py-2">
+            <p className="text-sm text-foreground py-2">
               Delete &ldquo;{task.title}&rdquo;? This cannot be undone.
             </p>
             {errorMsg && <p className="text-xs text-rose-600">{errorMsg}</p>}
@@ -116,8 +116,8 @@ export default function EditTaskDialog({ task, open, onOpenChange, onSuccess }: 
           <>
             {task.taskType === 'assignment' && task.assignedToName && (
               <div className="space-y-1">
-                <p className="text-xs font-medium text-slate-500">Assigned To</p>
-                <p className="text-sm text-slate-700 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2">
+                <p className="text-xs font-medium text-muted-foreground">Assigned To</p>
+                <p className="text-sm text-foreground bg-muted/50 border border-border rounded-lg px-3 py-2">
                   {task.assignedToName}
                 </p>
               </div>

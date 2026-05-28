@@ -92,16 +92,16 @@ export default function InteractionNotesPopout({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-base font-semibold text-slate-900 leading-snug">
+          <DialogTitle className="text-base font-semibold text-foreground leading-snug">
             {meetingTitle || 'Interaction Notes'}
           </DialogTitle>
-          <p className="text-xs text-slate-400 mt-0.5">{meetingDate}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{meetingDate}</p>
         </DialogHeader>
 
         <div className="mt-1 space-y-4">
           {loading && (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           )}
 
@@ -113,7 +113,7 @@ export default function InteractionNotesPopout({
                     <div key={n.id} className="text-sm">
                       <NoteBody content={n.content} inkImageUrl={n.inkImageUrl} />
                       {n.date && (
-                        <p className="text-xs text-slate-400 mt-1.5">
+                        <p className="text-xs text-muted-foreground mt-1.5">
                           {new Date(n.date).toLocaleDateString('en-US', {
                             month: 'short', day: 'numeric', year: 'numeric',
                           })}
@@ -124,15 +124,15 @@ export default function InteractionNotesPopout({
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2 py-8 text-center">
-                  <FileText className="h-8 w-8 text-slate-200" />
-                  <p className="text-sm text-slate-500 font-medium">No notes for this interaction yet</p>
-                  <p className="text-xs text-slate-400">Add a note below or use Take Notes for handwriting.</p>
+                  <FileText className="h-8 w-8 text-muted-foreground/30" />
+                  <p className="text-sm text-muted-foreground font-medium">No notes for this interaction yet</p>
+                  <p className="text-xs text-muted-foreground">Add a note below or use Take Notes for handwriting.</p>
                 </div>
               )}
 
               <button
                 onClick={startEdit}
-                className="w-full py-2 rounded-md border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors font-medium"
+                className="w-full py-2 rounded-md border border-border text-sm text-muted-foreground hover:bg-muted/50 hover:border-border transition-colors font-medium"
               >
                 {hasNotes ? 'Edit Note' : 'Add Note'}
               </button>
@@ -148,7 +148,7 @@ export default function InteractionNotesPopout({
                 onChange={(e) => setDraft(e.target.value)}
                 rows={6}
                 placeholder="Interaction notes…"
-                className="w-full rounded-md border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] placeholder:text-slate-400 resize-y"
+                className="w-full rounded-md border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] placeholder:text-muted-foreground resize-y"
                 disabled={saving}
               />
               {saveError && <p className="text-xs text-rose-600">{saveError}</p>}
@@ -163,7 +163,7 @@ export default function InteractionNotesPopout({
                 <button
                   onClick={() => { setEditing(false); setSaveError('') }}
                   disabled={saving}
-                  className="px-4 py-2 rounded-md border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+                  className="px-4 py-2 rounded-md border border-border text-sm text-muted-foreground hover:bg-muted/50 transition-colors"
                 >
                   Cancel
                 </button>

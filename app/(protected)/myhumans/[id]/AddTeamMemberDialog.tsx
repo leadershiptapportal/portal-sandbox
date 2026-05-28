@@ -156,25 +156,25 @@ export default function AddTeamMemberDialog({ leaderId, existingMemberIds }: Pro
             </div>
 
             {searched && results.length === 0 && (
-              <p className="text-sm text-slate-400 text-center py-4">
+              <p className="text-sm text-muted-foreground text-center py-4">
                 No matching users found.
               </p>
             )}
 
             {results.length > 0 && (
-              <ul className="divide-y divide-slate-100 rounded-lg border border-slate-100 overflow-hidden max-h-64 overflow-y-auto">
+              <ul className="divide-y divide-border rounded-lg border border-border overflow-hidden max-h-64 overflow-y-auto">
                 {results.map((r) => (
                   <li
                     key={r.id}
-                    className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors"
                   >
                     <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-semibold flex-shrink-0 select-none">
                       {getInitials(r.name)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-900 truncate">{r.name}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{r.name}</p>
                       {r.jobTitle && (
-                        <p className="text-xs text-slate-400 truncate">{r.jobTitle}</p>
+                        <p className="text-xs text-muted-foreground truncate">{r.jobTitle}</p>
                       )}
                     </div>
                     <Button

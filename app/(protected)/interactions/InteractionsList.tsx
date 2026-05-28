@@ -155,12 +155,12 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
                 key={key}
                 onClick={() => setFilter(key)}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  active ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  active ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:bg-muted'
                 }`}
               >
                 {label}
                 {count > 0 && (
-                  <span className={`ml-1.5 text-xs ${active ? 'text-slate-300' : 'text-slate-400'}`}>
+                  <span className={`ml-1.5 text-xs ${active ? 'text-muted-foreground/60' : 'text-muted-foreground'}`}>
                     {count}
                   </span>
                 )}
@@ -182,19 +182,19 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
 
         {/* Search */}
         <div className="relative sm:ml-auto sm:max-w-xs sm:flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name or title…"
-            className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-9 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)]"
+            className="w-full rounded-lg border border-border bg-card pl-9 pr-9 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)]"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
               aria-label="Clear search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -210,7 +210,7 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
             className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
               typeFilter === 'all'
                 ? 'bg-[hsl(213,70%,30%)] text-white'
-                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                : 'bg-muted text-muted-foreground hover:bg-muted'
             }`}
           >
             All Types
@@ -222,7 +222,7 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                 typeFilter === key
                   ? 'bg-[hsl(213,70%,30%)] text-white'
-                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                  : 'bg-muted text-muted-foreground hover:bg-muted'
               }`}
             >
               {icon}
@@ -234,21 +234,21 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
 
       {/* Results */}
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm p-10 text-center">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-            <Calendar className="h-6 w-6 text-slate-400" />
+        <div className="bg-card rounded-xl shadow-sm p-10 text-center">
+          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
+            <Calendar className="h-6 w-6 text-muted-foreground" />
           </div>
-          <p className="text-sm font-medium text-slate-700 mb-1">{empty.title}</p>
-          <p className="text-xs text-slate-400">{empty.message}</p>
+          <p className="text-sm font-medium text-foreground mb-1">{empty.title}</p>
+          <p className="text-xs text-muted-foreground">{empty.message}</p>
         </div>
       ) : (
         <div className="space-y-6">
           {grouped.map(({ label, rows }) => (
             <div key={label}>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2 px-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 px-1">
                 {label}
               </p>
-              <ul className="bg-white rounded-xl shadow-sm divide-y divide-slate-100 overflow-hidden">
+              <ul className="bg-card rounded-xl shadow-sm divide-y divide-border overflow-hidden">
                 {rows.map((item) => {
                   const subjectName = item.humanName ?? item.displayLabel ?? 'Unknown'
                   const needsNotes = item.isPast && !item.hasNote
@@ -270,24 +270,24 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
                         tabIndex={0}
                         onClick={() => router.push(href)}
                         onKeyDown={(e) => e.key === 'Enter' && router.push(href)}
-                        className="flex items-center gap-3 py-3 px-4 hover:bg-slate-50 transition-colors cursor-pointer"
+                        className="flex items-center gap-3 py-3 px-4 hover:bg-muted/50 transition-colors cursor-pointer"
                       >
-                        <div className="text-xs font-medium text-slate-400 w-20 flex-shrink-0">
+                        <div className="text-xs font-medium text-muted-foreground w-20 flex-shrink-0">
                           {formatRowDate(item)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-900 truncate">
+                          <p className="text-sm font-medium text-foreground truncate">
                             {subjectName}
                             {item.title && (
-                              <span className="text-slate-400 font-normal">
+                              <span className="text-muted-foreground font-normal">
                                 {' · '}
                                 {item.title}
                               </span>
                             )}
                           </p>
-                          <p className="text-xs text-slate-400 mt-0.5">{item.timeRange}</p>
-                          <p className="text-xs text-slate-400 mt-0.5">
-                            <span className="text-slate-400">Interaction Type: </span>
+                          <p className="text-xs text-muted-foreground mt-0.5">{item.timeRange}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            <span className="text-muted-foreground">Interaction Type: </span>
                             {TYPE_OPTIONS.find((t) => t.key === itype)?.label ?? itype}
                           </p>
                         </div>
@@ -310,10 +310,10 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
                             Add notes
                           </span>
                         ) : item.hasNote ? (
-                          <span className="text-xs text-slate-400 whitespace-nowrap">Noted</span>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">Noted</span>
                         ) : null}
 
-                        <ChevronRight className="h-4 w-4 text-slate-300 flex-shrink-0" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/60 flex-shrink-0" />
                       </div>
                     </li>
                   )

@@ -100,13 +100,13 @@ export default function AddHumanDialog({ coaches, companies, currentCoachId }: P
           />
 
           {/* Modal */}
-          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+          <div className="relative bg-card rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">Add New Person</h2>
+              <h2 className="text-lg font-semibold text-foreground">Add New Person</h2>
               <button
                 onClick={() => setOpen(false)}
                 disabled={saving}
-                className="p-1 rounded-md hover:bg-slate-100 text-slate-400 disabled:opacity-50"
+                className="p-1 rounded-md hover:bg-muted text-muted-foreground disabled:opacity-50"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -114,54 +114,54 @@ export default function AddHumanDialog({ coaches, companies, currentCoachId }: P
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-slate-700">First Name *</label>
+                <label className="text-xs font-medium text-foreground">First Name *</label>
                 <input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="Jane"
-                  className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-medium text-slate-700">Last Name *</label>
+                <label className="text-xs font-medium text-foreground">Last Name *</label>
                 <input
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Smith"
-                  className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-700">Work Email *</label>
+              <label className="text-xs font-medium text-foreground">Work Email *</label>
               <input
                 type="email"
                 value={workEmail}
                 onChange={(e) => setWorkEmail(e.target.value)}
                 placeholder="jane@company.com"
-                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-700">Job Title</label>
+              <label className="text-xs font-medium text-foreground">Job Title</label>
               <input
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
                 placeholder="e.g. VP of Operations"
-                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               {companies.length > 0 && (
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-700">Organization</label>
+                  <label className="text-xs font-medium text-foreground">Organization</label>
                   <select
                     value={companyId}
                     onChange={(e) => setCompanyId(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-white"
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-card"
                   >
                     <option value="">Select organization</option>
                     {companies.map((c) => (
@@ -173,11 +173,11 @@ export default function AddHumanDialog({ coaches, companies, currentCoachId }: P
 
               {coaches.length > 0 && (
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-700">Assign Coach</label>
+                  <label className="text-xs font-medium text-foreground">Assign Coach</label>
                   <select
                     value={coachId}
                     onChange={(e) => setCoachId(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-white"
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-card"
                   >
                     <option value="">No coach</option>
                     {coaches.map((c) => (
@@ -202,7 +202,7 @@ export default function AddHumanDialog({ coaches, companies, currentCoachId }: P
               <button
                 onClick={() => setOpen(false)}
                 disabled={saving}
-                className="px-4 py-2 border border-slate-200 text-sm rounded-lg hover:bg-slate-50 transition-colors text-slate-600 disabled:opacity-50"
+                className="px-4 py-2 border border-border text-sm rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground disabled:opacity-50"
               >
                 Cancel
               </button>

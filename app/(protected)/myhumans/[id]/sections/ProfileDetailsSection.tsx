@@ -10,25 +10,25 @@ export default function ProfileDetailsSection({ user }: Props) {
   if (!(user.department || user.title || user.startDate || user.engagementLevel)) return null
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+    <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
       <SectionHeading icon={FileText} title="Profile Details" />
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
         {user.title && (
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-0.5">Title</dt>
-            <dd className="text-sm text-slate-800">{user.title}</dd>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-0.5">Title</dt>
+            <dd className="text-sm text-foreground">{user.title}</dd>
           </div>
         )}
         {user.department && (
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-0.5">Department</dt>
-            <dd className="text-sm text-slate-800">{user.department}</dd>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-0.5">Department</dt>
+            <dd className="text-sm text-foreground">{user.department}</dd>
           </div>
         )}
         {user.startDate && (
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-0.5">Start Date</dt>
-            <dd className="text-sm text-slate-800">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-0.5">Start Date</dt>
+            <dd className="text-sm text-foreground">
               {new Date(user.startDate + 'T12:00:00').toLocaleDateString('en-US', {
                 month: 'long',
                 day: 'numeric',
@@ -39,7 +39,7 @@ export default function ProfileDetailsSection({ user }: Props) {
         )}
         {user.engagementLevel && (
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-0.5">Engagement Level</dt>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-0.5">Engagement Level</dt>
             <dd>
               <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 user.engagementLevel.toLowerCase().includes('high')

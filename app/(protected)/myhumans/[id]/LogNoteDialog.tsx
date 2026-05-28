@@ -104,7 +104,7 @@ export default function LogNoteDialog({ userId, humans, trigger }: Props) {
               <div className="space-y-1.5" ref={searchRef}>
                 <Label>Person</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                   <input
                     type="text"
                     value={query}
@@ -119,13 +119,13 @@ export default function LogNoteDialog({ userId, humans, trigger }: Props) {
                     }}
                     onFocus={() => setShowResults(true)}
                     placeholder="Search by name…"
-                    className="w-full pl-9 pr-9 py-2 text-sm rounded-md border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] placeholder:text-slate-400"
+                    className="w-full pl-9 pr-9 py-2 text-sm rounded-md border border-border focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] placeholder:text-muted-foreground"
                   />
                   {query && (
                     <button
                       type="button"
                       onClick={clearPerson}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -133,7 +133,7 @@ export default function LogNoteDialog({ userId, humans, trigger }: Props) {
 
                   {/* Results dropdown */}
                   {showResults && query.trim().length >= MIN_CHARS && (
-                    <div className="absolute z-50 top-full mt-1 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-52 overflow-y-auto">
+                    <div className="absolute z-50 top-full mt-1 w-full bg-card border border-border rounded-md shadow-lg max-h-52 overflow-y-auto">
                       {results.length > 0 ? (
                         results.map((c) => (
                           <button
@@ -144,13 +144,13 @@ export default function LogNoteDialog({ userId, humans, trigger }: Props) {
                               e.preventDefault()
                               selectPerson(c)
                             }}
-                            className="w-full text-left px-3 py-2.5 text-sm hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
+                            className="w-full text-left px-3 py-2.5 text-sm hover:bg-muted/50 transition-colors border-b border-border last:border-0"
                           >
                             {c.name}
                           </button>
                         ))
                       ) : (
-                        <p className="px-3 py-3 text-sm text-slate-400 italic">
+                        <p className="px-3 py-3 text-sm text-muted-foreground italic">
                           No matching people found.
                         </p>
                       )}
@@ -158,7 +158,7 @@ export default function LogNoteDialog({ userId, humans, trigger }: Props) {
                   )}
                 </div>
                 {query.trim().length > 0 && query.trim().length < MIN_CHARS && (
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-muted-foreground">
                     Keep typing to search…
                   </p>
                 )}
@@ -173,7 +173,7 @@ export default function LogNoteDialog({ userId, humans, trigger }: Props) {
                 hideInkLink
               />
             ) : (
-              <p className="text-sm text-slate-400 py-4 text-center">
+              <p className="text-sm text-muted-foreground py-4 text-center">
                 {userId ? '' : 'Search for a person above to write your note.'}
               </p>
             )}

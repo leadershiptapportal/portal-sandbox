@@ -72,8 +72,8 @@ function RoleBadge({ role }: { role: string }) {
   if (lower === 'coach')
     return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-700 whitespace-nowrap">{role}</span>
   if (lower === 'admin')
-    return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-800 text-white whitespace-nowrap">{role}</span>
-  return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-500 whitespace-nowrap">{role}</span>
+    return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-foreground text-background whitespace-nowrap">{role}</span>
+  return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-muted text-muted-foreground whitespace-nowrap">{role}</span>
 }
 
 function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
@@ -85,7 +85,7 @@ function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
   return (
     <Link
       href={`/myhumans/${user.id}`}
-      className="block bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow"
+      className="block bg-card rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow"
     >
       <div className="flex items-start gap-3">
         {/* Avatar */}
@@ -107,22 +107,22 @@ function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
         <div className="flex-1 min-w-0">
           {/* Name row + role badge + chevron */}
           <div className="flex items-center gap-1.5">
-            <p className="font-semibold text-slate-900 truncate flex-1 min-w-0">{name}</p>
+            <p className="font-semibold text-foreground truncate flex-1 min-w-0">{name}</p>
             {role && <RoleBadge role={role} />}
-            <ChevronRight className="h-4 w-4 text-slate-300 flex-shrink-0" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground/60 flex-shrink-0" />
           </div>
 
           {/* Subtitle: Title · Company */}
           {subtitle && (
-            <p className="text-sm text-slate-500 truncate mt-0.5">{subtitle}</p>
+            <p className="text-sm text-muted-foreground truncate mt-0.5">{subtitle}</p>
           )}
 
           {/* Interaction dates */}
           {(lastInteraction || nextInteraction) && (
             <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
               {lastInteraction && (
-                <span className="text-xs text-slate-400">
-                  Last: <span className="text-slate-600">{lastInteraction}</span>
+                <span className="text-xs text-muted-foreground">
+                  Last: <span className="text-muted-foreground">{lastInteraction}</span>
                 </span>
               )}
               {nextInteraction && (
@@ -131,7 +131,7 @@ function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
                 </span>
               )}
               {lastInteraction && !nextInteraction && (
-                <span className="text-xs text-slate-300 italic">No upcoming</span>
+                <span className="text-xs text-muted-foreground/60 italic">No upcoming</span>
               )}
             </div>
           )}
@@ -140,17 +140,17 @@ function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
           {(noteCount > 0 || openTaskCount > 0 || interactionCount > 0) && (
             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
               {interactionCount > 0 && (
-                <span className="text-xs text-slate-400">{interactionCount} interaction{interactionCount !== 1 ? 's' : ''}</span>
+                <span className="text-xs text-muted-foreground">{interactionCount} interaction{interactionCount !== 1 ? 's' : ''}</span>
               )}
               {noteCount > 0 && (
                 <>
-                  <span className="text-slate-200 text-xs">·</span>
-                  <span className="text-xs text-slate-400">{noteCount} note{noteCount !== 1 ? 's' : ''}</span>
+                  <span className="text-muted-foreground/30 text-xs">·</span>
+                  <span className="text-xs text-muted-foreground">{noteCount} note{noteCount !== 1 ? 's' : ''}</span>
                 </>
               )}
               {openTaskCount > 0 && (
                 <>
-                  <span className="text-slate-200 text-xs">·</span>
+                  <span className="text-muted-foreground/30 text-xs">·</span>
                   <span className="text-xs text-amber-600 font-medium">{openTaskCount} task{openTaskCount !== 1 ? 's' : ''}</span>
                 </>
               )}
@@ -177,7 +177,7 @@ function FilterSelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)] pr-8 appearance-none cursor-pointer"
+      className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)] pr-8 appearance-none cursor-pointer"
       style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2394a3b8\' stroke-width=\'2\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}
     >
       {children}
@@ -189,13 +189,13 @@ function FilterSelect({
 
 function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void }) {
   return (
-    <div className="inline-flex rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div className="inline-flex rounded-lg border border-border bg-card shadow-sm overflow-hidden">
       <button
         onClick={() => onChange('humans')}
         className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors ${
           mode === 'humans'
             ? 'bg-[hsl(213,70%,30%)] text-white'
-            : 'text-slate-600 hover:bg-slate-50'
+            : 'text-muted-foreground hover:bg-muted/50'
         }`}
       >
         <LayoutGrid className="h-3.5 w-3.5" />
@@ -203,10 +203,10 @@ function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode
       </button>
       <button
         onClick={() => onChange('company')}
-        className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors border-l border-slate-200 ${
+        className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors border-l border-border ${
           mode === 'company'
             ? 'bg-[hsl(213,70%,30%)] text-white'
-            : 'text-slate-600 hover:bg-slate-50'
+            : 'text-muted-foreground hover:bg-muted/50'
         }`}
       >
         <Building2 className="h-3.5 w-3.5" />
@@ -328,13 +328,13 @@ export default function HumansGrid({ users, coaches, companies }: Props) {
       <div className="flex flex-wrap gap-2 items-center">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name or organization..."
-            className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)]"
+            className="w-full rounded-lg border border-border bg-card pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)]"
           />
         </div>
 
@@ -382,7 +382,7 @@ export default function HumansGrid({ users, coaches, companies }: Props) {
         {/* Add Human button */}
         <Link
           href="/people/new"
-          className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-muted/50 transition-colors"
         >
           <Plus className="h-4 w-4" />
           Add Person
@@ -391,14 +391,14 @@ export default function HumansGrid({ users, coaches, companies }: Props) {
 
       {/* ── Grid or empty state ─────────────────────────────────────────────── */}
       {users.length === 0 ? (
-        <p className="text-sm text-slate-500">No people yet.</p>
+        <p className="text-sm text-muted-foreground">No people yet.</p>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-            <Users className="h-6 w-6 text-slate-400" />
+          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+            <Users className="h-6 w-6 text-muted-foreground" />
           </div>
-          <p className="text-sm font-medium text-slate-700 mb-1">No people match your search</p>
-          <p className="text-xs text-slate-400 mb-4">Try adjusting your filters</p>
+          <p className="text-sm font-medium text-foreground mb-1">No people match your search</p>
+          <p className="text-xs text-muted-foreground mb-4">Try adjusting your filters</p>
           {hasFilters && (
             <button
               onClick={clearFilters}
@@ -415,10 +415,10 @@ export default function HumansGrid({ users, coaches, companies }: Props) {
           {groupedByCompany.map(([company, members]) => (
             <div key={company}>
               <div className="flex items-center gap-2 mb-3">
-                <Building2 className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                <h3 className="text-sm font-semibold text-slate-700">{company}</h3>
+                <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <h3 className="text-sm font-semibold text-foreground">{company}</h3>
                 {members.length > 1 && (
-                  <span className="px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 text-xs font-medium">
+                  <span className="px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-medium">
                     {members.length}
                   </span>
                 )}

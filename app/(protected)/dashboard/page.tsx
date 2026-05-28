@@ -57,14 +57,14 @@ export default async function DashboardPage() {
 
       {/* ── Greeting ─────────────────────────────────────────────────────────── */}
       <div className="mb-5">
-        <h1 className="text-2xl font-bold text-slate-900">
+        <h1 className="text-2xl font-bold text-foreground">
           Good {getTimeOfDay().label}, {firstName} {getTimeOfDay().emoji}
         </h1>
         <DashboardTagline />
       </div>
 
       {/* ── Quick Actions ────────────────────────────────────────────────────── */}
-      <Suspense fallback={<div className="h-[68px] bg-white rounded-xl shadow-sm mb-4 md:mb-5 animate-pulse" />}>
+      <Suspense fallback={<div className="h-[68px] bg-card rounded-xl shadow-sm mb-4 md:mb-5 animate-pulse" />}>
         <QuickActionsRegion userRecord={userRecord} />
       </Suspense>
 

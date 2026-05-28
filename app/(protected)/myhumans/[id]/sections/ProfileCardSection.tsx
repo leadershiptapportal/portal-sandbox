@@ -65,8 +65,8 @@ function ProfileQuickNotes({
 
   return (
     <>
-      <div className="mt-4 pt-4 border-t border-slate-100">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-1">
+      <div className="mt-4 pt-4 border-t border-border">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
           Quick Notes
         </p>
         {saved ? (
@@ -75,7 +75,7 @@ function ProfileQuickNotes({
             className="w-full text-left group"
             title={canEdit ? 'Click to edit' : 'Click to view'}
           >
-            <p className="text-sm text-slate-600 line-clamp-5 group-hover:text-slate-800 transition-colors leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-muted-foreground line-clamp-5 group-hover:text-foreground transition-colors leading-relaxed whitespace-pre-wrap">
               {saved}
             </p>
           </button>
@@ -83,7 +83,7 @@ function ProfileQuickNotes({
           canEdit && (
             <button
               onClick={() => { setDraft(''); setOpen(true) }}
-              className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors italic"
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-muted-foreground transition-colors italic"
             >
               <StickyNote className="h-3.5 w-3.5" />
               Add quick notes…
@@ -109,18 +109,18 @@ function ProfileQuickNotes({
                 disabled={saving}
                 rows={8}
                 placeholder="Add quick notes about this person…"
-                className="w-full text-sm text-slate-700 border border-slate-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)] focus:border-transparent disabled:opacity-50"
+                className="w-full text-sm text-foreground border border-border rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)] focus:border-transparent disabled:opacity-50"
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />
-              <p className="text-xs text-slate-400">⌘↵ to save</p>
+              <p className="text-xs text-muted-foreground">⌘↵ to save</p>
               <DialogFooter>
                 <Button variant="outline" onClick={handleCancel} disabled={saving}>Cancel</Button>
                 <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
               </DialogFooter>
             </>
           ) : (
-            <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{saved}</p>
+            <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{saved}</p>
           )}
         </DialogContent>
       </Dialog>
@@ -160,7 +160,7 @@ export default function ProfileCardSection({
   personId,
 }: Props) {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+    <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
       {userCanWrite && (
         <div className="flex items-start justify-between gap-2 mb-4 sm:mb-0">
           <span />
@@ -184,22 +184,22 @@ export default function ProfileCardSection({
 
         <div className="min-w-0 flex-1">
           <h1
-            className="text-2xl font-bold text-slate-900 leading-tight"
+            className="text-2xl font-bold text-foreground leading-tight"
             style={{ fontFamily: 'var(--font-plus-jakarta-sans)' }}
           >
             {name}
           </h1>
           {showPreferredName && (
-            <p className="text-sm text-slate-400 mt-0.5">Goes by &ldquo;{user.preferredName}&rdquo;</p>
+            <p className="text-sm text-muted-foreground mt-0.5">Goes by &ldquo;{user.preferredName}&rdquo;</p>
           )}
           {displayTitle && (
-            <p className="text-base text-slate-500 mt-0.5">{displayTitle}</p>
+            <p className="text-base text-muted-foreground mt-0.5">{displayTitle}</p>
           )}
           {user.companyName && (
-            <p className="text-sm text-slate-400 mt-0.5">{user.companyName}</p>
+            <p className="text-sm text-muted-foreground mt-0.5">{user.companyName}</p>
           )}
           {contactEmail && (
-            <p className="flex items-center gap-1.5 text-sm text-slate-400 mt-1">
+            <p className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
               <Mail className="h-3.5 w-3.5 flex-shrink-0" />
               {contactEmail}
             </p>
@@ -207,20 +207,20 @@ export default function ProfileCardSection({
 
           <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1.5">
             {user.timeAtCompany && (
-              <span className="flex items-center gap-1.5 text-xs text-slate-500">
-                <Clock className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Clock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                 {user.timeAtCompany}
               </span>
             )}
             {coach && (
-              <span className="flex items-center gap-1.5 text-xs text-slate-500">
-                <UserCheck className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <UserCheck className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                 Coach: {getDisplayName(coach)}
               </span>
             )}
             {teamLead && (
-              <span className="flex items-center gap-1.5 text-xs text-slate-500">
-                <UserCheck className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <UserCheck className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                 Team Lead: {getDisplayName(teamLead)}
               </span>
             )}
@@ -229,7 +229,7 @@ export default function ProfileCardSection({
       </div>
 
       {badges.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-5 pt-5 border-t border-slate-100">
+        <div className="flex flex-wrap gap-2 mt-5 pt-5 border-t border-border">
           {badges.map((b) => (
             <span key={b.label} className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${b.className}`}>
               {b.label}

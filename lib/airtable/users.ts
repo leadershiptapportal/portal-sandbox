@@ -119,6 +119,7 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Use
     engagementLevel: f[FIELDS.USERS.ENGAGEMENT_LEVEL] as string | undefined,
     coachNotes: f[FIELDS.USERS.COACH_NOTES] as string | undefined,
     internalNotes: f[FIELDS.USERS.INTERNAL_NOTES] as string | undefined,
+    theme: (f[FIELDS.USERS.THEME] as 'light' | 'dark' | 'system' | undefined) || undefined,
   };
 }
 
@@ -336,6 +337,19 @@ export async function updateUserProfile(
   if (!res.ok) {
     console.error('[updateUserProfile] Full Airtable error:', res.status, responseText)
     throw new Error(`Airtable PATCH failed (${res.status}): ${responseText}`)
+  }
+}
+
+export async function updateUserTheme(userId: string, theme: 'light' | 'dark' | 'system'): Promise<void> {
+  const { apiKey, baseId } = getCredentials()
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${USERS_TABLE}/${userId}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: { [FIELDS.USERS.THEME]: theme } }),
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    console.error('[updateUserTheme] Airtable PATCH failed:', text)
   }
 }
 

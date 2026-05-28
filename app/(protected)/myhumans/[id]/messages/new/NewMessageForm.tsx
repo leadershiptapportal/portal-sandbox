@@ -21,7 +21,7 @@ export default function NewMessageForm({ userId, defaultSubject, defaultBody }: 
     >
       {/* Subject */}
       <div>
-        <label htmlFor="subject" className="block text-sm font-medium text-slate-700 mb-1.5">
+        <label htmlFor="subject" className="block text-sm font-medium text-foreground mb-1.5">
           Subject
         </label>
         <input
@@ -30,13 +30,13 @@ export default function NewMessageForm({ userId, defaultSubject, defaultBody }: 
           type="text"
           defaultValue={defaultSubject}
           required
-          className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)]"
+          className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)]"
         />
       </div>
 
       {/* Body */}
       <div>
-        <label htmlFor="body" className="block text-sm font-medium text-slate-700 mb-1.5">
+        <label htmlFor="body" className="block text-sm font-medium text-foreground mb-1.5">
           Message
         </label>
         <textarea
@@ -45,7 +45,7 @@ export default function NewMessageForm({ userId, defaultSubject, defaultBody }: 
           rows={12}
           defaultValue={defaultBody}
           placeholder="Write your follow-up message here…"
-          className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm resize-y focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)]"
+          className="w-full rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground shadow-sm resize-y focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)]"
         />
       </div>
 
@@ -59,7 +59,7 @@ export default function NewMessageForm({ userId, defaultSubject, defaultBody }: 
         </button>
         <Link
           href={`/myhumans/${userId}`}
-          className="rounded-lg px-5 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+          className="rounded-lg px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           Cancel
         </Link>

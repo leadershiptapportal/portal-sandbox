@@ -61,7 +61,7 @@ export default function DashboardTaskItem({ task }: { task: DashboardTask }) {
           className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors disabled:opacity-50 ${
             isDone
               ? 'bg-emerald-500 border-emerald-500 text-white'
-              : 'border-slate-300 hover:border-emerald-400'
+              : 'border-border hover:border-emerald-400'
           }`}
         >
           {isDone && <span className="text-[10px] leading-none">✓</span>}
@@ -71,7 +71,7 @@ export default function DashboardTaskItem({ task }: { task: DashboardTask }) {
         <div className="flex-1 min-w-0">
           <p
             className={`text-sm font-medium truncate ${
-              isDone ? 'line-through text-slate-400' : 'text-slate-800'
+              isDone ? 'line-through text-muted-foreground' : 'text-foreground'
             }`}
           >
             {task.title}
@@ -85,7 +85,7 @@ export default function DashboardTaskItem({ task }: { task: DashboardTask }) {
             {task.dueDate && (
               <span
                 className={`text-xs font-medium ${
-                  isOverdue ? 'text-rose-600' : 'text-slate-400'
+                  isOverdue ? 'text-rose-600' : 'text-muted-foreground'
                 }`}
               >
                 {isOverdue ? 'Overdue · ' : 'Due '}
@@ -105,7 +105,7 @@ export default function DashboardTaskItem({ task }: { task: DashboardTask }) {
         <button
           onClick={() => setEditOpen(true)}
           aria-label="Edit task"
-          className="flex-shrink-0 p-1.5 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
+          className="flex-shrink-0 p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-muted-foreground transition-colors opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>

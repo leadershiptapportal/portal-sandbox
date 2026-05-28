@@ -59,7 +59,7 @@ function avatarColor(id: string): string {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-6">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3 pb-1.5 border-b border-slate-100">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 pb-1.5 border-b border-border">
         {title}
       </p>
       {children}
@@ -70,17 +70,17 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Field({ label, children, half }: { label: string; children: React.ReactNode; half?: boolean }) {
   return (
     <div className={half ? '' : 'col-span-2'}>
-      <label className="block text-xs font-medium text-slate-600 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-muted-foreground mb-1">{label}</label>
       {children}
     </div>
   )
 }
 
 const inputCls =
-  'w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] disabled:bg-slate-50 disabled:text-slate-400'
+  'w-full rounded-md border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] disabled:bg-muted/50 disabled:text-muted-foreground'
 
 const selectCls =
-  'w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] bg-white disabled:bg-slate-50 disabled:text-slate-400'
+  'w-full rounded-md border border-border px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] bg-card disabled:bg-muted/50 disabled:text-muted-foreground'
 
 function SelectField({
   value,
@@ -326,12 +326,12 @@ export default function EditProfileDialog({ user }: Props) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
 
-          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh]">
+          <div className="relative bg-card rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh]">
 
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 flex-shrink-0">
-              <h2 className="text-lg font-semibold text-slate-900">Edit Profile</h2>
-              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600 text-2xl leading-none w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
+              <h2 className="text-lg font-semibold text-foreground">Edit Profile</h2>
+              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-muted-foreground text-2xl leading-none w-8 h-8 flex items-center justify-center rounded hover:bg-muted">
                 ×
               </button>
             </div>
@@ -353,12 +353,12 @@ export default function EditProfileDialog({ user }: Props) {
                     <button
                       type="button"
                       onClick={() => fileRef.current?.click()}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-sm text-foreground hover:bg-muted/50 transition-colors"
                     >
-                      <Camera className="h-4 w-4 text-slate-400" />
+                      <Camera className="h-4 w-4 text-muted-foreground" />
                       {photoPreview ? 'Change Photo' : 'Upload Photo'}
                     </button>
-                    <p className="text-xs text-slate-400 mt-1.5">JPG, PNG or WebP · Max 5 MB</p>
+                    <p className="text-xs text-muted-foreground mt-1.5">JPG, PNG or WebP · Max 5 MB</p>
                     <input ref={fileRef} type="file" accept=".jpg,.jpeg,.png,.webp" onChange={handlePhotoSelect} className="hidden" />
                   </div>
                 </div>
@@ -388,7 +388,7 @@ export default function EditProfileDialog({ user }: Props) {
                     </select>
                   </Field>
                 </div>
-                <p className="text-xs text-slate-400 mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                   Coach and reporting relationships are managed in the Relationships section on this profile.
                 </p>
               </Section>
@@ -412,7 +412,7 @@ export default function EditProfileDialog({ user }: Props) {
 
                 <Field label={`Strengths (${selectedStrengthIds.length}/5 selected)`}>
                   {optionsLoading ? (
-                    <p className="text-xs text-slate-400 py-2">Loading strengths…</p>
+                    <p className="text-xs text-muted-foreground py-2">Loading strengths…</p>
                   ) : (options?.strengths.length ?? 0) > 0 ? (
                     <div>
                       <input
@@ -421,7 +421,7 @@ export default function EditProfileDialog({ user }: Props) {
                         value={strengthSearch}
                         onChange={(e) => setStrengthSearch(e.target.value)}
                       />
-                      <div className="border border-slate-200 rounded-md divide-y divide-slate-100 max-h-48 overflow-y-auto">
+                      <div className="border border-border rounded-md divide-y divide-border max-h-48 overflow-y-auto">
                         {(options?.strengths ?? [])
                           .filter((s) => !strengthSearch || s.name.toLowerCase().includes(strengthSearch.toLowerCase()))
                           .map((s) => {
@@ -430,14 +430,14 @@ export default function EditProfileDialog({ user }: Props) {
                             return (
                               <label
                                 key={s.id}
-                                className={`flex items-center gap-2.5 px-3 py-2 text-sm select-none ${atLimit ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-50'}`}
+                                className={`flex items-center gap-2.5 px-3 py-2 text-sm select-none ${atLimit ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-muted/50'}`}
                               >
                                 <input
                                   type="checkbox"
                                   checked={checked}
                                   disabled={atLimit || saving}
                                   onChange={() => toggleStrength(s.id)}
-                                  className="rounded border-slate-300"
+                                  className="rounded border-border"
                                 />
                                 {s.name}
                               </label>
@@ -449,7 +449,7 @@ export default function EditProfileDialog({ user }: Props) {
                       )}
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-400 italic py-2">No strengths data available.</p>
+                    <p className="text-xs text-muted-foreground italic py-2">No strengths data available.</p>
                   )}
                 </Field>
               </Section>
@@ -457,12 +457,12 @@ export default function EditProfileDialog({ user }: Props) {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center gap-3 px-6 py-4 border-t border-slate-100 flex-shrink-0">
+            <div className="flex items-center gap-3 px-6 py-4 border-t border-border flex-shrink-0">
               <div className="mr-auto min-w-0">
                 {saved && <p className="text-xs font-medium text-emerald-600">Profile updated ✓</p>}
                 {errorMsg && <p className="text-xs font-medium text-rose-600 line-clamp-2">{errorMsg}</p>}
               </div>
-              <button onClick={() => setOpen(false)} disabled={saving} className="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-slate-600 disabled:opacity-50">
+              <button onClick={() => setOpen(false)} disabled={saving} className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground disabled:opacity-50">
                 Cancel
               </button>
               <button onClick={handleSave} disabled={saving} className="px-4 py-2 text-sm bg-[hsl(213,70%,30%)] text-white rounded-lg hover:bg-[hsl(213,70%,25%)] disabled:opacity-50 transition-colors font-medium min-w-[130px]">

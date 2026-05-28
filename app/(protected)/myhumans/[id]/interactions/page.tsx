@@ -80,10 +80,10 @@ export default async function PersonInteractionsPage({ params }: Props) {
 
   function InteractionRow({ interaction, isFirst }: { interaction: Interaction; isFirst?: boolean }) {
     return (
-      <li className={`relative flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors group ${isFirst ? 'bg-[hsl(213,60%,98%)]' : ''}`}>
+      <li className={`relative flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors group ${isFirst ? 'bg-[hsl(213,60%,98%)]' : ''}`}>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-slate-900 truncate">
+            <p className="text-sm font-medium text-foreground truncate">
               {interaction.title || 'Untitled Interaction'}
             </p>
             {isFirst && (
@@ -92,7 +92,7 @@ export default async function PersonInteractionsPage({ params }: Props) {
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">{formatRowDate(interaction)}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{formatRowDate(interaction)}</p>
         </div>
 
         {/* Quick actions */}
@@ -100,7 +100,7 @@ export default async function PersonInteractionsPage({ params }: Props) {
           <div className="flex items-center gap-1.5 flex-shrink-0 opacity-0 group-hover:opacity-100 sm:opacity-100 transition-opacity">
             <Link
               href={`/myhumans/${id}/take-notes?interactionId=${interaction.id}`}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-200 text-xs text-slate-500 hover:bg-white hover:border-slate-300 transition-colors"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-border text-xs text-muted-foreground hover:bg-card hover:border-border transition-colors"
             >
               <NotebookPen className="h-3 w-3 text-[hsl(213,70%,40%)]" />
               Take Notes
@@ -114,7 +114,7 @@ export default async function PersonInteractionsPage({ params }: Props) {
           className="absolute inset-0"
           aria-label={`View ${interaction.title || 'interaction'}`}
         />
-        <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 flex-shrink-0 transition-colors relative z-10 pointer-events-none" />
+        <ChevronRight className="h-4 w-4 text-muted-foreground/60 group-hover:text-muted-foreground flex-shrink-0 transition-colors relative z-10 pointer-events-none" />
       </li>
     )
   }
@@ -124,8 +124,8 @@ export default async function PersonInteractionsPage({ params }: Props) {
       <BackLink fallbackHref={`/myhumans/${id}`} label={`Back to ${displayName}`} />
 
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">All Interactions</h1>
-        <p className="text-sm text-slate-500 mt-0.5">
+        <h1 className="text-2xl font-bold text-foreground">All Interactions</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
           {displayName} · {totalCount} interaction{totalCount !== 1 ? 's' : ''}
         </p>
       </div>
@@ -133,10 +133,10 @@ export default async function PersonInteractionsPage({ params }: Props) {
       {/* Upcoming */}
       {upcomingSorted.length > 0 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2 px-1">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 px-1">
             Upcoming
           </p>
-          <ul className="bg-white rounded-xl shadow-sm divide-y divide-slate-100 overflow-hidden">
+          <ul className="bg-card rounded-xl shadow-sm divide-y divide-border overflow-hidden">
             {upcomingSorted.map((m) => (
               <InteractionRow key={m.id} interaction={m} />
             ))}
@@ -149,10 +149,10 @@ export default async function PersonInteractionsPage({ params }: Props) {
         <div className="space-y-5">
           {pastGroups.map(({ label, items }, groupIdx) => (
             <div key={label}>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2 px-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 px-1">
                 {label}
               </p>
-              <ul className="bg-white rounded-xl shadow-sm divide-y divide-slate-100 overflow-hidden">
+              <ul className="bg-card rounded-xl shadow-sm divide-y divide-border overflow-hidden">
                 {items.map((m, itemIdx) => (
                   <InteractionRow
                     key={m.id}
@@ -165,10 +165,10 @@ export default async function PersonInteractionsPage({ params }: Props) {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm p-10 text-center">
-          <Calendar className="h-8 w-8 text-slate-200 mx-auto mb-3" />
-          <p className="text-sm font-medium text-slate-600">No past interactions yet</p>
-          <p className="text-xs text-slate-400 mt-1">
+        <div className="bg-card rounded-xl shadow-sm p-10 text-center">
+          <Calendar className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-sm font-medium text-muted-foreground">No past interactions yet</p>
+          <p className="text-xs text-muted-foreground mt-1">
             Interactions will appear here once they&apos;re recorded or synced from your calendar.
           </p>
         </div>

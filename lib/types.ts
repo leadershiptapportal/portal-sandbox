@@ -70,6 +70,7 @@ export interface User {
   engagementLevel?: string;
   coachNotes?: string;
   internalNotes?: string;  // Airtable "Internal Notes" — coaching context on Users table
+  theme?: 'light' | 'dark' | 'system';  // User's preferred UI theme
 }
 
 export interface Interaction {

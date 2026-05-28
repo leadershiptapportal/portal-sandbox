@@ -35,7 +35,7 @@ export default async function NewMessagePage({ params }: Props) {
           <BackLink fallbackHref={`/myhumans/${id}`} label={`Back to ${clientName}`} />
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-card rounded-xl shadow-sm p-6">
           {latestDraft && (
             <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-5">
               Pre-filled from your most recent pending draft. Saving will create a new record.

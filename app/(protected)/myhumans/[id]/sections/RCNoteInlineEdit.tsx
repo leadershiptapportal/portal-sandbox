@@ -60,7 +60,7 @@ export default function RCNoteInlineEdit({
   return (
     <>
       <div className="mt-1.5">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-0.5">
           Quick Notes
         </p>
         {saved ? (
@@ -69,14 +69,14 @@ export default function RCNoteInlineEdit({
             className="w-full text-left group"
             title="Click to view or edit"
           >
-            <p className={`text-xs text-slate-600 ${clampClass} group-hover:text-slate-800 transition-colors leading-relaxed`}>
+            <p className={`text-xs text-muted-foreground ${clampClass} group-hover:text-foreground transition-colors leading-relaxed`}>
               {saved}
             </p>
           </button>
         ) : (
           <button
             onClick={() => { setDraft(''); setOpen(true) }}
-            className="flex items-center gap-1 text-xs text-slate-300 hover:text-slate-500 transition-colors"
+            className="flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
           >
             <StickyNote className="h-3 w-3" />
             Add note
@@ -99,11 +99,11 @@ export default function RCNoteInlineEdit({
             disabled={saving}
             rows={8}
             placeholder="Add a quick note about this relationship…"
-            className="w-full text-sm text-slate-700 border border-slate-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)] focus:border-transparent disabled:opacity-50"
+            className="w-full text-sm text-foreground border border-border rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)] focus:border-transparent disabled:opacity-50"
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
           />
-          <p className="text-xs text-slate-400">⌘↵ to save</p>
+          <p className="text-xs text-muted-foreground">⌘↵ to save</p>
           <DialogFooter>
             <Button variant="outline" onClick={handleCancel} disabled={saving}>
               Cancel

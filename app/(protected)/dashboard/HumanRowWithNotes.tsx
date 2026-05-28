@@ -131,10 +131,10 @@ export default function HumanRowWithNotes({
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="border-b border-slate-100 last:border-0">
+    <div className="border-b border-border last:border-0">
 
       {/* ── Collapsed row: Link area + expand button ─────────────────────────── */}
-      <div className="flex items-center rounded-lg hover:bg-slate-50 transition-colors duration-150 -mx-2 px-2">
+      <div className="flex items-center rounded-lg hover:bg-muted/50 transition-colors duration-150 -mx-2 px-2">
 
         {/* Profile link — covers avatar + name + subtitle + note preview */}
         <Link
@@ -159,28 +159,28 @@ export default function HumanRowWithNotes({
           {/* Text block */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <p className="text-base font-semibold text-slate-900 truncate leading-snug">
+              <p className="text-base font-semibold text-foreground truncate leading-snug">
                 {clientName}
               </p>
               {relationshipLabel && (
-                <span className="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500">
+                <span className="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground">
                   {relationshipLabel}
                 </span>
               )}
             </div>
             {subtitle && (
-              <p className="text-xs text-slate-500 truncate mt-0.5">{subtitle}</p>
+              <p className="text-xs text-muted-foreground truncate mt-0.5">{subtitle}</p>
             )}
             <div className="mt-0.5">
               {previewLine ? (
-                <p className="text-xs text-slate-400 truncate">
+                <p className="text-xs text-muted-foreground truncate">
                   {previewLine}
                   {mostRecentNote?.createdAt && (
-                    <span className="text-slate-300"> · {formatNoteDate(mostRecentNote.createdAt)}</span>
+                    <span className="text-muted-foreground/60"> · {formatNoteDate(mostRecentNote.createdAt)}</span>
                   )}
                 </p>
               ) : (
-                <p className="text-xs text-slate-300 italic">No notes yet</p>
+                <p className="text-xs text-muted-foreground/60 italic">No notes yet</p>
               )}
             </div>
           </div>
@@ -190,12 +190,12 @@ export default function HumanRowWithNotes({
         <button
           onClick={() => setExpanded((v) => !v)}
           aria-label={expanded ? 'Collapse' : 'Expand notes'}
-          className="flex-shrink-0 p-2 rounded-md hover:bg-slate-100 transition-colors"
+          className="flex-shrink-0 p-2 rounded-md hover:bg-muted transition-colors"
         >
           {expanded ? (
-            <ChevronDown className="h-4 w-4 text-slate-400" />
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
           ) : (
-            <ChevronRight className="h-4 w-4 text-slate-300" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground/60" />
           )}
         </button>
       </div>
@@ -206,7 +206,7 @@ export default function HumanRowWithNotes({
 
           {/* Notes header */}
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Recent Notes
             </p>
             <button
@@ -228,7 +228,7 @@ export default function HumanRowWithNotes({
                 onChange={(e) => setAddContent(e.target.value)}
                 placeholder="Interaction notes…"
                 rows={3}
-                className="w-full border border-slate-200 rounded-md px-2.5 py-2 text-sm bg-white resize-none focus:outline-none focus:ring-1 focus:ring-blue-400"
+                className="w-full border border-border rounded-md px-2.5 py-2 text-sm bg-card resize-none focus:outline-none focus:ring-1 focus:ring-blue-400"
               />
               {addError && <p className="text-xs text-rose-500">{addError}</p>}
               <div className="flex gap-2">
@@ -241,7 +241,7 @@ export default function HumanRowWithNotes({
                 </button>
                 <button
                   onClick={() => setAddOpen(false)}
-                  className="px-3 py-1.5 border border-slate-200 text-xs rounded-md hover:bg-slate-50 transition-colors text-slate-600"
+                  className="px-3 py-1.5 border border-border text-xs rounded-md hover:bg-muted/50 transition-colors text-muted-foreground"
                 >
                   Cancel
                 </button>
@@ -251,7 +251,7 @@ export default function HumanRowWithNotes({
 
           {/* Notes list */}
           {notes.length === 0 && !addOpen && (
-            <p className="text-xs text-slate-400 italic mb-3">No notes yet.</p>
+            <p className="text-xs text-muted-foreground italic mb-3">No notes yet.</p>
           )}
 
           <div className="space-y-1">
@@ -261,8 +261,8 @@ export default function HumanRowWithNotes({
               if (note.id === deletingId) {
                 return (
                   <div key={note.id} className="rounded-md border border-rose-200 bg-rose-50/40 p-3">
-                    <p className="text-xs font-medium text-slate-700 mb-1">Delete this note?</p>
-                    <p className="text-xs text-slate-500 line-clamp-2 mb-3">{note.body}</p>
+                    <p className="text-xs font-medium text-foreground mb-1">Delete this note?</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{note.body}</p>
                     {deleteError && <p className="text-xs text-rose-500 mb-2">{deleteError}</p>}
                     <div className="flex gap-2">
                       <button
@@ -274,7 +274,7 @@ export default function HumanRowWithNotes({
                       </button>
                       <button
                         onClick={() => { setDeletingId(null); setDeleteError('') }}
-                        className="px-3 py-1 border border-slate-200 text-xs rounded-md hover:bg-slate-50 transition-colors text-slate-600"
+                        className="px-3 py-1 border border-border text-xs rounded-md hover:bg-muted/50 transition-colors text-muted-foreground"
                       >
                         Cancel
                       </button>
@@ -293,7 +293,7 @@ export default function HumanRowWithNotes({
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
                       rows={4}
-                      className="w-full border border-slate-200 rounded-md px-2.5 py-2 text-sm bg-white resize-y focus:outline-none focus:ring-1 focus:ring-blue-400"
+                      className="w-full border border-border rounded-md px-2.5 py-2 text-sm bg-card resize-y focus:outline-none focus:ring-1 focus:ring-blue-400"
                     />
                     {editError && <p className="text-xs text-rose-500">{editError}</p>}
                     <div className="flex gap-2">
@@ -306,7 +306,7 @@ export default function HumanRowWithNotes({
                       </button>
                       <button
                         onClick={cancelEdit}
-                        className="px-3 py-1.5 border border-slate-200 text-xs rounded-md hover:bg-slate-50 transition-colors text-slate-600"
+                        className="px-3 py-1.5 border border-border text-xs rounded-md hover:bg-muted/50 transition-colors text-muted-foreground"
                       >
                         Cancel
                       </button>
@@ -320,11 +320,11 @@ export default function HumanRowWithNotes({
                 <div key={note.id} className="group flex items-start gap-2 py-1.5 -mx-1 px-1 rounded-md">
                   <div className="flex-1 min-w-0">
                     {note.createdAt && (
-                      <span className="text-xs font-medium text-slate-400 mr-1.5">
+                      <span className="text-xs font-medium text-muted-foreground mr-1.5">
                         {formatNoteDate(note.createdAt)} ·
                       </span>
                     )}
-                    <span className="text-xs text-slate-600 leading-relaxed line-clamp-1">
+                    <span className="text-xs text-muted-foreground leading-relaxed line-clamp-1">
                       {previewText(note.body, 120)}
                     </span>
                   </div>
@@ -332,14 +332,14 @@ export default function HumanRowWithNotes({
                     <button
                       onClick={() => startEdit(note)}
                       aria-label="Edit note"
-                      className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                      className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-muted-foreground transition-colors"
                     >
                       <Pencil className="h-3 w-3" />
                     </button>
                     <button
                       onClick={() => { setDeletingId(note.id); setDeleteError('') }}
                       aria-label="Delete note"
-                      className="p-1 rounded hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors"
+                      className="p-1 rounded hover:bg-rose-50 text-muted-foreground hover:text-rose-500 transition-colors"
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
@@ -363,19 +363,19 @@ export default function HumanRowWithNotes({
 
           {/* Sessions section */}
           {(nextSessionLabel || lastSessionLabel) && (
-            <div className="mt-4 pt-3 border-t border-slate-100 space-y-1">
+            <div className="mt-4 pt-3 border-t border-border space-y-1">
               {nextSessionLabel && (
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="h-3 w-3 text-slate-400 flex-shrink-0" />
-                  <span className="text-xs text-slate-500">
+                  <Calendar className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                  <span className="text-xs text-muted-foreground">
                     <span className="font-medium">Next interaction:</span> {nextSessionLabel}
                   </span>
                 </div>
               )}
               {lastSessionLabel && (
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="h-3 w-3 text-slate-300 flex-shrink-0" />
-                  <span className="text-xs text-slate-400">
+                  <Calendar className="h-3 w-3 text-muted-foreground/60 flex-shrink-0" />
+                  <span className="text-xs text-muted-foreground">
                     <span className="font-medium">Last interaction:</span> {lastSessionLabel}
                   </span>
                 </div>

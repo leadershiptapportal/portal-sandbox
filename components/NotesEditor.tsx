@@ -31,12 +31,12 @@ export default function NotesEditor({ interactionId, userId, initialNotes, saveA
     return (
       <div className="space-y-3">
         <div className="relative">
-          <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+          <div className="bg-muted/50 rounded-lg p-4 text-sm text-foreground whitespace-pre-wrap leading-relaxed">
             {value}
           </div>
           <button
             onClick={() => { setEditing(true); setStatus('idle') }}
-            className="absolute top-2 right-2 text-xs text-gray-400 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100 transition-colors"
+            className="absolute top-2 right-2 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-muted transition-colors"
           >
             Edit
           </button>
@@ -48,7 +48,7 @@ export default function NotesEditor({ interactionId, userId, initialNotes, saveA
   return (
     <div className="space-y-3">
       <textarea
-        className="w-full rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm resize-y min-h-[160px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        className="w-full rounded-lg border border-border bg-muted/50 p-4 text-sm resize-y min-h-[160px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
         placeholder="Paste transcript or notes here..."
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -57,14 +57,14 @@ export default function NotesEditor({ interactionId, userId, initialNotes, saveA
         <button
           onClick={handleSave}
           disabled={status === 'saving'}
-          className="bg-slate-900 text-white hover:bg-slate-800 h-9 px-4 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+          className="bg-foreground text-background hover:bg-foreground/90 h-9 px-4 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
         >
           {status === 'saving' ? 'Saving…' : 'Save Notes'}
         </button>
         {initialNotes && (
           <button
             onClick={() => { setEditing(false); setValue(initialNotes); setStatus('idle') }}
-            className="text-gray-500 hover:text-gray-700 h-9 px-3 rounded-lg text-sm transition-colors"
+            className="text-muted-foreground hover:text-foreground h-9 px-3 rounded-lg text-sm transition-colors"
           >
             Cancel
           </button>

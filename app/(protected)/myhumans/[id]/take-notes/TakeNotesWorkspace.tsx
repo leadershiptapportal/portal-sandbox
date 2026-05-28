@@ -74,21 +74,21 @@ export default function TakeNotesWorkspace({
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] overflow-hidden bg-white">
+    <div className="flex flex-col h-[100dvh] overflow-hidden bg-card">
       {/* Minimal top bar */}
-      <header className="flex items-center gap-3 px-4 py-2.5 border-b border-slate-200 bg-white flex-shrink-0">
+      <header className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-card flex-shrink-0">
         <Link
           href={`/myhumans/${person.id}`}
-          className="p-1.5 rounded-md text-slate-500 hover:bg-slate-100 transition-colors"
+          className="p-1.5 rounded-md text-muted-foreground hover:bg-muted transition-colors"
           aria-label="Back to profile"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="min-w-0 flex-1">
-          <p className="text-xs uppercase tracking-wide text-slate-400 leading-none font-medium">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground leading-none font-medium">
             {hasStrokes ? 'Continue Taking Notes' : 'Take Notes'}
           </p>
-          <p className="text-sm font-semibold text-slate-900 truncate leading-tight">
+          <p className="text-sm font-semibold text-foreground truncate leading-tight">
             {displayName}
           </p>
         </div>
@@ -98,19 +98,19 @@ export default function TakeNotesWorkspace({
       <div className="flex flex-1 min-h-0">
         {/* Left: collapsible person details sidebar */}
         <aside
-          className={`flex-shrink-0 border-r border-slate-200 bg-slate-50 transition-all duration-200 ${
+          className={`flex-shrink-0 border-r border-border bg-muted/50 transition-all duration-200 ${
             sidebarCollapsed ? 'w-10 overflow-hidden' : 'w-72 xl:w-80 overflow-y-auto'
           }`}
         >
           {/* Collapse / expand toggle strip */}
           <div
-            className={`flex border-b border-slate-100 py-1.5 px-1.5 ${
+            className={`flex border-b border-border py-1.5 px-1.5 ${
               sidebarCollapsed ? 'justify-center' : 'justify-end'
             }`}
           >
             <button
               onClick={() => setSidebarCollapsed((v) => !v)}
-              className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
+              className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               title={sidebarCollapsed ? 'Show profile panel' : 'Hide profile panel'}
             >
               {sidebarCollapsed ? (
@@ -125,7 +125,7 @@ export default function TakeNotesWorkspace({
             <>
               {/* "View last interaction notes" — prominent button at top of sidebar */}
               {lastInteractionNote && (
-                <div className="px-3 pt-3 pb-2 border-b border-slate-100">
+                <div className="px-3 pt-3 pb-2 border-b border-border">
                   <LastInteractionNotesDialog
                     note={lastInteractionNote}
                     variant="prominent"
@@ -148,7 +148,7 @@ export default function TakeNotesWorkspace({
         </aside>
 
         {/* Right: ink canvas */}
-        <div className="flex-1 flex flex-col min-w-0 bg-slate-100">
+        <div className="flex-1 flex flex-col min-w-0 bg-muted">
           <TakeNotesCanvas
             personId={person.id}
             personName={displayName}

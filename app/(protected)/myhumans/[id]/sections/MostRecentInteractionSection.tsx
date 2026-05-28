@@ -35,11 +35,11 @@ export default function MostRecentInteractionSection({ topInteractions, totalInt
 
   if (topInteractions.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-3">Most Recent Interactions</h2>
-        <div className="border border-dashed border-slate-200 rounded-xl p-6 text-center">
-          <Calendar className="h-6 w-6 text-slate-300 mx-auto mb-2" />
-          <p className="text-sm text-slate-400">No interactions recorded yet.</p>
+      <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-3">Most Recent Interactions</h2>
+        <div className="border border-dashed border-border rounded-xl p-6 text-center">
+          <Calendar className="h-6 w-6 text-muted-foreground/60 mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">No interactions recorded yet.</p>
         </div>
       </div>
     )
@@ -47,8 +47,8 @@ export default function MostRecentInteractionSection({ topInteractions, totalInt
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Most Recent Interactions</h2>
+      <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-4">Most Recent Interactions</h2>
 
         <div className="space-y-2.5">
           {topInteractions.map((interaction, idx) => {
@@ -62,7 +62,7 @@ export default function MostRecentInteractionSection({ topInteractions, totalInt
                 className={`relative rounded-xl border px-4 py-3.5 transition-colors cursor-pointer ${
                   isMostRecent
                     ? 'border-[hsl(213,70%,30%)]/20 bg-[hsl(213,60%,98%)] hover:border-[hsl(213,70%,30%)]/40'
-                    : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50'
+                    : 'border-border bg-card hover:border-border hover:bg-muted/50'
                 }`}
               >
                 {/* Stretched link — covers the whole card; buttons sit above via z-10 */}
@@ -74,7 +74,7 @@ export default function MostRecentInteractionSection({ topInteractions, totalInt
 
                 {/* Header row: title + most-recent badge */}
                 <div className="flex items-start gap-2 justify-between">
-                  <p className="text-sm font-semibold text-slate-900 leading-snug truncate">
+                  <p className="text-sm font-semibold text-foreground leading-snug truncate">
                     {interaction.title || 'Untitled Interaction'}
                   </p>
                   {isMostRecent && (
@@ -86,14 +86,14 @@ export default function MostRecentInteractionSection({ topInteractions, totalInt
 
                 {/* Date */}
                 {dateStr && (
-                  <p className="text-xs text-slate-400 mt-0.5">{dateStr}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{dateStr}</p>
                 )}
 
                 {/* Action buttons — z-10 so they intercept clicks above the card link */}
                 <div className="relative z-10 flex items-center gap-1.5 mt-3 flex-wrap">
                   <button
                     onClick={() => setPopoutInteractionId(interaction.id)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 hover:border-border transition-colors"
                   >
                     <FileText className="h-3 w-3" />
                     {noteStatus.hasNotes ? 'Edit Notes' : 'Add Notes'}
@@ -101,7 +101,7 @@ export default function MostRecentInteractionSection({ topInteractions, totalInt
 
                   <Link
                     href={`/myhumans/${userId}/take-notes?interactionId=${interaction.id}`}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 hover:border-border transition-colors"
                   >
                     <NotebookPen className="h-3 w-3 text-[hsl(213,70%,40%)]" />
                     {noteStatus.hasInk ? 'Continue Taking Notes' : 'Take Notes'}

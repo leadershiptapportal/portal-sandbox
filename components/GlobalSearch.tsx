@@ -41,16 +41,16 @@ function ResultList({
                 : { onClick: () => onSelect(r.id) })}
               onMouseEnter={() => onHover(i)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                i === activeIndex ? 'bg-slate-100' : 'hover:bg-slate-50'
+                i === activeIndex ? 'bg-muted' : 'hover:bg-muted/50'
               }`}
             >
               <div className="w-8 h-8 rounded-full bg-[hsl(213,60%,90%)] text-[hsl(213,70%,30%)] flex items-center justify-center text-xs font-semibold flex-shrink-0">
                 {initials(r.name)}
               </div>
               <div className="min-w-0">
-                <div className="text-sm font-medium text-slate-900 truncate">{r.name}</div>
+                <div className="text-sm font-medium text-foreground truncate">{r.name}</div>
                 {r.jobTitle && (
-                  <div className="text-xs text-slate-500 truncate">{r.jobTitle}</div>
+                  <div className="text-xs text-muted-foreground truncate">{r.jobTitle}</div>
                 )}
               </div>
             </button>
@@ -61,13 +61,13 @@ function ResultList({
   }
   if (query.length >= 2 && !loading) {
     return (
-      <div className="px-4 py-5 text-center text-sm text-slate-400">
+      <div className="px-4 py-5 text-center text-sm text-muted-foreground">
         No people found for &ldquo;{query}&rdquo;
       </div>
     )
   }
   return (
-    <div className="px-4 py-5 text-center text-xs text-slate-400">
+    <div className="px-4 py-5 text-center text-xs text-muted-foreground">
       Type a name to search
     </div>
   )
@@ -221,12 +221,12 @@ export default function GlobalSearch({ collapsed }: { collapsed: boolean }) {
         // Collapsed: icon only → opens center dialog
         <button
           onClick={() => setDialogOpen(true)}
-          className="group relative flex items-center justify-center w-10 mx-auto px-0 min-h-[44px] rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+          className="group relative flex items-center justify-center w-10 mx-auto px-0 min-h-[44px] rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           aria-label="Search my humans"
         >
           <Search className="h-4 w-4 flex-shrink-0" />
           <span
-            className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2 py-1 rounded-md bg-slate-900 text-white text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-50"
+            className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2 py-1 rounded-md bg-foreground text-background text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-50"
             role="tooltip"
           >
             Search my humans
@@ -235,20 +235,20 @@ export default function GlobalSearch({ collapsed }: { collapsed: boolean }) {
       ) : (
         // Expanded: real input with inline dropdown
         <div ref={containerRef}>
-          <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-lg focus-within:border-slate-300 transition-colors">
-            <Search className="h-4 w-4 text-slate-400 flex-shrink-0" />
+          <div className="flex items-center gap-2 px-3 py-2 bg-card border border-border hover:border-border rounded-lg focus-within:border-border transition-colors">
+            <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <input
               value={inlineQuery}
               onChange={e => { setInlineQuery(e.target.value); setDropdownOpen(true) }}
               onFocus={openDropdown}
               onKeyDown={handleInlineKeyDown}
               placeholder="Search my humans..."
-              className="flex-1 text-sm outline-none bg-transparent text-slate-900 placeholder:text-slate-400 min-w-0"
+              className="flex-1 text-sm outline-none bg-transparent text-foreground placeholder:text-muted-foreground min-w-0"
             />
             {inlineLoading ? (
-              <div className="h-3.5 w-3.5 border-2 border-slate-200 border-t-slate-400 rounded-full animate-spin flex-shrink-0" />
+              <div className="h-3.5 w-3.5 border-2 border-border border-t-muted-foreground rounded-full animate-spin flex-shrink-0" />
             ) : (
-              <kbd className="text-[11px] text-slate-300 font-sans leading-none flex-shrink-0">
+              <kbd className="text-[11px] text-muted-foreground/60 font-sans leading-none flex-shrink-0">
                 {isMac ? '⌘K' : 'Ctrl K'}
               </kbd>
             )}
@@ -260,7 +260,7 @@ export default function GlobalSearch({ collapsed }: { collapsed: boolean }) {
               <div
                 ref={dropdownRef}
                 style={dropdownStyle}
-                className="bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden"
+                className="bg-card border border-border rounded-lg shadow-lg overflow-hidden"
               >
                 <ResultList
                   results={inlineResults}
@@ -281,18 +281,18 @@ export default function GlobalSearch({ collapsed }: { collapsed: boolean }) {
       <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
         <DialogContent showCloseButton={false} className="p-0 gap-0 max-w-md overflow-hidden">
           <DialogTitle className="sr-only">Search my humans</DialogTitle>
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
-            <Search className="h-4 w-4 text-slate-400 flex-shrink-0" />
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+            <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <input
               autoFocus
               value={dialogQuery}
               onChange={e => setDialogQuery(e.target.value)}
               onKeyDown={handleDialogKeyDown}
               placeholder="Search my humans..."
-              className="flex-1 text-sm outline-none bg-transparent text-slate-900 placeholder:text-slate-400"
+              className="flex-1 text-sm outline-none bg-transparent text-foreground placeholder:text-muted-foreground"
             />
             {dialogLoading && (
-              <div className="h-4 w-4 border-2 border-slate-200 border-t-slate-400 rounded-full animate-spin flex-shrink-0" />
+              <div className="h-4 w-4 border-2 border-border border-t-muted-foreground rounded-full animate-spin flex-shrink-0" />
             )}
           </div>
           <ResultList

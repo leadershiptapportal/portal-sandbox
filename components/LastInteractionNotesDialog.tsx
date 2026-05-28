@@ -41,7 +41,7 @@ export default function LastInteractionNotesDialog({
   const triggerClass =
     variant === 'prominent'
       ? 'w-full flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[hsl(213,60%,94%)] text-[hsl(213,70%,30%)] text-sm font-medium hover:bg-[hsl(213,60%,88%)] transition-colors'
-      : 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors'
+      : 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors'
 
   return (
     <Dialog>
@@ -53,38 +53,38 @@ export default function LastInteractionNotesDialog({
       </DialogTrigger>
 
       <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col overflow-hidden p-0">
-        <DialogHeader className="px-6 pt-5 pb-4 border-b border-slate-100 flex-shrink-0">
-          <DialogTitle className="text-base font-semibold text-slate-900">
+        <DialogHeader className="px-6 pt-5 pb-4 border-b border-border flex-shrink-0">
+          <DialogTitle className="text-base font-semibold text-foreground">
             Previous Interaction Notes
           </DialogTitle>
           {formattedDate && (
-            <p className="text-xs text-slate-400 mt-0.5">{formattedDate}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{formattedDate}</p>
           )}
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
           {note.content && (
-            <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+            <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
               {note.content}
             </p>
           )}
 
           {note.inkImageUrl && (
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">
                 Handwritten Notes
               </p>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={note.inkImageUrl}
                 alt="Handwritten notes from previous interaction"
-                className="w-full rounded-lg border border-slate-200"
+                className="w-full rounded-lg border border-border"
               />
             </div>
           )}
 
           {!note.content && !note.inkImageUrl && (
-            <p className="text-sm text-slate-400">No note content available.</p>
+            <p className="text-sm text-muted-foreground">No note content available.</p>
           )}
         </div>
       </DialogContent>

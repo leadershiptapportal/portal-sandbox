@@ -24,12 +24,12 @@ export default function CoachNotesSection({ sessionNotes, userCanWrite }: Props)
   const hasAny = sessionNotes.length > 0
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+    <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
       <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <BookOpen className="h-5 w-5 text-slate-400" />
-        <h2 className="text-lg font-semibold text-slate-900">Notes</h2>
+        <BookOpen className="h-5 w-5 text-muted-foreground" />
+        <h2 className="text-lg font-semibold text-foreground">Notes</h2>
         {hasAny && query && (
-          <span className="text-xs text-slate-400 font-medium">
+          <span className="text-xs text-muted-foreground font-medium">
             {filtered.length} of {sessionNotes.length}
           </span>
         )}
@@ -37,19 +37,19 @@ export default function CoachNotesSection({ sessionNotes, userCanWrite }: Props)
 
       {hasAny && (
         <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search notes…"
-            className="w-full pl-9 pr-9 py-2 text-sm rounded-md border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] placeholder:text-slate-400"
+            className="w-full pl-9 pr-9 py-2 text-sm rounded-md border border-border focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] placeholder:text-muted-foreground"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
               aria-label="Clear search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -58,9 +58,9 @@ export default function CoachNotesSection({ sessionNotes, userCanWrite }: Props)
       )}
 
       {!hasAny ? (
-        <p className="text-sm text-slate-400">No notes yet — use the Log a Note button above.</p>
+        <p className="text-sm text-muted-foreground">No notes yet — use the Log a Note button above.</p>
       ) : filtered.length === 0 ? (
-        <p className="text-sm text-slate-400 italic">No notes match this search.</p>
+        <p className="text-sm text-muted-foreground italic">No notes match this search.</p>
       ) : (
         <div className="space-y-3">
           {filtered.map((note) => (

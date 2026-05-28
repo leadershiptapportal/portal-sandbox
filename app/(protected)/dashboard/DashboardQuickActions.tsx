@@ -43,7 +43,7 @@ function ActionCard({
         <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${iconBg}`}>
           {icon}
         </div>
-        <p className="text-xs font-semibold text-slate-700 truncate">{label}</p>
+        <p className="text-xs font-semibold text-foreground truncate">{label}</p>
       </div>
     </div>
   )
@@ -53,8 +53,8 @@ function ActionCard({
 
 export default function DashboardQuickActions({ humans, coaches }: Props) {
   return (
-    <div className="bg-white rounded-xl shadow-sm px-4 py-3 mb-4 md:mb-5">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Quick Actions</p>
+    <div className="bg-card rounded-xl shadow-sm px-4 py-3 mb-4 md:mb-5">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">Quick Actions</p>
       {/* 2-up on mobile, 3-up on md, 5-up on xl */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
         <TakeNotesDialog
@@ -66,7 +66,7 @@ export default function DashboardQuickActions({ humans, coaches }: Props) {
               label="Take Notes"
               description=""
             >
-              <button className="w-full min-h-[44px] rounded-lg border border-slate-200 bg-white hover:border-[hsl(213,70%,70%)] hover:bg-[hsl(213,60%,97%)] transition-colors" />
+              <button className="w-full min-h-[44px] rounded-lg border border-border bg-card hover:border-[hsl(213,70%,70%)] hover:bg-[hsl(213,60%,97%)] transition-colors" />
             </ActionCard>
           }
         />
@@ -80,7 +80,7 @@ export default function DashboardQuickActions({ humans, coaches }: Props) {
               label="Add Note"
               description=""
             >
-              <button className="w-full min-h-[44px] rounded-lg border border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50/40 transition-colors" />
+              <button className="w-full min-h-[44px] rounded-lg border border-border bg-card hover:border-blue-200 hover:bg-blue-50/40 transition-colors" />
             </ActionCard>
           }
         />
@@ -94,7 +94,7 @@ export default function DashboardQuickActions({ humans, coaches }: Props) {
               label="Add Interaction"
               description=""
             >
-              <button className="w-full min-h-[44px] rounded-lg border border-slate-200 bg-white hover:border-amber-200 hover:bg-amber-50/40 transition-colors" />
+              <button className="w-full min-h-[44px] rounded-lg border border-border bg-card hover:border-amber-200 hover:bg-amber-50/40 transition-colors" />
             </ActionCard>
           }
         />
@@ -109,7 +109,7 @@ export default function DashboardQuickActions({ humans, coaches }: Props) {
               label="Add Task"
               description=""
             >
-              <button className="w-full min-h-[44px] rounded-lg border border-slate-200 bg-white hover:border-emerald-200 hover:bg-emerald-50/40 transition-colors" />
+              <button className="w-full min-h-[44px] rounded-lg border border-border bg-card hover:border-emerald-200 hover:bg-emerald-50/40 transition-colors" />
             </ActionCard>
           }
         />
@@ -122,7 +122,7 @@ export default function DashboardQuickActions({ humans, coaches }: Props) {
         >
           <Link
             href="/interactions?filter=upcoming"
-            className="block w-full min-h-[44px] rounded-lg border border-slate-200 bg-white hover:border-violet-200 hover:bg-violet-50/40 transition-colors"
+            className="block w-full min-h-[44px] rounded-lg border border-border bg-card hover:border-violet-200 hover:bg-violet-50/40 transition-colors"
           />
         </ActionCard>
       </div>

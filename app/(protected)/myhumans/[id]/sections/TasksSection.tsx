@@ -41,8 +41,8 @@ export default function TasksSection({ tasks }: { tasks: Task[] }) {
               onClick={() => setFilter(key)}
               className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                 filter === key
-                  ? 'bg-slate-800 text-white'
-                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                  ? 'bg-foreground text-background'
+                  : 'bg-muted text-muted-foreground hover:bg-muted'
               }`}
             >
               {label}
@@ -53,14 +53,14 @@ export default function TasksSection({ tasks }: { tasks: Task[] }) {
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-            <CheckSquare className="w-5 h-5 text-slate-400" />
+          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-3">
+            <CheckSquare className="w-5 h-5 text-muted-foreground" />
           </div>
-          <p className="text-sm font-medium text-slate-500">
+          <p className="text-sm font-medium text-muted-foreground">
             {tasks.length === 0 ? 'No tasks yet' : EMPTY_MESSAGES[filter]}
           </p>
           {tasks.length === 0 && (
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Use the Add Task button above to create a task for this person.
             </p>
           )}

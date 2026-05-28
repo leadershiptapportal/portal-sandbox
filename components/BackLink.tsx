@@ -46,7 +46,7 @@ export default function BackLink({ fallbackHref, label = 'Back', className }: Pr
       onClick={handleClick}
       className={
         className ??
-        'inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors'
+        'inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors'
       }
     >
       <ArrowLeft className="h-4 w-4" />

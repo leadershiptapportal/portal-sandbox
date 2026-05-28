@@ -76,14 +76,14 @@ export default function MessageEditor({
     <div className="space-y-4">
       {/* Subject */}
       <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
           Subject
         </label>
         {isSent ? (
-          <p className="text-sm font-medium text-gray-900">{subject}</p>
+          <p className="text-sm font-medium text-foreground">{subject}</p>
         ) : (
           <input
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             value={subject}
             onChange={(e) => { setSubject(e.target.value); setSavedAt(null) }}
           />
@@ -92,16 +92,16 @@ export default function MessageEditor({
 
       {/* Body */}
       <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
           Message
         </label>
         {isSent ? (
-          <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+          <div className="bg-muted/50 rounded-lg p-4 text-sm text-foreground whitespace-pre-wrap leading-relaxed">
             {body}
           </div>
         ) : (
           <textarea
-            className="w-full rounded-lg border border-gray-200 bg-white p-3 text-sm resize-y min-h-[200px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full rounded-lg border border-border bg-card p-3 text-sm resize-y min-h-[200px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             value={body}
             onChange={(e) => { setBody(e.target.value); setSavedAt(null) }}
           />
@@ -115,7 +115,7 @@ export default function MessageEditor({
             Sent
           </span>
           {sentAt && (
-            <span className="text-xs text-gray-400">{formatSentAt(sentAt)}</span>
+            <span className="text-xs text-muted-foreground">{formatSentAt(sentAt)}</span>
           )}
         </div>
       )}
@@ -127,7 +127,7 @@ export default function MessageEditor({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-slate-900 text-white hover:bg-slate-800 h-9 px-4 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+              className="bg-foreground text-background hover:bg-foreground/90 h-9 px-4 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
             >
               {isSaving ? 'Saving…' : 'Save'}
             </button>
@@ -150,7 +150,7 @@ export default function MessageEditor({
           {/* Inline confirm */}
           {confirming && (
             <div className="flex items-center gap-3 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 flex-wrap">
-              <span className="text-sm text-gray-700">This will mark the message as sent. Continue?</span>
+              <span className="text-sm text-foreground">This will mark the message as sent. Continue?</span>
               <button
                 onClick={handleMarkSent}
                 disabled={isSending}
@@ -161,7 +161,7 @@ export default function MessageEditor({
               <button
                 onClick={() => setConfirming(false)}
                 disabled={isSending}
-                className="text-gray-500 hover:text-gray-700 h-8 px-3 rounded-md text-sm"
+                className="text-muted-foreground hover:text-foreground h-8 px-3 rounded-md text-sm"
               >
                 Cancel
               </button>

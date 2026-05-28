@@ -179,6 +179,7 @@ export const FIELDS = {
     RELATIONSHIP_CONTEXTS_CLIENT: 'fldXDcLMxY0q87gwE',            // "Relationship Contexts (Client)" — person is coachee
     RELATIONSHIP_CONTEXTS_COACH: 'fldFabqxT4dx63zeK',             // "Relationship Contexts (Coach)" — person is lead
     LAST_MODIFIED: 'fldAAzvWFfJSpUs93',                           // "Last Modified" (lastModifiedTime)
+    THEME: 'fldPMnj4NBZAv96ob',                                    // "Portal Theme" (singleSelect: "light" | "dark" | "system")
   },
   COMPANIES: {
     NAME: 'fldl7bZkR5JCKyLHk',                  // "Company Name"

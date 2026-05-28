@@ -58,7 +58,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen">
       <Sidebar collapsed={collapsed} onToggle={toggle} />
       <main
-        className={`flex-1 overflow-y-auto overflow-x-hidden bg-slate-100 pb-20 md:pb-0 transition-[margin-left] duration-200 ${
+        className={`flex-1 overflow-y-auto overflow-x-hidden bg-muted pb-20 md:pb-0 transition-[margin-left] duration-200 ${
           collapsed ? 'md:ml-16' : 'md:ml-60'
         }`}
       >

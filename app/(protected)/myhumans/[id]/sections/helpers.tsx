@@ -60,8 +60,8 @@ export function relativeDays(iso: string): string {
 export function SectionHeading({ icon: Icon, title }: { icon: React.ElementType; title: string }) {
   return (
     <div className="flex items-center gap-2 mb-4">
-      <Icon className="h-5 w-5 text-slate-400" />
-      <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+      <Icon className="h-5 w-5 text-muted-foreground" />
+      <h2 className="text-lg font-semibold text-foreground">{title}</h2>
     </div>
   )
 }
@@ -69,17 +69,17 @@ export function SectionHeading({ icon: Icon, title }: { icon: React.ElementType;
 // Server-safe expandable descriptor using native <details>/<summary>
 export function DescriptorText({ text, maxChars = 200 }: { text: string; maxChars?: number }) {
   if (text.length <= maxChars) {
-    return <p className="text-sm text-slate-600 leading-relaxed mt-1">{text}</p>
+    return <p className="text-sm text-muted-foreground leading-relaxed mt-1">{text}</p>
   }
   return (
     <details className="mt-1 group">
       <summary className="list-none cursor-pointer">
-        <p className="text-sm text-slate-600 leading-relaxed inline">
+        <p className="text-sm text-muted-foreground leading-relaxed inline">
           {text.slice(0, maxChars)}…{' '}
         </p>
         <span className="text-xs text-[hsl(213,70%,30%)] group-open:hidden">read more</span>
       </summary>
-      <p className="text-sm text-slate-600 leading-relaxed mt-1">{text}</p>
+      <p className="text-sm text-muted-foreground leading-relaxed mt-1">{text}</p>
     </details>
   )
 }

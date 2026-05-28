@@ -27,17 +27,17 @@ function MessageRow({ msg, userId }: { msg: Message; userId: string }) {
     : null
 
   const inner = (
-    <div className="px-4 py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
+    <div className="px-4 py-3 border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-slate-900 truncate">{subject}</p>
+          <p className="text-sm font-medium text-foreground truncate">{subject}</p>
           {msg.created && (
-            <p className="text-xs text-slate-400 mt-0.5">{formatMessageDate(msg.created)}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{formatMessageDate(msg.created)}</p>
           )}
           {preview ? (
-            <p className="text-xs text-slate-500 mt-1 line-clamp-1">{preview}</p>
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{preview}</p>
           ) : (
-            <p className="text-xs text-slate-300 mt-1 italic">No content yet</p>
+            <p className="text-xs text-muted-foreground/60 mt-1 italic">No content yet</p>
           )}
         </div>
         <StatusBadge status={msg.status} />
@@ -63,11 +63,11 @@ interface Props {
 
 export default function MessagesSection({ messages, userId, userCanWrite }: Props) {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+    <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2">
-          <MessageSquare className="h-5 w-5 text-slate-400" />
-          <h2 className="text-lg font-semibold text-slate-900">Messages & Follow-ups</h2>
+          <MessageSquare className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-lg font-semibold text-foreground">Messages & Follow-ups</h2>
         </div>
         {userCanWrite && (
           <Link
@@ -86,7 +86,7 @@ export default function MessagesSection({ messages, userId, userCanWrite }: Prop
           message="Use the button above to draft a follow-up for this person."
         />
       ) : (
-        <div className="rounded-lg border border-slate-100 overflow-hidden">
+        <div className="rounded-lg border border-border overflow-hidden">
           {messages.map((msg) => (
             <MessageRow key={msg.id} msg={msg} userId={userId} />
           ))}

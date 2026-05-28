@@ -24,7 +24,7 @@ export default function DashboardTagline() {
 
   return (
     <p
-      className={`text-sm text-slate-500 mt-1 transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}
+      className={`text-sm text-muted-foreground mt-1 transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}
     >
       {tagline}
     </p>

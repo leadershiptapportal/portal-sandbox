@@ -35,15 +35,15 @@ function MessageRow({ msg, userId }: { msg: Message; userId: string }) {
   const preview = msg.body ? msg.body.slice(0, 120) + (msg.body.length > 120 ? '…' : '') : null
 
   const inner = (
-    <div className="px-4 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+    <div className="px-4 py-3 border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-gray-900 truncate">{subject}</p>
+          <p className="text-sm font-medium text-foreground truncate">{subject}</p>
           {msg.created && (
-            <p className="text-xs text-gray-400 mt-0.5">{formatDate(msg.created)}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{formatDate(msg.created)}</p>
           )}
           {preview && (
-            <p className="text-xs text-gray-500 mt-1 line-clamp-1">{preview}</p>
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{preview}</p>
           )}
         </div>
         <StatusBadge status={msg.status} />
@@ -68,14 +68,14 @@ function MessageRow({ msg, userId }: { msg: Message; userId: string }) {
 export default function MessageHistory({ messages, userId }: MessageHistoryProps) {
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Message History</h2>
+      <h2 className="text-lg font-semibold text-foreground mb-4">Message History</h2>
       {messages.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 py-10 text-center">
-          <Mail className="mx-auto h-8 w-8 text-gray-300 mb-2" />
-          <p className="text-sm text-gray-400">No messages yet.</p>
+        <div className="bg-card rounded-xl border border-border py-10 text-center">
+          <Mail className="mx-auto h-8 w-8 text-muted-foreground/60 mb-2" />
+          <p className="text-sm text-muted-foreground">No messages yet.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           {messages.map((msg) => (
             <MessageRow key={msg.id} msg={msg} userId={userId} />
           ))}

@@ -20,23 +20,23 @@ export default function InteractionsSection({
   userId,
 }: Props) {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+    <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
       <div className="flex items-center gap-2 mb-5">
-        <Calendar className="h-5 w-5 text-slate-400" />
-        <h2 className="text-lg font-semibold text-slate-900">Interactions</h2>
+        <Calendar className="h-5 w-5 text-muted-foreground" />
+        <h2 className="text-lg font-semibold text-foreground">Interactions</h2>
         {allMeetings > 0 && (
-          <span className="ml-auto text-xs text-slate-400">{allMeetings} total</span>
+          <span className="ml-auto text-xs text-muted-foreground">{allMeetings} total</span>
         )}
       </div>
 
       {allMeetings === 0 ? (
-        <p className="text-sm text-slate-400">No interactions recorded yet.</p>
+        <p className="text-sm text-muted-foreground">No interactions recorded yet.</p>
       ) : (
         <div className="space-y-6">
 
           {/* NEXT INTERACTION */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
               Next Interaction
             </p>
             {nextMeeting ? (() => {
@@ -53,10 +53,10 @@ export default function InteractionsSection({
                     <p className="text-[10px] opacity-80 mt-0.5">{month}</p>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-900 truncate">
+                    <p className="font-semibold text-foreground truncate">
                       {nextMeeting.title || 'Untitled Interaction'}
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">{time}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{time}</p>
                     <span className="mt-2 inline-block text-xs font-semibold text-[hsl(213,70%,30%)] bg-[hsl(213,60%,90%)] px-2 py-0.5 rounded-full">
                       {label}
                     </span>
@@ -65,13 +65,13 @@ export default function InteractionsSection({
                 </Link>
               )
             })() : (
-              <p className="text-sm text-slate-400 pl-1">No upcoming interactions scheduled.</p>
+              <p className="text-sm text-muted-foreground pl-1">No upcoming interactions scheduled.</p>
             )}
           </div>
 
           {/* LAST INTERACTION */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
               Last Interaction
             </p>
 
@@ -79,29 +79,29 @@ export default function InteractionsSection({
               const { weekday, day, month, time } = formatMeetingDay(lastMeeting.startTime, lastMeeting.timezone)
               const label = relativeDays(lastMeeting.startTime)
               return (
-                <div className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
+                <div className="rounded-xl border border-border bg-muted/50 overflow-hidden">
                   <Link
                     href={`/myhumans/${userId}/interactions/${lastMeeting.id}`}
-                    className="flex items-start gap-4 p-4 hover:bg-slate-100 transition-colors group"
+                    className="flex items-start gap-4 p-4 hover:bg-muted transition-colors group"
                   >
-                    <div className="flex-shrink-0 w-12 text-center bg-slate-200 text-slate-600 rounded-lg py-2 px-1">
+                    <div className="flex-shrink-0 w-12 text-center bg-muted text-muted-foreground rounded-lg py-2 px-1">
                       <p className="text-[10px] font-bold uppercase tracking-wide">{weekday}</p>
                       <p className="text-2xl font-bold leading-none mt-0.5">{day}</p>
                       <p className="text-[10px] mt-0.5">{month}</p>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-800 truncate">
+                      <p className="font-medium text-foreground truncate">
                         {lastMeeting.title || 'Untitled Interaction'}
                       </p>
-                      <p className="text-xs text-slate-400 mt-0.5">{time}</p>
-                      <span className="mt-2 inline-block text-xs font-medium text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full">
+                      <p className="text-xs text-muted-foreground mt-0.5">{time}</p>
+                      <span className="mt-2 inline-block text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                         {label}
                       </span>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 flex-shrink-0 mt-1 transition-colors" />
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/60 group-hover:text-muted-foreground flex-shrink-0 mt-1 transition-colors" />
                   </Link>
                   {(lastMeeting.notes || lastMeeting.actionItems) && (
-                    <div className="px-4 pb-4 border-t border-slate-100">
+                    <div className="px-4 pb-4 border-t border-border">
                       <RecentInteractionCard
                         notes={lastMeeting.notes ?? ''}
                         actionItems={lastMeeting.actionItems ?? null}
@@ -111,38 +111,38 @@ export default function InteractionsSection({
                 </div>
               )
             })() : (
-              <p className="text-sm text-slate-400 pl-1">No past interactions.</p>
+              <p className="text-sm text-muted-foreground pl-1">No past interactions.</p>
             )}
           </div>
 
           {/* PAST INTERACTIONS */}
           {recentMeetings.length > 0 && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
                 Past Interactions
               </p>
-              <div className="rounded-lg border border-slate-100 overflow-hidden">
+              <div className="rounded-lg border border-border overflow-hidden">
                 {recentMeetings.map((m) => (
                   <div
                     key={m.id}
-                    className="flex items-start gap-3 px-4 py-3 border-b border-slate-100 last:border-0"
+                    className="flex items-start gap-3 px-4 py-3 border-b border-border last:border-0"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-900 truncate">
+                      <p className="text-sm font-medium text-foreground truncate">
                         {m.title || 'Untitled Interaction'}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                        <p className="text-xs text-slate-400">{formatMeetingDate(m.startTime)}</p>
+                        <p className="text-xs text-muted-foreground">{formatMeetingDate(m.startTime)}</p>
                         {m.sessionStatus && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-slate-100 text-slate-500 border border-slate-200">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-muted text-muted-foreground border border-border">
                             {m.sessionStatus}
                           </span>
                         )}
                       </div>
                       {m.notes ? (
-                        <p className="text-xs text-slate-400 mt-1 line-clamp-1">{m.notes}</p>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{m.notes}</p>
                       ) : (
-                        <p className="text-xs text-slate-300 mt-1 italic">No notes</p>
+                        <p className="text-xs text-muted-foreground/60 mt-1 italic">No notes</p>
                       )}
                     </div>
                     <Link

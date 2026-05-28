@@ -558,7 +558,7 @@ export default function InkCanvas({
   }, [controlsRef, onStrokesChange])
 
   return (
-    <div ref={containerRef} className={`relative bg-white touch-none ${className ?? ''}`} style={{ touchAction: 'none' }}>
+    <div ref={containerRef} className={`relative bg-card touch-none ${className ?? ''}`} style={{ touchAction: 'none' }}>
       <canvas
         ref={ref}
         // touch-action: none keeps the browser from stealing the gesture for

@@ -181,7 +181,7 @@ export default function GlobalLogNoteDialog({ humans, trigger }: Props) {
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   {interactionId && interactionId !== '__none__'
                     ? 'This note will be saved to the interaction record'
                     : 'This note will be saved as a general coaching note'}
@@ -191,7 +191,7 @@ export default function GlobalLogNoteDialog({ humans, trigger }: Props) {
           </div>
 
           {/* Fixed footer */}
-          <div className="px-6 py-4 border-t border-slate-100 shrink-0 flex items-center justify-end gap-2">
+          <div className="px-6 py-4 border-t border-border shrink-0 flex items-center justify-end gap-2">
             {error && (
               <p className="text-xs font-medium text-rose-600 mr-auto">{error}</p>
             )}

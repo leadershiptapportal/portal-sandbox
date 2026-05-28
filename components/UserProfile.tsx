@@ -44,16 +44,16 @@ export default function UserProfile({ user }: UserProfileProps) {
   return (
     <div>
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <Link href="/myhumans" className="hover:text-gray-700 transition-colors">
+      <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+        <Link href="/myhumans" className="hover:text-foreground transition-colors">
           My Humans
         </Link>
         <span>/</span>
-        <span className="text-gray-900">{name}</span>
+        <span className="text-foreground">{name}</span>
       </nav>
 
       {/* Profile header card */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+      <div className="bg-card rounded-xl border border-border p-6 mb-6">
         <div className="flex items-start gap-5">
           {/* Large avatar */}
           <div
@@ -62,11 +62,11 @@ export default function UserProfile({ user }: UserProfileProps) {
             {initStr}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-plus-jakarta-sans)' }}>{name}</h1>
+            <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'var(--font-plus-jakarta-sans)' }}>{name}</h1>
             {user.jobTitle && (
-              <p className="text-gray-500 mt-0.5">{user.jobTitle}</p>
+              <p className="text-muted-foreground mt-0.5">{user.jobTitle}</p>
             )}
-            <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 flex-wrap">
+            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
               {user.companyName && <span>{user.companyName}</span>}
               <span>{contactEmail}</span>
             </div>

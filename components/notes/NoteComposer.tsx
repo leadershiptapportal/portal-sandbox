@@ -117,13 +117,13 @@ export default function NoteComposer({
           placeholder={placeholder}
           rows={6}
           aria-invalid={tooShort}
-          className="w-full rounded-md border border-slate-200 px-3 py-2.5 text-sm bg-white resize-y focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] placeholder:text-slate-400 leading-relaxed"
+          className="w-full rounded-md border border-border px-3 py-2.5 text-sm bg-card resize-y focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] focus:border-[hsl(213,70%,30%)] placeholder:text-muted-foreground leading-relaxed"
         />
         <div className="flex items-center justify-between text-xs">
           {tooShort ? (
             <span className="text-rose-600">Note must be at least {MIN_CHARS} characters.</span>
           ) : (
-            <span className="text-slate-400">{trimmed.length} chars</span>
+            <span className="text-muted-foreground">{trimmed.length} chars</span>
           )}
           {!hideInkLink && (
             <Link
@@ -145,7 +145,7 @@ export default function NoteComposer({
             type="button"
             onClick={onCancel}
             disabled={saving}
-            className="px-4 h-9 text-sm border border-slate-200 rounded-md hover:bg-slate-50 transition-colors text-slate-600 disabled:opacity-50"
+            className="px-4 h-9 text-sm border border-border rounded-md hover:bg-muted/50 transition-colors text-muted-foreground disabled:opacity-50"
           >
             Cancel
           </button>

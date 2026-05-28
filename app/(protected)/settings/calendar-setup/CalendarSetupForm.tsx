@@ -70,17 +70,17 @@ export default function CalendarSetupForm({
         {calendars.map(cal => (
           <label
             key={cal.id}
-            className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors"
+            className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors"
           >
             <input
               type="checkbox"
               checked={selected.has(cal.id)}
               onChange={() => toggle(cal.id)}
-              className="h-4 w-4 rounded border-slate-300 text-[hsl(213,70%,30%)] accent-[hsl(213,70%,30%)]"
+              className="h-4 w-4 rounded border-border text-[hsl(213,70%,30%)] accent-[hsl(213,70%,30%)]"
             />
-            <span className="text-sm text-slate-800 font-medium">{cal.name}</span>
+            <span className="text-sm text-foreground font-medium">{cal.name}</span>
             {cal.isDefaultCalendar && (
-              <span className="ml-auto text-xs text-slate-400">Primary</span>
+              <span className="ml-auto text-xs text-muted-foreground">Primary</span>
             )}
           </label>
         ))}
@@ -89,7 +89,7 @@ export default function CalendarSetupForm({
       {/* Sync window */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">
+          <label className="block text-xs font-medium text-muted-foreground mb-1">
             Sync past (days)
           </label>
           <input
@@ -98,12 +98,12 @@ export default function CalendarSetupForm({
             max={365}
             value={pastDays}
             onChange={e => setPastDays(Number(e.target.value))}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]"
           />
-          <p className="text-xs text-slate-400 mt-1">How far back to pull past events</p>
+          <p className="text-xs text-muted-foreground mt-1">How far back to pull past events</p>
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">
+          <label className="block text-xs font-medium text-muted-foreground mb-1">
             Sync ahead (days)
           </label>
           <input
@@ -112,16 +112,16 @@ export default function CalendarSetupForm({
             max={365}
             value={futureDays}
             onChange={e => setFutureDays(Number(e.target.value))}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]"
           />
-          <p className="text-xs text-slate-400 mt-1">How far ahead to pull upcoming events</p>
+          <p className="text-xs text-muted-foreground mt-1">How far ahead to pull upcoming events</p>
         </div>
       </div>
 
       <div className="flex gap-3">
         <a
           href="/settings"
-          className="flex-1 inline-flex items-center justify-center px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
+          className="flex-1 inline-flex items-center justify-center px-4 py-2.5 rounded-lg text-sm font-medium text-muted-foreground border border-border hover:bg-muted/50 transition-colors"
         >
           Cancel
         </a>
