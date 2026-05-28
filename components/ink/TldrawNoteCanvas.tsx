@@ -22,6 +22,8 @@ import {
   DefaultSizeStyle,
   defaultShapeUtils,
   defaultBindingUtils,
+  getSnapshot,
+  loadSnapshot,
   type TLComponents,
 } from 'tldraw'
 import { createTLStore } from '@tldraw/editor'
@@ -83,10 +85,11 @@ const TLDRAW_OPTIONS = {
 // ── Public handle type ─────────────────────────────────────────────────────────
 
 export interface TldrawNoteCanvasHandle {
-  exportBlob: () => Promise<Blob | null>
-  undo:    () => void
-  clear:   () => void
-  isEmpty: () => boolean
+  exportBlob:  () => Promise<Blob | null>
+  getSnapshot: () => string | null
+  undo:        () => void
+  clear:       () => void
+  isEmpty:     () => boolean
 }
 
 // ── Props ──────────────────────────────────────────────────────────────────────
@@ -98,12 +101,13 @@ export interface TldrawNoteCanvasProps {
   penOnly:  boolean
   onShapeCountChange: (count: number) => void
   className?: string
+  initialSnapshot?: string
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
 function TldrawNoteCanvasInner(
-  { color, width, tool, penOnly, onShapeCountChange, className }: TldrawNoteCanvasProps,
+  { color, width, tool, penOnly, onShapeCountChange, className, initialSnapshot }: TldrawNoteCanvasProps,
   ref: React.ForwardedRef<TldrawNoteCanvasHandle>,
 ) {
   /**
@@ -113,13 +117,20 @@ function TldrawNoteCanvasInner(
    * during that async flip — causing the "works for 2 seconds then dies" bug.
    * Passing a TLStore instance routes straight to TldrawEditorWithReadyStore,
    * no loading cycle.
+   *
+   * If an initialSnapshot is provided, load it into the store before mounting
+   * so the existing strokes are visible immediately.
    */
-  const [store] = useState(() =>
-    createTLStore({
+  const [store] = useState(() => {
+    const s = createTLStore({
       shapeUtils:   defaultShapeUtils,
       bindingUtils: defaultBindingUtils,
     })
-  )
+    if (initialSnapshot) {
+      try { loadSnapshot(s, JSON.parse(initialSnapshot)) } catch { /* ignore corrupt data */ }
+    }
+    return s
+  })
 
   const editorRef = useRef<Editor | null>(null)
 
@@ -172,6 +183,11 @@ function TldrawNoteCanvasInner(
         pixelRatio: 2,
       })
       return blob
+    },
+    getSnapshot: () => {
+      const editor = editorRef.current
+      if (!editor) return null
+      return JSON.stringify(getSnapshot(editor.store))
     },
     undo: () => editorRef.current?.undo(),
     clear: () => {

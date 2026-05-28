@@ -7,6 +7,7 @@ import { Pencil, Undo2, Trash2, Eraser, Link2 } from 'lucide-react'
 import type { TldrawNoteCanvasHandle } from '@/components/ink/TldrawNoteCanvas'
 import { saveInkNoteAction } from '../actions'
 import type { Interaction } from '@/lib/types'
+import type { Note } from '@/lib/airtable/notes'
 
 const TldrawNoteCanvas = dynamic(
   () => import('@/components/ink/TldrawNoteCanvas'),
@@ -18,6 +19,7 @@ interface Props {
   personName: string
   meetings: Interaction[]
   initialInteraction: Interaction | null
+  existingInkNote?: Note | null
   onSaveComplete: () => void
   onCancel: () => void
   onStrokeCountChange?: (count: number) => void
@@ -55,6 +57,7 @@ export default function TakeNotesCanvas({
   personName,
   meetings,
   initialInteraction,
+  existingInkNote,
   onSaveComplete,
   onCancel,
   onStrokeCountChange,
@@ -65,9 +68,11 @@ export default function TakeNotesCanvas({
   const [width,    setWidth]    = useState(WIDTHS[2].value)   // default: Medium
   const [tool,     setTool]     = useState<'pen' | 'eraser'>('pen')
   const [hasShapes, setHasShapes] = useState(false)
-  const [caption,  setCaption]  = useState('')
+  const [caption,  setCaption]  = useState(existingInkNote?.content ?? '')
   const [saving,   setSaving]   = useState(false)
   const [error,    setError]    = useState<string | null>(null)
+  // Tracks the Airtable record ID of the note being edited so re-saves upsert
+  const [currentNoteId, setCurrentNoteId] = useState<string | undefined>(existingInkNote?.id)
 
   const [selectedMeetingId, setSelectedMeetingId] = useState<string>(
     initialInteraction?.id ?? '',
@@ -104,6 +109,8 @@ export default function TakeNotesCanvas({
         return
       }
 
+      const inkNoteData = canvasRef.current.getSnapshot() ?? ''
+
       const fd = new FormData()
       fd.append('file', new File([blob], `ink-note-${Date.now()}.png`, { type: 'image/png' }))
       fd.append('folder', 'leadershiptap/ink-notes')
@@ -119,8 +126,10 @@ export default function TakeNotesCanvas({
       const result = await saveInkNoteAction(
         personId,
         uploadJson.url,
+        inkNoteData,
         caption.trim() || undefined,
         selectedMeetingId || undefined,
+        currentNoteId,
       )
 
       if ('error' in result) {
@@ -129,6 +138,7 @@ export default function TakeNotesCanvas({
         return
       }
 
+      setCurrentNoteId(result.noteId)
       toast.success('Note saved')
       onSaveComplete()
     } catch (err) {
@@ -242,6 +252,7 @@ export default function TakeNotesCanvas({
           penOnly={true}
           onShapeCountChange={handleShapeCountChange}
           className="w-full h-full"
+          initialSnapshot={existingInkNote?.inkNoteData}
         />
       </div>
 

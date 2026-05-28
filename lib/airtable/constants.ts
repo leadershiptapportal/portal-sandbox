@@ -97,6 +97,7 @@ export const FIELDS = {
     VISIBILITY: 'fldan9xqdso86TKBv',            // "Visibility"
     RELATIONSHIP_CONTEXT: 'fldltUsIa9P0U73li',  // "Relationship Context" (linked)
     INK_IMAGE_URL: 'fldxHSSkmAvFsgBKR',         // "Ink Image URL" (url — Cloudinary image for ink notes)
+    INK_NOTE_DATA: 'fld2TBspTmUSjvaR3',         // "Ink Note Data" (multilineText — TLStore JSON snapshot for resumable editing)
   },
   TASKS: {
     TITLE: 'fldRgrskNdZharknP',                 // "Title"

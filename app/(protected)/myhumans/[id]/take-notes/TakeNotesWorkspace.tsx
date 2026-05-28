@@ -34,6 +34,7 @@ interface Props {
   lastInteractionNote?: LastNoteData | null
   relationships?: RelationshipContext[]
   rcNotes?: Map<string, Note>
+  existingInkNote?: Note | null
 }
 
 export default function TakeNotesWorkspace({
@@ -46,6 +47,7 @@ export default function TakeNotesWorkspace({
   lastInteractionNote,
   relationships = [],
   rcNotes = new Map(),
+  existingInkNote,
 }: Props) {
   const router = useRouter()
   const [savedPersonData, setSavedPersonData] = useState(person)
@@ -152,6 +154,7 @@ export default function TakeNotesWorkspace({
             personName={displayName}
             meetings={meetings}
             initialInteraction={initialInteraction}
+            existingInkNote={existingInkNote}
             onSaveComplete={handleSaveComplete}
             onCancel={handleCancel}
             onStrokeCountChange={(count) => setHasStrokes(count > 0)}

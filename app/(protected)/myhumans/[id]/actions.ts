@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createNote, updateNote, getNotesByInteractionId, upsertGeneralNoteForRC } from '@/lib/airtable/notes'
+import { createNote, updateNote, updateInkNoteFields, getNotesByInteractionId, upsertGeneralNoteForRC } from '@/lib/airtable/notes'
 import { createTask, updateTaskStatus } from '@/lib/airtable/tasks'
 import {
   updateUserProfile,
@@ -154,13 +154,22 @@ export async function saveNoteAction(
 export async function saveInkNoteAction(
   subjectPersonId: string,
   imageUrl: string,
+  inkNoteData: string,
   caption?: string,
   interactionId?: string,
-): Promise<{ success: true } | { error: string }> {
+  existingNoteId?: string,
+): Promise<{ success: true; noteId: string } | { error: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
     if (!userRecord.airtableId) {
       return { error: 'Could not resolve your user record.' }
+    }
+
+    if (existingNoteId) {
+      const result = await updateInkNoteFields(existingNoteId, imageUrl, inkNoteData, caption?.trim())
+      if ('error' in result) return result
+      revalidatePath(`/myhumans/${subjectPersonId}`)
+      return { success: true, noteId: existingNoteId }
     }
 
     const rc = await resolveContextForSubject(userRecord.airtableId, subjectPersonId)
@@ -168,9 +177,10 @@ export async function saveInkNoteAction(
       return { error: 'No active coaching or reporting relationship reaches this person.' }
     }
 
-    await createNote({
+    const created = await createNote({
       content: (caption ?? '').trim(),
       inkImageUrl: imageUrl,
+      inkNoteData,
       authorPersonId: userRecord.airtableId,
       coachName: userRecord.name || undefined,
       subjectPersonId,
@@ -180,7 +190,7 @@ export async function saveInkNoteAction(
       noteType: 'ink_note',
     })
     revalidatePath(`/myhumans/${subjectPersonId}`)
-    return { success: true }
+    return { success: true, noteId: created.id }
   } catch (err) {
     console.error('[saveInkNoteAction]', err)
     return { error: err instanceof Error ? err.message : String(err) }

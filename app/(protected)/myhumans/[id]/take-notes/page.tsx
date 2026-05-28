@@ -6,7 +6,7 @@ import { getAllUsers, fetchProfileOptions } from '@/lib/airtable/users'
 import { getCoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getInteractionById } from '@/lib/airtable/interactions'
-import { getMostRecentInteractionNoteByHuman, getGeneralNotesByRCIds } from '@/lib/airtable/notes'
+import { getMostRecentInteractionNoteByHuman, getMostRecentInkNoteByHuman, getGeneralNotesByRCIds } from '@/lib/airtable/notes'
 import { getRelationshipsForPerson } from '@/lib/airtable/relationships'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import TakeNotesWorkspace from './TakeNotesWorkspace'
@@ -52,7 +52,7 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
       getRelationshipsForPerson(id).catch(() => []),
     ])
 
-  const [lastInteractionNote, rcNotes] = await Promise.all([
+  const [lastInteractionNote, rcNotes, existingInkNote] = await Promise.all([
     getMostRecentInteractionNoteByHuman(id, interactionId ?? undefined).catch(() => null),
     currentUserRecord.airtableId
       ? getGeneralNotesByRCIds(
@@ -60,6 +60,7 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
           currentUserRecord.airtableId,
         ).catch(() => new Map())
       : Promise.resolve(new Map()),
+    getMostRecentInkNoteByHuman(id, interactionId ?? undefined).catch(() => null),
   ])
 
   const userCanWrite = canWrite(permissionLevel)
@@ -81,6 +82,7 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
       lastInteractionNote={lastInteractionNote}
       relationships={relationships}
       rcNotes={rcNotes}
+      existingInkNote={existingInkNote}
     />
   )
 }

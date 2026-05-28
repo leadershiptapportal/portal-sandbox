@@ -30,6 +30,7 @@ export interface Note {
   id: string
   content: string
   inkImageUrl?: string
+  inkNoteData?: string
   date: string
   humanId?: string
   coachName?: string
@@ -50,6 +51,7 @@ function mapRecord(r: AirtableRecord): Note {
     id: r.id,
     content: (r.fields[FIELDS.NOTES.BODY] as string) ?? '',
     inkImageUrl: (r.fields[FIELDS.NOTES.INK_IMAGE_URL] as string) || undefined,
+    inkNoteData: (r.fields[FIELDS.NOTES.INK_NOTE_DATA] as string) || undefined,
     date: (r.fields[FIELDS.NOTES.DATE] as string) ?? '',
     humanId: firstLinkedId(r.fields[FIELDS.NOTES.CLIENT]),
     coachName: (r.fields[FIELDS.NOTES.COACH_NAME] as string) || undefined,
@@ -200,6 +202,7 @@ export const getNotesByUser = getNotesByHuman
 export interface CreateNoteData {
   content: string
   inkImageUrl?: string
+  inkNoteData?: string
   date?: string
   humanId?: string
   authorPersonId?: string
@@ -230,6 +233,7 @@ export async function createNote(data: CreateNoteData): Promise<Note> {
   if (data.relationshipContextId) fields[FIELDS.NOTES.RELATIONSHIP_CONTEXT] = [data.relationshipContextId]
   if (data.coachName) fields[FIELDS.NOTES.COACH_NAME] = data.coachName
   if (data.inkImageUrl) fields[FIELDS.NOTES.INK_IMAGE_URL] = data.inkImageUrl
+  if (data.inkNoteData) fields[FIELDS.NOTES.INK_NOTE_DATA] = data.inkNoteData
 
   const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}`, {
     method: 'POST',
@@ -244,6 +248,43 @@ export async function createNote(data: CreateNoteData): Promise<Note> {
     throw new Error(`Notes POST failed: ${JSON.stringify(detail)}`)
   }
   return mapRecord(await res.json())
+}
+
+export async function updateInkNoteFields(
+  noteId: string,
+  imageUrl: string,
+  inkNoteData: string,
+  caption?: string,
+): Promise<{ success: true } | { error: string }> {
+  const { apiKey, baseId } = getCredentials()
+  const fields: Record<string, unknown> = {
+    [FIELDS.NOTES.INK_IMAGE_URL]: imageUrl,
+    [FIELDS.NOTES.INK_NOTE_DATA]: inkNoteData,
+  }
+  if (caption !== undefined) fields[FIELDS.NOTES.BODY] = caption
+  const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}/${noteId}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields }),
+  })
+  if (!res.ok) {
+    const data = await res.json()
+    return { error: JSON.stringify(data) }
+  }
+  return { success: true }
+}
+
+export async function getMostRecentInkNoteByHuman(
+  humanAirtableId: string,
+  interactionId?: string,
+): Promise<Note | null> {
+  const notes = await getNotesByHuman(humanAirtableId)
+  const inkNotes = notes.filter((n) => n.noteType === 'ink_note')
+  if (interactionId) {
+    const match = inkNotes.find((n) => n.interactionId === interactionId)
+    if (match) return match
+  }
+  return inkNotes.find((n) => !n.interactionId) ?? inkNotes[0] ?? null
 }
 
 export async function updateNote(
