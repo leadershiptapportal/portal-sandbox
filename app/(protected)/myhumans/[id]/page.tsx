@@ -9,6 +9,7 @@ import { getUserById } from '@/lib/services/usersService'
 import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getUserMessages } from '@/lib/services/messagesService'
 import { getNotesByUser, getGeneralNotesByRCIds } from '@/lib/airtable/notes'
+import { getCoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import { getTasksByUser } from '@/lib/airtable/tasks'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
@@ -94,6 +95,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     allPersonRelationships,
     allUsersForPicker,
     personalityOptions,
+    coachContext,
   ] = await Promise.all([
     // Every fetch is wrapped in `.catch(...)` so a single failing Airtable
     // call (permission, rate limit, transient network) can't reject the
@@ -112,6 +114,9 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     getRelationshipsForPerson(id).catch(() => []),
     getAllUsers().catch(() => [] as User[]),
     fetchPersonalityOptions().catch(() => null),
+    currentUserRecord.airtableId
+      ? getCoachPersonContext(currentUserRecord.airtableId, id).catch(() => null)
+      : Promise.resolve(null),
   ])
 
   const rcNotes = currentUserRecord.airtableId
@@ -263,6 +268,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         coach={coach}
         teamLead={teamLead}
         userCanWrite={userCanWrite}
+        quickNotes={coachContext?.quickNotes ?? null}
+        personId={id}
       />
 
       {/* ── Relationships (coaches, coachees, manager, reports) ──────────── */}

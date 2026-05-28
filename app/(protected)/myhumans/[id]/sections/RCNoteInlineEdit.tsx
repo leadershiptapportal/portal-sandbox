@@ -1,7 +1,15 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { Check, X, StickyNote } from 'lucide-react'
+import { useState } from 'react'
+import { StickyNote } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { upsertRCNoteAction } from '../actions'
 
 interface Props {
@@ -9,100 +17,103 @@ interface Props {
   subjectPersonId: string
   initialNote: string
   currentCoachId: string
+  /** Number of lines to show in the preview before truncating. Default 5. */
+  previewLines?: number
 }
 
-export default function RCNoteInlineEdit({ rcId, subjectPersonId, initialNote }: Props) {
-  const [editing, setEditing] = useState(false)
+const LINE_CLAMP: Record<number, string> = {
+  2: 'line-clamp-2',
+  3: 'line-clamp-3',
+  4: 'line-clamp-4',
+  5: 'line-clamp-5',
+}
+
+export default function RCNoteInlineEdit({
+  rcId,
+  subjectPersonId,
+  initialNote,
+  previewLines = 5,
+}: Props) {
+  const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState(initialNote)
   const [saved, setSaved] = useState(initialNote)
   const [saving, setSaving] = useState(false)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  useEffect(() => {
-    if (editing && textareaRef.current) {
-      textareaRef.current.focus()
-      textareaRef.current.selectionStart = textareaRef.current.value.length
-    }
-  }, [editing])
+  const clampClass = LINE_CLAMP[previewLines] ?? 'line-clamp-5'
 
   async function handleSave() {
-    if (draft === saved) { setEditing(false); return }
+    if (draft === saved) { setOpen(false); return }
     setSaving(true)
     const result = await upsertRCNoteAction({ rcId, subjectPersonId, content: draft })
     setSaving(false)
-    if ('error' in result && result.error) {
-      // Keep editing open on error
-      return
+    if (!('error' in result) || !result.error) {
+      setSaved(draft)
+      setOpen(false)
     }
-    setSaved(draft)
-    setEditing(false)
   }
 
   function handleCancel() {
     setDraft(saved)
-    setEditing(false)
-  }
-
-  if (editing) {
-    return (
-      <div className="mt-1.5">
-        <textarea
-          ref={textareaRef}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') handleCancel()
-            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSave()
-          }}
-          disabled={saving}
-          rows={3}
-          placeholder="Add a quick note about this relationship…"
-          className="w-full text-xs text-slate-700 border border-[hsl(213,70%,30%)] rounded-md px-2 py-1.5 resize-none focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] disabled:opacity-50"
-        />
-        <div className="flex items-center gap-1 mt-1">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex items-center gap-0.5 text-xs text-emerald-700 hover:text-emerald-800 font-medium disabled:opacity-50"
-          >
-            <Check className="h-3 w-3" />
-            {saving ? 'Saving…' : 'Save'}
-          </button>
-          <span className="text-slate-300 text-xs">·</span>
-          <button
-            onClick={handleCancel}
-            disabled={saving}
-            className="text-xs text-slate-400 hover:text-slate-600"
-          >
-            <X className="h-3 w-3 inline" /> Cancel
-          </button>
-          <span className="ml-auto text-[10px] text-slate-300">⌘↵ to save</span>
-        </div>
-      </div>
-    )
-  }
-
-  if (saved) {
-    return (
-      <button
-        onClick={() => setEditing(true)}
-        className="mt-1 w-full text-left group"
-        title="Click to edit note"
-      >
-        <p className="text-xs text-slate-500 line-clamp-2 group-hover:text-slate-700 transition-colors">
-          {saved}
-        </p>
-      </button>
-    )
+    setOpen(false)
   }
 
   return (
-    <button
-      onClick={() => setEditing(true)}
-      className="mt-1 flex items-center gap-1 text-xs text-slate-300 hover:text-slate-500 transition-colors"
-    >
-      <StickyNote className="h-3 w-3" />
-      Add note
-    </button>
+    <>
+      <div className="mt-1.5">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">
+          Quick Notes
+        </p>
+        {saved ? (
+          <button
+            onClick={() => { setDraft(saved); setOpen(true) }}
+            className="w-full text-left group"
+            title="Click to view or edit"
+          >
+            <p className={`text-xs text-slate-600 ${clampClass} group-hover:text-slate-800 transition-colors leading-relaxed`}>
+              {saved}
+            </p>
+          </button>
+        ) : (
+          <button
+            onClick={() => { setDraft(''); setOpen(true) }}
+            className="flex items-center gap-1 text-xs text-slate-300 hover:text-slate-500 transition-colors"
+          >
+            <StickyNote className="h-3 w-3" />
+            Add note
+          </button>
+        )}
+      </div>
+
+      <Dialog open={open} onOpenChange={(v) => { if (!v && !saving) handleCancel() }}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Quick Notes</DialogTitle>
+          </DialogHeader>
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSave()
+              if (e.key === 'Escape') handleCancel()
+            }}
+            disabled={saving}
+            rows={8}
+            placeholder="Add a quick note about this relationship…"
+            className="w-full text-sm text-slate-700 border border-slate-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)] focus:border-transparent disabled:opacity-50"
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
+          />
+          <p className="text-xs text-slate-400">⌘↵ to save</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCancel} disabled={saving}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving…' : 'Save'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

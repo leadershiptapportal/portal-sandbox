@@ -2,9 +2,9 @@
 
 import { useState, useRef } from 'react'
 import {
-  Check, Pencil, X, Plus, Search,
+  Check, Pencil, X, Plus,
   ChevronDown, ChevronUp, Network,
-  Cake, CalendarDays,
+  Cake, CalendarDays, StickyNote,
 } from 'lucide-react'
 import {
   Dialog,
@@ -19,8 +19,6 @@ import { Input } from '@/components/ui/input'
 import {
   updateProfileAction,
   updateCoachContextAction,
-  linkExistingTeamMember,
-  searchUsersAction,
   upsertRCNoteAction,
 } from '../actions'
 import RelationshipDialog from '../RelationshipDialog'
@@ -58,7 +56,7 @@ interface BucketItem {
   otherPersonId: string
   otherName: string
   otherTitle?: string
-  role: 'coach' | 'coachee' | 'manager' | 'report' | 'client' | 'personal'
+  role: 'coach' | 'coachee' | 'manager' | 'report' | 'client' | 'prospect' | 'personal'
 }
 
 function classifyRelationship(rc: RelationshipContext, subjectId: string): BucketItem | null {
@@ -74,6 +72,9 @@ function classifyRelationship(rc: RelationshipContext, subjectId: string): Bucke
   }
   if (rc.relationshipType === 'client') {
     return { rc, otherPersonId, otherName, otherTitle, role: 'client' }
+  }
+  if (rc.relationshipType === 'prospect') {
+    return { rc, otherPersonId, otherName, otherTitle, role: 'prospect' }
   }
   if (rc.relationshipType === 'personal') {
     return { rc, otherPersonId, otherName, otherTitle, role: 'personal' }
@@ -375,63 +376,70 @@ function CompactRCNote({
   subjectPersonId: string
   initialNote: string
 }) {
-  const [editing, setEditing] = useState(false)
+  const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState(initialNote)
   const [saved, setSaved] = useState(initialNote)
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
-    if (draft === saved) { setEditing(false); return }
+    if (draft === saved) { setOpen(false); return }
     setSaving(true)
     const result = await upsertRCNoteAction({ rcId, subjectPersonId, content: draft })
     setSaving(false)
     if (!('error' in result) || !result.error) {
       setSaved(draft)
-      setEditing(false)
+      setOpen(false)
     }
   }
 
-  if (editing) {
-    return (
-      <div className="mt-1">
-        <textarea
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') { setDraft(saved); setEditing(false) }
-            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSave()
-          }}
-          disabled={saving}
-          // eslint-disable-next-line jsx-a11y/no-autofocus
-          autoFocus
-          rows={3}
-          placeholder="Quick note…"
-          className="w-full text-[11px] text-slate-700 border border-[hsl(213,70%,30%)] rounded px-1.5 py-1 resize-none focus:outline-none"
-        />
-        <div className="flex items-center gap-2 mt-0.5">
-          <button onClick={handleSave} disabled={saving} className="text-[10px] text-emerald-700 font-medium">
-            {saving ? 'Saving…' : 'Save'}
-          </button>
-          <button onClick={() => { setDraft(saved); setEditing(false) }} className="text-[10px] text-slate-400">
-            Cancel
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (saved) {
-    return (
-      <button onClick={() => setEditing(true)} className="mt-0.5 w-full text-left" title="Edit note">
-        <p className="text-[11px] text-slate-500 line-clamp-2 hover:text-slate-700 transition-colors">{saved}</p>
-      </button>
-    )
+  function handleCancel() {
+    setDraft(saved)
+    setOpen(false)
   }
 
   return (
-    <button onClick={() => setEditing(true)} className="mt-0.5 text-[10px] text-slate-300 hover:text-slate-500 transition-colors">
-      + note
-    </button>
+    <>
+      <div className="mt-0.5">
+        <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">Quick Notes</p>
+        {saved ? (
+          <button onClick={() => { setDraft(saved); setOpen(true) }} className="w-full text-left" title="View or edit">
+            <p className="text-[11px] text-slate-500 line-clamp-2 hover:text-slate-700 transition-colors">{saved}</p>
+          </button>
+        ) : (
+          <button onClick={() => { setDraft(''); setOpen(true) }} className="flex items-center gap-0.5 text-[10px] text-slate-300 hover:text-slate-500 transition-colors">
+            <StickyNote className="h-2.5 w-2.5" />
+            Add note
+          </button>
+        )}
+      </div>
+
+      <Dialog open={open} onOpenChange={(v) => { if (!v && !saving) handleCancel() }}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Quick Notes</DialogTitle>
+          </DialogHeader>
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSave()
+              if (e.key === 'Escape') handleCancel()
+            }}
+            disabled={saving}
+            rows={8}
+            placeholder="Add a quick note about this relationship…"
+            className="w-full text-sm text-slate-700 border border-slate-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)] focus:border-transparent disabled:opacity-50"
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
+          />
+          <p className="text-xs text-slate-400">⌘↵ to save</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCancel} disabled={saving}>Cancel</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 
@@ -460,6 +468,7 @@ function CompactRelationshipsSection({
     { key: 'manager',  label: 'Reports to' },
     { key: 'report',   label: 'Direct Report' },
     { key: 'client',   label: 'Client' },
+    { key: 'prospect', label: 'Prospect' },
     { key: 'personal', label: 'Personal' },
   ]
 
@@ -500,7 +509,11 @@ function CompactRelationshipsSection({
                             subjectName={subjectName}
                             otherPersonId={item.otherPersonId}
                             otherName={item.otherName}
-                            initialRole={item.role === 'client' ? 'client_of' : item.role === 'personal' ? 'personal' : item.role}
+                            initialRole={
+                              item.role === 'client' ? 'client_of' :
+                              item.role === 'prospect' ? 'prospect_of' :
+                              item.role
+                            }
                             initialStartDate={item.rc.startDate}
                             initialStatus={item.rc.status as 'Active' | 'Inactive' | 'Paused' | 'Ended'}
                             trigger={
@@ -742,111 +755,6 @@ function PersonalityCard({
   )
 }
 
-// ── Team member row ───────────────────────────────────────────────────────────
-
-function TeamMemberRow({ name, label }: { name: string; label?: string }) {
-  return (
-    <div className="flex items-center gap-2 py-0.5">
-      <div className="w-5 h-5 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center">
-        <span className="text-[9px] font-bold text-slate-500 uppercase">{name[0]}</span>
-      </div>
-      <span className="text-sm text-slate-700 truncate">{name}</span>
-      {label && <span className="text-xs text-slate-400 shrink-0">{label}</span>}
-    </div>
-  )
-}
-
-// ── Add team member search ────────────────────────────────────────────────────
-
-function AddTeamMemberInline({
-  personId,
-  existingIds,
-  onAdded,
-}: {
-  personId: string
-  existingIds: string[]
-  onAdded: (newId: string, newName: string) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<Array<{ id: string; name: string; jobTitle?: string }>>([])
-  const [searching, setSearching] = useState(false)
-  const [adding, setAdding] = useState(false)
-
-  async function handleSearch(q: string) {
-    setQuery(q)
-    if (q.trim().length < 2) { setResults([]); return }
-    setSearching(true)
-    const res = await searchUsersAction(q)
-    setSearching(false)
-    setResults(res.filter((r) => !existingIds.includes(r.id)))
-  }
-
-  async function handleAdd(result: { id: string; name: string }) {
-    setAdding(true)
-    const outcome = await linkExistingTeamMember(personId, existingIds, result.id)
-    setAdding(false)
-    if ('success' in outcome) {
-      onAdded(result.id, result.name)
-      setOpen(false)
-      setQuery('')
-      setResults([])
-    }
-  }
-
-  if (!open) {
-    return (
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-1 text-xs text-[hsl(213,70%,35%)] hover:text-[hsl(213,70%,25%)] mt-1 font-medium"
-      >
-        <Plus className="h-3 w-3" />
-        Add member
-      </button>
-    )
-  }
-
-  return (
-    <div className="mt-2 space-y-1.5">
-      <div className="relative">
-        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
-        <input
-          // eslint-disable-next-line jsx-a11y/no-autofocus
-          autoFocus
-          type="text"
-          value={query}
-          onChange={(e) => handleSearch(e.target.value)}
-          placeholder="Search people…"
-          className="w-full pl-7 pr-2 py-1.5 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-white"
-          disabled={adding}
-        />
-      </div>
-      {searching && <p className="text-xs text-slate-400">Searching…</p>}
-      {results.length > 0 && (
-        <ul className="border border-slate-200 rounded-md bg-white divide-y divide-slate-100 overflow-hidden">
-          {results.slice(0, 5).map((r) => (
-            <li key={r.id}>
-              <button
-                onClick={() => handleAdd(r)}
-                disabled={adding}
-                className="w-full text-left px-3 py-1.5 hover:bg-slate-50 transition-colors disabled:opacity-50"
-              >
-                <p className="text-xs font-medium text-slate-800">{r.name}</p>
-                {r.jobTitle && <p className="text-xs text-slate-400">{r.jobTitle}</p>}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      <button
-        onClick={() => { setOpen(false); setQuery(''); setResults([]) }}
-        className="text-xs text-slate-400 hover:text-slate-600"
-      >
-        Cancel
-      </button>
-    </div>
-  )
-}
 
 // ── Section wrapper ───────────────────────────────────────────────────────────
 
@@ -872,15 +780,6 @@ export default function PersonSidebar({
   relationships = [],
   rcNotes = new Map(),
 }: Props) {
-  const [teamMemberIds, setTeamMemberIds] = useState<string[]>(person.teamMemberIds ?? [])
-  const [teamMemberNames, setTeamMemberNames] = useState<string[]>(
-    (person.teamMemberIds ?? []).map(
-      (id) => profileOptions.allUsers.find((u) => u.id === id)?.name ?? id,
-    ),
-  )
-
-  const lookupName = (id: string) =>
-    profileOptions.allUsers.find((u) => u.id === id)?.name ?? id
 
   // ── Save helpers ──────────────────────────────────────────────────────────
 
@@ -1143,53 +1042,6 @@ export default function PersonSidebar({
         </div>
       </Section>
 
-      {/* ── Team & Org ───────────────────────────────────────────────────── */}
-      <Section title="Team & Org">
-        {person.managerIds?.[0] && (
-          <div className="space-y-0.5">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Manager</p>
-            <TeamMemberRow name={lookupName(person.managerIds[0])} />
-          </div>
-        )}
-
-        {person.directReportIds && person.directReportIds.length > 0 && (
-          <div className="space-y-0.5">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              Direct Reports
-            </p>
-            <div className="space-y-1">
-              {person.directReportIds.map((id) => (
-                <TeamMemberRow key={id} name={lookupName(id)} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-0.5">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-            Team Members
-          </p>
-          {teamMemberNames.length > 0 ? (
-            <div className="space-y-1">
-              {teamMemberNames.map((name, i) => (
-                <TeamMemberRow key={teamMemberIds[i]} name={name} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-slate-400 italic">None added yet</p>
-          )}
-          {userCanWrite && (
-            <AddTeamMemberInline
-              personId={person.id}
-              existingIds={teamMemberIds}
-              onAdded={(newId, newName) => {
-                setTeamMemberIds((prev) => [...prev, newId])
-                setTeamMemberNames((prev) => [...prev, newName])
-              }}
-            />
-          )}
-        </div>
-      </Section>
 
       {/* ── Family Details ───────────────────────────────────────────────── */}
       {userCanWrite && (

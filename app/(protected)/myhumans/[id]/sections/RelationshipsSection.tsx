@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Network, UserCheck, Users as UsersIcon, ChevronRight, Pencil, Heart, Briefcase } from 'lucide-react'
+import { Network, UserCheck, Users as UsersIcon, ChevronRight, Pencil, Heart, Briefcase, TrendingUp } from 'lucide-react'
 import RelationshipDialog from '../RelationshipDialog'
 import RCNoteInlineEdit from './RCNoteInlineEdit'
 import { SectionHeading } from './helpers'
@@ -23,7 +23,7 @@ interface Props {
   currentCoachId: string
 }
 
-type BucketRole = 'coach' | 'coachee' | 'manager' | 'report' | 'client' | 'personal'
+type BucketRole = 'coach' | 'coachee' | 'manager' | 'report' | 'client' | 'prospect' | 'personal'
 
 interface BucketItem {
   rc: RelationshipContext
@@ -46,8 +46,10 @@ function classifyRelationship(rc: RelationshipContext, subjectId: string): Bucke
     return { rc, otherPersonId, otherName, otherTitle, role: subjectIsPerson ? 'manager' : 'report' }
   }
   if (rc.relationshipType === 'client') {
-    // Subject is Lead → they have this person as a client
     return { rc, otherPersonId, otherName, otherTitle, role: 'client' }
+  }
+  if (rc.relationshipType === 'prospect') {
+    return { rc, otherPersonId, otherName, otherTitle, role: 'prospect' }
   }
   if (rc.relationshipType === 'personal') {
     return { rc, otherPersonId, otherName, otherTitle, role: 'personal' }
@@ -128,7 +130,11 @@ function RelationshipPill({
           subjectName={subjectName}
           otherPersonId={item.otherPersonId}
           otherName={item.otherName}
-          initialRole={item.role === 'client' ? 'client_of' : item.role === 'personal' ? 'personal' : item.role}
+          initialRole={
+            item.role === 'client' ? 'client_of' :
+            item.role === 'prospect' ? 'prospect_of' :
+            item.role
+          }
           initialStartDate={item.rc.startDate}
           initialStatus={item.rc.status as 'Active' | 'Inactive' | 'Paused' | 'Ended'}
           trigger={
@@ -219,6 +225,7 @@ export default function RelationshipsSection({
   const managers  = classified.filter((b) => b.role === 'manager')
   const reports   = classified.filter((b) => b.role === 'report')
   const clients   = classified.filter((b) => b.role === 'client')
+  const prospects = classified.filter((b) => b.role === 'prospect')
   const personal  = classified.filter((b) => b.role === 'personal')
 
   const groupProps = { subjectPersonId, subjectName, canEdit, rcNotes, currentCoachId }
@@ -274,6 +281,13 @@ export default function RelationshipsSection({
           icon={Briefcase}
           items={clients}
           emptyText="No clients linked"
+          {...groupProps}
+        />
+        <RelationshipGroup
+          label="Prospects"
+          icon={TrendingUp}
+          items={prospects}
+          emptyText="No prospects linked"
           {...groupProps}
         />
         <RelationshipGroup

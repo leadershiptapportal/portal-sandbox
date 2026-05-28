@@ -35,6 +35,7 @@ export type RelationshipRole =
   | 'manager'
   | 'report'
   | 'client_of'
+  | 'prospect_of'
   | 'personal'
 
 interface Person {
@@ -73,6 +74,7 @@ const ROLE_LABELS: Record<RelationshipRole, string> = {
   manager: 'Manager — subject reports to them',
   report: 'Direct Report — they report to subject',
   client_of: 'Client — they are subject\'s client',
+  prospect_of: 'Prospect — they are a potential client of subject',
   personal: 'Personal — family, partner, or other personal connection',
 }
 
@@ -85,8 +87,9 @@ function roleToTypeAndDirection(role: RelationshipRole): {
     case 'coachee':  return { type: 'coaching',   subjectIs: 'lead' }
     case 'manager':  return { type: 'reports_to', subjectIs: 'person' }
     case 'report':   return { type: 'reports_to', subjectIs: 'lead' }
-    case 'client_of':return { type: 'client',     subjectIs: 'lead' }
-    case 'personal': return { type: 'personal',   subjectIs: 'lead' }
+    case 'client_of':  return { type: 'client',   subjectIs: 'lead' }
+    case 'prospect_of':return { type: 'prospect', subjectIs: 'lead' }
+    case 'personal':   return { type: 'personal', subjectIs: 'lead' }
   }
 }
 
@@ -258,7 +261,7 @@ export default function RelationshipDialog(props: Props) {
                     onClick={() => setAddMode('create')}
                     className={`flex-1 py-1.5 font-medium transition-colors ${addMode === 'create' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
                   >
-                    Create new person
+                    Add new person
                   </button>
                 </div>
 
@@ -353,6 +356,7 @@ export default function RelationshipDialog(props: Props) {
                   <SelectItem value="manager">{ROLE_LABELS.manager}</SelectItem>
                   <SelectItem value="report">{ROLE_LABELS.report}</SelectItem>
                   <SelectItem value="client_of">{ROLE_LABELS.client_of}</SelectItem>
+                  <SelectItem value="prospect_of">{ROLE_LABELS.prospect_of}</SelectItem>
                   <SelectItem value="personal">{ROLE_LABELS.personal}</SelectItem>
                 </SelectContent>
               </Select>
