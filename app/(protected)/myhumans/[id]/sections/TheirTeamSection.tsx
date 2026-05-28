@@ -41,7 +41,7 @@ export default function TheirTeamSection({ directReports, nextTrail, canDrillDee
                     className="w-9 h-9 rounded-full object-cover flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-semibold flex-shrink-0 select-none">
+                  <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 flex items-center justify-center text-xs font-semibold flex-shrink-0 select-none">
                     {reportInitials}
                   </div>
                 )}
@@ -69,7 +69,7 @@ export default function TheirTeamSection({ directReports, nextTrail, canDrillDee
                   className="w-9 h-9 rounded-full object-cover flex-shrink-0"
                 />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-semibold flex-shrink-0 select-none">
+                <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 flex items-center justify-center text-xs font-semibold flex-shrink-0 select-none">
                   {reportInitials}
                 </div>
               )}

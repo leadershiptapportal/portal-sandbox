@@ -177,7 +177,7 @@ export default function ProfileCardSection({
             className="w-16 h-16 rounded-full object-cover flex-shrink-0"
           />
         ) : (
-          <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-2xl font-bold flex-shrink-0 select-none">
+          <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 flex items-center justify-center text-2xl font-bold flex-shrink-0 select-none">
             {initials}
           </div>
         )}

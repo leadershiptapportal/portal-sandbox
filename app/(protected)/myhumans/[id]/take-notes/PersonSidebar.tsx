@@ -953,13 +953,13 @@ export default function PersonSidebar({
         <div className="space-y-3">
 
           {/* Enneagram — blue */}
-          <PersonalityCard label="Enneagram" bg="bg-blue-50" border="border-blue-100">
+          <PersonalityCard label="Enneagram" bg="bg-blue-50 dark:bg-blue-950/40" border="border-blue-100 dark:border-blue-800/50">
             <InlineSelect
               currentId={person.enneagramIds?.[0]}
               currentLabel={enneagramCurrent?.name || person.enneagramType || undefined}
               options={profileOptions.enneagrams}
               placeholder="Not set"
-              valueClassName="text-blue-800 font-semibold"
+              valueClassName="text-blue-800 dark:text-blue-300 font-semibold"
               onSave={async (id) => { await saveProfile({ 'Enneagram': id ? [id] : [] }) }}
             />
             {(enneagramCurrent?.descriptor || person.enneagramDescriptor) && (
@@ -970,13 +970,13 @@ export default function PersonSidebar({
           </PersonalityCard>
 
           {/* 16 Personalities — violet */}
-          <PersonalityCard label="16 Personalities" bg="bg-violet-50" border="border-violet-100">
+          <PersonalityCard label="16 Personalities" bg="bg-violet-50 dark:bg-violet-950/40" border="border-violet-100 dark:border-violet-800/50">
             <InlineSelect
               currentId={person.mbtiIds?.[0]}
               currentLabel={mbtiCurrent?.name || (person.mbtiType ? person.mbtiType.split('-')[0] : undefined)}
               options={profileOptions.mbtis}
               placeholder="Not set"
-              valueClassName="text-violet-800 font-semibold"
+              valueClassName="text-violet-800 dark:text-violet-300 font-semibold"
               onSave={async (id) => { await saveProfile({ 'MBTI': id ? [id] : [] }) }}
             />
             {(mbtiCurrent?.descriptor || person.mbtiDescriptor) && (
@@ -987,13 +987,13 @@ export default function PersonSidebar({
           </PersonalityCard>
 
           {/* Conflict Posture — amber */}
-          <PersonalityCard label="Conflict Posture" bg="bg-amber-50" border="border-amber-100">
+          <PersonalityCard label="Conflict Posture" bg="bg-amber-50 dark:bg-amber-950/40" border="border-amber-100 dark:border-amber-800/50">
             <InlineSelect
               currentId={person.conflictPostureIds?.[0]}
               currentLabel={conflictCurrent?.name || person.conflictPosture || undefined}
               options={profileOptions.conflictPostures}
               placeholder="Not set"
-              valueClassName="text-amber-800 font-semibold"
+              valueClassName="text-amber-800 dark:text-amber-300 font-semibold"
               onSave={async (id) => { await saveProfile({ 'Conflict Posture': id ? [id] : [] }) }}
             />
             {(conflictCurrent?.descriptor || person.conflictPostureDescriptor) && (
@@ -1004,13 +1004,13 @@ export default function PersonSidebar({
           </PersonalityCard>
 
           {/* Apology Language — emerald */}
-          <PersonalityCard label="Apology Language" bg="bg-emerald-50" border="border-emerald-100">
+          <PersonalityCard label="Apology Language" bg="bg-emerald-50 dark:bg-emerald-950/40" border="border-emerald-100 dark:border-emerald-800/50">
             <InlineSelect
               currentId={person.apologyLanguageIds?.[0]}
               currentLabel={apologyCurrent?.name || person.apologyLanguage || undefined}
               options={profileOptions.apologyLanguages}
               placeholder="Not set"
-              valueClassName="text-emerald-800 font-semibold"
+              valueClassName="text-emerald-800 dark:text-emerald-300 font-semibold"
               onSave={async (id) => { await saveProfile({ 'Apology Language': id ? [id] : [] }) }}
             />
             {(apologyCurrent?.descriptor || person.apologyLanguageDescriptor) && (
@@ -1026,7 +1026,7 @@ export default function PersonSidebar({
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">
                 Clifton Strengths
               </p>
-              <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 px-3 py-2.5">
+              <div className="rounded-lg border border-indigo-100 dark:border-indigo-800/50 bg-indigo-50/50 dark:bg-indigo-950/40 px-3 py-2.5">
                 <ol className="space-y-2.5">
                   {person.strengths.map((s, i) => {
                     const opt = profileOptions.strengths.find((o) => o.name === s.name)
@@ -1034,12 +1034,12 @@ export default function PersonSidebar({
                     return (
                       <li key={i}>
                         <div className="flex items-center gap-2">
-                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold flex items-center justify-center">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center justify-center">
                             {i + 1}
                           </span>
-                          <span className="text-sm font-semibold text-indigo-900">{s.name}</span>
+                          <span className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">{s.name}</span>
                           {s.domain && (
-                            <span className="text-xs font-medium text-indigo-600 px-1.5 py-0.5 bg-indigo-100 rounded">
+                            <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-900 rounded">
                               {s.domain}
                             </span>
                           )}

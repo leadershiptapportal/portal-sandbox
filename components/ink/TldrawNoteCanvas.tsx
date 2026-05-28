@@ -14,7 +14,7 @@
  * Usage: dynamically imported with { ssr: false } from the parent component.
  */
 
-import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle, useState } from 'react'
+import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle, useState, useMemo } from 'react'
 import {
   Tldraw,
   Editor,
@@ -49,7 +49,7 @@ const SIZE_MAP: Record<number, 's' | 'm' | 'l' | 'xl'> = {
 
 // ── Component overrides ────────────────────────────────────────────────────────
 
-const HIDDEN_COMPONENTS: TLComponents = {
+const HIDDEN_COMPONENTS_BASE: TLComponents = {
   Toolbar:           null,
   MainMenu:          null,
   StylePanel:        null,
@@ -59,9 +59,6 @@ const HIDDEN_COMPONENTS: TLComponents = {
   DebugMenu:         null,
   HelperButtons:     null,
   LoadingScreen:     null,
-  Background: () => (
-    <div style={{ position: 'absolute', inset: 0, background: '#ffffff' }} />
-  ),
 }
 
 // ── tldraw options ─────────────────────────────────────────────────────────────
@@ -102,12 +99,13 @@ export interface TldrawNoteCanvasProps {
   onShapeCountChange: (count: number) => void
   className?: string
   initialSnapshot?: string
+  isDarkMode?: boolean
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
 function TldrawNoteCanvasInner(
-  { color, width, tool, penOnly, onShapeCountChange, className, initialSnapshot }: TldrawNoteCanvasProps,
+  { color, width, tool, penOnly, onShapeCountChange, className, initialSnapshot, isDarkMode = false }: TldrawNoteCanvasProps,
   ref: React.ForwardedRef<TldrawNoteCanvasHandle>,
 ) {
   /**
@@ -199,6 +197,15 @@ function TldrawNoteCanvasInner(
     isEmpty: () => (editorRef.current?.getCurrentPageShapeIds().size ?? 0) === 0,
   }), [])
 
+  // ── Components (background adapts to dark mode) ──────────────────────────────
+
+  const components = useMemo((): TLComponents => ({
+    ...HIDDEN_COMPONENTS_BASE,
+    Background: () => (
+      <div style={{ position: 'absolute', inset: 0, background: isDarkMode ? '#111827' : '#ffffff' }} />
+    ),
+  }), [isDarkMode])
+
   // ── onMount ──────────────────────────────────────────────────────────────────
 
   const handleMount = useCallback(
@@ -261,9 +268,9 @@ function TldrawNoteCanvasInner(
       <Tldraw
         store={store}
         onMount={handleMount}
-        components={HIDDEN_COMPONENTS}
+        components={components}
         options={TLDRAW_OPTIONS}
-        colorScheme={'light' as const}
+        colorScheme={isDarkMode ? 'dark' : 'light'}
         licenseKey={process.env.NEXT_PUBLIC_TLDRAW_LICENSE_KEY}
       />
     </div>

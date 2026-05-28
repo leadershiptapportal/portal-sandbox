@@ -80,9 +80,9 @@ export default function PersonalityStrengthsSection({
             label="Enneagram"
             name={enneagramDisplay}
             descriptor={user.enneagramDescriptor}
-            bg="bg-blue-50"
-            border="border-blue-100"
-            nameColor="text-blue-800"
+            bg="bg-blue-50 dark:bg-blue-950/40"
+            border="border-blue-100 dark:border-blue-800/50"
+            nameColor="text-blue-800 dark:text-blue-300"
           />
         )}
 
@@ -92,9 +92,9 @@ export default function PersonalityStrengthsSection({
             label="16 Personalities"
             name={mbtiDisplay}
             descriptor={user.mbtiDescriptor}
-            bg="bg-violet-50"
-            border="border-violet-100"
-            nameColor="text-violet-800"
+            bg="bg-violet-50 dark:bg-violet-950/40"
+            border="border-violet-100 dark:border-violet-800/50"
+            nameColor="text-violet-800 dark:text-violet-300"
           />
         )}
 
@@ -104,9 +104,9 @@ export default function PersonalityStrengthsSection({
             label="Conflict Posture"
             name={conflictDisplay}
             descriptor={user.conflictPostureDescriptor}
-            bg="bg-amber-50"
-            border="border-amber-100"
-            nameColor="text-amber-800"
+            bg="bg-amber-50 dark:bg-amber-950/40"
+            border="border-amber-100 dark:border-amber-800/50"
+            nameColor="text-amber-800 dark:text-amber-300"
           />
         )}
 
@@ -116,9 +116,9 @@ export default function PersonalityStrengthsSection({
             label="Apology Language"
             name={user.apologyLanguage}
             descriptor={user.apologyLanguageDescriptor}
-            bg="bg-emerald-50"
-            border="border-emerald-100"
-            nameColor="text-emerald-800"
+            bg="bg-emerald-50 dark:bg-emerald-950/40"
+            border="border-emerald-100 dark:border-emerald-800/50"
+            nameColor="text-emerald-800 dark:text-emerald-300"
           />
         )}
 
@@ -128,19 +128,19 @@ export default function PersonalityStrengthsSection({
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
               Clifton Strengths
             </p>
-            <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 px-4 py-3">
+            <div className="rounded-lg border border-indigo-100 dark:border-indigo-800/50 bg-indigo-50/50 dark:bg-indigo-950/40 px-4 py-3">
               <ol className="space-y-3">
                 {user.strengths.map((s, i) => {
                   const descriptor = strengthDescriptors?.[s.name]
                   return (
                     <li key={i}>
                       <div className="flex items-center gap-2">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold flex items-center justify-center">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center justify-center">
                           {i + 1}
                         </span>
-                        <span className="text-sm font-semibold text-indigo-900">{s.name}</span>
+                        <span className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">{s.name}</span>
                         {s.domain && (
-                          <span className="text-xs font-medium text-indigo-600 px-1.5 py-0.5 bg-indigo-100 rounded">
+                          <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-900 rounded">
                             {s.domain}
                           </span>
                         )}

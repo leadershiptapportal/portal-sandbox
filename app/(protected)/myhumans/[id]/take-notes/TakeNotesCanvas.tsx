@@ -3,6 +3,7 @@
 import { useRef, useState, useMemo, useCallback, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
+import { useTheme } from 'next-themes'
 import { Pencil, Undo2, Trash2, Eraser, Link2, WifiOff } from 'lucide-react'
 import type { TldrawNoteCanvasHandle } from '@/components/ink/TldrawNoteCanvas'
 import { saveInkNoteAction } from '../actions'
@@ -63,6 +64,9 @@ export default function TakeNotesCanvas({
   onCancel,
   onStrokeCountChange,
 }: Props) {
+  const { resolvedTheme } = useTheme()
+  const isDarkMode = resolvedTheme === 'dark'
+
   const canvasRef = useRef<TldrawNoteCanvasHandle | null>(null)
   const draftKey  = `ink-draft-${personId}`
 
@@ -315,6 +319,7 @@ export default function TakeNotesCanvas({
             onShapeCountChange={handleShapeCountChange}
             className="w-full h-full"
             initialSnapshot={resolvedSnapshot}
+            isDarkMode={isDarkMode}
           />
         ) : (
           <div className="w-full h-full bg-card animate-pulse rounded-xl" />
