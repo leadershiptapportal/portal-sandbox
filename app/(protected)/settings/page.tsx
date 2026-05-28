@@ -1,10 +1,11 @@
 import { currentUser } from '@clerk/nextjs/server'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getConnectedCalendarsByClerkUserId } from '@/lib/airtable/connectedCalendars'
-import { getUserById } from '@/lib/airtable/users'
+import { getUserById, getPortalUsers } from '@/lib/airtable/users'
 import ManageAccountButton from './ManageAccountButton'
 import SyncCalendarSection from './SyncCalendarSection'
 import { ThemeToggle } from './ThemeToggle'
+import { ImpersonateSection } from './ImpersonateSection'
 
 const ROLE_BADGE: Record<string, string> = {
   admin:   'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
@@ -19,11 +20,17 @@ export default async function SettingsPage() {
     getCurrentUserRecord(),
   ])
 
-  const [connectedCalendars, airtableUser] = await Promise.all([
+  const isAdmin = userRecord.role === 'admin'
+
+  const [connectedCalendars, airtableUser, portalUsers] = await Promise.all([
     userRecord.clerkId
       ? getConnectedCalendarsByClerkUserId(userRecord.clerkId)
       : Promise.resolve([]),
-    userRecord.airtableId ? getUserById(userRecord.airtableId) : Promise.resolve(null),
+    // Use realAirtableId for theme so impersonating admin saves their own preference
+    (userRecord.realAirtableId ?? userRecord.airtableId)
+      ? getUserById((userRecord.realAirtableId ?? userRecord.airtableId)!)
+      : Promise.resolve(null),
+    isAdmin ? getPortalUsers() : Promise.resolve([]),
   ])
 
   const outlookCalendar = connectedCalendars.find((c) => c.provider === 'Outlook')
@@ -92,6 +99,14 @@ export default async function SettingsPage() {
         <p className="text-sm text-muted-foreground mb-4">Choose your preferred color theme.</p>
         <ThemeToggle initialTheme={airtableUser?.theme} />
       </section>
+
+      {/* ── Admin: Impersonate User ─────────────────────────────────────── */}
+      {isAdmin && (
+        <section className="bg-card rounded-xl border border-amber-200 dark:border-amber-900/50 p-6 mb-6">
+          <h2 className="text-base font-semibold text-foreground mb-1">View as User</h2>
+          <ImpersonateSection users={portalUsers} />
+        </section>
+      )}
 
       {/* ── Portal Info ─────────────────────────────────────────────────── */}
       <section className="bg-card rounded-xl border border-border p-6 mb-6">

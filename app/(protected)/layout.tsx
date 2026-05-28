@@ -6,9 +6,15 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Resolves Clerk session → People record, enforces Permission Profile gate,
-  // and writes Clerk User ID on first email-matched login. Redirects on failure.
-  await requireCurrentPortalPerson();
+  const person = await requireCurrentPortalPerson();
 
-  return <AppShell>{children}</AppShell>;
+  return (
+    <AppShell
+      isAdmin={person.role === 'admin'}
+      isImpersonated={person.isImpersonated}
+      impersonatedName={`${person.firstName} ${person.lastName}`.trim()}
+    >
+      {children}
+    </AppShell>
+  );
 }

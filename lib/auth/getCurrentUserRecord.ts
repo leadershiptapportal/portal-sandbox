@@ -2,6 +2,7 @@ import { currentUser } from '@clerk/nextjs/server'
 import { log } from '@/lib/utils/logger'
 import { airtableFetch } from '@/lib/airtable/client'
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
+import { getImpersonatedRecordId } from './impersonation'
 
 export interface CurrentUserRecord {
   clerkId: string
@@ -9,6 +10,8 @@ export interface CurrentUserRecord {
   airtableId: string | null
   role: 'admin' | 'coach' | 'client' | 'unknown'
   name: string
+  isImpersonated: boolean
+  realAirtableId: string | null  // admin's own ID when impersonating, otherwise same as airtableId
 }
 
 /**
@@ -23,7 +26,7 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
   try {
     const clerkUser = await currentUser()
     if (!clerkUser) {
-      return { clerkId: '', email: '', airtableId: null, role: 'unknown', name: '' }
+      return { clerkId: '', email: '', airtableId: null, role: 'unknown', name: '', isImpersonated: false, realAirtableId: null }
     }
 
     const email = clerkUser.emailAddresses[0]?.emailAddress ?? ''
@@ -34,7 +37,7 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
     if (!baseId || !token) {
       const clerkRole = (clerkUser.publicMetadata as { role?: string })?.role
       const role = clerkRole === 'admin' ? 'admin' : clerkRole === 'coach' ? 'coach' : 'unknown'
-      return { clerkId: clerkUser.id, email, airtableId: null, role, name }
+      return { clerkId: clerkUser.id, email, airtableId: null, role, name, isImpersonated: false, realAirtableId: null }
     }
 
     const searchEmail = email.toLowerCase().trim()
@@ -97,10 +100,9 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
 
     if (!match) {
       log.warn('[getCurrentUserRecord] No Airtable record found for:', searchEmail)
-      // Fall back to Clerk role; default admin prevents blank portal during setup
       const clerkRole = (clerkUser.publicMetadata as { role?: string })?.role
       const role = clerkRole === 'admin' ? 'admin' : clerkRole === 'coach' ? 'coach' : 'admin'
-      return { clerkId: clerkUser.id, email, airtableId: null, role, name }
+      return { clerkId: clerkUser.id, email, airtableId: null, role, name, isImpersonated: false, realAirtableId: null }
     }
 
     const rawRole = ((match.fields[FIELDS.USERS.ROLE] as string) ?? '').toLowerCase().trim()
@@ -109,15 +111,57 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
       rawRole === 'coach' ? 'coach' :
       rawRole === 'client' ? 'client' : 'unknown'
 
+    const realAirtableId = match.id as string
+
+    // ── Impersonation: admins can view the portal as another user ─────────
+    if (role === 'admin') {
+      const impersonateId = await getImpersonatedRecordId()
+      if (impersonateId && impersonateId !== realAirtableId) {
+        const { apiKey: impKey, baseId: impBase } = (() => {
+          const k = process.env.AIRTABLE_API_KEY
+          const b = process.env.AIRTABLE_BASE_ID
+          if (!k || !b) return { apiKey: null, baseId: null }
+          return { apiKey: k, baseId: b }
+        })()
+        if (impKey && impBase) {
+          const usersTable = encodeURIComponent(TABLES.PEOPLE)
+          const impRes = await airtableFetch(
+            `https://api.airtable.com/v0/${impBase}/${usersTable}/${impersonateId}`,
+            { headers: { Authorization: `Bearer ${impKey}` }, cache: 'no-store' },
+          )
+          if (impRes.ok) {
+            const impData = await impRes.json()
+            const f = impData.fields as Record<string, unknown>
+            const impRaw = ((f[FIELDS.USERS.ROLE] as string) ?? '').toLowerCase().trim()
+            const impRole: CurrentUserRecord['role'] =
+              impRaw === 'admin' ? 'admin' : impRaw === 'coach' ? 'coach' : impRaw === 'client' ? 'client' : 'unknown'
+            const impEmail = (f[FIELDS.USERS.WORK_EMAIL] as string | undefined) ?? email
+            const impName = [f[FIELDS.USERS.FIRST_NAME], f[FIELDS.USERS.LAST_NAME]].filter(Boolean).join(' ')
+            return {
+              clerkId: clerkUser.id,
+              email: impEmail,
+              airtableId: impersonateId,
+              role: impRole,
+              name: impName || impEmail,
+              isImpersonated: true,
+              realAirtableId,
+            }
+          }
+        }
+      }
+    }
+
     return {
       clerkId: clerkUser.id,
       email,
-      airtableId: match.id as string,
+      airtableId: realAirtableId,
       role,
       name,
+      isImpersonated: false,
+      realAirtableId,
     }
   } catch (err) {
     log.error('[getCurrentUserRecord] error:', err)
-    return { clerkId: '', email: '', airtableId: null, role: 'admin', name: '' }
+    return { clerkId: '', email: '', airtableId: null, role: 'admin', name: '', isImpersonated: false, realAirtableId: null }
   }
 }

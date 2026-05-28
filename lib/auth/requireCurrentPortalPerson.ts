@@ -4,19 +4,44 @@ import { redirect } from 'next/navigation'
 import { airtableFetch } from '@/lib/airtable/client'
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
 import { log } from '@/lib/utils/logger'
+import { getImpersonatedRecordId } from './impersonation'
 
 const AIRTABLE_API = 'https://api.airtable.com/v0'
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+export interface PortalPermissions {
+  canWriteNotes: boolean
+  canCreateMeetings: boolean
+  canViewPersonProfile: boolean
+  canViewDirectReports: boolean
+  notesDefaultVisibility: string
+}
+
 export interface PortalPerson {
   airtableRecordId: string
-  clerkUserId: string
+  clerkUserId: string          // always the real logged-in admin's Clerk ID
+  realAirtableId: string       // real admin's Airtable ID (same as airtableRecordId when not impersonating)
   email: string
   firstName: string
   lastName: string
+  role: 'admin' | 'coach' | 'client' | 'unknown'
   permissionProfileIds: string[]
+  permissions: PortalPermissions
+  isImpersonated: boolean
 }
 
 type AirtableRecord = { id: string; fields: Record<string, unknown> }
+
+const DEFAULT_PERMISSIONS: PortalPermissions = {
+  canWriteNotes: false,
+  canCreateMeetings: false,
+  canViewPersonProfile: false,
+  canViewDirectReports: false,
+  notesDefaultVisibility: 'internal_only',
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function getEnv() {
   const baseId = process.env.AIRTABLE_BASE_ID
@@ -25,7 +50,7 @@ function getEnv() {
   return { baseId, token }
 }
 
-function tableUrl(baseId: string) {
+function peopleUrl(baseId: string) {
   return `${AIRTABLE_API}/${baseId}/${TABLES.PEOPLE}`
 }
 
@@ -36,6 +61,7 @@ function personFields() {
     FIELDS.USERS.WORK_EMAIL,
     FIELDS.USERS.FIRST_NAME,
     FIELDS.USERS.LAST_NAME,
+    FIELDS.USERS.ROLE,
   ]
     .map((f) => `fields[]=${encodeURIComponent(f)}`)
     .join('&')
@@ -46,8 +72,7 @@ async function fetchByFormula(
   token: string,
   formula: string,
 ): Promise<AirtableRecord | null> {
-  const url =
-    `${tableUrl(baseId)}?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1&${personFields()}`
+  const url = `${peopleUrl(baseId)}?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1&${personFields()}`
   const res = await airtableFetch(url, {
     headers: { Authorization: `Bearer ${token}` },
     cache: 'no-store',
@@ -60,54 +85,110 @@ async function fetchByFormula(
   return (data.records as AirtableRecord[] | undefined)?.[0] ?? null
 }
 
+async function fetchByRecordId(
+  baseId: string,
+  token: string,
+  recordId: string,
+): Promise<AirtableRecord | null> {
+  const url = `${peopleUrl(baseId)}/${recordId}?${personFields()}`
+  const res = await airtableFetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  })
+  if (!res.ok) return null
+  return await res.json() as AirtableRecord
+}
+
+async function loadPermissions(
+  baseId: string,
+  token: string,
+  profileId: string,
+): Promise<PortalPermissions> {
+  const url = `${AIRTABLE_API}/${baseId}/${TABLES.PERMISSION_PROFILES}/${profileId}?` +
+    [
+      FIELDS.PERMISSION_PROFILES.CAN_WRITE_NOTES,
+      FIELDS.PERMISSION_PROFILES.CAN_CREATE_MEETINGS,
+      FIELDS.PERMISSION_PROFILES.CAN_VIEW_PERSON_PROFILE,
+      FIELDS.PERMISSION_PROFILES.CAN_VIEW_DIRECT_REPORTS,
+      FIELDS.PERMISSION_PROFILES.NOTES_DEFAULT_VISIBILITY,
+    ].map((f) => `fields[]=${encodeURIComponent(f)}`).join('&')
+
+  const res = await airtableFetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  })
+  if (!res.ok) return DEFAULT_PERMISSIONS
+  const data = await res.json()
+  const f = (data.fields ?? {}) as Record<string, unknown>
+  return {
+    canWriteNotes: Boolean(f[FIELDS.PERMISSION_PROFILES.CAN_WRITE_NOTES]),
+    canCreateMeetings: Boolean(f[FIELDS.PERMISSION_PROFILES.CAN_CREATE_MEETINGS]),
+    canViewPersonProfile: Boolean(f[FIELDS.PERMISSION_PROFILES.CAN_VIEW_PERSON_PROFILE]),
+    canViewDirectReports: Boolean(f[FIELDS.PERMISSION_PROFILES.CAN_VIEW_DIRECT_REPORTS]),
+    notesDefaultVisibility:
+      (f[FIELDS.PERMISSION_PROFILES.NOTES_DEFAULT_VISIBILITY] as string | undefined) ?? 'internal_only',
+  }
+}
+
 async function writeClerkUserId(
   baseId: string,
   token: string,
   recordId: string,
   clerkUserId: string,
 ): Promise<void> {
-  const res = await fetch(`${tableUrl(baseId)}/${recordId}`, {
+  const res = await fetch(`${peopleUrl(baseId)}/${recordId}`, {
     method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ fields: { [FIELDS.USERS.CLERK_USER_ID]: clerkUserId } }),
   })
   if (!res.ok) {
     const text = await res.text()
-    log.warn(`[requireCurrentPortalPerson] failed to write Clerk User ID to ${recordId}: ${text}`)
+    log.warn(`[requireCurrentPortalPerson] failed to write Clerk User ID: ${text}`)
   }
 }
 
-function mapRecord(record: AirtableRecord, clerkUserId: string, email: string): PortalPerson {
+function resolveRole(raw: unknown): PortalPerson['role'] {
+  const s = ((raw as string) ?? '').toLowerCase().trim()
+  if (s === 'admin') return 'admin'
+  if (s === 'coach') return 'coach'
+  if (s === 'client') return 'client'
+  return 'unknown'
+}
+
+function mapRecord(
+  record: AirtableRecord,
+  clerkUserId: string,
+  email: string,
+  permissions: PortalPermissions,
+  isImpersonated: boolean,
+  realAirtableId: string,
+): PortalPerson {
   const f = record.fields
-  const permissionProfileIds = Array.isArray(f[FIELDS.USERS.PERMISSION_PROFILE])
+  const profileIds = Array.isArray(f[FIELDS.USERS.PERMISSION_PROFILE])
     ? (f[FIELDS.USERS.PERMISSION_PROFILE] as string[])
     : []
   return {
     airtableRecordId: record.id,
     clerkUserId,
-    email,
+    realAirtableId,
+    email: (f[FIELDS.USERS.WORK_EMAIL] as string | undefined) ?? email,
     firstName: (f[FIELDS.USERS.FIRST_NAME] as string | undefined) ?? '',
     lastName: (f[FIELDS.USERS.LAST_NAME] as string | undefined) ?? '',
-    permissionProfileIds,
+    role: resolveRole(f[FIELDS.USERS.ROLE]),
+    permissionProfileIds: profileIds,
+    permissions,
+    isImpersonated,
   }
 }
 
+// ── Main export ───────────────────────────────────────────────────────────────
+
 /**
- * Resolves the current Clerk session to a People record and enforces access.
+ * Resolves the current session to a fully-loaded PortalPerson (role +
+ * permission flags). Supports admin impersonation via cookie.
  *
- * Lookup order:
- *   1. Clerk User ID field (fast path after first login)
- *   2. Work Email (first login — writes Clerk User ID back on match)
- *
- * Redirects to /access-denied if:
- *   - No matching People record
- *   - People record exists but Portal Permission Profile is blank
- *
- * Wrapped in React cache() so multiple callers in the same render share
- * one Airtable round-trip.
+ * Redirects to /access-denied if no People record or no Permission Profile.
+ * Wrapped in React cache() so multiple callers share one round-trip per render.
  */
 export const requireCurrentPortalPerson = cache(async (): Promise<PortalPerson> => {
   const clerkUser = await currentUser()
@@ -115,52 +196,69 @@ export const requireCurrentPortalPerson = cache(async (): Promise<PortalPerson> 
 
   const clerkUserId = clerkUser.id
   const email = clerkUser.primaryEmailAddress?.emailAddress ?? ''
-
   const { baseId, token } = getEnv()
 
-  // ── 1. Look up by Clerk User ID (fast path) ───────────────────────────────
+  // ── 1. Resolve the REAL admin's record first ──────────────────────────────
   const safeClerkId = clerkUserId.replace(/"/g, '\\"')
-  let record = await fetchByFormula(
-    baseId,
-    token,
-    `{${FIELDS.USERS.CLERK_USER_ID}} = "${safeClerkId}"`,
+  let realRecord = await fetchByFormula(
+    baseId, token, `{${FIELDS.USERS.CLERK_USER_ID}} = "${safeClerkId}"`,
   )
 
-  if (record) {
-    log.debug(`[requireCurrentPortalPerson] matched by Clerk ID clerkId=${clerkUserId} recordId=${record.id}`)
-  } else {
-    // ── 2. Fall back to Work Email ─────────────────────────────────────────
-    if (!email) {
-      log.warn(`[requireCurrentPortalPerson] no email on Clerk user clerkId=${clerkUserId}`)
-      redirect('/access-denied')
-    }
-
+  if (!realRecord && email) {
     const safeEmail = email.toLowerCase().replace(/"/g, '\\"')
-    record = await fetchByFormula(
-      baseId,
-      token,
-      `LOWER({${FIELDS.USERS.WORK_EMAIL}}) = "${safeEmail}"`,
+    realRecord = await fetchByFormula(
+      baseId, token, `LOWER({${FIELDS.USERS.WORK_EMAIL}}) = "${safeEmail}"`,
     )
-
-    if (!record) {
-      log.warn(`[requireCurrentPortalPerson] no People record found email=${email} clerkId=${clerkUserId}`)
-      redirect('/access-denied')
+    if (realRecord) {
+      await writeClerkUserId(baseId, token, realRecord.id, clerkUserId)
     }
-
-    log.debug(`[requireCurrentPortalPerson] matched by email email=${email} recordId=${record.id} — writing Clerk ID`)
-    // Write Clerk ID so future lookups hit the fast path.
-    await writeClerkUserId(baseId, token, record.id, clerkUserId)
   }
 
-  // ── 3. Enforce permission profile ─────────────────────────────────────────
-  const profileIds = Array.isArray(record.fields[FIELDS.USERS.PERMISSION_PROFILE])
-    ? (record.fields[FIELDS.USERS.PERMISSION_PROFILE] as string[])
-    : []
-
-  if (profileIds.length === 0) {
-    log.warn(`[requireCurrentPortalPerson] no Permission Profile recordId=${record.id} email=${email}`)
+  if (!realRecord) {
+    log.warn(`[requireCurrentPortalPerson] no record found email=${email}`)
     redirect('/access-denied')
   }
 
-  return mapRecord(record, clerkUserId, email)
+  const realRole = resolveRole(realRecord.fields[FIELDS.USERS.ROLE])
+  const realAirtableId = realRecord.id
+
+  // ── 2. Check impersonation (admin-only) ───────────────────────────────────
+  let targetRecord = realRecord
+  let isImpersonated = false
+
+  if (realRole === 'admin') {
+    const impersonateId = await getImpersonatedRecordId()
+    if (impersonateId && impersonateId !== realAirtableId) {
+      const impersonatedRecord = await fetchByRecordId(baseId, token, impersonateId)
+      if (impersonatedRecord) {
+        targetRecord = impersonatedRecord
+        isImpersonated = true
+        log.debug(`[requireCurrentPortalPerson] admin ${realAirtableId} impersonating ${impersonateId}`)
+      }
+    }
+  }
+
+  // ── 3. Enforce permission profile on the TARGET record ────────────────────
+  const profileIds = Array.isArray(targetRecord.fields[FIELDS.USERS.PERMISSION_PROFILE])
+    ? (targetRecord.fields[FIELDS.USERS.PERMISSION_PROFILE] as string[])
+    : []
+
+  if (profileIds.length === 0) {
+    // Admins always get through even if their record has no profile
+    if (realRole !== 'admin') {
+      log.warn(`[requireCurrentPortalPerson] no Permission Profile recordId=${targetRecord.id}`)
+      redirect('/access-denied')
+    }
+  }
+
+  // ── 4. Load permission flags from the first linked profile ────────────────
+  const permissions = profileIds.length > 0
+    ? await loadPermissions(baseId, token, profileIds[0])
+    : realRole === 'admin'
+      ? { canWriteNotes: true, canCreateMeetings: true, canViewPersonProfile: true, canViewDirectReports: true, notesDefaultVisibility: 'internal_only' }
+      : DEFAULT_PERMISSIONS
+
+  const targetEmail = (targetRecord.fields[FIELDS.USERS.WORK_EMAIL] as string | undefined) ?? email
+
+  return mapRecord(targetRecord, clerkUserId, targetEmail, permissions, isImpersonated, realAirtableId)
 })

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Sidebar from './Sidebar'
+import { ImpersonationBanner } from './ImpersonationBanner'
 
 const STORAGE_KEY = 'sidebar:collapsed'
 
@@ -22,7 +23,14 @@ const STORAGE_KEY = 'sidebar:collapsed'
  * shift on first load. A flash-blocking inline script would be the next step
  * if that becomes objectionable.
  */
-export default function AppShell({ children }: { children: React.ReactNode }) {
+interface AppShellProps {
+  children: React.ReactNode
+  isAdmin?: boolean
+  isImpersonated?: boolean
+  impersonatedName?: string
+}
+
+export default function AppShell({ children, isAdmin = false, isImpersonated = false, impersonatedName = '' }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
@@ -55,8 +63,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen">
-      <Sidebar collapsed={collapsed} onToggle={toggle} />
+    <div className={`flex h-screen ${isImpersonated ? 'pt-9' : ''}`}>
+      {isImpersonated && <ImpersonationBanner name={impersonatedName} />}
+      <Sidebar collapsed={collapsed} onToggle={toggle} isAdmin={isAdmin} />
       <main
         className={`flex-1 overflow-y-auto overflow-x-hidden bg-muted pb-20 md:pb-0 transition-[margin-left] duration-200 ${
           collapsed ? 'md:ml-16' : 'md:ml-60'

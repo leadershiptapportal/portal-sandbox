@@ -340,6 +340,32 @@ export async function updateUserProfile(
   }
 }
 
+export async function getPortalUsers(): Promise<Array<{ id: string; name: string; email: string; role: string }>> {
+  const { apiKey, baseId } = getCredentials()
+  const fields = [FIELDS.USERS.FIRST_NAME, FIELDS.USERS.LAST_NAME, FIELDS.USERS.FULL_NAME, FIELDS.USERS.WORK_EMAIL, FIELDS.USERS.ROLE, FIELDS.USERS.CLERK_USER_ID]
+    .map((f) => `fields[]=${encodeURIComponent(f)}`).join('&')
+  // Filter to records that have a Clerk User ID (i.e. actual portal login users)
+  const formula = encodeURIComponent(`{${FIELDS.USERS.CLERK_USER_ID}} != ""`)
+  const res = await airtableFetch(
+    `${API_BASE}/${baseId}/${USERS_TABLE}?filterByFormula=${formula}&${fields}&maxRecords=100`,
+    { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
+  )
+  if (!res.ok) return []
+  const data = await res.json()
+  return (data.records ?? []).map((r: { id: string; fields: Record<string, unknown> }) => {
+    const f = r.fields
+    const name = (f[FIELDS.USERS.FULL_NAME] as string | undefined) ||
+      [f[FIELDS.USERS.FIRST_NAME], f[FIELDS.USERS.LAST_NAME]].filter(Boolean).join(' ') ||
+      (f[FIELDS.USERS.WORK_EMAIL] as string | undefined) || r.id
+    return {
+      id: r.id,
+      name,
+      email: (f[FIELDS.USERS.WORK_EMAIL] as string | undefined) ?? '',
+      role: (f[FIELDS.USERS.ROLE] as string | undefined) ?? 'unknown',
+    }
+  })
+}
+
 export async function updateUserTheme(userId: string, theme: 'light' | 'dark' | 'system'): Promise<void> {
   const { apiKey, baseId } = getCredentials()
   const res = await airtableFetch(`${API_BASE}/${baseId}/${USERS_TABLE}/${userId}`, {

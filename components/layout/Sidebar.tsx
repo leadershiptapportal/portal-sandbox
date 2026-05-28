@@ -25,6 +25,7 @@ const navItems = [
 interface SidebarProps {
   collapsed: boolean
   onToggle: () => void
+  isAdmin?: boolean
 }
 
 // ── Reusable nav row ──────────────────────────────────────────────────────────
@@ -95,12 +96,10 @@ function NavRow({
 
 // ── Sidebar component ─────────────────────────────────────────────────────────
 
-export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export default function Sidebar({ collapsed, onToggle, isAdmin = false }: SidebarProps) {
   const pathname = usePathname()
   const { user } = useUser()
   const { signOut } = useClerk()
-
-  const isAdmin = user?.publicMetadata?.role === 'admin'
 
   return (
     <>
