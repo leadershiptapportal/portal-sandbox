@@ -17,8 +17,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "LeadershipTap",
-  description: "Internal coaching portal",
+  title: "MyHumans.App",
+  description: "Your coaching portal",
 };
 
 export default function RootLayout({

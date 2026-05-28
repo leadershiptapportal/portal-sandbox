@@ -3,6 +3,7 @@ import { getUsers, getHumansByRelationship } from '@/lib/services/usersService'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getHourInTimezone } from '@/lib/utils/dateFormat'
+import DashboardTagline from './DashboardTagline'
 import QuickActionsRegion from './regions/QuickActionsRegion'
 import ComingUpNextRegion from './regions/ComingUpNextRegion'
 import OpenTasksRegion from './regions/OpenTasksRegion'
@@ -59,9 +60,7 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-bold text-slate-900">
           Good {getTimeOfDay().label}, {firstName} {getTimeOfDay().emoji}
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Here&apos;s your coaching dashboard
-        </p>
+        <DashboardTagline />
       </div>
 
       {/* ── Quick Actions ────────────────────────────────────────────────────── */}

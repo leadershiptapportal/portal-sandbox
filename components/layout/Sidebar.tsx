@@ -171,22 +171,20 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           {collapsed ? (
             <Link
               href="/dashboard"
-              className="mx-auto w-9 h-9 rounded-full bg-[hsl(213,70%,30%)] flex items-center justify-center text-white font-bold text-sm"
-              title="LeadershipTap"
-              aria-label="LeadershipTap home"
+              className="mx-auto w-9 h-9 rounded-full overflow-hidden flex items-center justify-center"
+              title="MyHumans.App"
+              aria-label="MyHumans.App home"
             >
-              L
+              <img src="/myhumans-logo.png" alt="MyHumans.App" className="w-9 h-9 object-cover" />
             </Link>
           ) : (
             <Link href="/dashboard" className="flex items-center gap-2.5 px-2">
-              <div className="w-8 h-8 rounded-full bg-[hsl(213,70%,30%)] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                L
-              </div>
+              <img src="/myhumans-logo.png" alt="MyHumans.App" className="w-8 h-8 object-contain flex-shrink-0" />
               <span
                 className="font-bold text-[hsl(213,70%,30%)] text-base leading-tight truncate"
                 style={{ fontFamily: 'var(--font-plus-jakarta-sans)' }}
               >
-                LeadershipTap
+                MyHumans.App
               </span>
             </Link>
           )}
