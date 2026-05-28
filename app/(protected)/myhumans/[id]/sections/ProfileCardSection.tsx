@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Mail, Clock, UserCheck, StickyNote } from 'lucide-react'
 import {
   Dialog,
@@ -14,6 +14,7 @@ import EditProfileDialog from '../EditProfileDialog'
 import { getDisplayName, getInitials, isRecordId } from './helpers'
 import { updateCoachContextAction } from '../actions'
 import type { User } from '@/lib/types'
+import { useDraftSave, clearDraft, loadDraft } from '@/hooks/useDraftSave'
 
 // ── Quick Notes inline + modal ────────────────────────────────────────────────
 
@@ -26,15 +27,30 @@ function ProfileQuickNotes({
   initialNotes: string | null
   canEdit: boolean
 }) {
+  const draftKey = `qn-draft-${personId}`
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState(initialNotes ?? '')
   const [saved, setSaved] = useState(initialNotes ?? '')
   const [saving, setSaving] = useState(false)
+  const hasChanges = draft !== saved
+
+  // Restore any unsaved draft from localStorage on mount
+  useEffect(() => {
+    const stored = loadDraft(draftKey)
+    if (stored !== null && stored !== (initialNotes ?? '')) {
+      setDraft(stored)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Auto-save draft to localStorage while the user is typing
+  useDraftSave(draftKey, draft, hasChanges)
 
   async function handleSave() {
     if (draft === saved) { setOpen(false); return }
     setSaving(true)
     await updateCoachContextAction(personId, { quickNotes: draft })
+    clearDraft(draftKey)
     setSaving(false)
     setSaved(draft)
     setOpen(false)

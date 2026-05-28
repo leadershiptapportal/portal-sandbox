@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   Check, Pencil, X, Plus,
   ChevronDown, ChevronUp, Network,
@@ -27,6 +27,7 @@ import type { CoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import type { ProfileOption } from '@/lib/airtable/users'
 import type { RelationshipContext } from '@/lib/airtable/relationships'
 import type { Note } from '@/lib/airtable/notes'
+import { useDraftSave, clearDraft, loadDraft } from '@/hooks/useDraftSave'
 
 interface ProfileOptions {
   enneagrams: ProfileOption[]
@@ -266,12 +267,15 @@ function InlineDateField({
 // ── Quick Notes Accordion ─────────────────────────────────────────────────────
 
 function QuickNotesAccordion({
+  personId,
   initialValue,
   onSave,
 }: {
+  personId: string
   initialValue: string
   onSave: (v: string) => Promise<void>
 }) {
+  const draftKey = `qn-draft-${personId}`
   const isEmpty = !initialValue.trim()
   const [isOpen, setIsOpen] = useState(isEmpty) // start open when empty
   const [draft, setDraft] = useState(initialValue)
@@ -279,6 +283,18 @@ function QuickNotesAccordion({
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const hasChanges = draft !== savedValue
+
+  // Restore any unsaved draft from localStorage on mount
+  useEffect(() => {
+    const stored = loadDraft(draftKey)
+    if (stored !== null && stored !== initialValue) {
+      setDraft(stored)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Auto-save draft to localStorage while the user is typing
+  useDraftSave(draftKey, draft, hasChanges)
 
   function handleSaveAttempt() {
     if (!hasChanges) return
@@ -293,6 +309,7 @@ function QuickNotesAccordion({
   async function doSave() {
     setSaving(true)
     await onSave(draft)
+    clearDraft(draftKey)
     setSavedValue(draft)
     setSaving(false)
     setConfirmOpen(false)
@@ -913,6 +930,7 @@ export default function PersonSidebar({
       {/* ── Quick Notes (accordion) ─────────────────────────────────────── */}
       {userCanWrite && (
         <QuickNotesAccordion
+          personId={person.id}
           initialValue={coachContext?.quickNotes ?? ''}
           onSave={(v) => saveContext({ quickNotes: v })}
         />

@@ -1,13 +1,14 @@
 'use client'
 
-import { useRef, useState, useMemo, useCallback } from 'react'
+import { useRef, useState, useMemo, useCallback, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
-import { Pencil, Undo2, Trash2, Eraser, Link2 } from 'lucide-react'
+import { Pencil, Undo2, Trash2, Eraser, Link2, WifiOff } from 'lucide-react'
 import type { TldrawNoteCanvasHandle } from '@/components/ink/TldrawNoteCanvas'
 import { saveInkNoteAction } from '../actions'
 import type { Interaction } from '@/lib/types'
 import type { Note } from '@/lib/airtable/notes'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 
 const TldrawNoteCanvas = dynamic(
   () => import('@/components/ink/TldrawNoteCanvas'),
@@ -63,6 +64,7 @@ export default function TakeNotesCanvas({
   onStrokeCountChange,
 }: Props) {
   const canvasRef = useRef<TldrawNoteCanvasHandle | null>(null)
+  const draftKey  = `ink-draft-${personId}`
 
   const [color,    setColor]    = useState(COLORS[0].value)
   const [width,    setWidth]    = useState(WIDTHS[2].value)   // default: Medium
@@ -79,12 +81,59 @@ export default function TakeNotesCanvas({
   )
   const [showPicker, setShowPicker] = useState(false)
 
+  // Draft restoration state — gate canvas render until localStorage is checked
+  const [snapshotReady,    setSnapshotReady]    = useState(false)
+  const [resolvedSnapshot, setResolvedSnapshot] = useState<string | undefined>(undefined)
+
+  // Stable ref so the 30s interval always reads the latest caption without stale closure
+  const captionRef = useRef(caption)
+  useEffect(() => { captionRef.current = caption }, [caption])
+
+  const isOnline = useOnlineStatus()
+
+  // Restore draft from localStorage on mount (runs client-side only)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(draftKey)
+      if (stored) {
+        const draft = JSON.parse(stored) as { snapshot?: string; caption?: string }
+        setResolvedSnapshot(draft.snapshot ?? existingInkNote?.inkNoteData)
+        if (draft.caption !== undefined) setCaption(draft.caption)
+        toast.info('Restored unsaved draft')
+      } else {
+        setResolvedSnapshot(existingInkNote?.inkNoteData)
+      }
+    } catch {
+      setResolvedSnapshot(existingInkNote?.inkNoteData)
+    }
+    setSnapshotReady(true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Save snapshot + caption to localStorage every 30s (only when canvas has content)
+  useEffect(() => {
+    if (!snapshotReady) return
+    const interval = setInterval(() => {
+      if (!canvasRef.current || canvasRef.current.isEmpty()) return
+      const snapshot = canvasRef.current.getSnapshot()
+      if (!snapshot) return
+      try {
+        localStorage.setItem(draftKey, JSON.stringify({
+          snapshot,
+          caption: captionRef.current,
+          savedAt: Date.now(),
+        }))
+      } catch {}
+    }, 30_000)
+    return () => clearInterval(interval)
+  }, [snapshotReady, draftKey])
+
   const selectedMeeting = useMemo(
     () => meetings.find((m) => m.id === selectedMeetingId) ?? initialInteraction ?? null,
     [meetings, selectedMeetingId, initialInteraction],
   )
 
-  const canSave = hasShapes && !saving
+  const canSave = hasShapes && !saving && isOnline
 
   const handleShapeCountChange = useCallback(
     (count: number) => {
@@ -138,6 +187,7 @@ export default function TakeNotesCanvas({
         return
       }
 
+      try { localStorage.removeItem(draftKey) } catch {}
       setCurrentNoteId(result.noteId)
       toast.success('Note saved')
       onSaveComplete()
@@ -151,6 +201,14 @@ export default function TakeNotesCanvas({
 
   return (
     <div className="flex flex-col h-full">
+
+      {/* ── Offline banner ────────────────────────────────────────────────── */}
+      {!isOnline && (
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border-b border-amber-200 text-amber-700 text-xs flex-shrink-0">
+          <WifiOff className="h-3.5 w-3.5 flex-shrink-0" />
+          You&apos;re offline — your work is saved locally and will sync when you reconnect.
+        </div>
+      )}
 
       {/* ── Tool strip ────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-2 px-3 py-2 bg-white border-b border-slate-200 flex-shrink-0 overflow-x-auto">
@@ -231,7 +289,10 @@ export default function TakeNotesCanvas({
             <Undo2 className="h-4 w-4" />
           </button>
           <button
-            onClick={() => canvasRef.current?.clear()}
+            onClick={() => {
+              canvasRef.current?.clear()
+              try { localStorage.removeItem(draftKey) } catch {}
+            }}
             disabled={!hasShapes}
             aria-label="Clear"
             title="Clear"
@@ -244,16 +305,20 @@ export default function TakeNotesCanvas({
 
       {/* ── Canvas ────────────────────────────────────────────────────────── */}
       <div className="flex-1 min-h-0">
-        <TldrawNoteCanvas
-          ref={canvasRef}
-          color={color}
-          width={width}
-          tool={tool}
-          penOnly={true}
-          onShapeCountChange={handleShapeCountChange}
-          className="w-full h-full"
-          initialSnapshot={existingInkNote?.inkNoteData}
-        />
+        {snapshotReady ? (
+          <TldrawNoteCanvas
+            ref={canvasRef}
+            color={color}
+            width={width}
+            tool={tool}
+            penOnly={true}
+            onShapeCountChange={handleShapeCountChange}
+            className="w-full h-full"
+            initialSnapshot={resolvedSnapshot}
+          />
+        ) : (
+          <div className="w-full h-full bg-white animate-pulse rounded-xl" />
+        )}
       </div>
 
       {/* ── Footer ────────────────────────────────────────────────────────── */}
@@ -312,9 +377,10 @@ export default function TakeNotesCanvas({
           <button
             onClick={handleSave}
             disabled={!canSave}
+            title={!isOnline ? 'Reconnect to save' : undefined}
             className="px-5 h-10 rounded-md bg-[hsl(213,70%,30%)] text-white text-sm font-medium hover:bg-[hsl(213,70%,25%)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
           >
-            {saving ? 'Saving…' : 'Save Note'}
+            {saving ? 'Saving…' : !isOnline ? 'Offline' : 'Save Note'}
           </button>
         </div>
 
