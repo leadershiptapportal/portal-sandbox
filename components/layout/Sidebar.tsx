@@ -215,7 +215,7 @@ export default function Sidebar({ collapsed, onToggle, isAdmin = false }: Sideba
             <NavRow
               href="/admin/users"
               icon={Network}
-              label="Relationships"
+              label="Admin Control"
               enabled
               active={pathname.startsWith('/admin')}
               collapsed={collapsed}
