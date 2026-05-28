@@ -9,6 +9,7 @@ export interface CurrentUserRecord {
   email: string
   airtableId: string | null
   role: 'admin' | 'coach' | 'client' | 'unknown'
+  realRole: 'admin' | 'coach' | 'client' | 'unknown'  // always the actual logged-in user's role
   name: string
   isImpersonated: boolean
   realAirtableId: string | null  // admin's own ID when impersonating, otherwise same as airtableId
@@ -26,7 +27,7 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
   try {
     const clerkUser = await currentUser()
     if (!clerkUser) {
-      return { clerkId: '', email: '', airtableId: null, role: 'unknown', name: '', isImpersonated: false, realAirtableId: null }
+      return { clerkId: "", email: "", airtableId: null, role: "unknown", realRole: "unknown", name: "", isImpersonated: false, realAirtableId: null }
     }
 
     const email = clerkUser.emailAddresses[0]?.emailAddress ?? ''
@@ -37,7 +38,7 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
     if (!baseId || !token) {
       const clerkRole = (clerkUser.publicMetadata as { role?: string })?.role
       const role = clerkRole === 'admin' ? 'admin' : clerkRole === 'coach' ? 'coach' : 'unknown'
-      return { clerkId: clerkUser.id, email, airtableId: null, role, name, isImpersonated: false, realAirtableId: null }
+      return { clerkId: clerkUser.id, email, airtableId: null, role, realRole: role, name, isImpersonated: false, realAirtableId: null }
     }
 
     const searchEmail = email.toLowerCase().trim()
@@ -102,7 +103,7 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
       log.warn('[getCurrentUserRecord] No Airtable record found for:', searchEmail)
       const clerkRole = (clerkUser.publicMetadata as { role?: string })?.role
       const role = clerkRole === 'admin' ? 'admin' : clerkRole === 'coach' ? 'coach' : 'admin'
-      return { clerkId: clerkUser.id, email, airtableId: null, role, name, isImpersonated: false, realAirtableId: null }
+      return { clerkId: clerkUser.id, email, airtableId: null, role, realRole: role, name, isImpersonated: false, realAirtableId: null }
     }
 
     const rawRole = ((match.fields[FIELDS.USERS.ROLE] as string) ?? '').toLowerCase().trim()
@@ -142,6 +143,7 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
               email: impEmail,
               airtableId: impersonateId,
               role: impRole,
+              realRole: role,  // role = the real admin's role, computed before impersonation
               name: impName || impEmail,
               isImpersonated: true,
               realAirtableId,
@@ -156,12 +158,13 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
       email,
       airtableId: realAirtableId,
       role,
+      realRole: role,
       name,
       isImpersonated: false,
       realAirtableId,
     }
   } catch (err) {
     log.error('[getCurrentUserRecord] error:', err)
-    return { clerkId: '', email: '', airtableId: null, role: 'admin', name: '', isImpersonated: false, realAirtableId: null }
+    return { clerkId: '', email: '', airtableId: null, role: 'admin', realRole: 'admin', name: '', isImpersonated: false, realAirtableId: null }
   }
 }

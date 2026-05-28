@@ -137,7 +137,7 @@ export default function Sidebar({ collapsed, onToggle, isAdmin = false }: Sideba
           })}
           {isAdmin && (
             <Link
-              href="/admin/relationships"
+              href="/admin/users"
               className={`flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors ${
                 pathname.startsWith('/admin')
                   ? 'text-[hsl(213,70%,30%)] dark:text-[hsl(213,60%,72%)]'
@@ -213,7 +213,7 @@ export default function Sidebar({ collapsed, onToggle, isAdmin = false }: Sideba
         {isAdmin && (
           <div className="px-2 pb-1">
             <NavRow
-              href="/admin/relationships"
+              href="/admin/users"
               icon={Network}
               label="Relationships"
               enabled

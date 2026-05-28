@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation'
-import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getAllRelationshipContexts } from '@/lib/airtable/relationships'
 
 function StatusBadge({ status }: { status: string }) {
@@ -18,9 +16,6 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default async function AdminRelationshipsPage() {
-  const userRecord = await getCurrentUserRecord()
-  if (userRecord.role !== 'admin') redirect('/dashboard')
-
   const contexts = await getAllRelationshipContexts()
 
   // Sort: Active first, then by relationship type
@@ -33,10 +28,9 @@ export default async function AdminRelationshipsPage() {
   const activeCount = contexts.filter((c) => c.status === 'Active').length
 
   return (
-    <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Relationship Contexts</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+    <div>
+      <div className="mb-4">
+        <p className="text-sm text-muted-foreground">
           {activeCount} active · {contexts.length} total
         </p>
       </div>
