@@ -4,9 +4,8 @@ import BackLink from '@/components/BackLink'
 import { notFound } from 'next/navigation'
 import { getUserById } from '@/lib/services/usersService'
 import { getInteractionById } from '@/lib/airtable/interactions'
-import { getCoachSession } from '@/lib/airtable/coachSessions'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
-import { getMostRecentInteractionNoteByHuman } from '@/lib/airtable/notes'
+import { getMostRecentInteractionNoteByHuman, getNotesByInteractionId } from '@/lib/airtable/notes'
 import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import InteractionNotesEditor from './InteractionNotesEditor'
 import LastInteractionNotesDialog from '@/components/LastInteractionNotesDialog'
@@ -55,17 +54,20 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
 
   if (!interaction) notFound()
 
-  const [coachSession, lastInteractionNote] = await Promise.all([
-    currentUserRecord.airtableId
-      ? getCoachSession(currentUserRecord.airtableId, interactionId).catch(() => null)
-      : Promise.resolve(null),
+  const [thisInteractionNotes, lastInteractionNote] = await Promise.all([
+    getNotesByInteractionId(interactionId).catch(() => []),
     getMostRecentInteractionNoteByHuman(id, interactionId),
   ])
 
-  // Show coach session notes when available; fall back to the Calendar Event's
-  // Notes field so that notes entered before the Coach Session table existed
-  // still appear.
-  const notesForEditor = coachSession?.sessionNotes ?? interaction.notes ?? undefined
+  // Find the coach's own typed note for this interaction (if any).
+  // Fall back to the Calendar Event's Notes field for older records written
+  // before the Notes table was used for interaction notes.
+  const coachOwnNote = currentUserRecord.airtableId
+    ? thisInteractionNotes.find(
+        (n) => n.authorPersonId === currentUserRecord.airtableId && n.noteType !== 'ink_note',
+      )
+    : undefined
+  const notesForEditor = coachOwnNote?.content ?? interaction.notes ?? undefined
 
   const userName = user?.fullName ?? user?.preferredName ?? user?.firstName ?? 'Person'
 
@@ -152,8 +154,7 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
         <InteractionNotesEditor interactionId={interactionId} userId={id} initialNotes={notesForEditor} autoEdit={autoEdit} />
       </div>
 
-      {/* Action Items — prefer coach session, fall back to Calendar Event */}
-      {(coachSession?.actionItems || interaction.actionItems) && (
+      {interaction.actionItems && (
         <div className="bg-card rounded-xl shadow-sm p-5 md:p-6">
           <div className="flex items-center gap-2 mb-3">
             <CheckSquare className="h-4 w-4 text-amber-500" />
@@ -162,7 +163,7 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
             </h2>
           </div>
           <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-            {coachSession?.actionItems ?? interaction.actionItems}
+            {interaction.actionItems}
           </p>
         </div>
       )}
