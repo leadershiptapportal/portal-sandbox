@@ -66,9 +66,14 @@ function ProfileQuickNotes({
   return (
     <>
       <div className="mt-4 pt-4 border-t border-border">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-0.5">
           Quick Notes
         </p>
+        {canEdit && (
+          <p className="text-[10px] text-muted-foreground/50 mb-1.5">
+            {saved ? 'click to edit' : 'click to add'}
+          </p>
+        )}
         {saved ? (
           <button
             onClick={() => { setDraft(saved); setOpen(true) }}

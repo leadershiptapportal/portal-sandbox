@@ -325,7 +325,14 @@ function QuickNotesAccordion({
         onClick={() => setIsOpen((v) => !v)}
         className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/50 transition-colors"
       >
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Quick Notes</span>
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Quick Notes</span>
+          {!isOpen && (
+            <span className="text-[10px] text-muted-foreground/50">
+              {savedValue.trim() ? 'click to edit' : 'click to add'}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2 min-w-0">
           {!isOpen && savedValue.trim() && (
             <span className="text-xs text-muted-foreground truncate max-w-[120px]">
