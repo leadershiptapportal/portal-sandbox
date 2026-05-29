@@ -84,17 +84,17 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
 
             {/* Note actions */}
             {item.humanId && (
-              <div className="flex items-center gap-3 px-3 pb-2 pt-1 border-t border-border">
+              <div className="flex items-center gap-2 flex-wrap px-3 pb-2.5 pt-2 border-t border-border">
                 <Link
                   href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=prep`}
-                  className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
                 >
                   <ClipboardList className="h-3 w-3" />
                   Add/Edit Prep Notes
                 </Link>
                 <Link
                   href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=interaction`}
-                  className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
                 >
                   <NotebookPen className="h-3 w-3" />
                   Add/Edit Interaction Notes

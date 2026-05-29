@@ -8,6 +8,7 @@ import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getInteractionNotesGrouped } from '@/lib/airtable/notes'
 import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import InteractionNotesEditor from './InteractionNotesEditor'
+import PrepNotesEditor from './PrepNotesEditor'
 
 interface Props {
   params: Promise<{ id: string; interactionId: string }>
@@ -142,27 +143,19 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
 
       {/* ── Prep Notes ────────────────────────────────────────────────────── */}
       <div className="bg-card rounded-xl shadow-sm p-5 md:p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ClipboardList className="h-4 w-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Prep Notes</h2>
-          </div>
-          <Link
-            href={`${takeNotesBase}&noteCategory=prep`}
-            className="text-xs font-medium text-[hsl(213,70%,30%)] hover:underline"
-          >
-            {notesGroup?.prepTyped || notesGroup?.prepInk ? 'Edit' : 'Add'}
-          </Link>
+        <div className="flex items-center gap-2">
+          <ClipboardList className="h-4 w-4 text-muted-foreground" />
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Prep Notes</h2>
         </div>
 
-        {notesGroup?.prepTyped ? (
-          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-            {notesGroup.prepTyped.content}
-          </p>
-        ) : null}
+        <PrepNotesEditor
+          interactionId={interactionId}
+          userId={id}
+          initialNotes={notesGroup?.prepTyped?.content}
+        />
 
-        {notesGroup?.prepInk ? (
-          <div className="space-y-2">
+        {notesGroup?.prepInk && (
+          <div className="space-y-2 pt-2 border-t border-border">
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground font-medium">Handwritten</p>
               <Link
@@ -181,18 +174,6 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
                 className="w-full h-auto object-contain"
               />
             </div>
-          </div>
-        ) : null}
-
-        {!notesGroup?.prepTyped && !notesGroup?.prepInk && (
-          <div className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-5 text-center">
-            <p className="text-sm text-muted-foreground">No prep notes yet.</p>
-            <Link
-              href={`${takeNotesBase}&noteCategory=prep`}
-              className="text-xs text-[hsl(213,70%,30%)] hover:underline mt-1 inline-block"
-            >
-              Add prep notes →
-            </Link>
           </div>
         )}
       </div>
