@@ -90,14 +90,14 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
                   className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors"
                 >
                   <ClipboardList className="h-3 w-3" />
-                  Prep Notes
+                  Add/Edit Prep Notes
                 </Link>
                 <Link
                   href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=interaction`}
                   className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors"
                 >
                   <NotebookPen className="h-3 w-3" />
-                  Interaction Notes
+                  Add/Edit Interaction Notes
                 </Link>
               </div>
             )}

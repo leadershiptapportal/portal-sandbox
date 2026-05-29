@@ -75,21 +75,16 @@ export default function InteractionNotesEditor({ interactionId, userId, initialN
   if (!editing) {
     return (
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Interaction Notes
-          </h2>
-          <div className="flex items-center gap-2">
-            {status === 'saved' && (
-              <span className="text-xs font-medium text-emerald-600">Notes saved</span>
-            )}
-            <button
-              onClick={handleEdit}
-              className="text-xs font-medium text-[hsl(213,70%,30%)] hover:underline"
-            >
-              {initialNotes ? 'Edit Notes' : 'Add Notes'}
-            </button>
-          </div>
+        <div className="flex items-center justify-end mb-3 gap-2">
+          {status === 'saved' && (
+            <span className="text-xs font-medium text-emerald-600">Notes saved</span>
+          )}
+          <button
+            onClick={handleEdit}
+            className="text-xs font-medium text-[hsl(213,70%,30%)] hover:underline"
+          >
+            {initialNotes ? 'Edit' : 'Add'}
+          </button>
         </div>
 
         {initialNotes ? (
@@ -110,29 +105,24 @@ export default function InteractionNotesEditor({ interactionId, userId, initialN
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Interaction Notes
-        </h2>
-        <div className="flex items-center gap-2">
-          {status === 'error' && (
-            <span className="text-xs font-medium text-rose-600">{errorMsg}</span>
-          )}
-          <button
-            onClick={handleCancel}
-            disabled={isPending}
-            className="text-xs font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={isPending}
-            className="text-xs font-medium px-2.5 py-1 rounded-md bg-[hsl(213,70%,30%)] text-white hover:bg-[hsl(213,70%,25%)] disabled:opacity-50 transition-colors"
-          >
-            {isPending ? 'Saving…' : 'Save'}
-          </button>
-        </div>
+      <div className="flex items-center justify-end mb-3 gap-2">
+        {status === 'error' && (
+          <span className="text-xs font-medium text-rose-600">{errorMsg}</span>
+        )}
+        <button
+          onClick={handleCancel}
+          disabled={isPending}
+          className="text-xs font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSave}
+          disabled={isPending}
+          className="text-xs font-medium px-2.5 py-1 rounded-md bg-[hsl(213,70%,30%)] text-white hover:bg-[hsl(213,70%,25%)] disabled:opacity-50 transition-colors"
+        >
+          {isPending ? 'Saving…' : 'Save'}
+        </button>
       </div>
 
       <textarea

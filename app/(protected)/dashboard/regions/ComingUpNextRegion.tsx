@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { FileText } from 'lucide-react'
+import { ClipboardList, NotebookPen } from 'lucide-react'
 import { getUsers, getHumansByRelationship } from '@/lib/services/usersService'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
@@ -67,35 +67,47 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
           </p>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
           {allTodayItems.map((item) => {
-            const needsNotes = item.isPast && !item.hasNote
-            const inner = (
-              <span
-                className={`inline-flex items-center gap-2 whitespace-nowrap px-3 py-1.5 rounded-full text-sm transition-colors border ${
-                  item.isPast
-                    ? needsNotes
-                      ? 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100'
-                      : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'
-                    : 'bg-card border-border hover:border-[hsl(213,60%,70%)] hover:text-[hsl(213,70%,30%)]'
-                }`}
-                title={item.title}
-              >
-                <span className="text-xs font-medium text-muted-foreground">{item.timeRange}</span>
-                <span className="font-medium">{item.humanName ?? item.title}</span>
-                {needsNotes && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide">
-                    <FileText className="h-3 w-3" />
-                    Note
-                  </span>
-                )}
-              </span>
-            )
             const href = item.humanId
               ? `/myhumans/${item.humanId}/interactions/${item.interactionId}`
               : `/interactions/${item.interactionId}`
+            const startTimeLabel = new Date(item.startTime).toLocaleString('en-US', {
+              timeZone: item.timezone,
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+            })
             return (
-              <Link key={item.interactionId} href={href}>
-                {inner}
-              </Link>
+              <div
+                key={item.interactionId}
+                className={`inline-flex flex-col px-3 py-2 rounded-2xl text-sm transition-colors border flex-shrink-0 ${
+                  item.isPast
+                    ? 'bg-muted/50 border-border text-muted-foreground'
+                    : 'bg-card border-border'
+                }`}
+              >
+                <Link href={href} className="flex items-center gap-2 whitespace-nowrap hover:opacity-70 transition-opacity">
+                  <span className="text-xs font-medium text-muted-foreground">{startTimeLabel}</span>
+                  <span className="font-medium">{item.humanName ?? item.title}</span>
+                </Link>
+                {item.humanId && (
+                  <div className="flex items-center gap-3 mt-1.5">
+                    <Link
+                      href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=prep`}
+                      className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                    >
+                      <ClipboardList className="h-2.5 w-2.5" />
+                      Add/Edit Prep Notes
+                    </Link>
+                    <Link
+                      href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=interaction`}
+                      className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                    >
+                      <NotebookPen className="h-2.5 w-2.5" />
+                      Add/Edit Interaction Notes
+                    </Link>
+                  </div>
+                )}
+              </div>
             )
           })}
           </div>

@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Calendar, Clock, Users, CheckSquare, ClipboardList, NotebookPen, Pencil } from 'lucide-react'
-import BackLink from '@/components/BackLink'
+import { ArrowLeft, Calendar, Clock, Users, CheckSquare, ClipboardList, NotebookPen, Pencil } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { getUserById } from '@/lib/services/usersService'
 import { getInteractionById } from '@/lib/airtable/interactions'
@@ -74,7 +73,13 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
   return (
     <div className="px-4 py-5 md:p-8 max-w-3xl mx-auto space-y-6">
 
-      <BackLink fallbackHref={`/myhumans/${id}`} label={`Back to ${userName}`} />
+      <Link
+        href={`/myhumans/${id}`}
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to {userName}
+      </Link>
 
       {/* ── Interaction header ─────────────────────────────────────────────── */}
       <div className="bg-card rounded-xl shadow-sm p-5 md:p-6">
@@ -114,23 +119,25 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
           )}
         </div>
 
-        {/* Note action buttons */}
-        <div className="pt-3 border-t border-border mt-4 flex flex-wrap gap-2">
-          <Link
-            href={`${takeNotesBase}&noteCategory=prep`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
-          >
-            <ClipboardList className="h-3.5 w-3.5" />
-            {notesGroup?.prepTyped || notesGroup?.prepInk ? 'Edit Prep Notes' : 'Add Prep Notes'}
-          </Link>
-          <Link
-            href={`${takeNotesBase}&noteCategory=interaction`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
-          >
-            <NotebookPen className="h-3.5 w-3.5" />
-            {notesGroup?.interactionTyped || notesGroup?.interactionInk ? 'Edit Interaction Notes' : 'Add Interaction Notes'}
-          </Link>
-        </div>
+        {/* Note action buttons — only shown when no notes exist yet */}
+        {!(notesGroup?.prepTyped || notesGroup?.prepInk || notesGroup?.interactionTyped || notesGroup?.interactionInk) && (
+          <div className="pt-3 border-t border-border mt-4 flex flex-wrap gap-2">
+            <Link
+              href={`${takeNotesBase}&noteCategory=prep`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+            >
+              <ClipboardList className="h-3.5 w-3.5" />
+              Add Prep Notes
+            </Link>
+            <Link
+              href={`${takeNotesBase}&noteCategory=interaction`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
+            >
+              <NotebookPen className="h-3.5 w-3.5" />
+              Add Interaction Notes
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* ── Prep Notes ────────────────────────────────────────────────────── */}
