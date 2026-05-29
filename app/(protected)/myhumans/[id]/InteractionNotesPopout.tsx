@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -95,6 +96,9 @@ export default function InteractionNotesPopout({
           <DialogTitle className="text-base font-semibold text-foreground leading-snug">
             {meetingTitle || 'Interaction Notes'}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Add or edit notes for this interaction.
+          </DialogDescription>
           <p className="text-xs text-muted-foreground mt-0.5">{meetingDate}</p>
         </DialogHeader>
 

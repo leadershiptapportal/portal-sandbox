@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useTransition } from 'react'
+import { useState, useRef, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateInteractionNotes } from './actions'
 
@@ -8,28 +8,42 @@ interface Props {
   interactionId: string
   userId: string
   initialNotes: string | undefined
+  autoEdit?: boolean
 }
 
-export default function InteractionNotesEditor({ interactionId, userId, initialNotes }: Props) {
+export default function InteractionNotesEditor({ interactionId, userId, initialNotes, autoEdit }: Props) {
   const router = useRouter()
-  const [editing, setEditing] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [editing, setEditing] = useState(autoEdit ?? false)
   const [draft, setDraft] = useState(initialNotes ?? '')
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const [isPending, startTransition] = useTransition()
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // When opened via the top "Add Notes" button, scroll the editor into view and focus it.
+  useEffect(() => {
+    if (autoEdit) {
+      setTimeout(() => {
+        textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        textareaRef.current?.focus()
+      }, 50)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function handleEdit() {
     setDraft(initialNotes ?? '')
     setStatus('idle')
     setEditing(true)
-    // Focus textarea on next tick after render
     setTimeout(() => textareaRef.current?.focus(), 0)
   }
 
   function handleCancel() {
     setEditing(false)
     setStatus('idle')
+    if (autoEdit) {
+      router.replace(window.location.pathname)
+    }
   }
 
   function handleSave() {
@@ -43,7 +57,11 @@ export default function InteractionNotesEditor({ interactionId, userId, initialN
       }
       setStatus('saved')
       setEditing(false)
-      router.refresh()
+      if (autoEdit) {
+        router.replace(window.location.pathname)
+      } else {
+        router.refresh()
+      }
       setTimeout(() => setStatus('idle'), 2000)
     })
   }

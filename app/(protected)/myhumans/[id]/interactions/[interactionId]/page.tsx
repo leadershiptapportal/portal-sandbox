@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Calendar, Clock, Users, CheckSquare, NotebookPen } from 'lucide-react'
+import { Calendar, Clock, FileText, Users, CheckSquare, NotebookPen } from 'lucide-react'
 import BackLink from '@/components/BackLink'
 import { notFound } from 'next/navigation'
 import { getUserById } from '@/lib/services/usersService'
@@ -13,6 +13,7 @@ import LastInteractionNotesDialog from '@/components/LastInteractionNotesDialog'
 
 interface Props {
   params: Promise<{ id: string; interactionId: string }>
+  searchParams: Promise<{ edit?: string }>
 }
 
 function formatDateTime(iso: string, timezone?: string): string {
@@ -41,8 +42,10 @@ const SESSION_STATUS_STYLES: Record<string, string> = {
   Cancelled:  'bg-rose-50 text-rose-700 border-rose-200',
 }
 
-export default async function InteractionDetailPage({ params }: Props) {
+export default async function InteractionDetailPage({ params, searchParams }: Props) {
   const { id, interactionId } = await params
+  const { edit } = await searchParams
+  const autoEdit = edit === '1'
 
   const [user, interaction, currentUserRecord] = await Promise.all([
     getUserById(id),
@@ -133,13 +136,20 @@ export default async function InteractionDetailPage({ params }: Props) {
             <NotebookPen className="h-3.5 w-3.5" />
             Take Notes
           </Link>
+          <Link
+            href="?edit=1"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            Add Notes
+          </Link>
           <LastInteractionNotesDialog note={lastInteractionNote} />
         </div>
       </div>
 
       {/* Interaction Notes */}
       <div className="bg-card rounded-xl shadow-sm p-5 md:p-6">
-        <InteractionNotesEditor interactionId={interactionId} userId={id} initialNotes={notesForEditor} />
+        <InteractionNotesEditor interactionId={interactionId} userId={id} initialNotes={notesForEditor} autoEdit={autoEdit} />
       </div>
 
       {/* Action Items — prefer coach session, fall back to Calendar Event */}

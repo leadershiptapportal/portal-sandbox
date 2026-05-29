@@ -4,6 +4,7 @@ import { Clock } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -57,6 +58,9 @@ export default function LastInteractionNotesDialog({
           <DialogTitle className="text-base font-semibold text-foreground">
             Previous Interaction Notes
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Notes from the most recent prior interaction with this person.
+          </DialogDescription>
           {formattedDate && (
             <p className="text-xs text-muted-foreground mt-0.5">{formattedDate}</p>
           )}
