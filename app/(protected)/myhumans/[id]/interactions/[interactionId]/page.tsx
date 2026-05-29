@@ -129,7 +129,7 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
               >
                 <ClipboardList className="h-3.5 w-3.5" />
-                Add Pre-Notes
+                Edit Pre-Notes
               </Link>
             )}
             {!(notesGroup?.interactionTyped && notesGroup?.interactionInk) && (
@@ -138,7 +138,7 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
               >
                 <NotebookPen className="h-3.5 w-3.5" />
-                Add Interaction Notes
+                Edit Interaction Notes
               </Link>
             )}
           </div>

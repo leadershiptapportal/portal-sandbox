@@ -47,10 +47,17 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
         return (
           <div
             key={item.interactionId}
-            className="rounded-lg border border-border hover:border-border transition-colors overflow-hidden"
+            className="relative rounded-lg border border-border overflow-hidden"
           >
-            {/* Main row */}
-            <Link href={href} className="flex items-center gap-3 px-3 py-2.5">
+            {/* Stretched link to interaction detail — covers the card background */}
+            <Link
+              href={href}
+              className="absolute inset-0 hover:bg-muted/50 transition-colors"
+              aria-label={item.title || 'View interaction'}
+            />
+
+            {/* Main content row */}
+            <div className="relative z-10 flex items-center gap-3 px-3 py-2.5 pointer-events-none">
               {/* Date block */}
               <div className="flex-shrink-0 w-9 text-center">
                 <p className="text-[10px] font-bold uppercase tracking-wide text-[hsl(213,70%,30%)]">
@@ -68,10 +75,15 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
                   {item.title || 'Untitled Interaction'}
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">{item.timeRange}</p>
-                {item.humanName ? (
-                  <p className="text-xs font-medium text-[hsl(213,70%,30%)] mt-0.5">
-                    with {item.humanName}
-                  </p>
+                {item.humanId && item.humanName ? (
+                  <Link
+                    href={`/myhumans/${item.humanId}`}
+                    className="pointer-events-auto text-xs font-medium text-[hsl(213,70%,30%)] mt-0.5 hover:underline inline-block"
+                  >
+                    {item.humanName}
+                  </Link>
+                ) : item.humanName ? (
+                  <p className="text-xs font-medium text-[hsl(213,70%,30%)] mt-0.5">{item.humanName}</p>
                 ) : item.displayLabel ? (
                   <p className="text-xs text-muted-foreground mt-0.5">{item.displayLabel}</p>
                 ) : (
@@ -80,11 +92,11 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
               </div>
 
               <span className="flex-shrink-0 text-muted-foreground/60 text-sm">›</span>
-            </Link>
+            </div>
 
             {/* Note actions */}
             {item.humanId && (
-              <div className="flex items-center gap-2 flex-wrap px-3 pb-2.5 pt-2 border-t border-border">
+              <div className="relative z-10 flex items-center gap-2 flex-wrap px-3 pb-2.5 pt-2 border-t border-border">
                 <Link
                   href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=prep`}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"

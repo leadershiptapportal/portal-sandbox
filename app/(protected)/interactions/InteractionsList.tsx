@@ -253,10 +253,17 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
                   return (
                     <div
                       key={item.interactionId}
-                      className="rounded-lg border border-border bg-card overflow-hidden"
+                      className="relative rounded-lg border border-border bg-card overflow-hidden"
                     >
-                      {/* Main link row */}
-                      <Link href={href} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors">
+                      {/* Stretched link to interaction detail */}
+                      <Link
+                        href={href}
+                        className="absolute inset-0 hover:bg-muted/50 transition-colors"
+                        aria-label={item.title || 'View interaction'}
+                      />
+
+                      {/* Main content row */}
+                      <div className="relative z-10 flex items-center gap-3 px-4 py-3 pointer-events-none">
                         {/* Date block */}
                         <div className="flex-shrink-0 w-9 text-center">
                           <p className="text-[10px] font-bold uppercase tracking-wide text-[hsl(213,70%,30%)]">
@@ -270,9 +277,16 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
 
                         {/* Body */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">
-                            {subjectName}
-                          </p>
+                          {item.humanId ? (
+                            <Link
+                              href={`/myhumans/${item.humanId}`}
+                              className="pointer-events-auto text-sm font-medium text-foreground hover:underline truncate block"
+                            >
+                              {subjectName}
+                            </Link>
+                          ) : (
+                            <p className="text-sm font-medium text-foreground truncate">{subjectName}</p>
+                          )}
                           <p className="text-xs text-muted-foreground mt-0.5 truncate">
                             {item.title || typeLabel}
                           </p>
@@ -280,11 +294,11 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
                         </div>
 
                         <span className="flex-shrink-0 text-muted-foreground/60 text-sm">›</span>
-                      </Link>
+                      </div>
 
                       {/* Note action buttons */}
                       {item.humanId && (
-                        <div className="flex items-center gap-2 flex-wrap px-4 pb-2.5 pt-2 border-t border-border">
+                        <div className="relative z-10 flex items-center gap-2 flex-wrap px-4 pb-2.5 pt-2 border-t border-border">
                           <Link
                             href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=prep`}
                             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
