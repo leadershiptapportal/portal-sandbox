@@ -106,7 +106,6 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Use
     // Extra contact fields
     personalEmail: f[FIELDS.USERS.PERSONAL_EMAIL] as string | undefined,
     birthday: f[FIELDS.USERS.BIRTHDAY] as string | undefined,
-    workDeskNumber: f[FIELDS.USERS.WORK_DESK_NUMBER] as string | undefined,
     workCellNumber: f[FIELDS.USERS.WORK_CELL_NUMBER] as string | undefined,
     personalCellNumber: f[FIELDS.USERS.PERSONAL_CELL_NUMBER] as string | undefined,
     // Legacy / alternate read paths
@@ -115,7 +114,6 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Use
     department: f[FIELDS.USERS.DEPARTMENT] as string | undefined,
     title: f[FIELDS.USERS.TITLE] as string | undefined,
     startDate: f[FIELDS.USERS.START_DATE] as string | undefined,
-    hireDate: f[FIELDS.USERS.HIRE_DATE] as string | undefined,
     engagementLevel: f[FIELDS.USERS.ENGAGEMENT_LEVEL] as string | undefined,
     coachNotes: f[FIELDS.USERS.COACH_NOTES] as string | undefined,
     internalNotes: f[FIELDS.USERS.INTERNAL_NOTES] as string | undefined,
@@ -281,9 +279,8 @@ export interface UserProfileFields {
   'Work Email'?: string
   'Personal Email'?: string
   'Title'?: string
-  'Hire Date'?: string
+  'Start Date'?: string
   'Birthday'?: string
-  'Work Desk Number'?: string
   'Work Cell Number'?: string
   'Personal Cell Number'?: string
   'Role'?: string

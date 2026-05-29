@@ -56,7 +56,6 @@ export interface User {
   // Extra contact fields
   personalEmail?: string        // "Personal Email"
   birthday?: string             // "Birthday"
-  workDeskNumber?: string       // "Work Desk Number"
   workCellNumber?: string       // "Work Cell Number"
   personalCellNumber?: string   // "Personal Cell Number"
 
@@ -66,7 +65,6 @@ export interface User {
   department?: string;
   title?: string;        // maps to Airtable "Title" (distinct from "Job Title")
   startDate?: string;
-  hireDate?: string;
   engagementLevel?: string;
   coachNotes?: string;
   internalNotes?: string;  // Airtable "Internal Notes" — coaching context on Users table

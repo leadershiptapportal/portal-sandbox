@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera } from 'lucide-react'
-import { updateProfileAction, fetchProfileOptionsAction } from './actions'
+import { updateProfileAction, fetchProfileOptionsAction, updateCoachContextAction } from './actions'
 import type { UserProfileFields } from '@/lib/airtable/users'
 import type { User } from '@/lib/types'
 
@@ -27,6 +27,7 @@ interface ProfileOptions {
 
 interface Props {
   user: User
+  initialQuickNotes?: string | null
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -123,7 +124,7 @@ const ROLE_OPTIONS = [
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function EditProfileDialog({ user }: Props) {
+export default function EditProfileDialog({ user, initialQuickNotes }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -147,6 +148,10 @@ export default function EditProfileDialog({ user }: Props) {
   const [title, setTitle] = useState('')
   const [workEmail, setWorkEmail] = useState('')
 
+  // ── Personal Info ─────────────────────────────────────────────────────────────
+  const [birthday, setBirthday] = useState('')
+  const [startDate, setStartDate] = useState('')
+
   // ── Organization ─────────────────────────────────────────────────────────────
   // Coach and Team Lead removed — those relationships are now managed via the
   // RelationshipsSection on the profile page, which writes to the canonical
@@ -154,10 +159,12 @@ export default function EditProfileDialog({ user }: Props) {
   const [companyId, setCompanyId] = useState('')
   const [role, setRole] = useState('')
 
-  // Coaching context (Quick Notes / Family Details) used to live here. It's
-  // now captured as proper Notes (note_type=general_context) via the "Log a
-  // Note" button on the profile, so this dialog no longer writes to the
-  // deprecated Coach-Person Context table.
+  // ── Contact ───────────────────────────────────────────────────────────────────
+  const [workCellNumber, setWorkCellNumber] = useState('')
+  const [personalCellNumber, setPersonalCellNumber] = useState('')
+
+  // ── Quick Notes ───────────────────────────────────────────────────────────────
+  const [quickNotes, setQuickNotes] = useState('')
 
   // ── Personality ──────────────────────────────────────────────────────────────
   const [enneagramId, setEnneagramId] = useState('')
@@ -181,8 +188,13 @@ export default function EditProfileDialog({ user }: Props) {
     setPreferredName(user.preferredName ?? '')
     setTitle(user.title ?? user.jobTitle ?? '')
     setWorkEmail(user.workEmail ?? '')
+    setBirthday(user.birthday ?? '')
+    setStartDate(user.startDate ?? '')
     setCompanyId(user.companyLinkedIds?.[0] ?? '')
     setRole(user.role ?? '')
+    setWorkCellNumber(user.workCellNumber ?? '')
+    setPersonalCellNumber(user.personalCellNumber ?? '')
+    setQuickNotes(initialQuickNotes ?? '')
     setEnneagramId(user.enneagramIds?.[0] ?? '')
     setMbtiId(user.mbtiIds?.[0] ?? '')
     setConflictPostureId(user.conflictPostureIds?.[0] ?? '')
@@ -265,6 +277,10 @@ export default function EditProfileDialog({ user }: Props) {
     if (preferredName !== (user.preferredName ?? '')) patch['Preferred Name'] = preferredName
     if (title !== (user.title ?? user.jobTitle ?? '')) patch['Title'] = title
     if (workEmail !== (user.workEmail ?? '')) patch['Work Email'] = workEmail
+    if (birthday !== (user.birthday ?? '')) patch['Birthday'] = birthday
+    if (startDate !== (user.startDate ?? '')) patch['Start Date'] = startDate
+    if (workCellNumber !== (user.workCellNumber ?? '')) patch['Work Cell Number'] = workCellNumber
+    if (personalCellNumber !== (user.personalCellNumber ?? '')) patch['Personal Cell Number'] = personalCellNumber
     if (role !== (user.role ?? '')) patch['Role'] = role
 
     // Linked single-record fields — only if changed and non-empty
@@ -290,6 +306,11 @@ export default function EditProfileDialog({ user }: Props) {
         setErrorMsg((prev) => (prev ? `${prev}\n${result.error}` : result.error))
         return
       }
+    }
+
+    // Quick notes are written to Coach-Person Context, not the Users table
+    if (quickNotes !== (initialQuickNotes ?? '')) {
+      await updateCoachContextAction(user.id, { quickNotes })
     }
 
     setSaving(false)
@@ -375,7 +396,19 @@ export default function EditProfileDialog({ user }: Props) {
                 </div>
               </Section>
 
-              {/* ── Section 3: Organization ─────────────────────────────── */}
+              {/* ── Section 3: Personal Info ────────────────────────────── */}
+              <Section title="Personal Info">
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Birthday" half>
+                    <input className={inputCls} type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} disabled={saving} />
+                  </Field>
+                  <Field label="Start Date" half>
+                    <input className={inputCls} type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={saving} />
+                  </Field>
+                </div>
+              </Section>
+
+              {/* ── Section 4: Organization ─────────────────────────────── */}
               <Section title="Organization">
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="Organization" half>
@@ -393,7 +426,31 @@ export default function EditProfileDialog({ user }: Props) {
                 </p>
               </Section>
 
-              {/* ── Section 5: Personality & Strengths ──────────────────── */}
+              {/* ── Section 5: Contact ───────────────────────────────────── */}
+              <Section title="Contact">
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Work Cell Number" half>
+                    <input className={inputCls} type="tel" value={workCellNumber} onChange={(e) => setWorkCellNumber(e.target.value)} placeholder="+1 555 000 0000" disabled={saving} />
+                  </Field>
+                  <Field label="Personal Cell Number" half>
+                    <input className={inputCls} type="tel" value={personalCellNumber} onChange={(e) => setPersonalCellNumber(e.target.value)} placeholder="+1 555 000 0000" disabled={saving} />
+                  </Field>
+                </div>
+              </Section>
+
+              {/* ── Section 6: Quick Notes ───────────────────────────────── */}
+              <Section title="Quick Notes">
+                <textarea
+                  className={`${inputCls} resize-none`}
+                  rows={4}
+                  value={quickNotes}
+                  onChange={(e) => setQuickNotes(e.target.value)}
+                  placeholder="Add quick notes about this person…"
+                  disabled={saving}
+                />
+              </Section>
+
+              {/* ── Section 7: Personality & Strengths ──────────────────── */}
               <Section title="Personality & Strengths">
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <Field label="Enneagram" half>

@@ -163,12 +163,10 @@ export const FIELDS = {
     COMPANY: 'fldUu6I5aaiIhTVj6',                                  // "Company"
     PERSONAL_EMAIL: 'fldsARb1wJcJauPAx',                           // "Personal Email"
     BIRTHDAY: 'flde4V2mmmYv0dMME',                                 // "Birthday"
-    WORK_DESK_NUMBER: 'fldZIvMj9ggKNAHwO',                         // "Work Desk Number"
-    WORK_CELL_NUMBER: 'fldoMP21FCwAemPEW',                         // "Work Cell Number"
+    WORK_CELL_NUMBER: 'fldZIvMj9ggKNAHwO',                         // "Work Cell Number"
     PERSONAL_CELL_NUMBER: 'fldV3990UGnVEdSQL',                     // "Personal Cell Number"
     DEPARTMENT: 'Department',                                      // does not exist in schema
-    START_DATE: 'Start Date',                                      // does not exist in schema
-    HIRE_DATE: 'fldQPh2SMs4SXjp6Q',                                // "Hire Date"
+    START_DATE: 'fldgDu0FAVHCEtp0w',                               // "Start Date"
     ENGAGEMENT_LEVEL: 'Engagement Level',                          // does not exist in schema
     COACH_NOTES: 'Coach Notes',                                    // does not exist in schema
     INTERNAL_NOTES: 'Internal Notes',                              // does not exist in schema

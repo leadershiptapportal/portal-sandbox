@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import {
   Check, Pencil, X, Plus,
   ChevronDown, ChevronUp, Network,
-  Cake, CalendarDays, StickyNote,
+  Cake, CalendarDays, StickyNote, Clock,
 } from 'lucide-react'
 import {
   Dialog,
@@ -926,13 +926,19 @@ export default function PersonSidebar({
               {userCanWrite && (
                 <InlineDateField
                   icon={<CalendarDays className="h-3 w-3" />}
-                  value={person.hireDate}
+                  value={person.startDate}
                   format="month-year"
-                  label="Work Anniversary"
-                  onSave={(v) => saveProfile({ 'Hire Date': v })}
+                  label="Start Date"
+                  onSave={(v) => saveProfile({ 'Start Date': v })}
                 />
               )}
             </div>
+            {person.timeAtCompany && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground pt-0.5">
+                <Clock className="h-3 w-3 flex-shrink-0" />
+                <span>{person.timeAtCompany}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

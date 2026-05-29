@@ -202,24 +202,9 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     !isRecordId(user.preferredName)
 
   const badges = [
-    enneagramLabel
-      ? { label: enneagramLabel, className: 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300' }
-      : user.enneagram && !isRecordId(user.enneagram)
-      ? { label: `Enneagram ${user.enneagram}`, className: 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300' }
-      : null,
-    mbtiLabel
-      ? { label: mbtiLabel, className: 'bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300' }
-      : user.mbtiType
-      ? { label: user.mbtiType.split('-')[0], className: 'bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300' }
-      : user.mbti && !isRecordId(user.mbti)
-      ? { label: user.mbti, className: 'bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300' }
-      : null,
     user.role && !isRecordId(user.role)
       ? { label: user.role, className: 'bg-muted text-muted-foreground' }
       : null,
-    // Relationship flags badges were sourced from the deprecated Coach-Person
-    // Context table. After the Item 11 cutover they're surfaced as Notes with
-    // note_type='general_context' instead.
   ].filter((b): b is { label: string; className: string } => b !== null)
 
   return (

@@ -29,7 +29,8 @@ export default async function AdminUsersPage() {
         </div>
       ) : (
         <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">User</th>
@@ -50,6 +51,7 @@ export default async function AdminUsersPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

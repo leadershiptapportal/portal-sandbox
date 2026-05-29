@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Mail, Clock, UserCheck, StickyNote } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Mail, Clock, UserCheck, StickyNote, Cake, CalendarDays, Check, X, Plus, Pencil } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -12,9 +13,94 @@ import {
 import { Button } from '@/components/ui/button'
 import EditProfileDialog from '../EditProfileDialog'
 import { getDisplayName, getInitials, isRecordId } from './helpers'
-import { updateCoachContextAction } from '../actions'
+import { updateCoachContextAction, updateProfileAction } from '../actions'
 import type { User } from '@/lib/types'
 import { useDraftSave, clearDraft, loadDraft } from '@/hooks/useDraftSave'
+
+// ── Inline date chip ──────────────────────────────────────────────────────────
+
+function InlineDateChip({
+  icon,
+  value,
+  label,
+  format,
+  onSave,
+  canEdit,
+}: {
+  icon: React.ReactNode
+  value: string | undefined
+  label: string
+  format: 'month-day' | 'month-year'
+  onSave: (v: string) => Promise<void>
+  canEdit: boolean
+}) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(value ?? '')
+  const [saving, setSaving] = useState(false)
+
+  function formatDisplay(v: string) {
+    if (!v) return ''
+    const d = new Date(v + 'T12:00:00')
+    if (format === 'month-day') return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+  }
+
+  async function commit() {
+    if (draft === (value ?? '')) { setEditing(false); return }
+    setSaving(true)
+    await onSave(draft)
+    setSaving(false)
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <span className="flex items-center gap-1">
+        <input
+          type="date"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus
+          className="text-xs border border-[hsl(213,70%,30%)] rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-card"
+          disabled={saving}
+        />
+        <button onClick={commit} disabled={saving} className="p-0.5 rounded text-emerald-600 hover:bg-emerald-50">
+          <Check className="h-3 w-3" />
+        </button>
+        <button onClick={() => { setDraft(value ?? ''); setEditing(false) }} className="p-0.5 rounded text-muted-foreground hover:bg-muted">
+          <X className="h-3 w-3" />
+        </button>
+      </span>
+    )
+  }
+
+  if (!value && canEdit) {
+    return (
+      <button
+        onClick={() => { setDraft(''); setEditing(true) }}
+        className="flex items-center gap-1 text-xs px-2 py-0.5 rounded border border-dashed border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-muted-foreground transition-colors"
+      >
+        {icon}
+        <span>{label}</span>
+        <Plus className="h-2.5 w-2.5" />
+      </button>
+    )
+  }
+
+  if (!value) return null
+
+  return (
+    <button
+      onClick={canEdit ? () => { setDraft(value ?? ''); setEditing(true) } : undefined}
+      className={`group flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground ${canEdit ? 'hover:bg-muted transition-colors cursor-pointer' : 'cursor-default'}`}
+    >
+      {icon}
+      <span>{formatDisplay(value)}</span>
+      {canEdit && <Pencil className="h-2.5 w-2.5 opacity-0 group-hover:opacity-40 transition-opacity" />}
+    </button>
+  )
+}
 
 // ── Quick Notes inline + modal ────────────────────────────────────────────────
 
@@ -164,13 +250,20 @@ export default function ProfileCardSection({
   quickNotes = null,
   personId,
 }: Props) {
+  const router = useRouter()
+
+  async function saveDateField(field: 'Birthday' | 'Start Date', value: string) {
+    await updateProfileAction(user.id, { [field]: value })
+    router.refresh()
+  }
+
   return (
     <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
       {userCanWrite && (
         <div className="flex items-start justify-between gap-2 mb-4 sm:mb-0">
           <span />
           <div className="flex items-center gap-3">
-            <EditProfileDialog user={user} />
+            <EditProfileDialog user={user} initialQuickNotes={quickNotes} />
           </div>
         </div>
       )}
@@ -230,6 +323,28 @@ export default function ProfileCardSection({
               </span>
             )}
           </div>
+
+          {/* Birthday + Start Date chips */}
+          {(userCanWrite || user.birthday || user.startDate) && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <InlineDateChip
+                icon={<Cake className="h-3 w-3" />}
+                value={user.birthday}
+                label="Birthday"
+                format="month-day"
+                canEdit={userCanWrite}
+                onSave={(v) => saveDateField('Birthday', v)}
+              />
+              <InlineDateChip
+                icon={<CalendarDays className="h-3 w-3" />}
+                value={user.startDate}
+                label="Start Date"
+                format="month-year"
+                canEdit={userCanWrite}
+                onSave={(v) => saveDateField('Start Date', v)}
+              />
+            </div>
+          )}
         </div>
       </div>
 
