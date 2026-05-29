@@ -42,6 +42,7 @@ export default function TakeNotesTyped({
   const draftKey = `typed-draft-${personId}-${noteCategory}`
   const isOnline = useOnlineStatus()
 
+  const [noteTitle, setNoteTitle] = useState(existingNote?.noteTitle ?? '')
   const [content, setContent] = useState(existingNote?.content ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -133,6 +134,7 @@ export default function TakeNotesTyped({
       content.trim(),
       noteCategory,
       selectedMeetingId || undefined,
+      noteCategory === 'general' ? noteTitle.trim() || undefined : undefined,
     )
 
     if ('error' in result) {
@@ -180,6 +182,20 @@ export default function TakeNotesTyped({
         </div>
       )}
 
+      {/* ── Title input (general notes only) ─────────────────────────────── */}
+      {noteCategory === 'general' && (
+        <div className="flex-shrink-0 border-b border-border bg-card">
+          <input
+            type="text"
+            value={noteTitle}
+            onChange={(e) => setNoteTitle(e.target.value)}
+            placeholder="Note title (defaults to date &amp; time if blank)"
+            disabled={saving}
+            className="w-full bg-transparent px-5 py-3 text-sm font-medium text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+          />
+        </div>
+      )}
+
       {/* ── Text area ─────────────────────────────────────────────────────── */}
       <div className="flex-1 min-h-0 overflow-y-auto bg-card">
         {draftReady ? (
@@ -188,7 +204,7 @@ export default function TakeNotesTyped({
             onChange={(e) => setContent(e.target.value)}
             placeholder={
               noteCategory === 'prep'
-                ? 'Add preparation notes — questions to ask, topics to cover, context to keep in mind…'
+                ? 'Add pre-notes — questions to ask, topics to cover, context to keep in mind…'
                 : noteCategory === 'interaction'
                 ? 'Add interaction notes…'
                 : 'Start typing your notes…'

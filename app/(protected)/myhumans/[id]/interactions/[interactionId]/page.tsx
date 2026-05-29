@@ -120,23 +120,27 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
           )}
         </div>
 
-        {/* Note action buttons — only shown when no notes exist yet */}
-        {!(notesGroup?.prepTyped || notesGroup?.prepInk || notesGroup?.interactionTyped || notesGroup?.interactionInk) && (
+        {/* Note action buttons — each hidden only when both note types for it exist */}
+        {(!(notesGroup?.prepTyped && notesGroup?.prepInk) || !(notesGroup?.interactionTyped && notesGroup?.interactionInk)) && (
           <div className="pt-3 border-t border-border mt-4 flex flex-wrap gap-2">
-            <Link
-              href={`${takeNotesBase}&noteCategory=prep`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
-            >
-              <ClipboardList className="h-3.5 w-3.5" />
-              Add Prep Notes
-            </Link>
-            <Link
-              href={`${takeNotesBase}&noteCategory=interaction`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
-            >
-              <NotebookPen className="h-3.5 w-3.5" />
-              Add Interaction Notes
-            </Link>
+            {!(notesGroup?.prepTyped && notesGroup?.prepInk) && (
+              <Link
+                href={`${takeNotesBase}&noteCategory=prep`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+              >
+                <ClipboardList className="h-3.5 w-3.5" />
+                Add Pre-Notes
+              </Link>
+            )}
+            {!(notesGroup?.interactionTyped && notesGroup?.interactionInk) && (
+              <Link
+                href={`${takeNotesBase}&noteCategory=interaction`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
+              >
+                <NotebookPen className="h-3.5 w-3.5" />
+                Add Interaction Notes
+              </Link>
+            )}
           </div>
         )}
       </div>
@@ -145,7 +149,7 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
       <div className="bg-card rounded-xl shadow-sm p-5 md:p-6 space-y-4">
         <div className="flex items-center gap-2">
           <ClipboardList className="h-4 w-4 text-muted-foreground" />
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Prep Notes</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Pre-Notes</h2>
         </div>
 
         <PrepNotesEditor

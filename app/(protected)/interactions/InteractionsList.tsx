@@ -2,9 +2,8 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import {
-  Search, ChevronRight, FileText, Calendar, X, NotebookPen, Plus,
+  Search, Calendar, X, NotebookPen, ClipboardList, Plus,
   Users, Phone, Video, MessageSquare, Mail, Package, MoreHorizontal,
 } from 'lucide-react'
 import AddInteractionDialog from '@/components/AddInteractionDialog'
@@ -62,10 +61,6 @@ const EMPTY_COPY: Record<Filter, { title: string; message: string }> = {
   },
 }
 
-function formatRowDate(item: ListItem): string {
-  return `${item.weekday} ${item.month} ${item.day}`
-}
-
 function groupByMonth(items: ListItem[]): { label: string; rows: ListItem[] }[] {
   const groups = new Map<string, ListItem[]>()
   const labels = new Map<string, string>()
@@ -91,7 +86,6 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
   const [filter, setFilter] = useState<Filter>(initialFilter)
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
   const [query, setQuery] = useState('')
-  const router = useRouter()
 
   useEffect(() => {
     const url = new URL(window.location.href)
@@ -248,77 +242,69 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 px-1">
                 {label}
               </p>
-              <ul className="bg-card rounded-xl shadow-sm divide-y divide-border overflow-hidden">
+              <div className="space-y-2">
                 {rows.map((item) => {
                   const subjectName = item.humanName ?? item.displayLabel ?? 'Unknown'
-                  const needsNotes = item.isPast && !item.hasNote
                   const href = item.humanId
                     ? `/myhumans/${item.humanId}/interactions/${item.interactionId}`
                     : `/interactions/${item.interactionId}`
-                  const takeNotesHref = item.humanId
-                    ? `/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}`
-                    : null
                   const itype = item.interactionType ?? 'Calendar Event'
+                  const typeLabel = TYPE_OPTIONS.find((t) => t.key === itype)?.label ?? itype
                   return (
-                    <li key={item.interactionId}>
-                      {/*
-                        Row uses a plain div + router.push so we can include a
-                        separate <Link> for Take Notes without nesting <a> in <a>.
-                      */}
-                      <div
-                        role="link"
-                        tabIndex={0}
-                        onClick={() => router.push(href)}
-                        onKeyDown={(e) => e.key === 'Enter' && router.push(href)}
-                        className="flex items-center gap-3 py-3 px-4 hover:bg-muted/50 transition-colors cursor-pointer"
-                      >
-                        <div className="text-xs font-medium text-muted-foreground w-20 flex-shrink-0">
-                          {formatRowDate(item)}
+                    <div
+                      key={item.interactionId}
+                      className="rounded-lg border border-border bg-card overflow-hidden"
+                    >
+                      {/* Main link row */}
+                      <Link href={href} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors">
+                        {/* Date block */}
+                        <div className="flex-shrink-0 w-9 text-center">
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-[hsl(213,70%,30%)]">
+                            {item.weekday}
+                          </p>
+                          <p className="text-xl font-bold text-foreground leading-none mt-0.5">
+                            {item.day}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">{item.month}</p>
                         </div>
+
+                        {/* Body */}
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-foreground truncate">
                             {subjectName}
-                            {item.title && (
-                              <span className="text-muted-foreground font-normal">
-                                {' · '}
-                                {item.title}
-                              </span>
-                            )}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                            {item.title || typeLabel}
                           </p>
                           <p className="text-xs text-muted-foreground mt-0.5">{item.timeRange}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            <span className="text-muted-foreground">Interaction Type: </span>
-                            {TYPE_OPTIONS.find((t) => t.key === itype)?.label ?? itype}
-                          </p>
                         </div>
 
-                        {/* Take Notes — always visible when a human is linked */}
-                        {takeNotesHref && (
+                        <span className="flex-shrink-0 text-muted-foreground/60 text-sm">›</span>
+                      </Link>
+
+                      {/* Note action buttons */}
+                      {item.humanId && (
+                        <div className="flex items-center gap-2 flex-wrap px-4 pb-2.5 pt-2 border-t border-border">
                           <Link
-                            href={takeNotesHref}
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1 text-xs font-medium text-[hsl(213,70%,40%)] hover:text-[hsl(213,70%,25%)] whitespace-nowrap transition-colors"
+                            href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=prep`}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+                          >
+                            <ClipboardList className="h-3 w-3" />
+                            Edit Pre-Notes
+                          </Link>
+                          <Link
+                            href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=interaction`}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
                           >
                             <NotebookPen className="h-3 w-3" />
-                            Take Notes
+                            Edit Interaction Notes
                           </Link>
-                        )}
-
-                        {needsNotes ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full whitespace-nowrap">
-                            <FileText className="h-3 w-3" />
-                            Add notes
-                          </span>
-                        ) : item.hasNote ? (
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">Noted</span>
-                        ) : null}
-
-                        <ChevronRight className="h-4 w-4 text-muted-foreground/60 flex-shrink-0" />
-                      </div>
-                    </li>
+                        </div>
+                      )}
+                    </div>
                   )
                 })}
-              </ul>
+              </div>
             </div>
           ))}
         </div>

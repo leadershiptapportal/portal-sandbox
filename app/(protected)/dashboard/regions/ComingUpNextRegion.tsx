@@ -96,14 +96,14 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
                       className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
                     >
                       <ClipboardList className="h-2.5 w-2.5" />
-                      Add/Edit Prep Notes
+                      Edit Pre-Notes
                     </Link>
                     <Link
                       href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=interaction`}
                       className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
                     >
                       <NotebookPen className="h-2.5 w-2.5" />
-                      Add/Edit Interaction Notes
+                      Edit Interaction Notes
                     </Link>
                   </div>
                 )}

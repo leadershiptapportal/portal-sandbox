@@ -212,6 +212,7 @@ export async function saveTypedNoteAction(
   content: string,
   noteCategory: NoteCategory,
   interactionId?: string,
+  noteTitle?: string,
 ): Promise<{ success: true; noteId: string } | { error: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
@@ -223,6 +224,14 @@ export async function saveTypedNoteAction(
       noteCategory === 'prep' ? 'prep_note' as const
       : noteCategory === 'interaction' && interactionId ? 'interaction_note' as const
       : 'general_note' as const
+
+    // For general notes, default title to a timestamp if none provided
+    const resolvedTitle = noteCategory === 'general'
+      ? (noteTitle?.trim() || new Date().toLocaleString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric',
+          hour: 'numeric', minute: '2-digit', hour12: true,
+        }))
+      : undefined
 
     // Upsert: if this is an interaction-scoped note, patch existing instead of creating duplicate
     if (interactionId && noteType !== 'general_note') {
@@ -245,6 +254,7 @@ export async function saveTypedNoteAction(
 
     const created = await createNote({
       content,
+      noteTitle: resolvedTitle,
       authorPersonId: userRecord.airtableId,
       coachName: userRecord.name || undefined,
       subjectPersonId,

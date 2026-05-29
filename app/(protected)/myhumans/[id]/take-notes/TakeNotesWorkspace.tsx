@@ -116,7 +116,7 @@ export default function TakeNotesWorkspace({
         </Link>
         <div className="min-w-0 flex-1">
           <p className="text-xs uppercase tracking-wide text-muted-foreground leading-none font-medium">
-            {noteCategory === 'prep' ? 'Prep Notes' : noteCategory === 'interaction' ? 'Interaction Notes' : 'General Notes'}
+            {noteCategory === 'prep' ? 'Pre-Notes' : noteCategory === 'interaction' ? 'Interaction Notes' : 'General Notes'}
           </p>
           <p className="text-sm font-semibold text-foreground truncate leading-tight">
             {displayName}

@@ -86,6 +86,7 @@ export const FIELDS = {
   },
   NOTES: {
     BODY: 'fldCT8P7Da1INkG0T',                  // "Content" (primary text field)
+    NOTE_TITLE: 'fldqvZQqv7yytyHnT',            // "Note Title" (singleLineText — optional label for general notes)
     DATE: 'fldnOSv13VmCbOtEY',                  // "Date"
     CLIENT: 'fldDLBsX8zXpJInAD',                // "Client" (linked → People)
     COACH_NAME: 'fld4QwJB7HdqZPQZt',            // "Coach Name"
