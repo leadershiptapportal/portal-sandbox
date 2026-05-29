@@ -27,6 +27,8 @@ export async function updateInteractionNotes(
     return { success: true }
   } catch (err) {
     console.error('[updateInteractionNotes]', err)
-    return { error: 'Failed to save — please try again' }
+    // Surface the actual error so it's visible in the UI during debugging
+    const detail = err instanceof Error ? err.message : String(err)
+    return { error: detail || 'Failed to save — please try again' }
   }
 }

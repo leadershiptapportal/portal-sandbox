@@ -14,22 +14,26 @@ interface Props {
 export default function InteractionNotesEditor({ interactionId, userId, initialNotes, autoEdit }: Props) {
   const router = useRouter()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  // Initialize from autoEdit for the first render (SSR → hydrate path).
+  // The effect below handles the case where autoEdit becomes true after a
+  // client-side navigation (user was already on the page when they clicked
+  // the top "Add Notes" button, so useState doesn't re-initialize).
   const [editing, setEditing] = useState(autoEdit ?? false)
   const [draft, setDraft] = useState(initialNotes ?? '')
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const [isPending, startTransition] = useTransition()
 
-  // When opened via the top "Add Notes" button, scroll the editor into view and focus it.
   useEffect(() => {
     if (autoEdit) {
-      setTimeout(() => {
+      setEditing(true)
+      const tid = setTimeout(() => {
         textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
         textareaRef.current?.focus()
-      }, 50)
+      }, 80)
+      return () => clearTimeout(tid)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [autoEdit])
 
   function handleEdit() {
     setDraft(initialNotes ?? '')
