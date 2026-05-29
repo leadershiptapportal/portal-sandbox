@@ -4,7 +4,6 @@ import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getHourInTimezone } from '@/lib/utils/dateFormat'
 import DashboardTagline from './DashboardTagline'
-import QuickActionsRegion from './regions/QuickActionsRegion'
 import ComingUpNextRegion from './regions/ComingUpNextRegion'
 import OpenTasksRegion from './regions/OpenTasksRegion'
 import UpcomingThisWeekRegion from './regions/UpcomingThisWeekRegion'
@@ -62,11 +61,6 @@ export default async function DashboardPage() {
         </h1>
         <DashboardTagline />
       </div>
-
-      {/* ── Quick Actions ────────────────────────────────────────────────────── */}
-      <Suspense fallback={<div className="h-[68px] bg-card rounded-xl shadow-sm mb-4 md:mb-5 animate-pulse" />}>
-        <QuickActionsRegion userRecord={userRecord} />
-      </Suspense>
 
       {/* ── Today chips + admin calendar ─────────────────────────────────────── */}
       <Suspense fallback={<ComingUpNextSkeleton />}>
