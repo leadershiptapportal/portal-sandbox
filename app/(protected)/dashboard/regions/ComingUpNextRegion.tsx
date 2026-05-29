@@ -1,8 +1,5 @@
 import Link from 'next/link'
-import { CalendarDays, FileText } from 'lucide-react'
-import { TABLES, FIELDS } from '@/lib/airtable/constants'
-import { airtableFetch } from '@/lib/airtable/client'
-import { log } from '@/lib/utils/logger'
+import { FileText } from 'lucide-react'
 import { getUsers, getHumansByRelationship } from '@/lib/services/usersService'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
@@ -13,45 +10,6 @@ import { getDateInTimezone, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import { interactionsToUpcomingItems } from './interactionMappers'
 import type { CurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 
-interface PortalCalendarEvent {
-  id: string
-  subject: string
-  start: string
-  timezone: string
-}
-
-async function getUpcomingPortalEvents(ownerEmail: string): Promise<PortalCalendarEvent[]> {
-  const apiKey = process.env.AIRTABLE_API_KEY
-  const baseId = process.env.AIRTABLE_BASE_ID
-  if (!apiKey || !baseId) return []
-
-  const now = new Date()
-  const cutoff = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
-  const safeOwner = ownerEmail.toLowerCase().replace(/"/g, '\\"')
-  const formula = encodeURIComponent(
-    `AND(IS_AFTER({${FIELDS.INTERACTIONS.START}}, "${now.toISOString()}"), IS_BEFORE({${FIELDS.INTERACTIONS.START}}, "${cutoff.toISOString()}"), LOWER({${FIELDS.INTERACTIONS.CALENDAR_OWNER}}) = "${safeOwner}")`,
-  )
-  try {
-    const res = await airtableFetch(
-      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(TABLES.INTERACTIONS)}?filterByFormula=${formula}&sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.INTERACTIONS.START)}&sort%5B0%5D%5Bdirection%5D=asc&maxRecords=10`,
-      { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
-    )
-    if (!res.ok) {
-      log.error('[getUpcomingPortalEvents] failed status:', res.status, await res.text())
-      return []
-    }
-    const data = await res.json()
-    return (data.records ?? []).map((r: { id: string; fields: Record<string, unknown> }) => ({
-      id: r.id,
-      subject: (r.fields[FIELDS.INTERACTIONS.TITLE] as string) ?? '(No Subject)',
-      start: (r.fields[FIELDS.INTERACTIONS.START] as string) ?? '',
-      timezone: resolveDisplayTz(r.fields[FIELDS.INTERACTIONS.TIMEZONE] as string | undefined),
-    })).filter((e: PortalCalendarEvent) => e.start)
-  } catch {
-    return []
-  }
-}
-
 interface Props {
   userRecord: CurrentUserRecord
 }
@@ -61,7 +19,7 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
   const isAdmin = userRecord.role === 'admin'
   const ownerEmail = userRecord.email || undefined
 
-  const [users, upcomingInteractions, pastDay, coachContexts, coachNotes, portalEvents] =
+  const [users, upcomingInteractions, pastDay, coachContexts, coachNotes] =
     await Promise.all([
       isAdmin || !userRecord.airtableId
         ? getUsers(sessionUser)
@@ -74,7 +32,6 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
       userRecord.airtableId
         ? getNotesByAuthor(userRecord.airtableId)
         : Promise.resolve([]),
-      isAdmin && ownerEmail ? getUpcomingPortalEvents(ownerEmail) : Promise.resolve([]),
     ])
 
   const emailToUser = buildEmailToUserMap(users)
@@ -141,45 +98,6 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
               </Link>
             )
           })}
-          </div>
-        </div>
-      )}
-
-      {/* ── Upcoming Sessions (admin only, from Calendar) ────────────────────── */}
-      {isAdmin && portalEvents.length > 0 && (
-        <div className="mb-4 md:mb-5 bg-card rounded-xl shadow-sm p-4 md:p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <CalendarDays className="h-5 w-5 text-muted-foreground" />
-            <h2 className="text-lg font-semibold text-foreground">Upcoming Interactions (from Calendar)</h2>
-            <span className="ml-auto text-xs text-muted-foreground font-medium">
-              {portalEvents.length} {portalEvents.length === 1 ? 'event' : 'events'}
-            </span>
-          </div>
-          <div className="divide-y divide-border">
-            {portalEvents.map((event) => (
-              <div key={event.id} className="py-3 flex items-center gap-3">
-                <div className="flex-shrink-0 text-center w-10">
-                  <p className="text-xs font-medium text-muted-foreground uppercase">
-                    {new Date(event.start).toLocaleString('en-US', { timeZone: event.timezone, month: 'short' })}
-                  </p>
-                  <p className="text-lg font-bold text-foreground leading-none">
-                    {new Date(event.start).toLocaleString('en-US', { timeZone: event.timezone, day: 'numeric' })}
-                  </p>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{event.subject}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {new Date(event.start).toLocaleString('en-US', {
-                      timeZone: event.timezone,
-                      weekday: 'short',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true,
-                    })} ET
-                  </p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       )}
