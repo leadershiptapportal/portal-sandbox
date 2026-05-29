@@ -105,7 +105,7 @@ export interface Note {
   authorPersonId?: string;
   subjectPersonId?: string;
   interactionId?: string;
-  noteType?: 'general_note' | 'interaction_note' | 'ink_note';
+  noteType?: 'general_note' | 'interaction_note' | 'ink_note' | 'prep_note';
   visibility: 'private_to_author';
 }
 

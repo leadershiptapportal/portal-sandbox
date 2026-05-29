@@ -92,20 +92,24 @@ export default async function SessionPage({ params }: Props) {
             with {interaction.humanName}
           </p>
         )}
-        {(userCanWrite && clientAirtableId) || lastInteractionNote ? (
+        {userCanWrite && clientAirtableId && (
           <div className="pt-2 flex flex-wrap gap-2">
-            {userCanWrite && clientAirtableId && (
-              <Link
-                href={`/myhumans/${clientAirtableId}/take-notes?interactionId=${eventId}`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
-              >
-                <NotebookPen className="h-3.5 w-3.5" />
-                Take Notes
-              </Link>
-            )}
-            <LastInteractionNotesDialog note={lastInteractionNote} />
+            <Link
+              href={`/myhumans/${clientAirtableId}/take-notes?interactionId=${eventId}&noteCategory=prep`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+            >
+              <NotebookPen className="h-3.5 w-3.5" />
+              Prep Notes
+            </Link>
+            <Link
+              href={`/myhumans/${clientAirtableId}/take-notes?interactionId=${eventId}&noteCategory=interaction`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
+            >
+              <NotebookPen className="h-3.5 w-3.5" />
+              Interaction Notes
+            </Link>
           </div>
-        ) : null}
+        )}
       </div>
 
       {/* Interaction note — create or edit */}

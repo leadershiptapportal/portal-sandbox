@@ -28,7 +28,7 @@ export async function updateInteractionNotes(
     // Look for an existing note from this coach for this interaction
     const existingNotes = await getNotesByInteractionId(interactionId)
     const myNote = existingNotes.find(
-      (n) => n.authorPersonId === userRecord.airtableId && n.noteType !== 'ink_note',
+      (n) => n.authorPersonId === userRecord.airtableId && n.noteType === 'interaction_note' && !n.inkImageUrl,
     )
 
     if (myNote) {

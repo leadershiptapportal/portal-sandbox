@@ -14,6 +14,7 @@ import type { ProfileOption } from '@/lib/airtable/users'
 import type { LastNoteData } from '@/components/LastInteractionNotesDialog'
 import type { RelationshipContext } from '@/lib/airtable/relationships'
 import type { Note } from '@/lib/airtable/notes'
+import type { NoteCategory } from '../actions'
 
 interface ProfileOptions {
   enneagrams: ProfileOption[]
@@ -36,6 +37,8 @@ interface Props {
   relationships?: RelationshipContext[]
   rcNotes?: Map<string, Note>
   existingInkNote?: Note | null
+  noteCategory?: NoteCategory
+  existingTypedNote?: Note | null
 }
 
 type InputMode = 'type' | 'ink'
@@ -52,6 +55,8 @@ export default function TakeNotesWorkspace({
   relationships = [],
   rcNotes = new Map(),
   existingInkNote,
+  noteCategory = 'general',
+  existingTypedNote,
 }: Props) {
   const router = useRouter()
   const [savedPersonData, setSavedPersonData] = useState(person)
@@ -111,7 +116,7 @@ export default function TakeNotesWorkspace({
         </Link>
         <div className="min-w-0 flex-1">
           <p className="text-xs uppercase tracking-wide text-muted-foreground leading-none font-medium">
-            {hasUnsavedContent ? 'Continue Taking Notes' : 'Take Notes'}
+            {noteCategory === 'prep' ? 'Prep Notes' : noteCategory === 'interaction' ? 'Interaction Notes' : 'General Notes'}
           </p>
           <p className="text-sm font-semibold text-foreground truncate leading-tight">
             {displayName}
@@ -217,6 +222,7 @@ export default function TakeNotesWorkspace({
               meetings={meetings}
               initialInteraction={initialInteraction}
               existingInkNote={existingInkNote}
+              noteCategory={noteCategory}
               onSaveComplete={handleSaveComplete}
               onCancel={handleCancel}
               onStrokeCountChange={(count) => setHasUnsavedContent(count > 0)}
@@ -226,6 +232,8 @@ export default function TakeNotesWorkspace({
               personId={person.id}
               meetings={meetings}
               initialInteraction={initialInteraction}
+              existingNote={existingTypedNote}
+              noteCategory={noteCategory}
               onSaveComplete={handleSaveComplete}
               onCancel={handleCancel}
               onContentChange={(hasContent) => setHasUnsavedContent(hasContent)}

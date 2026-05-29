@@ -24,7 +24,7 @@ type AirtableRecord = { id: string; fields: Record<string, unknown> }
  * round-trip safely (TypeScript widens to string at the boundary), but all
  * new writes use the two canonical values above.
  */
-export type NoteType = 'general_note' | 'interaction_note' | 'ink_note'
+export type NoteType = 'general_note' | 'interaction_note' | 'ink_note' | 'prep_note'
 
 export interface Note {
   id: string
@@ -349,6 +349,37 @@ export async function upsertGeneralNoteForRC(
     subjectPersonId,
     noteType: 'general_note',
   })
+}
+
+// ── Interaction notes grouped by category + format ───────────────────────────
+
+export interface InteractionNotesGroup {
+  prepTyped: Note | null
+  prepInk: Note | null
+  interactionTyped: Note | null
+  interactionInk: Note | null
+}
+
+/**
+ * Returns all four possible note slots for a given interaction + author.
+ * Format (typed vs handwritten) is detected by presence of inkImageUrl.
+ * Old ink_note records are treated as handwritten interaction notes.
+ */
+export async function getInteractionNotesGrouped(
+  interactionId: string,
+  authorPersonId: string,
+): Promise<InteractionNotesGroup> {
+  const all = await getNotesByInteractionId(interactionId)
+  const mine = all.filter((n) => n.authorPersonId === authorPersonId)
+
+  return {
+    prepTyped: mine.find((n) => n.noteType === 'prep_note' && !n.inkImageUrl) ?? null,
+    prepInk: mine.find((n) => n.noteType === 'prep_note' && !!n.inkImageUrl) ?? null,
+    interactionTyped: mine.find((n) => n.noteType === 'interaction_note' && !n.inkImageUrl) ?? null,
+    interactionInk: mine.find((n) =>
+      (n.noteType === 'interaction_note' || n.noteType === 'ink_note') && !!n.inkImageUrl
+    ) ?? null,
+  }
 }
 
 /**

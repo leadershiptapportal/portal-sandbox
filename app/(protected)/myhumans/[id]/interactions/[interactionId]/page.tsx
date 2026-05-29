@@ -1,14 +1,14 @@
 import Link from 'next/link'
-import { Calendar, Clock, FileText, Users, CheckSquare, NotebookPen } from 'lucide-react'
+import Image from 'next/image'
+import { Calendar, Clock, Users, CheckSquare, ClipboardList, NotebookPen, Pencil } from 'lucide-react'
 import BackLink from '@/components/BackLink'
 import { notFound } from 'next/navigation'
 import { getUserById } from '@/lib/services/usersService'
 import { getInteractionById } from '@/lib/airtable/interactions'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
-import { getMostRecentInteractionNoteByHuman, getNotesByInteractionId } from '@/lib/airtable/notes'
+import { getInteractionNotesGrouped } from '@/lib/airtable/notes'
 import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
 import InteractionNotesEditor from './InteractionNotesEditor'
-import LastInteractionNotesDialog from '@/components/LastInteractionNotesDialog'
 
 interface Props {
   params: Promise<{ id: string; interactionId: string }>
@@ -54,20 +54,9 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
 
   if (!interaction) notFound()
 
-  const [thisInteractionNotes, lastInteractionNote] = await Promise.all([
-    getNotesByInteractionId(interactionId).catch(() => []),
-    getMostRecentInteractionNoteByHuman(id, interactionId),
-  ])
-
-  // Find the coach's own typed note for this interaction (if any).
-  // Fall back to the Calendar Event's Notes field for older records written
-  // before the Notes table was used for interaction notes.
-  const coachOwnNote = currentUserRecord.airtableId
-    ? thisInteractionNotes.find(
-        (n) => n.authorPersonId === currentUserRecord.airtableId && n.noteType !== 'ink_note',
-      )
-    : undefined
-  const notesForEditor = coachOwnNote?.content ?? interaction.notes ?? undefined
+  const notesGroup = currentUserRecord.airtableId
+    ? await getInteractionNotesGrouped(interactionId, currentUserRecord.airtableId).catch(() => null)
+    : null
 
   const userName = user?.fullName ?? user?.preferredName ?? user?.firstName ?? 'Person'
 
@@ -80,13 +69,14 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
     ? (SESSION_STATUS_STYLES[interaction.sessionStatus] ?? 'bg-muted text-muted-foreground border-border')
     : null
 
+  const takeNotesBase = `/myhumans/${id}/take-notes?interactionId=${interactionId}`
+
   return (
     <div className="px-4 py-5 md:p-8 max-w-3xl mx-auto space-y-6">
 
-      {/* Back link — goes to wherever the user actually came from. */}
       <BackLink fallbackHref={`/myhumans/${id}`} label={`Back to ${userName}`} />
 
-      {/* Interaction header */}
+      {/* ── Interaction header ─────────────────────────────────────────────── */}
       <div className="bg-card rounded-xl shadow-sm p-5 md:p-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <h1 className="text-xl font-bold text-foreground leading-snug">
@@ -101,21 +91,16 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
 
         <div className="mt-4 space-y-2">
           <div className="flex items-start gap-2 text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <Calendar className="h-4 w-4 flex-shrink-0 mt-0.5" />
             <span>{dateLabel}</span>
           </div>
 
           {interaction.participantEmails.length > 0 && (
             <div className="flex items-start gap-2 text-sm text-muted-foreground">
-              <Users className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+              <Users className="h-4 w-4 flex-shrink-0 mt-0.5" />
               <div className="flex flex-wrap gap-1.5">
                 {interaction.participantEmails.map((email) => (
-                  <span
-                    key={email}
-                    className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs"
-                  >
-                    {email}
-                  </span>
+                  <span key={email} className="px-2 py-0.5 rounded-full bg-muted text-xs">{email}</span>
                 ))}
               </div>
             </div>
@@ -129,38 +114,128 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
           )}
         </div>
 
-        {/* Action buttons */}
+        {/* Note action buttons */}
         <div className="pt-3 border-t border-border mt-4 flex flex-wrap gap-2">
           <Link
-            href={`/myhumans/${id}/take-notes?interactionId=${interactionId}`}
+            href={`${takeNotesBase}&noteCategory=prep`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+          >
+            <ClipboardList className="h-3.5 w-3.5" />
+            {notesGroup?.prepTyped || notesGroup?.prepInk ? 'Edit Prep Notes' : 'Add Prep Notes'}
+          </Link>
+          <Link
+            href={`${takeNotesBase}&noteCategory=interaction`}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
           >
             <NotebookPen className="h-3.5 w-3.5" />
-            Take Notes
+            {notesGroup?.interactionTyped || notesGroup?.interactionInk ? 'Edit Interaction Notes' : 'Add Interaction Notes'}
           </Link>
-          <Link
-            href="?edit=1"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
-          >
-            <FileText className="h-3.5 w-3.5" />
-            Add Notes
-          </Link>
-          <LastInteractionNotesDialog note={lastInteractionNote} />
         </div>
       </div>
 
-      {/* Interaction Notes */}
-      <div className="bg-card rounded-xl shadow-sm p-5 md:p-6">
-        <InteractionNotesEditor interactionId={interactionId} userId={id} initialNotes={notesForEditor} autoEdit={autoEdit} />
+      {/* ── Prep Notes ────────────────────────────────────────────────────── */}
+      <div className="bg-card rounded-xl shadow-sm p-5 md:p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ClipboardList className="h-4 w-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Prep Notes</h2>
+          </div>
+          <Link
+            href={`${takeNotesBase}&noteCategory=prep`}
+            className="text-xs font-medium text-[hsl(213,70%,30%)] hover:underline"
+          >
+            {notesGroup?.prepTyped || notesGroup?.prepInk ? 'Edit' : 'Add'}
+          </Link>
+        </div>
+
+        {notesGroup?.prepTyped ? (
+          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+            {notesGroup.prepTyped.content}
+          </p>
+        ) : null}
+
+        {notesGroup?.prepInk ? (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground font-medium">Handwritten</p>
+              <Link
+                href={`${takeNotesBase}&noteCategory=prep`}
+                className="text-xs text-[hsl(213,70%,30%)] hover:underline flex items-center gap-1"
+              >
+                <Pencil className="h-3 w-3" /> Edit
+              </Link>
+            </div>
+            <div className="rounded-lg overflow-hidden border border-border">
+              <Image
+                src={notesGroup.prepInk.inkImageUrl!}
+                alt="Handwritten prep notes"
+                width={800}
+                height={600}
+                className="w-full h-auto object-contain"
+              />
+            </div>
+          </div>
+        ) : null}
+
+        {!notesGroup?.prepTyped && !notesGroup?.prepInk && (
+          <div className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-5 text-center">
+            <p className="text-sm text-muted-foreground">No prep notes yet.</p>
+            <Link
+              href={`${takeNotesBase}&noteCategory=prep`}
+              className="text-xs text-[hsl(213,70%,30%)] hover:underline mt-1 inline-block"
+            >
+              Add prep notes →
+            </Link>
+          </div>
+        )}
       </div>
 
+      {/* ── Interaction Notes ──────────────────────────────────────────────── */}
+      <div className="bg-card rounded-xl shadow-sm p-5 md:p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <NotebookPen className="h-4 w-4 text-muted-foreground" />
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Interaction Notes</h2>
+        </div>
+
+        {/* Typed interaction notes — inline editor */}
+        <InteractionNotesEditor
+          interactionId={interactionId}
+          userId={id}
+          initialNotes={notesGroup?.interactionTyped?.content}
+          autoEdit={autoEdit}
+        />
+
+        {/* Handwritten interaction notes */}
+        {notesGroup?.interactionInk && (
+          <div className="space-y-2 pt-2 border-t border-border">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground font-medium">Handwritten</p>
+              <Link
+                href={`${takeNotesBase}&noteCategory=interaction`}
+                className="text-xs text-[hsl(213,70%,30%)] hover:underline flex items-center gap-1"
+              >
+                <Pencil className="h-3 w-3" /> Edit
+              </Link>
+            </div>
+            <div className="rounded-lg overflow-hidden border border-border">
+              <Image
+                src={notesGroup.interactionInk.inkImageUrl!}
+                alt="Handwritten interaction notes"
+                width={800}
+                height={600}
+                className="w-full h-auto object-contain"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Action Items ──────────────────────────────────────────────────── */}
       {interaction.actionItems && (
         <div className="bg-card rounded-xl shadow-sm p-5 md:p-6">
           <div className="flex items-center gap-2 mb-3">
             <CheckSquare className="h-4 w-4 text-amber-500" />
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Action Items
-            </h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Action Items</h2>
           </div>
           <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
             {interaction.actionItems}

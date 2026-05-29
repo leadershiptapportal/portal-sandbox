@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { FileText, NotebookPen } from 'lucide-react'
-import LogNoteDialog from '@/app/(protected)/myhumans/[id]/LogNoteDialog'
+import { NotebookPen, ClipboardList } from 'lucide-react'
 
 export interface UpcomingItem {
   interactionId: string
@@ -85,35 +84,21 @@ export default function UpcomingInteractionsCard({ items, emptyMessage }: Props)
 
             {/* Note actions */}
             {item.humanId && (
-              <div className="flex items-center gap-3 px-3 pb-2 border-t border-border">
-                {item.hasNote ? (
-                  <Link
-                    href={href}
-                    className="text-xs font-medium text-[hsl(213,70%,40%)] flex items-center gap-1 hover:underline"
-                  >
-                    <FileText className="h-3 w-3" />
-                    Edit Note
-                  </Link>
-                ) : (
-                  <>
-                    <LogNoteDialog
-                      userId={item.humanId}
-                      trigger={
-                        <button className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors pt-2">
-                          <FileText className="h-3 w-3" />
-                          Add Note
-                        </button>
-                      }
-                    />
-                    <Link
-                      href={`/myhumans/${item.humanId}/take-notes`}
-                      className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors pt-2"
-                    >
-                      <NotebookPen className="h-3 w-3" />
-                      Take Notes
-                    </Link>
-                  </>
-                )}
+              <div className="flex items-center gap-3 px-3 pb-2 pt-1 border-t border-border">
+                <Link
+                  href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=prep`}
+                  className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors"
+                >
+                  <ClipboardList className="h-3 w-3" />
+                  Prep Notes
+                </Link>
+                <Link
+                  href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=interaction`}
+                  className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors"
+                >
+                  <NotebookPen className="h-3 w-3" />
+                  Interaction Notes
+                </Link>
               </div>
             )}
           </div>

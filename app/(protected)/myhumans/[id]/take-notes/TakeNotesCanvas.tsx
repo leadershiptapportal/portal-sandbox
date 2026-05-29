@@ -7,6 +7,7 @@ import { useTheme } from 'next-themes'
 import { Pencil, Undo2, Trash2, Eraser, Link2, WifiOff } from 'lucide-react'
 import type { TldrawNoteCanvasHandle } from '@/components/ink/TldrawNoteCanvas'
 import { saveInkNoteAction } from '../actions'
+import type { NoteCategory } from '../actions'
 import type { Interaction } from '@/lib/types'
 import type { Note } from '@/lib/airtable/notes'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -22,6 +23,7 @@ interface Props {
   meetings: Interaction[]
   initialInteraction: Interaction | null
   existingInkNote?: Note | null
+  noteCategory?: NoteCategory
   onSaveComplete: () => void
   onCancel: () => void
   onStrokeCountChange?: (count: number) => void
@@ -60,6 +62,7 @@ export default function TakeNotesCanvas({
   meetings,
   initialInteraction,
   existingInkNote,
+  noteCategory = 'interaction',
   onSaveComplete,
   onCancel,
   onStrokeCountChange,
@@ -183,6 +186,7 @@ export default function TakeNotesCanvas({
         caption.trim() || undefined,
         selectedMeetingId || undefined,
         currentNoteId,
+        noteCategory,
       )
 
       if ('error' in result) {

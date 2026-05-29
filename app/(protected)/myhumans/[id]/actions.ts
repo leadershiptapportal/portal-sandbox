@@ -158,6 +158,7 @@ export async function saveInkNoteAction(
   caption?: string,
   interactionId?: string,
   existingNoteId?: string,
+  noteCategory: NoteCategory = 'interaction',
 ): Promise<{ success: true; noteId: string } | { error: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
@@ -177,6 +178,11 @@ export async function saveInkNoteAction(
       return { error: 'No active coaching or reporting relationship reaches this person.' }
     }
 
+    const noteType =
+      noteCategory === 'prep' ? 'prep_note' as const
+      : noteCategory === 'interaction' ? 'interaction_note' as const
+      : 'general_note' as const
+
     const created = await createNote({
       content: (caption ?? '').trim(),
       inkImageUrl: imageUrl,
@@ -187,7 +193,7 @@ export async function saveInkNoteAction(
       humanId: subjectPersonId,
       relationshipContextId: rc.id,
       interactionId: interactionId || undefined,
-      noteType: 'ink_note',
+      noteType,
     })
     revalidatePath(`/myhumans/${subjectPersonId}`)
     return { success: true, noteId: created.id }
@@ -199,15 +205,37 @@ export async function saveInkNoteAction(
 
 // ── Save Typed Note ───────────────────────────────────────────────────────────
 
+export type NoteCategory = 'general' | 'prep' | 'interaction'
+
 export async function saveTypedNoteAction(
   subjectPersonId: string,
   content: string,
+  noteCategory: NoteCategory,
   interactionId?: string,
 ): Promise<{ success: true; noteId: string } | { error: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
     if (!userRecord.airtableId) {
       return { error: 'Could not resolve your user record.' }
+    }
+
+    const noteType =
+      noteCategory === 'prep' ? 'prep_note' as const
+      : noteCategory === 'interaction' && interactionId ? 'interaction_note' as const
+      : 'general_note' as const
+
+    // Upsert: if this is an interaction-scoped note, patch existing instead of creating duplicate
+    if (interactionId && noteType !== 'general_note') {
+      const existing = await getNotesByInteractionId(interactionId)
+      const myNote = existing.find(
+        (n) => n.authorPersonId === userRecord.airtableId && n.noteType === noteType && !n.inkImageUrl,
+      )
+      if (myNote) {
+        const result = await updateNote(myNote.id, content)
+        if ('error' in result) return result
+        revalidatePath(`/myhumans/${subjectPersonId}`)
+        return { success: true, noteId: myNote.id }
+      }
     }
 
     const rc = await resolveContextForSubject(userRecord.airtableId, subjectPersonId)
@@ -223,13 +251,32 @@ export async function saveTypedNoteAction(
       humanId: subjectPersonId,
       relationshipContextId: rc.id,
       interactionId: interactionId || undefined,
-      noteType: interactionId ? 'interaction_note' : 'general_note',
+      noteType,
     })
     revalidatePath(`/myhumans/${subjectPersonId}`)
     return { success: true, noteId: created.id }
   } catch (err) {
     console.error('[saveTypedNoteAction]', err)
     return { error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+// ── Check if a typed interaction note already exists (for append-on-link flow) ─
+
+export async function checkInteractionTypedNoteAction(
+  interactionId: string,
+): Promise<{ note: { id: string; content: string } } | { note: null }> {
+  try {
+    const userRecord = await getCurrentUserRecord()
+    if (!userRecord.airtableId) return { note: null }
+    const existing = await getNotesByInteractionId(interactionId)
+    const myNote = existing.find(
+      (n) => n.authorPersonId === userRecord.airtableId && n.noteType === 'interaction_note' && !n.inkImageUrl,
+    )
+    if (!myNote) return { note: null }
+    return { note: { id: myNote.id, content: myNote.content } }
+  } catch {
+    return { note: null }
   }
 }
 
@@ -313,7 +360,9 @@ export async function updateInteractionNotesAction(
     // PATCH it if found, POST a new one if not. Prevents accumulating duplicate
     // notes records every time an interaction note is saved.
     const existingNotes = await getNotesByInteractionId(interactionId)
-    const myNote = existingNotes.find((n) => n.authorPersonId === userRecord.airtableId)
+    const myNote = existingNotes.find(
+      (n) => n.authorPersonId === userRecord.airtableId && n.noteType === 'interaction_note' && !n.inkImageUrl,
+    )
     if (myNote) {
       const result = await updateNote(myNote.id, notes)
       if ('error' in result) throw new Error(result.error)
