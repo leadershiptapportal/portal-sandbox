@@ -57,7 +57,7 @@ interface BucketItem {
   otherPersonId: string
   otherName: string
   otherTitle?: string
-  role: 'coach' | 'coachee' | 'manager' | 'report' | 'client' | 'prospect' | 'personal'
+  role: 'coach' | 'coachee' | 'manager' | 'report' | 'client' | 'prospect' | 'personal' | 'peer'
 }
 
 function classifyRelationship(rc: RelationshipContext, subjectId: string): BucketItem | null {
@@ -79,6 +79,9 @@ function classifyRelationship(rc: RelationshipContext, subjectId: string): Bucke
   }
   if (rc.relationshipType === 'personal') {
     return { rc, otherPersonId, otherName, otherTitle, role: 'personal' }
+  }
+  if (rc.relationshipType === 'peer') {
+    return { rc, otherPersonId, otherName, otherTitle, role: 'peer' }
   }
   return null
 }
@@ -486,6 +489,7 @@ function CompactRelationshipsSection({
     { key: 'report',   label: 'Direct Report' },
     { key: 'client',   label: 'Client' },
     { key: 'prospect', label: 'Prospect' },
+    { key: 'peer',     label: 'Peer' },
     { key: 'personal', label: 'Personal' },
   ]
 

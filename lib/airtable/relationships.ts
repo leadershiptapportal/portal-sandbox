@@ -12,7 +12,7 @@ function getCredentials() {
   return { apiKey, baseId }
 }
 
-export type RelationshipType = 'coaching' | 'reports_to' | 'client' | 'prospect' | 'personal'
+export type RelationshipType = 'coaching' | 'reports_to' | 'client' | 'prospect' | 'personal' | 'peer'
 
 export interface RelationshipContext {
   id: string
@@ -48,12 +48,13 @@ export interface OnboardingData {
 function normalizeRelationshipType(raw: unknown): RelationshipType {
   const s = (typeof raw === 'string' ? raw : '').toLowerCase().trim()
   if (!s) return 'coaching'
-  if (s === 'coaching' || s === 'reports_to' || s === 'client' || s === 'prospect' || s === 'personal') return s
+  if (s === 'coaching' || s === 'reports_to' || s === 'client' || s === 'prospect' || s === 'personal' || s === 'peer') return s
   if (s.includes('report') || s.includes('manager')) return 'reports_to'
   if (s.includes('coach')) return 'coaching'
   if (s.includes('prospect')) return 'prospect'
   if (s.includes('client')) return 'client'
   if (s.includes('personal') || s.includes('family')) return 'personal'
+  if (s.includes('peer')) return 'peer'
   console.warn(`[RC] non-spec Relationship Type "${raw}" — defaulting to coaching`)
   return 'coaching'
 }

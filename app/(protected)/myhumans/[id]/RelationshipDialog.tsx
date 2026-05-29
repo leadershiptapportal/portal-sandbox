@@ -37,6 +37,7 @@ export type RelationshipRole =
   | 'client_of'
   | 'prospect_of'
   | 'personal'
+  | 'peer'
 
 interface Person {
   id: string
@@ -76,6 +77,7 @@ const ROLE_LABELS: Record<RelationshipRole, string> = {
   client_of: 'Client — they are subject\'s client',
   prospect_of: 'Prospect — they are a potential client of subject',
   personal: 'Personal — family, partner, or other personal connection',
+  peer: 'Peer — colleague or professional equal',
 }
 
 function roleToTypeAndDirection(role: RelationshipRole): {
@@ -90,6 +92,7 @@ function roleToTypeAndDirection(role: RelationshipRole): {
     case 'client_of':  return { type: 'client',   subjectIs: 'lead' }
     case 'prospect_of':return { type: 'prospect', subjectIs: 'lead' }
     case 'personal':   return { type: 'personal', subjectIs: 'lead' }
+    case 'peer':       return { type: 'peer',     subjectIs: 'lead' }
   }
 }
 
@@ -358,6 +361,7 @@ export default function RelationshipDialog(props: Props) {
                   <SelectItem value="client_of">{ROLE_LABELS.client_of}</SelectItem>
                   <SelectItem value="prospect_of">{ROLE_LABELS.prospect_of}</SelectItem>
                   <SelectItem value="personal">{ROLE_LABELS.personal}</SelectItem>
+                  <SelectItem value="peer">{ROLE_LABELS.peer}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Network, UserCheck, Users as UsersIcon, ChevronRight, Pencil, Heart, Briefcase, TrendingUp } from 'lucide-react'
+import { Network, UserCheck, Users as UsersIcon, ChevronRight, Pencil, Heart, Briefcase, TrendingUp, Handshake } from 'lucide-react'
 import RelationshipDialog from '../RelationshipDialog'
 import RCNoteInlineEdit from './RCNoteInlineEdit'
 import { SectionHeading } from './helpers'
@@ -23,7 +23,7 @@ interface Props {
   currentCoachId: string
 }
 
-type BucketRole = 'coach' | 'coachee' | 'manager' | 'report' | 'client' | 'prospect' | 'personal'
+type BucketRole = 'coach' | 'coachee' | 'manager' | 'report' | 'client' | 'prospect' | 'personal' | 'peer'
 
 interface BucketItem {
   rc: RelationshipContext
@@ -53,6 +53,9 @@ function classifyRelationship(rc: RelationshipContext, subjectId: string): Bucke
   }
   if (rc.relationshipType === 'personal') {
     return { rc, otherPersonId, otherName, otherTitle, role: 'personal' }
+  }
+  if (rc.relationshipType === 'peer') {
+    return { rc, otherPersonId, otherName, otherTitle, role: 'peer' }
   }
   return null
 }
@@ -161,6 +164,7 @@ function RelationshipGroup({
   emptyText,
   rcNotes,
   currentCoachId,
+  hideWhenEmpty,
 }: {
   label: string
   icon: React.ElementType
@@ -171,8 +175,10 @@ function RelationshipGroup({
   emptyText: string
   rcNotes: Map<string, Note>
   currentCoachId: string
+  hideWhenEmpty?: boolean
 }) {
   if (items.length === 0) {
+    if (hideWhenEmpty) return null
     return (
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
@@ -227,6 +233,7 @@ export default function RelationshipsSection({
   const clients   = classified.filter((b) => b.role === 'client')
   const prospects = classified.filter((b) => b.role === 'prospect')
   const personal  = classified.filter((b) => b.role === 'personal')
+  const peers     = classified.filter((b) => b.role === 'peer')
 
   const groupProps = { subjectPersonId, subjectName, canEdit, rcNotes, currentCoachId }
 
@@ -253,6 +260,7 @@ export default function RelationshipsSection({
           icon={UserCheck}
           items={coaches}
           emptyText="No coaches"
+          hideWhenEmpty
           {...groupProps}
         />
         <RelationshipGroup
@@ -260,6 +268,7 @@ export default function RelationshipsSection({
           icon={UserCheck}
           items={coachees}
           emptyText={`${subjectName}'s coachees will appear here`}
+          hideWhenEmpty
           {...groupProps}
         />
         <RelationshipGroup
@@ -281,6 +290,7 @@ export default function RelationshipsSection({
           icon={Briefcase}
           items={clients}
           emptyText="No clients linked"
+          hideWhenEmpty
           {...groupProps}
         />
         <RelationshipGroup
@@ -288,6 +298,15 @@ export default function RelationshipsSection({
           icon={TrendingUp}
           items={prospects}
           emptyText="No prospects linked"
+          hideWhenEmpty
+          {...groupProps}
+        />
+        <RelationshipGroup
+          label="Peers"
+          icon={Handshake}
+          items={peers}
+          emptyText="No peers linked"
+          hideWhenEmpty
           {...groupProps}
         />
         <RelationshipGroup
