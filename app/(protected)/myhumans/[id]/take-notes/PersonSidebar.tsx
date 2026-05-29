@@ -483,7 +483,6 @@ function CompactRelationshipsSection({
     .filter((b): b is BucketItem => b !== null)
 
   const roleOrder: Array<{ key: BucketItem['role']; label: string }> = [
-    { key: 'coach',    label: 'Coach' },
     { key: 'coachee',  label: 'Coachee' },
     { key: 'manager',  label: 'Reports to' },
     { key: 'report',   label: 'Direct Report' },

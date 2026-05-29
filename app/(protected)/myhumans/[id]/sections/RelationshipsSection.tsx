@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Network, UserCheck, Users as UsersIcon, ChevronRight, Pencil, Heart, Briefcase, TrendingUp, Handshake } from 'lucide-react'
+import { Network, UserCheck, Users as UsersIcon, Pencil, Heart, Briefcase, TrendingUp, Handshake } from 'lucide-react'
 import RelationshipDialog from '../RelationshipDialog'
 import RCNoteInlineEdit from './RCNoteInlineEdit'
 import { SectionHeading } from './helpers'
@@ -226,9 +226,7 @@ export default function RelationshipsSection({
     .map((rc) => classifyRelationship(rc, subjectPersonId))
     .filter((b): b is BucketItem => b !== null)
 
-  const coaches   = classified.filter((b) => b.role === 'coach')
   const coachees  = classified.filter((b) => b.role === 'coachee')
-  const managers  = classified.filter((b) => b.role === 'manager')
   const reports   = classified.filter((b) => b.role === 'report')
   const clients   = classified.filter((b) => b.role === 'client')
   const prospects = classified.filter((b) => b.role === 'prospect')
@@ -256,26 +254,11 @@ export default function RelationshipsSection({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
         <RelationshipGroup
-          label="Coaches"
-          icon={UserCheck}
-          items={coaches}
-          emptyText="No coaches"
-          hideWhenEmpty
-          {...groupProps}
-        />
-        <RelationshipGroup
           label="Coachees"
           icon={UserCheck}
           items={coachees}
           emptyText={`${subjectName}'s coachees will appear here`}
           hideWhenEmpty
-          {...groupProps}
-        />
-        <RelationshipGroup
-          label="Reports to"
-          icon={ChevronRight}
-          items={managers}
-          emptyText="No manager set"
           {...groupProps}
         />
         <RelationshipGroup
