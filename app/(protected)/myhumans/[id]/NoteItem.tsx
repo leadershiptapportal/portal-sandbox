@@ -41,7 +41,7 @@ function formatNoteDate(dateStr: string): string {
 
 export default function NoteItem({ note }: { note: Note }) {
   const router = useRouter()
-  const [mode, setMode] = useState<'view' | 'edit' | 'confirmDelete'>('view')
+  const [mode, setMode] = useState<'view' | 'detail' | 'edit' | 'confirmDelete'>('view')
   // Editing tracks the typed caption separately from any embedded ink images.
   // This way edit mode preserves attached images instead of forcing the user
   // to retype + re-attach.
@@ -89,10 +89,11 @@ export default function NoteItem({ note }: { note: Note }) {
   async function handleDelete() {
     setDeleting(true)
     const result = await deleteNoteAction(note.id)
-    setDeleting(false)
     if (result.success) {
       router.refresh()
+      // keep deleting=true — component unmounts when note is removed from the list
     } else {
+      setDeleting(false)
       setError('Failed to delete — please try again.')
       setMode('view')
     }
@@ -101,9 +102,18 @@ export default function NoteItem({ note }: { note: Note }) {
   // ── VIEW ──────────────────────────────────────────────────────────────────
   if (mode === 'view') {
     return (
-      <div className="group relative rounded-lg border border-border hover:border-border p-4 transition-colors">
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => setMode('detail')}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setMode('detail') }}
+        className="group relative rounded-lg border border-border hover:border-[hsl(213,70%,50%)] p-4 transition-colors cursor-pointer"
+      >
         {/* Hover action buttons */}
-        <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div
+          className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             onClick={() => setMode('edit')}
             className="text-xs px-2 py-1 rounded border border-border bg-card hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
@@ -126,6 +136,42 @@ export default function NoteItem({ note }: { note: Note }) {
             {formatNoteDate(note.date)}
           </p>
         )}
+      </div>
+    )
+  }
+
+  // ── DETAIL (read/view) ────────────────────────────────────────────────────
+  if (mode === 'detail') {
+    return (
+      <div className="rounded-lg border border-[hsl(213,70%,50%)] bg-card p-4">
+        <div className="mb-3">
+          <NoteBody content={content} inkImageUrl={note.inkImageUrl} />
+        </div>
+        {note.date && (
+          <p className="text-xs font-medium text-muted-foreground mb-4">
+            {formatNoteDate(note.date)}
+          </p>
+        )}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setMode('edit')}
+            className="px-3 py-1.5 text-xs font-medium rounded border border-border bg-card hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => setMode('confirmDelete')}
+            className="px-3 py-1.5 text-xs font-medium rounded border border-rose-100 bg-card hover:bg-rose-50 text-rose-400 hover:text-rose-600 transition-colors"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => setMode('view')}
+            className="ml-auto px-3 py-1.5 text-xs font-medium rounded border border-border hover:bg-muted/50 transition-colors text-muted-foreground"
+          >
+            Close
+          </button>
+        </div>
       </div>
     )
   }

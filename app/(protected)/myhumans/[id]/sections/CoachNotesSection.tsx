@@ -27,7 +27,7 @@ export default function CoachNotesSection({ sessionNotes, userCanWrite }: Props)
     <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
       <div className="flex items-center gap-2 mb-4 flex-wrap">
         <BookOpen className="h-5 w-5 text-muted-foreground" />
-        <h2 className="text-lg font-semibold text-foreground">Notes</h2>
+        <h2 className="text-lg font-semibold text-foreground">General Notes</h2>
         {hasAny && query && (
           <span className="text-xs text-muted-foreground font-medium">
             {filtered.length} of {sessionNotes.length}

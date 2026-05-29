@@ -25,7 +25,6 @@ import { getDisplayName, getInitials, isRecordId, SectionHeading } from './secti
 import ProfileCardSection from './sections/ProfileCardSection'
 import MostRecentInteractionSection from './sections/MostRecentInteractionSection'
 import PersonalityStrengthsSection from './sections/PersonalityStrengthsSection'
-import ProfileDetailsSection from './sections/ProfileDetailsSection'
 import CoachNotesSection from './sections/CoachNotesSection'
 import TheirTeamSection from './sections/TheirTeamSection'
 import MessagesSection from './sections/MessagesSection'
@@ -305,9 +304,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         conflictPostureLabel={conflictPostureLabel}
         strengthDescriptors={Object.keys(strengthDescriptors).length > 0 ? strengthDescriptors : undefined}
       />
-
-      {/* ── Profile Details ──────────────────────────────────────────────── */}
-      <ProfileDetailsSection user={user} />
 
       {/* ── Coach Notes ──────────────────────────────────────────────────── */}
       <CoachNotesSection sessionNotes={standaloneNotes} userCanWrite={userCanWrite} />
