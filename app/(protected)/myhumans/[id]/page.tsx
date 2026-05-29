@@ -306,7 +306,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
       />
 
       {/* ── Coach Notes ──────────────────────────────────────────────────── */}
-      <CoachNotesSection sessionNotes={standaloneNotes} userCanWrite={userCanWrite} />
+      <CoachNotesSection sessionNotes={standaloneNotes} userCanWrite={userCanWrite} userId={id} />
 
       {/* ── Their Team ───────────────────────────────────────────────────── */}
       <TheirTeamSection

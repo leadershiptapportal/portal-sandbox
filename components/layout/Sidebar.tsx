@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useUser, useClerk } from '@clerk/nextjs'
@@ -8,10 +9,11 @@ import {
   LayoutDashboard,
   Settings,
   LogOut,
-  Network,
   Calendar,
   ChevronLeft,
   ChevronRight,
+  ShieldCheck,
+  Menu,
 } from 'lucide-react'
 import GlobalSearch from '@/components/GlobalSearch'
 
@@ -96,34 +98,69 @@ function NavRow({
 
 // ── Sidebar component ─────────────────────────────────────────────────────────
 
+const mobileMainItems = [
+  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/myhumans', icon: Users, label: 'My Humans' },
+  { href: '/interactions', icon: Calendar, label: 'Interactions' },
+]
+
 export default function Sidebar({ collapsed, onToggle, isAdmin = false }: SidebarProps) {
   const pathname = usePathname()
   const { user } = useUser()
   const { signOut } = useClerk()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <>
       {/* ── Mobile bottom navigation bar ── */}
       <nav className="flex md:hidden fixed bottom-0 inset-x-0 z-50 bg-background border-t border-border h-16">
+        {/* Hamburger popup menu */}
+        {mobileMenuOpen && (
+          <div className="absolute bottom-16 inset-x-0 bg-background border-t border-border shadow-lg">
+            <Link
+              href="/settings"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`flex items-center gap-3 px-5 py-3.5 transition-colors ${
+                pathname.startsWith('/settings')
+                  ? 'text-[hsl(213,70%,30%)] dark:text-[hsl(213,60%,72%)]'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Settings className="h-5 w-5" />
+              <span className="text-sm font-medium">Settings</span>
+            </Link>
+            {isAdmin && (
+              <Link
+                href="/admin/users"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-3 px-5 py-3.5 transition-colors ${
+                  pathname.startsWith('/admin')
+                    ? 'text-[hsl(213,70%,30%)] dark:text-[hsl(213,60%,72%)]'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <ShieldCheck className="h-5 w-5" />
+                <span className="text-sm font-medium">Admin Console</span>
+              </Link>
+            )}
+            <button
+              onClick={() => { setMobileMenuOpen(false); signOut({ redirectUrl: '/sign-in' }) }}
+              className="flex w-full items-center gap-3 px-5 py-3.5 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="text-sm font-medium">Sign out</span>
+            </button>
+          </div>
+        )}
+
         <div className="flex w-full items-stretch">
-          {navItems.map(({ href, icon: Icon, label, enabled }) => {
-            const active = enabled && pathname.startsWith(href)
-            if (!enabled) {
-              return (
-                <div
-                  key={href}
-                  className="flex flex-1 flex-col items-center justify-center gap-0.5 text-muted-foreground/40 cursor-not-allowed select-none"
-                  title="Coming soon"
-                >
-                  <Icon className="h-5 w-5" />
-                  <span className="text-[10px] font-medium">{label}</span>
-                </div>
-              )
-            }
+          {mobileMainItems.map(({ href, icon: Icon, label }) => {
+            const active = pathname.startsWith(href)
             return (
               <Link
                 key={href}
                 href={href}
+                onClick={() => setMobileMenuOpen(false)}
                 className={`flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors ${
                   active
                     ? 'text-[hsl(213,70%,30%)] dark:text-[hsl(213,60%,72%)]'
@@ -135,25 +172,17 @@ export default function Sidebar({ collapsed, onToggle, isAdmin = false }: Sideba
               </Link>
             )
           })}
-          {isAdmin && (
-            <Link
-              href="/admin/users"
-              className={`flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors ${
-                pathname.startsWith('/admin')
-                  ? 'text-[hsl(213,70%,30%)] dark:text-[hsl(213,60%,72%)]'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Network className="h-5 w-5" />
-              <span className="text-[10px] font-medium">Admin</span>
-            </Link>
-          )}
           <button
-            onClick={() => signOut({ redirectUrl: '/sign-in' })}
-            className="flex flex-1 flex-col items-center justify-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            className={`flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors ${
+              mobileMenuOpen
+                ? 'text-[hsl(213,70%,30%)] dark:text-[hsl(213,60%,72%)]'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+            aria-label="More options"
           >
-            <LogOut className="h-5 w-5" />
-            <span className="text-[10px] font-medium">Sign out</span>
+            <Menu className="h-5 w-5" />
+            <span className="text-[10px] font-medium">More</span>
           </button>
         </div>
       </nav>
@@ -214,8 +243,8 @@ export default function Sidebar({ collapsed, onToggle, isAdmin = false }: Sideba
           <div className="px-2 pb-1">
             <NavRow
               href="/admin/users"
-              icon={Network}
-              label="Admin Control"
+              icon={ShieldCheck}
+              label="Admin Console"
               enabled
               active={pathname.startsWith('/admin')}
               collapsed={collapsed}
@@ -276,7 +305,7 @@ export default function Sidebar({ collapsed, onToggle, isAdmin = false }: Sideba
           onClick={onToggle}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="absolute top-20 -right-3 w-6 h-6 rounded-full bg-background border border-border shadow-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-50"
+          className="absolute top-1/2 -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-background border border-border shadow-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-50"
         >
           {collapsed ? (
             <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />

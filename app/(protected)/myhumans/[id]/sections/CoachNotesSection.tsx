@@ -3,14 +3,16 @@
 import { useMemo, useState } from 'react'
 import { BookOpen, Search, X } from 'lucide-react'
 import NoteItem from '../NoteItem'
+import LogNoteDialog from '../LogNoteDialog'
 import type { Note } from '@/lib/types'
 
 interface Props {
   sessionNotes: Note[]
   userCanWrite: boolean
+  userId: string
 }
 
-export default function CoachNotesSection({ sessionNotes, userCanWrite }: Props) {
+export default function CoachNotesSection({ sessionNotes, userCanWrite, userId }: Props) {
   const [query, setQuery] = useState('')
 
   const filtered = useMemo(() => {
@@ -25,14 +27,24 @@ export default function CoachNotesSection({ sessionNotes, userCanWrite }: Props)
 
   return (
     <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <BookOpen className="h-5 w-5 text-muted-foreground" />
-        <h2 className="text-lg font-semibold text-foreground">General Notes</h2>
-        {hasAny && query && (
-          <span className="text-xs text-muted-foreground font-medium">
-            {filtered.length} of {sessionNotes.length}
-          </span>
-        )}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-lg font-semibold text-foreground">General Notes</h2>
+          {hasAny && query && (
+            <span className="text-xs text-muted-foreground font-medium">
+              {filtered.length} of {sessionNotes.length}
+            </span>
+          )}
+        </div>
+        <LogNoteDialog
+          userId={userId}
+          trigger={
+            <button className="inline-flex items-center gap-1.5 rounded-lg bg-[hsl(213,70%,30%)] px-3 py-1.5 text-xs font-medium text-white hover:bg-[hsl(213,70%,25%)] transition-colors">
+              + Add Notes
+            </button>
+          }
+        />
       </div>
 
       {hasAny && (
@@ -58,7 +70,7 @@ export default function CoachNotesSection({ sessionNotes, userCanWrite }: Props)
       )}
 
       {!hasAny ? (
-        <p className="text-sm text-muted-foreground">No notes yet — use the Log a Note button above.</p>
+        <p className="text-sm text-muted-foreground">No notes yet — use the Add Notes button above.</p>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-muted-foreground italic">No notes match this search.</p>
       ) : (

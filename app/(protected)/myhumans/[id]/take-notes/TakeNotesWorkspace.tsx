@@ -167,13 +167,16 @@ export default function TakeNotesWorkspace({
           >
             <button
               onClick={() => setSidebarCollapsed((v) => !v)}
-              className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className="flex items-center gap-1 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-xs"
               title={sidebarCollapsed ? 'Show profile panel' : 'Hide profile panel'}
             >
               {sidebarCollapsed ? (
                 <ChevronRight className="h-4 w-4" />
               ) : (
-                <ChevronLeft className="h-4 w-4" />
+                <>
+                  <span>Hide Profile Details</span>
+                  <ChevronLeft className="h-4 w-4" />
+                </>
               )}
             </button>
           </div>
