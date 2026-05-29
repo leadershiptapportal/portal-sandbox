@@ -59,10 +59,10 @@ export default function MostRecentInteractionSection({ topInteractions, totalInt
             return (
               <div
                 key={interaction.id}
-                className={`relative rounded-xl border px-4 py-3.5 transition-colors cursor-pointer ${
+                className={`relative rounded-xl px-4 py-3.5 transition-colors cursor-pointer ${
                   isMostRecent
-                    ? 'border-[hsl(213,70%,30%)]/20 bg-[hsl(213,60%,98%)] hover:border-[hsl(213,70%,30%)]/40'
-                    : 'border-border bg-card hover:border-border hover:bg-muted/50'
+                    ? 'border-2 border-white/70 dark:border-white/40 bg-card hover:bg-muted/50'
+                    : 'border border-border bg-card hover:border-border hover:bg-muted/50'
                 }`}
               >
                 {/* Stretched link — covers the whole card; buttons sit above via z-10 */}

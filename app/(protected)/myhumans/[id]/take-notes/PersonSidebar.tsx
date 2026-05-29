@@ -1037,12 +1037,12 @@ export default function PersonSidebar({
                     return (
                       <li key={i}>
                         <div className="flex items-center gap-2">
-                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center justify-center">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-700 text-indigo-600 dark:text-indigo-100 text-xs font-bold flex items-center justify-center">
                             {i + 1}
                           </span>
                           <span className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">{s.name}</span>
                           {s.domain && (
-                            <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-900 rounded">
+                            <span className="text-xs font-medium text-indigo-700 dark:text-indigo-100 px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-600/60 rounded">
                               {s.domain}
                             </span>
                           )}

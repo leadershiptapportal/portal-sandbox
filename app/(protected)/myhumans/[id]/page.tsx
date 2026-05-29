@@ -20,7 +20,6 @@ import {
 } from '@/lib/airtable/relationships'
 import { getAllUsers, fetchPersonalityOptions } from '@/lib/airtable/users'
 import PlaceholderSection from '@/components/ui/PlaceholderSection'
-import UserActionsBar from './UserActionsBar'
 import { getDisplayName, getInitials, isRecordId, SectionHeading } from './sections/helpers'
 import ProfileCardSection from './sections/ProfileCardSection'
 import MostRecentInteractionSection from './sections/MostRecentInteractionSection'
@@ -251,9 +250,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
           <span className="font-semibold text-foreground">{name}</span>
         </nav>
       )}
-
-      {/* ── Actions bar ──────────────────────────────────────────────────── */}
-      {userCanWrite && <UserActionsBar userId={id} />}
 
       {/* ── Profile card ─────────────────────────────────────────────────── */}
       <ProfileCardSection
