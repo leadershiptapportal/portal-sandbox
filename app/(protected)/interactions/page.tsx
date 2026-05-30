@@ -88,7 +88,7 @@ export default async function InteractionsIndexPage({ searchParams }: Props) {
         <Calendar className="h-6 w-6 text-muted-foreground" />
         <h1 className="text-2xl font-bold text-foreground">Interactions</h1>
         <span className="ml-auto text-sm text-muted-foreground">
-          {combined.length} interaction{combined.length === 1 ? '' : 's'} ({PAST_DAYS} days back · {FUTURE_DAYS} days ahead)
+          {combined.length} interaction{combined.length === 1 ? '' : 's'}
         </span>
       </div>
 

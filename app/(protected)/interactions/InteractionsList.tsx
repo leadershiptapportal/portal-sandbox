@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   Search, Calendar, X, NotebookPen, ClipboardList, Plus,
@@ -83,6 +84,7 @@ interface Props {
 }
 
 export default function InteractionsList({ items, initialFilter, humans = [] }: Props) {
+  const router = useRouter()
   const [filter, setFilter] = useState<Filter>(initialFilter)
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
   const [query, setQuery] = useState('')
@@ -253,17 +255,11 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
                   return (
                     <div
                       key={item.interactionId}
-                      className="relative rounded-lg border border-border bg-card overflow-hidden"
+                      className="rounded-lg border border-border bg-card overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => router.push(href)}
                     >
-                      {/* Stretched link to interaction detail */}
-                      <Link
-                        href={href}
-                        className="absolute inset-0 hover:bg-muted/50 transition-colors"
-                        aria-label={item.title || 'View interaction'}
-                      />
-
                       {/* Main content row */}
-                      <div className="relative z-10 flex items-center gap-3 px-4 py-3 pointer-events-none">
+                      <div className="flex items-center gap-3 px-4 py-3">
                         {/* Date block */}
                         <div className="flex-shrink-0 w-9 text-center">
                           <p className="text-[10px] font-bold uppercase tracking-wide text-[hsl(213,70%,30%)]">
@@ -275,22 +271,23 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
                           <p className="text-[10px] text-muted-foreground mt-0.5">{item.month}</p>
                         </div>
 
-                        {/* Body */}
+                        {/* Body — title first, then time, then linked human name */}
                         <div className="flex-1 min-w-0">
-                          {item.humanId ? (
-                            <Link
-                              href={`/myhumans/${item.humanId}`}
-                              className="pointer-events-auto text-sm font-medium text-foreground hover:underline truncate block"
-                            >
-                              {subjectName}
-                            </Link>
-                          ) : (
-                            <p className="text-sm font-medium text-foreground truncate">{subjectName}</p>
-                          )}
-                          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                          <p className="text-sm font-medium text-foreground truncate">
                             {item.title || typeLabel}
                           </p>
                           <p className="text-xs text-muted-foreground mt-0.5">{item.timeRange}</p>
+                          {item.humanId ? (
+                            <Link
+                              href={`/myhumans/${item.humanId}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-xs font-medium text-[hsl(213,70%,30%)] mt-0.5 hover:underline inline-block"
+                            >
+                              {subjectName}
+                            </Link>
+                          ) : subjectName ? (
+                            <p className="text-xs font-medium text-[hsl(213,70%,30%)] mt-0.5">{subjectName}</p>
+                          ) : null}
                         </div>
 
                         <span className="flex-shrink-0 text-muted-foreground/60 text-sm">›</span>
@@ -298,9 +295,10 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
 
                       {/* Note action buttons */}
                       {item.humanId && (
-                        <div className="relative z-10 flex items-center gap-2 flex-wrap px-4 pb-2.5 pt-2 border-t border-border">
+                        <div className="flex items-center gap-2 flex-wrap px-4 pb-2.5 pt-2 border-t border-border">
                           <Link
                             href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=prep`}
+                            onClick={(e) => e.stopPropagation()}
                             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
                           >
                             <ClipboardList className="h-3 w-3" />
@@ -308,6 +306,7 @@ export default function InteractionsList({ items, initialFilter, humans = [] }: 
                           </Link>
                           <Link
                             href={`/myhumans/${item.humanId}/take-notes?interactionId=${item.interactionId}&noteCategory=interaction`}
+                            onClick={(e) => e.stopPropagation()}
                             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
                           >
                             <NotebookPen className="h-3 w-3" />

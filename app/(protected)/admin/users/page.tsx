@@ -28,8 +28,7 @@ export default async function AdminUsersPage() {
           <p className="text-sm text-muted-foreground">No portal users found.</p>
         </div>
       ) : (
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <div className="overflow-x-auto">
+        <div className="bg-card rounded-xl border border-border overflow-x-auto">
           <table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr className="border-b border-border bg-muted/50">
@@ -51,7 +50,6 @@ export default async function AdminUsersPage() {
               ))}
             </tbody>
           </table>
-          </div>
         </div>
       )}
 
