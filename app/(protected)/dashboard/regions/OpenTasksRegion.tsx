@@ -11,7 +11,7 @@ function getDisplayName(user: User): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')
-  return user.preferredName ?? user.email
+  return user.preferredName ?? user.workEmail ?? ''
 }
 
 interface Props {

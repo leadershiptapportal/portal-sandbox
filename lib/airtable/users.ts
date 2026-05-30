@@ -39,15 +39,9 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Use
     preferredName: f[FIELDS.USERS.PREFERRED_NAME] as string | undefined,
     firstName: f[FIELDS.USERS.FIRST_NAME] as string | undefined,
     lastName: f[FIELDS.USERS.LAST_NAME] as string | undefined,
-    email: (f[FIELDS.USERS.EMAIL] as string) ?? "",
     workEmail: f[FIELDS.USERS.WORK_EMAIL] as string | undefined,
-    jobTitle: f[FIELDS.USERS.JOB_TITLE] as string | undefined,
     role: f[FIELDS.USERS.ROLE] as string | undefined,
-    // Company ID and Company Name are Airtable lookup fields — they come back
-    // as arrays, not strings. Use readLookup to normalise.
-    companyId: readLookup(f[FIELDS.USERS.COMPANY_ID]),
     companyName: readLookup(f[FIELDS.USERS.COMPANY_NAME]),
-    avatarUrl: f[FIELDS.USERS.AVATAR_URL] as string | undefined,
     profilePhoto: Array.isArray(f[FIELDS.USERS.PROFILE_PHOTO])
       ? (f[FIELDS.USERS.PROFILE_PHOTO] as Array<{ url: string }>)[0]?.url
       : undefined,
@@ -61,7 +55,6 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Use
       : [],
     // Coaching context
     quickNotes: f[FIELDS.USERS.QUICK_NOTES] as string | undefined,
-    familyDetails: f[FIELDS.USERS.FAMILY_DETAILS] as string | undefined,
     // Personality — lookup fields from linked tables (read only)
     enneagramType: readLookup(f[FIELDS.USERS.ENNEAGRAM_TYPE_FROM_ENNEAGRAM]),
     enneagramDescriptor: readLookup(f[FIELDS.USERS.DESCRIPTOR_FROM_ENNEAGRAM]),
@@ -81,12 +74,6 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Use
       ? (f[FIELDS.USERS.ASSOCIATED_MEETINGS] as string[])
       : [],
     // Org / Team — linked record IDs
-    managerIds: Array.isArray(f[FIELDS.USERS.MANAGER])
-      ? (f[FIELDS.USERS.MANAGER] as string[])
-      : [],
-    directReportIds: Array.isArray(f[FIELDS.USERS.DIRECT_REPORTS])
-      ? (f[FIELDS.USERS.DIRECT_REPORTS] as string[])
-      : [],
     teamMemberIds: Array.isArray(f[FIELDS.USERS.TEAM_MEMBERS])
       ? (f[FIELDS.USERS.TEAM_MEMBERS] as string[])
       : [],
@@ -104,19 +91,12 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Use
     companyLinkedIds: Array.isArray(f[FIELDS.USERS.COMPANY])
       ? (f[FIELDS.USERS.COMPANY] as string[]) : [],
     // Extra contact fields
-    personalEmail: f[FIELDS.USERS.PERSONAL_EMAIL] as string | undefined,
     birthday: f[FIELDS.USERS.BIRTHDAY] as string | undefined,
     workCellNumber: f[FIELDS.USERS.WORK_CELL_NUMBER] as string | undefined,
     personalCellNumber: f[FIELDS.USERS.PERSONAL_CELL_NUMBER] as string | undefined,
     // Legacy / alternate read paths
-    enneagram: f[FIELDS.USERS.ENNEAGRAM] as string | undefined,
-    mbti: f[FIELDS.USERS.MBTI] as string | undefined,
-    department: f[FIELDS.USERS.DEPARTMENT] as string | undefined,
     title: f[FIELDS.USERS.TITLE] as string | undefined,
     startDate: f[FIELDS.USERS.START_DATE] as string | undefined,
-    engagementLevel: f[FIELDS.USERS.ENGAGEMENT_LEVEL] as string | undefined,
-    coachNotes: f[FIELDS.USERS.COACH_NOTES] as string | undefined,
-    internalNotes: f[FIELDS.USERS.INTERNAL_NOTES] as string | undefined,
     theme: (f[FIELDS.USERS.THEME] as 'light' | 'dark' | 'system' | undefined) || undefined,
   };
 }
@@ -143,9 +123,9 @@ export async function searchUsersByName(
     const name =
       (f[FIELDS.USERS.FULL_NAME] as string | undefined) ||
       [f[FIELDS.USERS.FIRST_NAME], f[FIELDS.USERS.LAST_NAME]].filter(Boolean).join(' ') ||
-      (f[FIELDS.USERS.EMAIL] as string | undefined) ||
+      (f[FIELDS.USERS.WORK_EMAIL] as string | undefined) ||
       r.id
-    return { id: r.id, name, jobTitle: f[FIELDS.USERS.JOB_TITLE] as string | undefined }
+    return { id: r.id, name }
   })
 }
 
@@ -245,48 +225,18 @@ export async function getAllUsers(): Promise<User[]> {
   }
 }
 
-export async function updateUserCoachNotes(userId: string, notes: string): Promise<void> {
-  let apiKey: string, baseId: string;
-  try {
-    ({ apiKey, baseId } = getCredentials());
-  } catch (e) {
-    console.error('[updateUserCoachNotes] Missing Airtable credentials:', e);
-    return;
-  }
-  try {
-    const res = await airtableFetch(`${API_BASE}/${baseId}/${USERS_TABLE}/${userId}`, {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ fields: { 'Coach Notes': notes } }),
-    });
-    if (!res.ok) {
-      const text = await res.text();
-      console.error('[updateUserCoachNotes] Airtable PATCH failed:', text);
-    }
-  } catch (e) {
-    console.error('[updateUserCoachNotes] Unexpected error:', e);
-  }
-}
-
 export interface UserProfileFields {
   // Text / date fields
   'First Name'?: string
   'Last Name'?: string
   'Preferred Name'?: string
   'Work Email'?: string
-  'Personal Email'?: string
   'Title'?: string
   'Start Date'?: string
   'Birthday'?: string
   'Work Cell Number'?: string
   'Personal Cell Number'?: string
   'Role'?: string
-  'Internal Notes'?: string
-  // NOTE: Quick Notes and Family Details are coach-specific — write to
-  // Coach-Person Context table via upsertCoachPersonContext, not here.
   // Linked record fields — arrays of record IDs
   'Enneagram'?: string[]
   'MBTI'?: string[]
@@ -542,7 +492,7 @@ export async function fetchProfileOptions(allUsers: User[]): Promise<{
     ])
 
   const nameOf = (u: User) =>
-    (u.fullName ?? [u.firstName, u.lastName].filter(Boolean).join(' ')) || u.email
+    (u.fullName ?? [u.firstName, u.lastName].filter(Boolean).join(' ')) || u.workEmail || u.id
 
   const coaches = allUsers
     .filter((u) => u.role?.toLowerCase() === 'coach' || u.role?.toLowerCase() === 'admin')

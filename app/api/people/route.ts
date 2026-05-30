@@ -2,9 +2,6 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { createUserRecord } from '@/lib/airtable/users'
 import { generateRelationshipRows } from '@/lib/airtable/relationships'
-import { TABLES } from '@/lib/airtable/constants'
-
-const API_BASE = 'https://api.airtable.com/v0'
 
 export async function POST(req: Request) {
   const { userId } = await auth()
@@ -41,34 +38,7 @@ export async function POST(req: Request) {
       'Role': 'client',
     })
 
-    // 2. Create Organization Membership if company selected
-    if (companyId) {
-      try {
-        const apiKey = process.env.AIRTABLE_API_KEY
-        const baseId = process.env.AIRTABLE_BASE_ID
-        if (apiKey && baseId) {
-          await fetch(
-            `${API_BASE}/${baseId}/${encodeURIComponent(TABLES.ORG_MEMBERSHIPS)}`,
-            {
-              method: 'POST',
-              headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                fields: {
-                  'Person': [newPersonId],
-                  'Organization': [companyId],
-                  'Status': 'Active',
-                },
-              }),
-            },
-          )
-        }
-      } catch (err) {
-        // Non-critical — log and continue
-        console.warn('[POST /api/people] Org membership creation failed:', err)
-      }
-    }
-
-    // 3. Generate Relationship Context rows
+    // 2. Generate Relationship Context rows
     const rcCount =
       (coachIds.length > 0 ? coachIds.length : 0) +
       (reportsToIds.length > 0 ? reportsToIds.length : 0) +

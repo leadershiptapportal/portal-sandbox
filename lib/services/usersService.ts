@@ -6,13 +6,13 @@ import type { SessionUser } from "@/lib/auth/getSessionUser";
 // TODO: duplicate user records in Airtable should be merged manually
 function dataScore(user: User): number {
   let score = 0
-  if (user.profilePhoto || user.avatarUrl) score += 2
+  if (user.profilePhoto) score += 2
   if (user.coachIds?.length) score += user.coachIds.length
   if (user.strengths?.length) score += user.strengths.length
   if (user.quickNotes) score++
   if (user.enneagramType) score++
   if (user.mbtiType) score++
-  if (user.title ?? user.jobTitle) score++
+  if (user.title) score++
   if (user.companyName) score++
   if (user.teamMemberIds?.length) score += user.teamMemberIds.length
   return score
@@ -25,7 +25,7 @@ function deduplicateUsers(users: User[]): User[] {
 
   for (const user of users) {
     const name = (user.fullName ?? '').toLowerCase().trim()
-    const email = (user.workEmail ?? user.email ?? '').toLowerCase().trim()
+    const email = (user.workEmail ?? '').toLowerCase().trim()
 
     if (!name || !email) {
       unkeyed.push(user)
@@ -71,7 +71,6 @@ export async function getUsers(
   // Resolve the coach's own Airtable record ID by email
   const coachRecord = deduped.find(
     (u) =>
-      u.email?.toLowerCase() === sessionUser.email.toLowerCase() ||
       u.workEmail?.toLowerCase() === sessionUser.email.toLowerCase(),
   );
 
@@ -109,7 +108,7 @@ export async function getHumansByRelationship(coachAirtableId: string): Promise<
 
   const typeOrder = (id: string) => (typeByPersonId.get(id) === 'coaching' ? 0 : 1)
   const nameOf = (u: User) =>
-    (u.fullName ?? ([u.firstName, u.lastName].filter(Boolean).join(' ') || u.email)).toLowerCase()
+    (u.fullName ?? ([u.firstName, u.lastName].filter(Boolean).join(' ') || u.workEmail || '')).toLowerCase()
 
   return humans.sort((a, b) => {
     const diff = typeOrder(a.id) - typeOrder(b.id)

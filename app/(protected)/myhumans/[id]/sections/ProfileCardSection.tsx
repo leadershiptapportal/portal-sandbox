@@ -273,9 +273,9 @@ export default function ProfileCardSection({
         </div>
       )}
       <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
-        {(user.profilePhoto ?? user.avatarUrl) ? (
+        {user.profilePhoto ? (
           <img
-            src={(user.profilePhoto ?? user.avatarUrl)!}
+            src={user.profilePhoto}
             alt={name}
             className="w-16 h-16 rounded-full object-cover flex-shrink-0"
           />

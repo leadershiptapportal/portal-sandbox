@@ -68,9 +68,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     )
   }
 
-  const contactEmail = user.workEmail ?? user.email
-  const managerId = user.managerIds?.[0] ?? null
-  const reportIds = user.directReportIds ?? []
+  const contactEmail = user.workEmail ?? ''
+  const managerId = null
   const coachId = user.coachIds?.[0] ?? null
   const teamLeadId = user.teamLeadIds?.[0] ?? null
   const teamMemberIdList = user.teamMemberIds ?? []
@@ -197,7 +196,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   const canDrillDeeper = currentDepth < MAX_DRILL_DEPTH
 
   const displayTitle =
-    user.jobTitle ??
+    user.title ??
     (user.role && !isRecordId(user.role) ? user.role : undefined)
 
   // Show preferred name only when it differs from the display name
@@ -270,7 +269,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
           name:
             u.fullName ||
             [u.firstName, u.lastName].filter(Boolean).join(' ') ||
-            u.email,
+            u.workEmail ||
+            u.id,
         }))}
         canEdit={userCanWrite}
         rcNotes={rcNotes}

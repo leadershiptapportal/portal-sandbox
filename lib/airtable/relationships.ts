@@ -300,10 +300,8 @@ export async function getDirectReports(
       `&fields[]=${encodeURIComponent(FIELDS.USERS.FIRST_NAME)}` +
       `&fields[]=${encodeURIComponent(FIELDS.USERS.LAST_NAME)}` +
       `&fields[]=${encodeURIComponent(FIELDS.USERS.TITLE)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.USERS.JOB_TITLE)}` +
       `&fields[]=${encodeURIComponent(FIELDS.USERS.WORK_EMAIL)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.USERS.PROFILE_PHOTO)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.USERS.AVATAR_URL)}`,
+      `&fields[]=${encodeURIComponent(FIELDS.USERS.PROFILE_PHOTO)}`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
   if (!userRes.ok) {
@@ -321,13 +319,12 @@ export async function getDirectReports(
     const name = fullName || [first, last].filter(Boolean).join(' ') || r.id
 
     const photoArr = f[FIELDS.USERS.PROFILE_PHOTO] as Array<{ url: string }> | undefined
-    const photoUrl = photoArr?.[0]?.url ?? (f[FIELDS.USERS.AVATAR_URL] as string | undefined) ?? undefined
+    const photoUrl = photoArr?.[0]?.url ?? undefined
 
     results.push({
       personId: r.id as string,
       name,
-      title: (f[FIELDS.USERS.TITLE] as string | undefined)?.trim() ||
-        (f[FIELDS.USERS.JOB_TITLE] as string | undefined)?.trim() || undefined,
+      title: (f[FIELDS.USERS.TITLE] as string | undefined)?.trim() || undefined,
       email: (f[FIELDS.USERS.WORK_EMAIL] as string | undefined)?.trim() || undefined,
       photoUrl,
     })

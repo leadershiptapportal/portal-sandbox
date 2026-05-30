@@ -110,7 +110,7 @@ function stripTld(email: string): string {
 export function buildEmailToUserMap(users: User[]): Map<string, User> {
   const map = new Map<string, User>()
   for (const user of users) {
-    for (const raw of [user.email, user.workEmail]) {
+    for (const raw of [user.workEmail]) {
       if (!raw) continue
       const norm = normalizeEmail(raw)
       if (!norm) continue

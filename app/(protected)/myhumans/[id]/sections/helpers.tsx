@@ -5,13 +5,13 @@ export function getDisplayName(user: User): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')
-  return user.preferredName ?? user.email
+  return user.preferredName ?? user.workEmail ?? ''
 }
 
 export function getInitials(user: User): string {
   const first = user.firstName ?? user.fullName?.split(' ')[0] ?? ''
   const last = user.lastName ?? user.fullName?.split(' ').slice(-1)[0] ?? ''
-  return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase() || user.email[0].toUpperCase()
+  return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase() || user.workEmail?.[0]?.toUpperCase() || '?'
 }
 
 export function formatMeetingDate(iso: string, timezone?: string): string {

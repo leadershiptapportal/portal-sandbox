@@ -18,10 +18,10 @@ export async function PATCH(
 
   const { id } = await params
   const body = await req.json()
-  const { internalNotes, title } = body as { internalNotes?: string; title?: string }
+  const { title } = body as { title?: string }
 
   // Nothing to update
-  if (internalNotes === undefined && title === undefined) {
+  if (title === undefined) {
     return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
   }
 
@@ -41,7 +41,6 @@ export async function PATCH(
 
   // Build Airtable PATCH payload
   const fields: Record<string, unknown> = {}
-  if (internalNotes !== undefined) fields[FIELDS.USERS.INTERNAL_NOTES] = internalNotes
   if (title !== undefined) fields[FIELDS.USERS.TITLE] = title
 
   const apiKey = process.env.AIRTABLE_API_KEY

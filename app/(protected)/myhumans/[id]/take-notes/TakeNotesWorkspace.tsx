@@ -89,7 +89,8 @@ export default function TakeNotesWorkspace({
     savedPersonData.preferredName ||
     savedPersonData.fullName ||
     [savedPersonData.firstName, savedPersonData.lastName].filter(Boolean).join(' ') ||
-    savedPersonData.email
+    savedPersonData.workEmail ||
+    ''
 
   function handleSaveComplete() {
     router.push(`/myhumans/${person.id}`)

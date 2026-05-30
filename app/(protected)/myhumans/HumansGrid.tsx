@@ -30,7 +30,7 @@ function getDisplayName(user: User): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')
-  return user.preferredName ?? user.email
+  return user.preferredName ?? user.workEmail ?? ''
 }
 
 function getInitials(user: User): string {
@@ -42,7 +42,7 @@ function getInitials(user: User): string {
       ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
       : parts[0][0].toUpperCase()
   }
-  return user.email[0].toUpperCase()
+  return user.workEmail?.[0]?.toUpperCase() ?? '?'
 }
 
 const AVATAR_COLORS = [
@@ -79,7 +79,7 @@ function RoleBadge({ role }: { role: string }) {
 function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
   const { user, interactionCount, noteCount, openTaskCount, lastInteraction, nextInteraction } = enriched
   const name = getDisplayName(user)
-  const subtitle = [user.title ?? user.jobTitle, user.companyName].filter(Boolean).join(' · ')
+  const subtitle = [user.title, user.companyName].filter(Boolean).join(' · ')
   const role = user.role && !isRecordId(user.role) ? user.role : null
 
   return (
@@ -89,9 +89,9 @@ function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
     >
       <div className="flex items-start gap-3">
         {/* Avatar */}
-        {(user.profilePhoto ?? user.avatarUrl) ? (
+        {user.profilePhoto ? (
           <img
-            src={(user.profilePhoto ?? user.avatarUrl)!}
+            src={user.profilePhoto}
             alt={name}
             className="w-11 h-11 rounded-full object-cover flex-shrink-0 mt-0.5"
           />
@@ -260,7 +260,7 @@ export default function HumansGrid({ users, coaches, companies }: Props) {
       result = result.filter(({ user }) =>
         getDisplayName(user).toLowerCase().includes(q) ||
         (user.companyName ?? '').toLowerCase().includes(q) ||
-        (user.workEmail ?? user.email ?? '').toLowerCase().includes(q)
+        (user.workEmail ?? '').toLowerCase().includes(q)
       )
     }
 

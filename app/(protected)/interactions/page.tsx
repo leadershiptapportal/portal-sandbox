@@ -57,7 +57,7 @@ export default async function InteractionsIndexPage({ searchParams }: Props) {
   // Human list for the Log Interaction dialog
   const humans = users.map((u) => ({
     id: u.id,
-    name: u.fullName || [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email || 'Unknown',
+    name: u.fullName || [u.firstName, u.lastName].filter(Boolean).join(' ') || u.workEmail || 'Unknown',
   }))
 
   const upcomingItems = interactionsToUpcomingItems(upcomingInteractions, {

@@ -10,7 +10,7 @@ function displayName(user: User): string {
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')
   if (user.preferredName) return user.preferredName
-  return user.email
+  return user.workEmail ?? ''
 }
 
 const AVATAR_COLORS = [
@@ -33,7 +33,7 @@ function avatarColor(user: User): string {
 function initials(user: User): string {
   const first = user.firstName ?? user.fullName?.split(' ')[0] ?? ''
   const last = user.lastName ?? user.fullName?.split(' ').slice(-1)[0] ?? ''
-  return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase() || user.email[0].toUpperCase()
+  return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase() || user.workEmail?.[0]?.toUpperCase() || '?'
 }
 
 interface UsersListProps {
@@ -48,7 +48,7 @@ export default function UsersList({ users }: UsersListProps) {
         const q = query.toLowerCase()
         return (
           displayName(u).toLowerCase().includes(q) ||
-          u.email.toLowerCase().includes(q) ||
+          (u.workEmail ?? '').toLowerCase().includes(q) ||
           (u.companyName ?? '').toLowerCase().includes(q)
         )
       })
@@ -93,7 +93,7 @@ export default function UsersList({ users }: UsersListProps) {
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-foreground truncate">{displayName(user)}</p>
                     <p className="text-sm text-muted-foreground truncate">{user.companyName || '—'}</p>
-                    <p className="text-xs text-muted-foreground truncate mt-1">{user.email}</p>
+                    <p className="text-xs text-muted-foreground truncate mt-1">{user.workEmail}</p>
                   </div>
                 </div>
                 <div className="mt-4 flex justify-end">

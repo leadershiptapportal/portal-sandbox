@@ -11,12 +11,12 @@ function getDisplayName(user: {
   firstName?: string | null
   lastName?: string | null
   preferredName?: string | null
-  email: string
+  workEmail?: string | null
 }): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')
-  return user.preferredName ?? user.email
+  return user.preferredName ?? user.workEmail ?? ''
 }
 
 export default async function InkNotePage({ params }: Props) {

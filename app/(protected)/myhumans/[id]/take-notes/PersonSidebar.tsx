@@ -834,21 +834,22 @@ export default function PersonSidebar({
     (o) => person.apologyLanguageIds?.includes(o.id),
   )
 
-  const avatar = person.avatarUrl || person.profilePhoto
+  const avatar = person.profilePhoto
   const initials = [person.firstName, person.lastName]
     .filter(Boolean)
     .map((n) => n![0])
     .join('')
-    .toUpperCase() || (person.email[0] ?? '?').toUpperCase()
+    .toUpperCase() || person.workEmail?.[0]?.toUpperCase() || '?'
 
   const displayName =
     person.preferredName ||
     person.fullName ||
     [person.firstName, person.lastName].filter(Boolean).join(' ') ||
-    person.email
+    person.workEmail ||
+    ''
 
-  const displayTitle = person.jobTitle ?? person.title
-  const contactEmail = person.workEmail ?? person.email
+  const displayTitle = person.title
+  const contactEmail = person.workEmail ?? ''
 
   const allPeopleForPicker = profileOptions.allUsers.map((u) => ({ id: u.id, name: u.name }))
 

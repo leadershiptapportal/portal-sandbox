@@ -20,7 +20,6 @@ export async function canAccessUser(
   // Resolve the coach's own Airtable record ID by email
   const coachRecord = all.find(
     (u) =>
-      u.email?.toLowerCase() === sessionUser.email.toLowerCase() ||
       u.workEmail?.toLowerCase() === sessionUser.email.toLowerCase(),
   )
 

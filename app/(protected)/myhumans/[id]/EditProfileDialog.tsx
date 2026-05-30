@@ -41,7 +41,7 @@ function getInitials(user: User): string {
       ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
       : parts[0][0].toUpperCase()
   }
-  return user.email[0].toUpperCase()
+  return user.workEmail?.[0]?.toUpperCase() ?? '?'
 }
 
 const AVATAR_COLORS = [
@@ -187,7 +187,7 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
     setFirstName(user.firstName ?? '')
     setLastName(user.lastName ?? '')
     setPreferredName(user.preferredName ?? '')
-    setTitle(user.title ?? user.jobTitle ?? '')
+    setTitle(user.title ?? '')
     setWorkEmail(user.workEmail ?? '')
     setBirthday(user.birthday ?? '')
     setStartDate(user.startDate ?? '')
@@ -276,7 +276,7 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
     if (firstName !== (user.firstName ?? '')) patch['First Name'] = firstName
     if (lastName !== (user.lastName ?? '')) patch['Last Name'] = lastName
     if (preferredName !== (user.preferredName ?? '')) patch['Preferred Name'] = preferredName
-    if (title !== (user.title ?? user.jobTitle ?? '')) patch['Title'] = title
+    if (title !== (user.title ?? '')) patch['Title'] = title
     if (workEmail !== (user.workEmail ?? '')) patch['Work Email'] = workEmail
     if (birthday !== (user.birthday ?? '')) patch['Birthday'] = birthday
     if (startDate !== (user.startDate ?? '')) patch['Start Date'] = startDate
@@ -332,7 +332,7 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
 
   // ── Render ───────────────────────────────────────────────────────────────────
 
-  const currentPhoto = photoPreview ?? user.profilePhoto ?? user.avatarUrl ?? null
+  const currentPhoto = photoPreview ?? user.profilePhoto ?? null
 
   return (
     <>

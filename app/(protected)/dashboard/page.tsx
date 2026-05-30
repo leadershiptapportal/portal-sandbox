@@ -25,7 +25,7 @@ function getDisplayName(user: User): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')
-  return user.preferredName ?? user.email
+  return user.preferredName ?? user.workEmail ?? ''
 }
 
 export default async function DashboardPage() {
@@ -40,7 +40,6 @@ export default async function DashboardPage() {
 
   const coachUser = users.find(
     (u) =>
-      u.email?.toLowerCase() === sessionUser?.email?.toLowerCase() ||
       u.workEmail?.toLowerCase() === sessionUser?.email?.toLowerCase(),
   )
   const firstName =

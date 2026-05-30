@@ -20,7 +20,6 @@
 export const TABLES = {
   PEOPLE: 'tblD4Pttofq0sDl2R',                  // "People"
   ORGANIZATIONS: 'tbl56SmsLjb0odxag',           // "Organizations"
-  ORG_MEMBERSHIPS: 'tbl6Ld2QCBAN4EI62',         // "Organization Memberships"
   PERMISSION_PROFILES: 'tbl1XeWzXjE41fSSE',     // "Permission Profiles"
   CONNECTED_CALENDARS: 'tblJs7uabNEOsgyoF',     // "Connected Calendars"
   RELATIONSHIP_CONTEXTS: 'tblYdLi7dp2RmhNjh',   // "Relationship Contexts"
@@ -28,8 +27,6 @@ export const TABLES = {
   MEETINGS: 'tblUm3dEvQqQBhxSE',                // alias → INTERACTIONS, kept for backwards compatibility
   NOTES: 'tblSTELdCWLYk5dq4',                   // "Notes"
   TASKS: 'tbleG9GWJEB9jd6yt',                   // "Tasks"
-  COACH_SESSION: 'tblPFj41wHQXZVzzZ',           // "Coach Session"
-  COACH_PERSON_CONTEXT: 'tbly1SOW603Qhd2nJ',    // "Coach-Person Context" — legacy, table may not exist; reads return null gracefully
   MESSAGES: 'tbl8VGHVCU8cXyAis',                // "Messages"
 } as const
 
@@ -112,14 +109,6 @@ export const FIELDS = {
     TASK_TYPE: 'fldhJUxdZGKijHSKX',             // "Task Type"
     VISIBILITY: 'fldOpVCxStZP5tMhP',            // "Visibility"
   },
-  COACH_SESSION: {
-    COACH: 'fldMKmrbXmxpXV3Y5',                 // "Coach"
-    CALENDAR_EVENT: 'fldoHpg3OxFnuKeJ5',        // "Calendar Event"
-    FOCAL_PERSON: 'fldz6kvciTYm30gNq',          // "Focal Person"
-    SESSION_NOTES: 'fldEy7rDjvvIG13Af',         // "Session Notes"
-    ACTION_ITEMS: 'fldVJ8aeHxjrHd1Gh',          // "Action Items"
-    LAST_UPDATED: 'fld5Veqq1nQpQkdaG',          // "Last Updated"
-  },
   USERS: {
     CLERK_USER_ID: 'fldFADxRhS8Jx8oEr',                            // "Clerk User ID"
     PERMISSION_PROFILE: 'fldKCYbCstGpxPqDh',                       // "Portal Permission Profile" (linked)
@@ -128,20 +117,15 @@ export const FIELDS = {
     PREFERRED_NAME: 'fld3HX06VuQWQYCM1',                           // "Preferred Name"
     FIRST_NAME: 'fldOGveomFlCV6DjD',                               // "First Name"
     LAST_NAME: 'fldJh2vuJqYkyyZqx',                                // "Last Name"
-    EMAIL: 'Email',                                                // does not exist in schema; read returns undefined
     WORK_EMAIL: 'fldlL8HrXCnd3K4KL',                               // "Work Email"
-    JOB_TITLE: 'Job Title',                                        // does not exist in schema; read returns undefined
     TITLE: 'fldVwZtWoJjZp920l',                                    // "Title"
     ROLE: 'fldaSnC1UCEukV8Um',                                     // "Role"
-    COMPANY_ID: 'Company ID',                                      // does not exist in schema
     COMPANY_NAME: 'fldHd3omMw7PUAWNJ',                             // "Company Name (from Company)" lookup
-    AVATAR_URL: 'Avatar URL',                                      // does not exist in schema
     PROFILE_PHOTO: 'fldHj7YBmed6S8s58',                            // "Profile Photo"
     TIME_AT_COMPANY: 'fldi1Ez09JdS0tjnb',                          // "Time at Company"
     COACH: 'fld4kKouAYi5plNVL',                                    // "Coach"
     TEAM_LEAD: 'fldRyJGLnzfoZlIpN',                                // "Team Lead"
     QUICK_NOTES: 'fldduqJaVzxE9u6IP',                              // "Quick Notes"
-    FAMILY_DETAILS: 'fldZb1F9kHhHPjqLk',                           // "Family Details"
     ENNEAGRAM_TYPE_FROM_ENNEAGRAM: 'fld3NTWw3EmFRVBRY',            // "Enneagram Type (from Enneagram)"
     DESCRIPTOR_FROM_ENNEAGRAM: 'fldfTiZfRCarNCvUe',                // "Descriptor (from Enneagram)"
     MBTI_FROM_MBTI: 'fldetFbWFerHgk3Ai',                           // "MBTI (from MBTI)"
@@ -152,8 +136,6 @@ export const FIELDS = {
     STRENGTH_NAME_FROM_STRENGTHS: 'fldm4MrDJsj8BZHRz',             // "Strength Name (from Strengths)"
     DOMAIN_FROM_STRENGTHS: 'fldG84OLoi5HtKagW',                    // "Domain (from Strengths)"
     ASSOCIATED_MEETINGS: 'fld1t3bIXyBxHEh4B',                      // "Associated Meetings"
-    MANAGER: 'Manager',                                            // does not exist in schema
-    DIRECT_REPORTS: 'Direct Reports',                              // does not exist in schema
     TEAM_MEMBERS: 'fldbpthkjaXy7mU0R',                             // "Team Members"
     ENNEAGRAM: 'fldSQ11YFsWjlkREZ',                                // "Enneagram"
     MBTI: 'fldyjw72Zx7bbbSqQ',                                     // "MBTI"
@@ -161,15 +143,10 @@ export const FIELDS = {
     APOLOGY_LANGUAGE: 'fldVEQ4DZuTARM3ST',                         // "Apology Language"
     STRENGTHS: 'fldcQe5diYYsoThxi',                                // "Strengths"
     COMPANY: 'fldUu6I5aaiIhTVj6',                                  // "Company"
-    PERSONAL_EMAIL: 'fldsARb1wJcJauPAx',                           // "Personal Email"
     BIRTHDAY: 'flde4V2mmmYv0dMME',                                 // "Birthday"
     WORK_CELL_NUMBER: 'fldZIvMj9ggKNAHwO',                         // "Work Cell Number"
     PERSONAL_CELL_NUMBER: 'fldV3990UGnVEdSQL',                     // "Personal Cell Number"
-    DEPARTMENT: 'Department',                                      // does not exist in schema
     START_DATE: 'fldgDu0FAVHCEtp0w',                               // "Start Date"
-    ENGAGEMENT_LEVEL: 'Engagement Level',                          // does not exist in schema
-    COACH_NOTES: 'Coach Notes',                                    // does not exist in schema
-    INTERNAL_NOTES: 'Internal Notes',                              // does not exist in schema
     // Linked record fields on People (not the singleLineText lookup variants)
     MEETINGS_LINKED: 'fldPvW5FXxWUiiI8F',                         // "Meetings" (multipleRecordLinks → Meetings)
     NOTES_LINKED: 'fldtaUHrHe079g2iz',                            // "Notes" (multipleRecordLinks → Notes)
@@ -208,14 +185,6 @@ export const FIELDS = {
   STRENGTHS: {
     NAME: 'fldO3GPrkGxC1ldZi',                  // "Strength"
     DESCRIPTOR: 'fldA4m8V4MfsI6oKY',            // "Descriptor"
-  },
-  COACH_PERSON_CONTEXT: {
-    COACH: 'fldMidd750nvVaOuD',                 // "Coach"
-    PERSON: 'fldgP7Hn2EnOCeEOn',                // "Person"
-    QUICK_NOTES: 'fldeCsw5wQ9cJJJte',           // "Quick Notes"
-    FAMILY_DETAILS: 'fldICfOOjlBgwXLzI',        // "Family Details"
-    RELATIONSHIP_FLAGS: 'fldkaBmcetVEbGD02',    // "Relationship Flags"
-    LAST_UPDATED: 'fldV5RnOV6h0IkPkR',          // "Last Updated"
   },
   CONNECTED_CALENDARS: {
     CONNECTION_NAME: 'fldjj4sUqh1Rdz34T',       // "Connection Name" (primary)

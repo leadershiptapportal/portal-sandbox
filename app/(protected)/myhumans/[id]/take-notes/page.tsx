@@ -36,10 +36,10 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
 
   if (!user) notFound()
 
-  const contactEmail = user.workEmail ?? user.email
+  const contactEmail = user.workEmail ?? ''
   const displayName =
     user.fullName ??
-    ([user.firstName, user.lastName].filter(Boolean).join(' ') || user.email)
+    ([user.firstName, user.lastName].filter(Boolean).join(' ') || user.workEmail || '')
 
   const [profileOptions, interactions, initialInteraction, permissionLevel, relationships] =
     await Promise.all([

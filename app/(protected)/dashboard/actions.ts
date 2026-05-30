@@ -84,7 +84,7 @@ export async function fetchHumanInteractionsAction(
   try {
     const user = await getUserById(humanId)
     if (!user) return []
-    const email = user.workEmail ?? user.email
+    const email = user.workEmail
     if (!email) return []
     const meetings = await getInteractionsByUserEmail(email)
     const now = new Date()

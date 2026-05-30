@@ -5,7 +5,7 @@ function displayName(user: User): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')
-  return user.preferredName ?? user.email
+  return user.preferredName ?? user.workEmail ?? ''
 }
 
 const AVATAR_COLORS = [
@@ -28,7 +28,7 @@ function avatarColor(user: User): string {
 function initials(user: User): string {
   const first = user.firstName ?? user.fullName?.split(' ')[0] ?? ''
   const last = user.lastName ?? user.fullName?.split(' ').slice(-1)[0] ?? ''
-  return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase() || user.email[0].toUpperCase()
+  return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase() || user.workEmail?.[0]?.toUpperCase() || '?'
 }
 
 interface UserProfileProps {
@@ -37,7 +37,7 @@ interface UserProfileProps {
 
 export default function UserProfile({ user }: UserProfileProps) {
   const name = displayName(user)
-  const contactEmail = user.workEmail ?? user.email
+  const contactEmail = user.workEmail
   const color = avatarColor(user)
   const initStr = initials(user)
 
@@ -63,8 +63,8 @@ export default function UserProfile({ user }: UserProfileProps) {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'var(--font-plus-jakarta-sans)' }}>{name}</h1>
-            {user.jobTitle && (
-              <p className="text-muted-foreground mt-0.5">{user.jobTitle}</p>
+            {user.title && (
+              <p className="text-muted-foreground mt-0.5">{user.title}</p>
             )}
             <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
               {user.companyName && <span>{user.companyName}</span>}

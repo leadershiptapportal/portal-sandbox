@@ -466,7 +466,7 @@ export async function logManualSessionAction(params: {
   const end = new Date(start.getTime() + Math.max(durationMs, 60_000))
 
   // Populate Attendees so the profile-page email-match query picks this up.
-  const subjectEmail = subject?.workEmail ?? subject?.email ?? ''
+  const subjectEmail = subject?.workEmail ?? ''
 
   const { createManualInteraction } = await import('@/lib/airtable/interactions')
   const interactionId = await createManualInteraction({
