@@ -48,3 +48,6 @@ next-env.d.ts
 
 # claude local settings (contains secrets)
 .claude/settings.local.json
+
+# claude agent worktrees (temporary scratch checkouts)
+.claude/worktrees/
