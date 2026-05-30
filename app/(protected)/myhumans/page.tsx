@@ -115,27 +115,17 @@ export default async function UsersPage() {
     }
   }
 
-  // ── Enrich users — interaction count from linked "Associated Meetings" field ──
   const enrichedHumans: EnrichedHuman[] = users.map((user) => {
-    const interactionCount = user.associatedMeetingIds?.length ?? 0
     const displayNameLower = getDisplayName(user).toLowerCase()
     return {
       user,
       noteCount: noteCountByUser.get(user.id) ?? 0,
       openTaskCount: openTaskCountByUser.get(user.id) ?? 0,
-      interactionCount,
+      interactionCount: 0,
       lastInteraction: lastInteractionByName.get(displayNameLower) ?? null,
       nextInteraction: nextInteractionByName.get(displayNameLower) ?? null,
     }
   })
-
-  console.log('[ClientsPage] Users with interaction counts:',
-    users.map((u) => ({
-      name: getDisplayName(u),
-      interactionCount: u.associatedMeetingIds?.length ?? 0,
-      associatedMeetings: u.associatedMeetingIds,
-    }))
-  )
 
   // ── Header stats (Part G) ────────────────────────────────────────────────
   const coachCount = users.filter((u) => u.role?.toLowerCase() === 'coach').length
@@ -152,13 +142,6 @@ export default async function UsersPage() {
       ? `${userRecord.role} view  ·  ${statParts.join('  ·  ')}`
       : statParts.join('  ·  ')
 
-  // ── Coaches for filter dropdown and Add Client dialog ────────────────────
-  const coaches = users
-    .filter((u) => u.role?.toLowerCase() === 'coach')
-    .map((u) => ({ id: u.id, name: getDisplayName(u) }))
-
-  console.log('[ClientsPage] role:', userRecord.role, '— airtableId:', userRecord.airtableId, '— showing:', users.length, 'clients')
-
   return (
     <>
       <PageHeader
@@ -167,8 +150,6 @@ export default async function UsersPage() {
       />
       <HumansGrid
         users={enrichedHumans}
-        coaches={coaches}
-        organizations={profileOptions.organizations}
       />
     </>
   )

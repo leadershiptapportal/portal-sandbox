@@ -57,8 +57,6 @@ export interface Human {
   strengths?: Array<{ name: string; domain?: string }>;
 
   // Session count via linked record field (avoids email matching)
-  associatedMeetingIds?: string[]   // "Associated Meetings" linked field → Portal Calendar Events
-
   // Raw linked record IDs — used by edit forms to pre-select current values
   enneagramIds?: string[]
   mbtiIds?: string[]

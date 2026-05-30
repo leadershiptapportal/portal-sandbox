@@ -149,7 +149,6 @@ export const FIELDS = {
     DESCRIPTOR_FROM_APOLOGY_LANGUAGE: 'fldcmyFlWikFNyR53',         // "Descriptor (from Apology Language)"
     STRENGTH_NAME_FROM_STRENGTHS: 'fldm4MrDJsj8BZHRz',             // "Strength Name (from Strengths)"
     DOMAIN_FROM_STRENGTHS: 'fldG84OLoi5HtKagW',                    // "Domain (from Strengths)"
-    ASSOCIATED_MEETINGS: 'fld1t3bIXyBxHEh4B',                      // "Associated Meetings"
     ENNEAGRAM: 'fldSQ11YFsWjlkREZ',                                // "Enneagram"
     MBTI: 'fldyjw72Zx7bbbSqQ',                                     // "MBTI"
     CONFLICT_POSTURE: 'fldCD4HvwKE5SXXLE',                         // "Conflict Posture"

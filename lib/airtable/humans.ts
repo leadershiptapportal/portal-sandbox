@@ -57,9 +57,6 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Hum
       f[FIELDS.HUMANS.STRENGTH_NAME_FROM_STRENGTHS],
       f[FIELDS.HUMANS.DOMAIN_FROM_STRENGTHS]
     ),
-    associatedMeetingIds: Array.isArray(f[FIELDS.HUMANS.ASSOCIATED_MEETINGS])
-      ? (f[FIELDS.HUMANS.ASSOCIATED_MEETINGS] as string[])
-      : [],
     enneagramIds: Array.isArray(f[FIELDS.HUMANS.ENNEAGRAM])
       ? (f[FIELDS.HUMANS.ENNEAGRAM] as string[]) : [],
     mbtiIds: Array.isArray(f[FIELDS.HUMANS.MBTI])

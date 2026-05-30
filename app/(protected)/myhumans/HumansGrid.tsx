@@ -18,8 +18,6 @@ export interface EnrichedHuman {
 
 interface Props {
   users: EnrichedHuman[]
-  coaches: Array<{ id: string; name: string }>
-  organizations: Array<{ id: string; name: string }>
 }
 
 type ViewMode = 'humans' | 'organization'
@@ -162,29 +160,6 @@ function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
   )
 }
 
-// ── Select helper ─────────────────────────────────────────────────────────────
-
-function FilterSelect({
-  value,
-  onChange,
-  children,
-}: {
-  value: string
-  onChange: (v: string) => void
-  children: React.ReactNode
-}) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)] pr-8 appearance-none cursor-pointer"
-      style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2394a3b8\' stroke-width=\'2\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}
-    >
-      {children}
-    </select>
-  )
-}
-
 // ── View toggle ───────────────────────────────────────────────────────────────
 
 function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void }) {
@@ -218,10 +193,8 @@ function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode
 
 // ── Main grid ─────────────────────────────────────────────────────────────────
 
-export default function HumansGrid({ users, coaches, organizations }: Props) {
+export default function HumansGrid({ users }: Props) {
   const [query, setQuery] = useState('')
-  const [selectedRole, setSelectedRole] = useState('all')
-  const [selectedOrganization, setSelectedOrganization] = useState('all')
   const [sortBy, setSortBy] = useState('recent')
   const [viewMode, setViewMode] = useState<ViewMode>('humans')
 
@@ -236,23 +209,9 @@ export default function HumansGrid({ users, coaches, organizations }: Props) {
     localStorage.setItem('clientsViewMode', mode)
   }
 
-  // Unique roles from data
-  const roles = useMemo(() => {
-    const found = new Set(
-      users.map((e) => e.user.role).filter((r): r is string => !!r && !isRecordId(r))
-    )
-    return [...found].sort()
-  }, [users])
-
-  const hasFilters =
-    query.trim() !== '' ||
-    selectedRole !== 'all' ||
-    selectedOrganization !== 'all'
-
   const filtered = useMemo(() => {
     let result = [...users]
 
-    // Text search
     if (query.trim()) {
       const q = query.toLowerCase()
       result = result.filter(({ user }) =>
@@ -262,36 +221,15 @@ export default function HumansGrid({ users, coaches, organizations }: Props) {
       )
     }
 
-    // Role filter
-    if (selectedRole !== 'all') {
-      result = result.filter(({ user }) => user.role === selectedRole)
-    }
-
-    // Organization filter — match by linked record IDs (reliable) with a
-    // fallback to organizationName string-match for users whose linked field
-    // wasn't populated correctly.
-    if (selectedOrganization !== 'all') {
-      const organizationName = organizations.find((c) => c.id === selectedOrganization)?.name
-      result = result.filter(({ user }) => {
-        if (user.organizationLinkedIds?.includes(selectedOrganization)) return true
-        if (organizationName && user.organizationName === organizationName) return true
-        return false
-      })
-    }
-
-    // Sort
     if (sortBy === 'name-asc') {
       result.sort((a, b) => getDisplayName(a.user).localeCompare(getDisplayName(b.user)))
-    } else if (sortBy === 'name-desc') {
-      result.sort((a, b) => getDisplayName(b.user).localeCompare(getDisplayName(a.user)))
     } else {
       result.sort((a, b) => b.interactionCount - a.interactionCount)
     }
 
     return result
-  }, [users, query, selectedRole, selectedOrganization, sortBy, organizations])
+  }, [users, query, sortBy])
 
-  // Group by organization for organization view
   const groupedByOrganization = useMemo(() => {
     const map = new Map<string, EnrichedHuman[]>()
     for (const enriched of filtered) {
@@ -305,13 +243,6 @@ export default function HumansGrid({ users, coaches, organizations }: Props) {
       return a.localeCompare(b)
     })
   }, [filtered])
-
-  function clearFilters() {
-    setQuery('')
-    setSelectedRole('all')
-    setSelectedOrganization('all')
-    setSortBy('recent')
-  }
 
   return (
     <div className="p-4 md:p-8 space-y-5">
@@ -330,33 +261,16 @@ export default function HumansGrid({ users, coaches, organizations }: Props) {
           />
         </div>
 
-        {/* Role filter */}
-        {roles.length > 1 && (
-          <FilterSelect value={selectedRole} onChange={setSelectedRole}>
-            <option value="all">All Roles</option>
-            {roles.map((r) => (
-              <option key={r} value={r}>{r}</option>
-            ))}
-          </FilterSelect>
-        )}
-
-        {/* Organization filter */}
-        {organizations.length > 1 && (
-          <FilterSelect value={selectedOrganization} onChange={setSelectedOrganization}>
-            <option value="all">All Organizations</option>
-            {organizations.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </FilterSelect>
-        )}
-
         {/* Sort */}
-        <FilterSelect value={sortBy} onChange={setSortBy}>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[hsl(213,70%,30%)]/30 focus:border-[hsl(213,70%,30%)] pr-8 appearance-none cursor-pointer"
+          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}
+        >
           <option value="recent">Recently Active</option>
           <option value="name-asc">Name A–Z</option>
-          <option value="name-desc">Name Z–A</option>
-          <option value="sessions">Most Interactions</option>
-        </FilterSelect>
+        </select>
 
         {/* View toggle */}
         <ViewToggle mode={viewMode} onChange={handleViewModeChange} />
@@ -380,16 +294,13 @@ export default function HumansGrid({ users, coaches, organizations }: Props) {
             <Users className="h-6 w-6 text-muted-foreground" />
           </div>
           <p className="text-sm font-medium text-foreground mb-1">No humans match your search</p>
-          <p className="text-xs text-muted-foreground mb-4">Try adjusting your filters</p>
-          {hasFilters && (
-            <button
-              onClick={clearFilters}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-[hsl(213,70%,30%)] hover:underline"
-            >
-              <X className="h-3.5 w-3.5" />
-              Clear filters
-            </button>
-          )}
+          <button
+            onClick={() => setQuery('')}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[hsl(213,70%,30%)] hover:underline mt-3"
+          >
+            <X className="h-3.5 w-3.5" />
+            Clear search
+          </button>
         </div>
       ) : viewMode === 'organization' ? (
         /* ── Organization grouped view ────────────────────────────────────── */
