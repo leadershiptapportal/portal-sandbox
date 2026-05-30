@@ -8,8 +8,7 @@ import BackLink from '@/components/BackLink'
 import { getUserById } from '@/lib/services/usersService'
 import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getUserMessages } from '@/lib/services/messagesService'
-import { getNotesByUser, getGeneralNotesByRCIds } from '@/lib/airtable/notes'
-import { getCoachPersonContext } from '@/lib/airtable/coachPersonContext'
+import { getNotesByUser, getGeneralNotesByRCIds, getQuickNoteForRC } from '@/lib/airtable/notes'
 import { getTasksByUser } from '@/lib/airtable/tasks'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
@@ -93,7 +92,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     allPersonRelationships,
     allUsersForPicker,
     personalityOptions,
-    coachContext,
   ] = await Promise.all([
     // Every fetch is wrapped in `.catch(...)` so a single failing Airtable
     // call (permission, rate limit, transient network) can't reject the
@@ -112,17 +110,24 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     getRelationshipsForPerson(id).catch(() => []),
     getAllUsers().catch(() => [] as User[]),
     fetchPersonalityOptions().catch(() => null),
-    currentUserRecord.airtableId
-      ? getCoachPersonContext(currentUserRecord.airtableId, id).catch(() => null)
-      : Promise.resolve(null),
   ])
 
-  const rcNotes = currentUserRecord.airtableId
-    ? await getGeneralNotesByRCIds(
-        allPersonRelationships.map((rc) => rc.id),
-        currentUserRecord.airtableId,
-      ).catch(() => new Map())
-    : new Map()
+  // Resolve the coach's RC with this person, then batch quick note + RC notes
+  const coachRC = currentUserRecord.airtableId
+    ? allPersonRelationships.find((rc) => rc.leadId === currentUserRecord.airtableId) ?? null
+    : null
+
+  const [rcNotes, quickNote] = await Promise.all([
+    currentUserRecord.airtableId
+      ? getGeneralNotesByRCIds(
+          allPersonRelationships.map((rc) => rc.id),
+          currentUserRecord.airtableId,
+        ).catch(() => new Map())
+      : Promise.resolve(new Map()),
+    coachRC && currentUserRecord.airtableId
+      ? getQuickNoteForRC(coachRC.id, currentUserRecord.airtableId).catch(() => null)
+      : Promise.resolve(null),
+  ])
 
   const directReports = theirTeamReports
   const teamMembers = teamMemberResults.filter((u): u is User => u !== null)
@@ -250,7 +255,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         coach={coach}
         teamLead={teamLead}
         userCanWrite={userCanWrite}
-        quickNotes={coachContext?.quickNotes ?? null}
+        quickNotes={quickNote?.content ?? null}
+        quickNoteRcId={coachRC?.id ?? null}
         personId={id}
       />
 

@@ -24,7 +24,7 @@ type AirtableRecord = { id: string; fields: Record<string, unknown> }
  * round-trip safely (TypeScript widens to string at the boundary), but all
  * new writes use the two canonical values above.
  */
-export type NoteType = 'general_note' | 'interaction_note' | 'ink_note' | 'prep_note'
+export type NoteType = 'general_note' | 'interaction_note' | 'ink_note' | 'prep_note' | 'quick_notes'
 
 export interface Note {
   id: string
@@ -422,4 +422,56 @@ export async function getGeneralNotesByRCIds(
     }
   }
   return result
+}
+
+/**
+ * Returns the single quick_notes Note for a given RC + author pair, or null.
+ * Quick notes are private scratch-pad notes scoped to one coach↔person relationship.
+ */
+export async function getQuickNoteForRC(
+  rcId: string,
+  authorPersonId: string,
+): Promise<Note | null> {
+  const { apiKey, baseId } = getCredentials()
+  const url = `${API_BASE}/${baseId}/${TABLE}?${SORT_DATE_DESC}&maxRecords=1000`
+  const res = await airtableFetch(url, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+    cache: 'no-store',
+  })
+  if (!res.ok) return null
+  const data = await res.json()
+  const notes = (data.records ?? []).map(mapRecord) as Note[]
+  return (
+    notes.find(
+      (n) =>
+        n.noteType === 'quick_notes' &&
+        n.authorPersonId === authorPersonId &&
+        n.relationshipContextId === rcId,
+    ) ?? null
+  )
+}
+
+/**
+ * Creates or replaces the quick_notes Note for a given RC + author pair.
+ * Patches in place if one already exists so edits never create duplicates.
+ */
+export async function upsertQuickNoteForRC(
+  rcId: string,
+  authorPersonId: string,
+  content: string,
+  subjectPersonId?: string,
+): Promise<void> {
+  const existing = await getQuickNoteForRC(rcId, authorPersonId)
+  if (existing) {
+    const result = await updateNote(existing.id, content)
+    if ('error' in result) throw new Error(result.error)
+  } else {
+    await createNote({
+      content,
+      relationshipContextId: rcId,
+      authorPersonId,
+      subjectPersonId,
+      noteType: 'quick_notes',
+    })
+  }
 }

@@ -3,10 +3,9 @@ import { getUserById } from '@/lib/services/usersService'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getAllUsers, fetchProfileOptions } from '@/lib/airtable/users'
-import { getCoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getInteractionById } from '@/lib/airtable/interactions'
-import { getMostRecentInteractionNoteByHuman, getInteractionNotesGrouped, getGeneralNotesByRCIds } from '@/lib/airtable/notes'
+import { getMostRecentInteractionNoteByHuman, getInteractionNotesGrouped, getGeneralNotesByRCIds, getQuickNoteForRC } from '@/lib/airtable/notes'
 import { getRelationshipsForPerson } from '@/lib/airtable/relationships'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import TakeNotesWorkspace from './TakeNotesWorkspace'
@@ -42,12 +41,9 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
     user.fullName ??
     ([user.firstName, user.lastName].filter(Boolean).join(' ') || user.email)
 
-  const [profileOptions, coachContext, interactions, initialInteraction, permissionLevel, relationships] =
+  const [profileOptions, interactions, initialInteraction, permissionLevel, relationships] =
     await Promise.all([
       getAllUsers().then((allUsers) => fetchProfileOptions(allUsers)),
-      currentUserRecord.airtableId
-        ? getCoachPersonContext(currentUserRecord.airtableId, id).catch(() => null)
-        : Promise.resolve(null),
       getInteractionsForUser(
         contactEmail,
         sessionUser,
@@ -60,8 +56,12 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
       getRelationshipsForPerson(id).catch(() => []),
     ])
 
-  // Load grouped notes for this interaction + author, plus sidebar RC notes
-  const [lastInteractionNote, rcNotes, notesGroup] = await Promise.all([
+  // Resolve coach's RC with this person, then load notes in parallel
+  const coachRC = currentUserRecord.airtableId
+    ? relationships.find((rc) => rc.leadId === currentUserRecord.airtableId) ?? null
+    : null
+
+  const [lastInteractionNote, rcNotes, notesGroup, quickNote] = await Promise.all([
     getMostRecentInteractionNoteByHuman(id, interactionId ?? undefined).catch(() => null),
     currentUserRecord.airtableId
       ? getGeneralNotesByRCIds(
@@ -71,6 +71,9 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
       : Promise.resolve(new Map()),
     interactionId && currentUserRecord.airtableId
       ? getInteractionNotesGrouped(interactionId, currentUserRecord.airtableId).catch(() => null)
+      : Promise.resolve(null),
+    coachRC && currentUserRecord.airtableId
+      ? getQuickNoteForRC(coachRC.id, currentUserRecord.airtableId).catch(() => null)
       : Promise.resolve(null),
   ])
 
@@ -97,7 +100,8 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
   return (
     <TakeNotesWorkspace
       person={user}
-      coachContext={coachContext}
+      quickNoteContent={quickNote?.content ?? ''}
+      quickNoteRcId={coachRC?.id ?? null}
       profileOptions={profileOptions}
       meetings={allInteractions}
       initialInteraction={initialInteraction ?? null}

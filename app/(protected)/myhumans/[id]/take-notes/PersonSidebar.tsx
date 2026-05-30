@@ -23,7 +23,6 @@ import {
 } from '../actions'
 import RelationshipDialog from '../RelationshipDialog'
 import type { User } from '@/lib/types'
-import type { CoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import type { ProfileOption } from '@/lib/airtable/users'
 import type { RelationshipContext } from '@/lib/airtable/relationships'
 import type { Note } from '@/lib/airtable/notes'
@@ -41,13 +40,13 @@ interface ProfileOptions {
 
 interface Props {
   person: User
-  coachContext: CoachPersonContext | null
+  quickNoteContent?: string
+  quickNoteRcId?: string | null
   profileOptions: ProfileOptions
   userCanWrite: boolean
   onPersonUpdate?: (partial: Partial<User>) => void
   relationships?: RelationshipContext[]
   rcNotes?: Map<string, Note>
-  currentCoachId?: string
 }
 
 // ── Relationship classification (mirrors RelationshipsSection) ────────────────
@@ -800,7 +799,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function PersonSidebar({
   person,
-  coachContext,
+  quickNoteContent = '',
+  quickNoteRcId = null,
   profileOptions,
   userCanWrite,
   onPersonUpdate,
@@ -816,8 +816,9 @@ export default function PersonSidebar({
     else onPersonUpdate?.(fields as Partial<User>)
   }
 
-  async function saveContext(fields: { quickNotes?: string; familyDetails?: string }) {
-    await updateCoachContextAction(person.id, fields)
+  async function saveQuickNote(content: string) {
+    if (!quickNoteRcId) return
+    await updateCoachContextAction(person.id, quickNoteRcId, content)
   }
 
   // ── Personality option lookups ────────────────────────────────────────────
@@ -944,11 +945,11 @@ export default function PersonSidebar({
       </div>
 
       {/* ── Quick Notes (accordion) ─────────────────────────────────────── */}
-      {userCanWrite && (
+      {userCanWrite && quickNoteRcId && (
         <QuickNotesAccordion
           personId={person.id}
-          initialValue={coachContext?.quickNotes ?? ''}
-          onSave={(v) => saveContext({ quickNotes: v })}
+          initialValue={quickNoteContent}
+          onSave={(v) => saveQuickNote(v)}
         />
       )}
 
@@ -1076,19 +1077,6 @@ export default function PersonSidebar({
         </div>
       </Section>
 
-
-      {/* ── Family Details ───────────────────────────────────────────────── */}
-      {userCanWrite && (
-        <Section title="Family Details">
-          <InlineText
-            label=""
-            value={coachContext?.familyDetails ?? ''}
-            placeholder="Click to add family details…"
-            multiline
-            onSave={(v) => saveContext({ familyDetails: v })}
-          />
-        </Section>
-      )}
 
       <div className="h-6" />
     </div>

@@ -106,10 +106,12 @@ function InlineDateChip({
 
 function ProfileQuickNotes({
   personId,
+  rcId,
   initialNotes,
   canEdit,
 }: {
   personId: string
+  rcId: string | null
   initialNotes: string | null
   canEdit: boolean
 }) {
@@ -134,8 +136,9 @@ function ProfileQuickNotes({
 
   async function handleSave() {
     if (draft === saved) { setOpen(false); return }
+    if (!rcId) { setOpen(false); return }
     setSaving(true)
-    await updateCoachContextAction(personId, { quickNotes: draft })
+    await updateCoachContextAction(personId, rcId, draft)
     clearDraft(draftKey)
     setSaving(false)
     setSaved(draft)
@@ -233,6 +236,7 @@ interface Props {
   teamLead: User | null
   userCanWrite: boolean
   quickNotes?: string | null
+  quickNoteRcId?: string | null
   personId?: string
 }
 
@@ -248,6 +252,7 @@ export default function ProfileCardSection({
   teamLead,
   userCanWrite,
   quickNotes = null,
+  quickNoteRcId = null,
   personId,
 }: Props) {
   const router = useRouter()
@@ -263,7 +268,7 @@ export default function ProfileCardSection({
         <div className="flex items-start justify-between gap-2 mb-4 sm:mb-0">
           <span />
           <div className="flex items-center gap-3">
-            <EditProfileDialog user={user} initialQuickNotes={quickNotes} />
+            <EditProfileDialog user={user} initialQuickNotes={quickNotes} quickNoteRcId={quickNoteRcId} />
           </div>
         </div>
       )}
@@ -358,9 +363,10 @@ export default function ProfileCardSection({
         </div>
       )}
 
-      {personId && (
+      {personId && quickNoteRcId && (
         <ProfileQuickNotes
           personId={personId}
+          rcId={quickNoteRcId}
           initialNotes={quickNotes}
           canEdit={userCanWrite}
         />

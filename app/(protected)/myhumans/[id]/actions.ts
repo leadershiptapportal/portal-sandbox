@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createNote, updateNote, updateInkNoteFields, getNotesByInteractionId, upsertGeneralNoteForRC } from '@/lib/airtable/notes'
+import { createNote, updateNote, updateInkNoteFields, getNotesByInteractionId, upsertGeneralNoteForRC, upsertQuickNoteForRC } from '@/lib/airtable/notes'
 import { createTask, updateTaskStatus } from '@/lib/airtable/tasks'
 import {
   updateUserProfile,
@@ -23,7 +23,6 @@ import {
   type UpdateRCInput,
   type RelationshipType,
 } from '@/lib/airtable/relationships'
-import { upsertCoachPersonContext } from '@/lib/airtable/coachPersonContext'
 
 // ── Edit Profile ──────────────────────────────────────────────────────────────
 
@@ -396,16 +395,17 @@ export async function updateInteractionNotesAction(
   }
 }
 
-// ── Coach-Person Context (Quick Notes / Family Details) ──────────────────────
+// ── Quick Notes ───────────────────────────────────────────────────────────────
 
 export async function updateCoachContextAction(
   personId: string,
-  fields: { quickNotes?: string; familyDetails?: string },
+  rcId: string,
+  content: string,
 ): Promise<{ success: true } | { error: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
     if (!userRecord.airtableId) return { error: 'Could not resolve your user record.' }
-    await upsertCoachPersonContext(userRecord.airtableId, personId, fields)
+    await upsertQuickNoteForRC(rcId, userRecord.airtableId, content, personId)
     revalidatePath(`/myhumans/${personId}`)
     return { success: true }
   } catch (err) {

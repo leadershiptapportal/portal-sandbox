@@ -28,6 +28,7 @@ interface ProfileOptions {
 interface Props {
   user: User
   initialQuickNotes?: string | null
+  quickNoteRcId?: string | null
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -124,7 +125,7 @@ const ROLE_OPTIONS = [
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function EditProfileDialog({ user, initialQuickNotes }: Props) {
+export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRcId }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -308,9 +309,8 @@ export default function EditProfileDialog({ user, initialQuickNotes }: Props) {
       }
     }
 
-    // Quick notes are written to Coach-Person Context, not the Users table
-    if (quickNotes !== (initialQuickNotes ?? '')) {
-      await updateCoachContextAction(user.id, { quickNotes })
+    if (quickNotes !== (initialQuickNotes ?? '') && quickNoteRcId) {
+      await updateCoachContextAction(user.id, quickNoteRcId, quickNotes)
     }
 
     setSaving(false)

@@ -9,7 +9,6 @@ import TakeNotesCanvas from './TakeNotesCanvas'
 import TakeNotesTyped from './TakeNotesTyped'
 import LastInteractionNotesDialog from '@/components/LastInteractionNotesDialog'
 import type { User, Interaction } from '@/lib/types'
-import type { CoachPersonContext } from '@/lib/airtable/coachPersonContext'
 import type { ProfileOption } from '@/lib/airtable/users'
 import type { LastNoteData } from '@/components/LastInteractionNotesDialog'
 import type { RelationshipContext } from '@/lib/airtable/relationships'
@@ -28,7 +27,8 @@ interface ProfileOptions {
 
 interface Props {
   person: User
-  coachContext: CoachPersonContext | null
+  quickNoteContent?: string
+  quickNoteRcId?: string | null
   profileOptions: ProfileOptions
   meetings: Interaction[]
   initialInteraction: Interaction | null
@@ -46,7 +46,8 @@ const MODE_KEY = 'notes-input-mode-pref'
 
 export default function TakeNotesWorkspace({
   person,
-  coachContext,
+  quickNoteContent = '',
+  quickNoteRcId = null,
   profileOptions,
   meetings,
   initialInteraction,
@@ -200,7 +201,8 @@ export default function TakeNotesWorkspace({
 
               <PersonSidebar
                 person={savedPersonData}
-                coachContext={coachContext}
+                quickNoteContent={quickNoteContent}
+                quickNoteRcId={quickNoteRcId}
                 profileOptions={profileOptions}
                 userCanWrite={userCanWrite}
                 onPersonUpdate={(updated) => setSavedPersonData((prev) => ({ ...prev, ...updated }))}
