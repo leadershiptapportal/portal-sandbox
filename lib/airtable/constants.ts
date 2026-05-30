@@ -8,8 +8,8 @@
 //  appends `returnFieldsByFieldId=true`, so the response is keyed by ID.
 //  Code accesses fields via `record.fields[FIELDS.X.Y]` which matches.
 //
-//  Writes: Airtable accepts both names and IDs in request bodies. Existing
-//  write payloads using literal name keys still work; new code can use IDs.
+//  Writes: ALL write payloads must use field ID constants as keys. Airtable
+//  accepts field names too, but names break silently if a field is renamed.
 //
 //  To regenerate after schema changes:
 //    npx tsx scripts/dump-airtable-schema.ts
@@ -24,10 +24,16 @@ export const TABLES = {
   CONNECTED_CALENDARS: 'tblJs7uabNEOsgyoF',     // "Connected Calendars"
   RELATIONSHIP_CONTEXTS: 'tblYdLi7dp2RmhNjh',   // "Relationship Contexts"
   INTERACTIONS: 'tblUm3dEvQqQBhxSE',            // "Interactions" (formerly "Meetings")
-  MEETINGS: 'tblUm3dEvQqQBhxSE',                // alias → INTERACTIONS, kept for backwards compatibility
+  MEETINGS: 'tblUm3dEvQqQBhxSE',                // @deprecated — use INTERACTIONS
   NOTES: 'tblSTELdCWLYk5dq4',                   // "Notes"
   TASKS: 'tbleG9GWJEB9jd6yt',                   // "Tasks"
   MESSAGES: 'tbl8VGHVCU8cXyAis',                // "Messages"
+  // Personality / profile lookup tables
+  ENNEAGRAM: 'tblxIXPnTaO2GcxRp',              // "Enneagram"
+  PERSONALITIES_16: 'tblXqHT7DoRNEF7nb',        // "16Personalities"
+  STRENGTHS: 'tblXyaww4PqwXxNjN',              // "Strengths"
+  CONFLICT_POSTURES: 'tblqe4I8l7y1Y0TAI',      // "Conflict Postures"
+  APOLOGY_LANGUAGES: 'tblwxN86JQrYPqVlv',      // "Apology Languages"
 } as const
 
 export const FIELDS = {

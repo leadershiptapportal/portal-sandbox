@@ -109,7 +109,7 @@ async function upsertInteraction(
     .filter(e => e && e.toLowerCase() !== coachLower)
     .join(', ')
 
-  const F = FIELDS.MEETINGS
+  const F = FIELDS.INTERACTIONS
   const fields: Record<string, unknown> = {
     [F.TITLE]: event.subject ?? '(No Subject)',
     [F.RELATIONSHIP_CONTEXT]: [contextId],
@@ -162,10 +162,10 @@ async function upsertInteraction(
 
 async function markCancelled(apiKey: string, baseId: string, providerEventId: string): Promise<void> {
   const safeId = providerEventId.replace(/"/g, '\\"')
-  const formula = encodeURIComponent(`{${FIELDS.MEETINGS.PROVIDER_EVENT_ID}}="${safeId}"`)
+  const formula = encodeURIComponent(`{${FIELDS.INTERACTIONS.PROVIDER_EVENT_ID}}="${safeId}"`)
   const findRes = await airtableFetch(
     `${AIRTABLE_API}/${baseId}/${INTERACTIONS_TABLE}?filterByFormula=${formula}&maxRecords=50` +
-      `&fields[]=${encodeURIComponent(FIELDS.MEETINGS.PROVIDER_EVENT_ID)}`,
+      `&fields[]=${encodeURIComponent(FIELDS.INTERACTIONS.PROVIDER_EVENT_ID)}`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
   if (!findRes.ok) return
@@ -174,7 +174,7 @@ async function markCancelled(apiKey: string, baseId: string, providerEventId: st
     await fetch(`${AIRTABLE_API}/${baseId}/${INTERACTIONS_TABLE}/${r.id}`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fields: { [FIELDS.MEETINGS.MEETING_STATUS]: 'Cancelled' } }),
+      body: JSON.stringify({ fields: { [FIELDS.INTERACTIONS.MEETING_STATUS]: 'Cancelled' } }),
     })
   }
 }

@@ -98,9 +98,9 @@ export async function createAndLinkTeamMember(
   try {
     console.log('[createAndLinkTeamMember] creating user:', memberData)
     const newId = await createHumanRecord({
-      'First Name': memberData.firstName || undefined,
-      'Last Name': memberData.lastName || undefined,
-      'Title': memberData.jobTitle || undefined,
+      firstName: memberData.firstName || undefined,
+      lastName: memberData.lastName || undefined,
+      title: memberData.jobTitle || undefined,
     })
     console.log('[createAndLinkTeamMember] created record id:', newId, '| linking to leader:', leaderId)
     await patchTeamMembers(leaderId, [...existingMemberIds, newId])
@@ -588,10 +588,10 @@ export async function addRelationshipWithNewPersonAction(params: {
     if (!userRecord.airtableId) return { success: false, error: 'Could not resolve your user record.' }
 
     const newHumanId = await createHumanRecord({
-      'First Name': params.firstName,
-      ...(params.lastName ? { 'Last Name': params.lastName } : {}),
-      ...(params.title ? { 'Title': params.title } : {}),
-      ...(params.email ? { 'Work Email': params.email } : {}),
+      firstName: params.firstName,
+      lastName: params.lastName,
+      title: params.title,
+      workEmail: params.email,
     })
 
     const humanId = params.role === 'subject_is_person' ? params.subjectPersonId : newHumanId

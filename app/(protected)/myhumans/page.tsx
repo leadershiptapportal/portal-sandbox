@@ -35,21 +35,21 @@ async function getCoachCalendarInteractions(ownerEmail: string): Promise<CoachIn
   const baseId = process.env.AIRTABLE_BASE_ID
   if (!apiKey || !baseId) return []
   const safeEmail = ownerEmail.toLowerCase().replace(/"/g, '\\"')
-  const formula = encodeURIComponent(`AND(LOWER({${FIELDS.MEETINGS.CALENDAR_OWNER}})="${safeEmail}",{${FIELDS.MEETINGS.CLIENT_NAME}}!="")`)
+  const formula = encodeURIComponent(`AND(LOWER({${FIELDS.INTERACTIONS.CALENDAR_OWNER}})="${safeEmail}",{${FIELDS.INTERACTIONS.CLIENT_NAME}}!="")`)
   const res = await airtableFetch(
-    `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(TABLES.MEETINGS)}` +
+    `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(TABLES.INTERACTIONS)}` +
       `?filterByFormula=${formula}` +
-      `&fields[]=${encodeURIComponent(FIELDS.MEETINGS.CLIENT_NAME)}&fields[]=${encodeURIComponent(FIELDS.MEETINGS.START)}&fields[]=${encodeURIComponent(FIELDS.MEETINGS.END)}` +
-      `&sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.MEETINGS.START)}&sort%5B0%5D%5Bdirection%5D=desc` +
+      `&fields[]=${encodeURIComponent(FIELDS.INTERACTIONS.CLIENT_NAME)}&fields[]=${encodeURIComponent(FIELDS.INTERACTIONS.START)}&fields[]=${encodeURIComponent(FIELDS.INTERACTIONS.END)}` +
+      `&sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.INTERACTIONS.START)}&sort%5B0%5D%5Bdirection%5D=desc` +
       `&maxRecords=2000`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
   if (!res.ok) return []
   const data = await res.json()
   return (data.records ?? []).map((r: { fields: Record<string, unknown> }) => ({
-    humanName: (r.fields[FIELDS.MEETINGS.CLIENT_NAME] as string) ?? '',
-    startTime: (r.fields[FIELDS.MEETINGS.START] as string) ?? '',
-    endTime: (r.fields[FIELDS.MEETINGS.END] as string) ?? '',
+    humanName: (r.fields[FIELDS.INTERACTIONS.CLIENT_NAME] as string) ?? '',
+    startTime: (r.fields[FIELDS.INTERACTIONS.START] as string) ?? '',
+    endTime: (r.fields[FIELDS.INTERACTIONS.END] as string) ?? '',
   }))
 }
 

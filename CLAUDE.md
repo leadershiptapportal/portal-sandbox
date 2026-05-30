@@ -94,8 +94,10 @@ Primary field is `Title` (`FIELDS.TASKS.TITLE`). Client link field is `Human` (`
 
 ## Key conventions
 
-- **All Airtable field access uses IDs** — `airtableFetch()` in `client.ts` appends `returnFieldsByFieldId=true` to all GETs. Always access response fields via `record.fields[FIELDS.X.Y]`, never by string name. New writes can also use field IDs as keys.
-- **All interactions data comes from `TABLES.INTERACTIONS`** — `TABLES.MEETINGS` is an alias pointing to the same table, kept for backward compat. There is no separate archived table being queried.
+- **All Airtable field access uses IDs — mandatory.** `airtableFetch()` appends `returnFieldsByFieldId=true` to all GETs so responses are keyed by ID. Read fields via `record.fields[FIELDS.X.Y]`; write payloads must use `[FIELDS.X.Y]` as keys too. Never use a string field name as a key in a read or write. Never use string field names in `filterByFormula` — use `{${FIELDS.X.Y}}` syntax. Violation: Airtable renames break silently.
+- **All interactions data comes from `TABLES.INTERACTIONS`** — `TABLES.MEETINGS` is a deprecated alias kept only for reference; do not use it in new code.
+- **`createHumanRecord` takes `CreateHumanFields`** (camelCase TS keys). All callers must use this typed interface — no string Airtable field name keys at call sites. Mapping to field IDs happens inside `createHumanRecord`.
+- **`updateHumanProfile` takes `HumanProfileFields`** (human-readable string keys). The complete name→ID mapping lives inside `updateHumanProfile`. Do not add partial mappings elsewhere.
 - **Relationship Contexts replace Coach-Person Context + Coach Session** — the old tables no longer exist. Notes for a relationship are in the Notes table, linked via `FIELDS.NOTES.RELATIONSHIP_CONTEXT`.
 - **Never write to formula or lookup fields**: `Full Name`, `Organization Name`, `Created`.
 - **Message status**: always `"Pending"` for drafts. Never `"Draft"`.

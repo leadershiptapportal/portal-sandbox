@@ -13,12 +13,12 @@ export async function createClientAction(data: {
 }): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
     const id = await createHumanRecord({
-      'First Name': data.firstName,
-      'Last Name': data.lastName,
-      'Work Email': data.workEmail,
-      ...(data.jobTitle ? { 'Job Title': data.jobTitle } : {}),
-      ...(data.organizationId ? { 'Organization': [data.organizationId] } : {}),
-      ...(data.coachId ? { 'Coach': [data.coachId] } : {}),
+      firstName: data.firstName,
+      lastName: data.lastName,
+      workEmail: data.workEmail,
+      title: data.jobTitle,
+      organizationIds: data.organizationId ? [data.organizationId] : undefined,
+      coachIds: data.coachId ? [data.coachId] : undefined,
     })
     revalidatePath('/myhumans')
     return { success: true, id }

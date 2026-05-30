@@ -99,8 +99,8 @@ export async function searchHumansByName(
   const q = query.toLowerCase().replace(/"/g, '')
   const formula = encodeURIComponent(
     `OR(` +
-    `SEARCH("${q}",LOWER(IF({Full Name},{Full Name},"")),0),` +
-    `SEARCH("${q}",LOWER(IF({First Name},{First Name},"")&" "&IF({Last Name},{Last Name},"")),0)` +
+    `SEARCH("${q}",LOWER(IF({${FIELDS.HUMANS.FULL_NAME}},{${FIELDS.HUMANS.FULL_NAME}},"")),0),` +
+    `SEARCH("${q}",LOWER(IF({${FIELDS.HUMANS.FIRST_NAME}},{${FIELDS.HUMANS.FIRST_NAME}},"")&" "&IF({${FIELDS.HUMANS.LAST_NAME}},{${FIELDS.HUMANS.LAST_NAME}},"")),0)` +
     `)`,
   )
   const res = await airtableFetch(
@@ -120,28 +120,28 @@ export async function searchHumansByName(
   })
 }
 
-export async function createHumanRecord(fields: {
-  'First Name'?: string
-  'Last Name'?: string
-  'Job Title'?: string
-  'Title'?: string
-  'Work Email'?: string
-  'Role'?: string
-  'Coach'?: string[]
-  'Organization'?: string[]
-}): Promise<string> {
+export interface CreateHumanFields {
+  firstName?: string
+  lastName?: string
+  title?: string
+  workEmail?: string
+  role?: string
+  coachIds?: string[]
+  organizationIds?: string[]
+}
+
+export async function createHumanRecord(fields: CreateHumanFields): Promise<string> {
   const { apiKey, baseId } = getCredentials()
 
   const body = {
     fields: {
-      ...(fields['First Name'] ? { 'First Name': fields['First Name'] } : {}),
-      ...(fields['Last Name'] ? { 'Last Name': fields['Last Name'] } : {}),
-      ...(fields['Job Title'] ? { 'Job Title': fields['Job Title'] } : {}),
-      ...(fields['Title'] ? { 'Title': fields['Title'] } : {}),
-      ...(fields['Work Email'] ? { 'Work Email': fields['Work Email'] } : {}),
-      ...(fields['Role'] ? { 'Role': fields['Role'] } : {}),
-      ...(fields['Coach']?.length ? { 'Coach': fields['Coach'] } : {}),
-      ...(fields['Organization']?.length ? { [FIELDS.HUMANS.ORGANIZATION]: fields['Organization'] } : {}),
+      ...(fields.firstName ? { [FIELDS.HUMANS.FIRST_NAME]: fields.firstName } : {}),
+      ...(fields.lastName ? { [FIELDS.HUMANS.LAST_NAME]: fields.lastName } : {}),
+      ...(fields.title ? { [FIELDS.HUMANS.TITLE]: fields.title } : {}),
+      ...(fields.workEmail ? { [FIELDS.HUMANS.WORK_EMAIL]: fields.workEmail } : {}),
+      ...(fields.role ? { [FIELDS.HUMANS.ROLE]: fields.role } : {}),
+      ...(fields.coachIds?.length ? { [FIELDS.HUMANS.COACH]: fields.coachIds } : {}),
+      ...(fields.organizationIds?.length ? { [FIELDS.HUMANS.ORGANIZATION]: fields.organizationIds } : {}),
     },
   }
   console.log('[createHumanRecord] POST body:', JSON.stringify(body, null, 2))
@@ -166,7 +166,7 @@ export async function patchTeamMembers(
   memberIds: string[],
 ): Promise<void> {
   const { apiKey, baseId } = getCredentials()
-  const body = { fields: { 'Team Members': memberIds } }
+  const body = { fields: { [FIELDS.HUMANS.TEAM_MEMBERS]: memberIds } }
   console.log('[patchTeamMembers] PATCH humanId:', humanId, 'body:', JSON.stringify(body))
   const res = await airtableFetch(`${API_BASE}/${baseId}/${HUMANS_TABLE}/${humanId}`, {
     method: 'PATCH',
@@ -239,11 +239,28 @@ export async function updateHumanProfile(
 ): Promise<void> {
   const { apiKey, baseId } = getCredentials()
 
-  // Remap the friendly 'Organization' key → Airtable field ID so writes use IDs not names
+  const NAME_TO_ID: Record<string, string> = {
+    'First Name': FIELDS.HUMANS.FIRST_NAME,
+    'Last Name': FIELDS.HUMANS.LAST_NAME,
+    'Preferred Name': FIELDS.HUMANS.PREFERRED_NAME,
+    'Work Email': FIELDS.HUMANS.WORK_EMAIL,
+    'Title': FIELDS.HUMANS.TITLE,
+    'Start Date': FIELDS.HUMANS.START_DATE,
+    'Birthday': FIELDS.HUMANS.BIRTHDAY,
+    'Work Cell Number': FIELDS.HUMANS.WORK_CELL_NUMBER,
+    'Personal Cell Number': FIELDS.HUMANS.PERSONAL_CELL_NUMBER,
+    'Role': FIELDS.HUMANS.ROLE,
+    'Enneagram': FIELDS.HUMANS.ENNEAGRAM,
+    'MBTI': FIELDS.HUMANS.MBTI,
+    'Conflict Posture': FIELDS.HUMANS.CONFLICT_POSTURE,
+    'Apology Language': FIELDS.HUMANS.APOLOGY_LANGUAGE,
+    'Strengths': FIELDS.HUMANS.STRENGTHS,
+    'Coach': FIELDS.HUMANS.COACH,
+    'Team Lead': FIELDS.HUMANS.TEAM_LEAD,
+    'Organization': FIELDS.HUMANS.ORGANIZATION,
+  }
   const remapped = Object.fromEntries(
-    Object.entries(fields).map(([k, v]) =>
-      k === 'Organization' ? [FIELDS.HUMANS.ORGANIZATION, v] : [k, v]
-    )
+    Object.entries(fields).map(([k, v]) => [NAME_TO_ID[k] ?? k, v])
   )
   const sanitized = Object.fromEntries(
     Object.entries(remapped).filter(([, v]) => {
@@ -422,20 +439,20 @@ export async function fetchPersonalityOptions(): Promise<{
   conflictPostures: ProfileOption[]
 }> {
   const [enneagrams, mbtis, strengths, conflictPostures] = await Promise.all([
-    fetchTableOptions('Enneagram', FIELDS.ENNEAGRAM.NAME, {
+    fetchTableOptions(TABLES.ENNEAGRAM, FIELDS.ENNEAGRAM.NAME, {
       codeField: FIELDS.ENNEAGRAM.TYPE_NUMBER,
       descriptorField: FIELDS.ENNEAGRAM.DESCRIPTOR,
       nameFormatter: (name, code) => (code ? `Type ${code} | ${name}` : name),
     }),
-    fetchTableOptions('16Personalities', FIELDS.PERSONALITIES_16.NAME, {
+    fetchTableOptions(TABLES.PERSONALITIES_16, FIELDS.PERSONALITIES_16.NAME, {
       codeField: FIELDS.PERSONALITIES_16.MBTI_CODE,
       descriptorField: FIELDS.PERSONALITIES_16.DESCRIPTOR,
       nameFormatter: (name, code) => (code ? `${code.split('-')[0]} | ${name}` : name),
     }),
-    fetchTableOptions('Strengths', FIELDS.STRENGTHS.NAME, {
+    fetchTableOptions(TABLES.STRENGTHS, FIELDS.STRENGTHS.NAME, {
       descriptorField: FIELDS.STRENGTHS.DESCRIPTOR,
     }),
-    fetchTableOptions('Conflict Postures', FIELDS.CONFLICT_POSTURES.NAME, {
+    fetchTableOptions(TABLES.CONFLICT_POSTURES, FIELDS.CONFLICT_POSTURES.NAME, {
       descriptorField: FIELDS.CONFLICT_POSTURES.DESCRIPTOR,
     }),
   ])
@@ -457,23 +474,23 @@ export async function fetchProfileOptions(allHumans: Human[]): Promise<{
       fetchTableOptions(TABLES.ORGANIZATIONS, FIELDS.ORGANIZATIONS.NAME, {
         filterFormula: `{${FIELDS.ORGANIZATIONS.STATUS}}="Active"`,
       }),
-      fetchTableOptions('Enneagram', FIELDS.ENNEAGRAM.NAME, {
+      fetchTableOptions(TABLES.ENNEAGRAM, FIELDS.ENNEAGRAM.NAME, {
         codeField: FIELDS.ENNEAGRAM.TYPE_NUMBER,
         descriptorField: FIELDS.ENNEAGRAM.DESCRIPTOR,
         nameFormatter: (name, code) => (code ? `Type ${code} | ${name}` : name),
       }),
-      fetchTableOptions('16Personalities', FIELDS.PERSONALITIES_16.NAME, {
+      fetchTableOptions(TABLES.PERSONALITIES_16, FIELDS.PERSONALITIES_16.NAME, {
         codeField: FIELDS.PERSONALITIES_16.MBTI_CODE,
         descriptorField: FIELDS.PERSONALITIES_16.DESCRIPTOR,
         nameFormatter: (name, code) => (code ? `${code.split('-')[0]} | ${name}` : name),
       }),
-      fetchTableOptions('Conflict Postures', FIELDS.CONFLICT_POSTURES.NAME, {
+      fetchTableOptions(TABLES.CONFLICT_POSTURES, FIELDS.CONFLICT_POSTURES.NAME, {
         descriptorField: FIELDS.CONFLICT_POSTURES.DESCRIPTOR,
       }),
-      fetchTableOptions('Apology Languages', FIELDS.APOLOGY_LANGUAGES.NAME, {
+      fetchTableOptions(TABLES.APOLOGY_LANGUAGES, FIELDS.APOLOGY_LANGUAGES.NAME, {
         descriptorField: FIELDS.APOLOGY_LANGUAGES.DESCRIPTOR,
       }),
-      fetchTableOptions('Strengths', FIELDS.STRENGTHS.NAME, {
+      fetchTableOptions(TABLES.STRENGTHS, FIELDS.STRENGTHS.NAME, {
         descriptorField: FIELDS.STRENGTHS.DESCRIPTOR,
       }),
     ])
