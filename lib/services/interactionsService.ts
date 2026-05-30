@@ -163,17 +163,3 @@ export function groupInteractionsByUser(
   return result
 }
 
-// ── Legacy compatibility exports ──────────────────────────────────────────────
-
-/** @deprecated Use getInteractions instead */
-export const getMeetings = getInteractions
-/** @deprecated Use getInteractionsForUser instead */
-export const getMeetingsForUser = getInteractionsForUser
-/** @deprecated Use getInteractionDetail instead */
-export const getMeetingDetail = getInteractionDetail
-/** @deprecated Use updateInteractionNotes instead */
-export const updateMeetingNotes = updateInteractionNotes
-/** @deprecated Use findClientForInteraction instead */
-export const findClientForMeeting = findClientForInteraction
-/** @deprecated Use groupInteractionsByUser instead */
-export const groupMeetingsByUser = groupInteractionsByUser

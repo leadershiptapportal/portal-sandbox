@@ -76,8 +76,6 @@ export interface Interaction {
   source?: string;
 }
 
-/** @deprecated Use Interaction instead */
-export type Meeting = Interaction;
 
 export interface Note {
   id: string;

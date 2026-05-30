@@ -46,7 +46,7 @@ export default function TakeNotesTyped({
   const [content, setContent] = useState(existingNote?.content ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [selectedMeetingId, setSelectedMeetingId] = useState(initialInteraction?.id ?? '')
+  const [selectedInteractionId, setSelectedInteractionId] = useState(initialInteraction?.id ?? '')
   const [showPicker, setShowPicker] = useState(false)
   const [draftReady, setDraftReady] = useState(false)
 
@@ -63,12 +63,12 @@ export default function TakeNotesTyped({
       try {
         const stored = localStorage.getItem(draftKey)
         if (stored) {
-          const draft = JSON.parse(stored) as { content?: string; meetingId?: string }
+          const draft = JSON.parse(stored) as { content?: string; interactionId?: string }
           if (draft.content) {
             setContent(draft.content)
             toast.info('Restored unsaved draft')
           }
-          if (draft.meetingId) setSelectedMeetingId(draft.meetingId)
+          if (draft.interactionId) setSelectedInteractionId(draft.interactionId)
         }
       } catch {}
     }
@@ -94,15 +94,15 @@ export default function TakeNotesTyped({
   }, [content, onContentChange])
 
   // When user links an interaction from general-note mode, check for existing typed note
-  function handleInteractionSelect(meetingId: string) {
-    setSelectedMeetingId(meetingId)
+  function handleInteractionSelect(interactionId: string) {
+    setSelectedInteractionId(interactionId)
     setShowPicker(false)
     setAppendConflict(null)
 
-    if (!meetingId || noteCategory !== 'general' || !content.trim()) return
+    if (!interactionId || noteCategory !== 'general' || !content.trim()) return
 
     startCheckTransition(async () => {
-      const result = await checkInteractionTypedNoteAction(meetingId)
+      const result = await checkInteractionTypedNoteAction(interactionId)
       if (result.note) {
         setAppendConflict({ existingContent: result.note.content, noteId: result.note.id })
       }
@@ -117,11 +117,11 @@ export default function TakeNotesTyped({
   }
 
   function handleKeepAsGeneral() {
-    setSelectedMeetingId('')
+    setSelectedInteractionId('')
     setAppendConflict(null)
   }
 
-  const selectedMeeting = meetings.find((m) => m.id === selectedMeetingId) ?? initialInteraction ?? null
+  const selectedMeeting = meetings.find((m) => m.id === selectedInteractionId) ?? initialInteraction ?? null
   const canSave = content.trim().length > 0 && !saving && isOnline
 
   async function handleSave() {
@@ -133,7 +133,7 @@ export default function TakeNotesTyped({
       humanId,
       content.trim(),
       noteCategory,
-      selectedMeetingId || undefined,
+      selectedInteractionId || undefined,
       noteCategory === 'general' ? noteTitle.trim() || undefined : undefined,
     )
 
@@ -231,7 +231,7 @@ export default function TakeNotesTyped({
                 <select
                   // eslint-disable-next-line jsx-a11y/no-autofocus
                   autoFocus
-                  value={selectedMeetingId}
+                  value={selectedInteractionId}
                   onChange={(e) => handleInteractionSelect(e.target.value)}
                   className="flex-1 text-xs border border-[hsl(213,70%,30%)] rounded-md px-2 py-1.5 bg-card focus:outline-none"
                 >

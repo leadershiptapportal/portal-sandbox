@@ -249,17 +249,3 @@ export async function createManualInteraction(data: CreateManualInteractionData)
   return result.id as string
 }
 
-// ── Legacy compatibility exports (keep old function names as aliases) ──────────
-
-/** @deprecated Use getAllUpcomingInteractions instead */
-export const getAllUpcomingMeetings = getAllUpcomingInteractions
-/** @deprecated Use getRecentPastInteractions instead */
-export const getRecentPastMeetings = getRecentPastInteractions
-/** @deprecated Use getAllInteractions instead */
-export const getAllMeetings = getAllInteractions
-/** @deprecated Use getInteractionsByUserEmail instead */
-export const getMeetingsByUserEmail = getInteractionsByUserEmail
-/** @deprecated Use getInteractionById instead */
-export const getMeetingById = getInteractionById
-/** @deprecated Use createManualInteraction instead */
-export const createManualMeeting = createManualInteraction

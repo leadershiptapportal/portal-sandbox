@@ -11,7 +11,7 @@ import InteractionNoteForm from './InteractionNoteForm'
 import LastInteractionNotesDialog from '@/components/LastInteractionNotesDialog'
 
 interface Props {
-  params: Promise<{ eventId: string }>
+  params: Promise<{ interactionId: string }>
 }
 
 function formatDateTime(iso: string, timezone?: string): string {
@@ -26,13 +26,13 @@ function formatDateTime(iso: string, timezone?: string): string {
   }, resolveDisplayTz(timezone)) + ' ET'
 }
 
-export default async function SessionPage({ params }: Props) {
-  const { eventId } = await params
+export default async function InteractionPage({ params }: Props) {
+  const { interactionId } = await params
 
   const userRecord = await getCurrentUserRecord()
 
   const [interaction, contexts] = await Promise.all([
-    getInteractionById(eventId),
+    getInteractionById(interactionId),
     userRecord.airtableId
       ? getRelationshipContexts(userRecord.airtableId)
       : Promise.resolve([]),
@@ -52,7 +52,7 @@ export default async function SessionPage({ params }: Props) {
     : null
   const clientAirtableId = matchedContext?.humanId ?? undefined
 
-  // Permission level for this session's client
+  // Permission level for this interaction's client
   const permissionLevel = clientAirtableId
     ? await getPermissionLevel(userRecord.airtableId, userRecord.role, clientAirtableId)
     : userRecord.role === 'admin' ? 'internal_admin' : 'coach_owner'
@@ -60,14 +60,14 @@ export default async function SessionPage({ params }: Props) {
   const userCanWrite = canWrite(permissionLevel)
 
   // Fetch the interaction note for this interaction written by this author
-  const allMeetingNotes = await getNotesByInteractionId(eventId)
+  const allInteractionNotes = await getNotesByInteractionId(interactionId)
   const existingNote = userRecord.airtableId
-    ? allMeetingNotes.find((n) => n.authorPersonId === userRecord.airtableId) ?? null
+    ? allInteractionNotes.find((n) => n.authorPersonId === userRecord.airtableId) ?? null
     : null
 
   // Last interaction note for this client (for the "previous notes" popup)
   const lastInteractionNote = clientAirtableId
-    ? await getMostRecentInteractionNoteByHuman(clientAirtableId, eventId)
+    ? await getMostRecentInteractionNoteByHuman(clientAirtableId, interactionId)
     : null
 
   return (
@@ -95,14 +95,14 @@ export default async function SessionPage({ params }: Props) {
         {userCanWrite && clientAirtableId && (
           <div className="pt-2 flex flex-wrap gap-2">
             <Link
-              href={`/myhumans/${clientAirtableId}/take-notes?interactionId=${eventId}&noteCategory=prep`}
+              href={`/myhumans/${clientAirtableId}/take-notes?interactionId=${interactionId}&noteCategory=prep`}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
             >
               <NotebookPen className="h-3.5 w-3.5" />
               Prep Notes
             </Link>
             <Link
-              href={`/myhumans/${clientAirtableId}/take-notes?interactionId=${eventId}&noteCategory=interaction`}
+              href={`/myhumans/${clientAirtableId}/take-notes?interactionId=${interactionId}&noteCategory=interaction`}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[hsl(213,70%,30%)] text-white text-xs font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
             >
               <NotebookPen className="h-3.5 w-3.5" />
@@ -132,7 +132,7 @@ export default async function SessionPage({ params }: Props) {
 
         {userCanWrite ? (
           <InteractionNoteForm
-            interactionId={eventId}
+            interactionId={interactionId}
             subjectPersonId={clientAirtableId}
             relationshipContextId={matchedContext?.id}
             existingNote={existingNote ?? undefined}

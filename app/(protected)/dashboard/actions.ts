@@ -195,7 +195,7 @@ export async function dashboardDeleteNoteAction(
 }
 
 export async function savePortalEventNotesAction(
-  meetingId: string,
+  interactionId: string,
   notes: string,
   humanId: string,
 ): Promise<{ success: boolean; error?: string }> {
@@ -217,7 +217,7 @@ export async function savePortalEventNotesAction(
       subjectPersonId: humanId,
       humanId,
       relationshipContextId: rc.id,
-      interactionId: meetingId,
+      interactionId,
       noteType: 'interaction_note',
     })
     revalidatePath('/dashboard')

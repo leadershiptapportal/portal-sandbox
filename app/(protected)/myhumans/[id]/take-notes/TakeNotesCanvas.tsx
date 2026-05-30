@@ -83,7 +83,7 @@ export default function TakeNotesCanvas({
   // Tracks the Airtable record ID of the note being edited so re-saves upsert
   const [currentNoteId, setCurrentNoteId] = useState<string | undefined>(existingInkNote?.id)
 
-  const [selectedMeetingId, setSelectedMeetingId] = useState<string>(
+  const [selectedInteractionId, setSelectedInteractionId] = useState<string>(
     initialInteraction?.id ?? '',
   )
   const [showPicker, setShowPicker] = useState(false)
@@ -136,8 +136,8 @@ export default function TakeNotesCanvas({
   }, [snapshotReady, draftKey])
 
   const selectedMeeting = useMemo(
-    () => meetings.find((m) => m.id === selectedMeetingId) ?? initialInteraction ?? null,
-    [meetings, selectedMeetingId, initialInteraction],
+    () => meetings.find((m) => m.id === selectedInteractionId) ?? initialInteraction ?? null,
+    [meetings, selectedInteractionId, initialInteraction],
   )
 
   const canSave = hasShapes && !saving && isOnline
@@ -184,7 +184,7 @@ export default function TakeNotesCanvas({
         uploadJson.url,
         inkNoteData,
         caption.trim() || undefined,
-        selectedMeetingId || undefined,
+        selectedInteractionId || undefined,
         currentNoteId,
         noteCategory,
       )
@@ -341,8 +341,8 @@ export default function TakeNotesCanvas({
               <select
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
-                value={selectedMeetingId}
-                onChange={(e) => { setSelectedMeetingId(e.target.value); setShowPicker(false) }}
+                value={selectedInteractionId}
+                onChange={(e) => { setSelectedInteractionId(e.target.value); setShowPicker(false) }}
                 className="flex-1 text-xs border border-[hsl(213,70%,30%)] rounded-md px-2 py-1.5 bg-card focus:outline-none"
               >
                 <option value="">— No linked interaction —</option>
