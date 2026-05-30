@@ -4,90 +4,116 @@
 
 | File | What it does |
 |---|---|
-| `lib/auth/getCurrentUserRecord.ts` | Resolves Clerk session → Airtable Users record. Always call this in server actions that need the coach's Airtable ID. |
-| `lib/airtable/users.ts` | CRUD for Users table. `updateUserProfile()` is the main write path for profile edits. Never write `Quick Notes` / `Family Details` here — use Coach-Person Context. |
-| `lib/airtable/coachPersonContext.ts` | Per coach ↔ client pair notes (Quick Notes, Family Details, Relationship Flags). |
-| `lib/airtable/coachSessions.ts` | Per coach ↔ meeting session notes and action items. |
-| `lib/airtable/meetings.ts` | All Portal Calendar Events access: read, write notes, search by email. Single source of truth — the old Calendar Events table is archived and never queried. |
-| `app/api/calendar/sync/route.ts` | POST — syncs Microsoft Graph calendar events for all @leadershiptap.com coaches into Portal Calendar Events. Requires Clerk session or SYNC_SECRET header. |
+| `lib/auth/getCurrentUserRecord.ts` | Resolves Clerk session → Airtable Humans record. Supports admin impersonation. Always call this in server actions that need the coach's Airtable ID. |
+| `lib/airtable/humans.ts` | CRUD for Humans table. `updateHumanProfile()` is the main write path for profile edits. Never write `Quick Notes` here — use `upsertQuickNoteForRC()` in notes.ts. |
+| `lib/airtable/relationships.ts` | Relationship Contexts table — maps `humanId` (coachee) ↔ `leadId` (coach/manager) with type, status, dates. Replaces the old Coach-Person Context and Coach Session tables. |
+| `lib/airtable/notes.ts` | All notes: general observations, interaction notes, ink notes, prep notes, quick notes. `createNote()`, `upsertGeneralNoteForRC()`, `upsertQuickNoteForRC()`, `getInteractionNotesGrouped()`. |
+| `lib/airtable/interactions.ts` | Interactions table access (formerly meetings/Portal Calendar Events): read, write notes, create manual interactions. Legacy aliases (`getAllUpcomingMeetings` etc.) are exported for backwards compat. |
+| `lib/airtable/messages.ts` | Messages table access. |
+| `lib/airtable/tasks.ts` | Tasks table access. |
+| `lib/airtable/constants.ts` | **Single source of truth for all Airtable table and field IDs.** Use `TABLES.X` and `FIELDS.X.Y` everywhere — never hardcode string field names. |
+| `app/api/calendar/sync/route.ts` | POST — syncs Microsoft Graph calendar events for all @leadershiptap.com coaches into the Interactions table. Requires Clerk session or SYNC_SECRET header. Does NOT overwrite the `Notes` field on existing records. |
 
 ## Airtable field map
 
-### Portal Calendar Events (the active calendar table — Calendar Events is archived)
-| Airtable field | Notes |
-|---|---|
-| `Note Name` | Primary field — auto-set by sync as `YYYY-MM-DD // Attendee Name` |
-| `Subject` | Meeting title (from Microsoft Graph) |
-| `Start` | ISO 8601 DateTime |
-| `End` | ISO 8601 DateTime |
-| `Provider Event ID` | Stable Microsoft Graph event ID — used for upsert dedup |
-| `Participant Emails` | Comma-separated emails (coach excluded) — written by sync |
-| `Notes` | Long text — written manually by coaches via the dashboard note panel |
-
-### Coach-Person Context
-| Airtable field | Notes |
-|---|---|
-| `Coach` | Linked → Users (coach record IDs) |
-| `Person` | Linked → Users (client record IDs) |
-| `Quick Notes` | Free-text coaching notes |
-| `Family Details` | Free-text |
-| `Relationship Flags` | Multi-select |
-| `Last Updated` | Date — written on every upsert |
-
-### Coach Session
-| Airtable field | Notes |
-|---|---|
-| `Coach` | Linked → Users (coach record IDs) |
-| `Calendar Event` | Linked → Portal Calendar Events |
-| `Focal Person` | Linked → Users (client record IDs) |
-| `Session Notes` | Long text |
-| `Action Items` | Long text |
-| `Last Updated` | Date — written on every upsert |
-
-### Messages
-| Airtable field | Notes |
-|---|---|
-| `Message Name` | Primary field |
-| `Subject` | Subject line |
-| `AI Generated Message Content` | Body |
-| `Status` | `"Pending"` or `"Sent"` — **never `"Draft"`** |
-| `Calculation` | Formula — read-only, never write |
-| `Created` | Created time — read-only, never write |
-
-### Users (key fields)
-| Airtable field | TypeScript | Notes |
+### Interactions (active calendar/event table — `TABLES.INTERACTIONS`)
+| Airtable field | TS constant | Notes |
 |---|---|---|
-| `Full Name` | `fullName` | Formula field — **never write to it** |
-| `First Name` / `Last Name` | `firstName` / `lastName` | Write these instead |
-| `Work Email` | `workEmail` | Used for meeting email matching |
-| `Role` | `role` | `"admin"`, `"coach"`, `"client"` |
-| `Coach` | `coachIds` | Linked record IDs |
-| `Associated Meetings` | `associatedMeetingIds` | Linked → Portal Calendar Events — used for session count |
-| `Quick Notes` | — | **Do not write.** Write to Coach-Person Context instead. |
-| `Family Details` | — | **Do not write.** Write to Coach-Person Context instead. |
+| `Note Name` | `FIELDS.INTERACTIONS.NOTE_NAME` | Primary field — auto-set by sync as `YYYY-MM-DD // Attendee Name` |
+| `Subject` | `FIELDS.INTERACTIONS.TITLE` | Meeting/event title (from Microsoft Graph) |
+| `Start Time` | `FIELDS.INTERACTIONS.START` | ISO 8601 DateTime |
+| `End Time` | `FIELDS.INTERACTIONS.END` | ISO 8601 DateTime |
+| `Provider Event ID` | `FIELDS.INTERACTIONS.PROVIDER_EVENT_ID` | Stable Microsoft Graph event ID — used for upsert dedup |
+| `Attendees` | `FIELDS.INTERACTIONS.ATTENDEES` | Comma-separated emails (calendar owner excluded) — written by sync |
+| `Notes` | `FIELDS.INTERACTIONS.NOTES_TEXT` | Long text — written manually by coaches |
+| `Interaction Type` | `FIELDS.INTERACTIONS.INTERACTION_TYPE` | singleSelect: `"Calendar Event"` \| `"Email"` \| `"Text"` \| `"In-Person"` \| `"Phone Call"` \| `"Video Call"` \| `"Mail"` \| `"Other"` |
+| `Source` | `FIELDS.INTERACTIONS.SOURCE` | singleSelect: `"Synced"` \| `"Manual"` |
+| `Calendar Owner` | `FIELDS.INTERACTIONS.CALENDAR_OWNER` | Text email of the calendar owner (coach) |
+| `Relationship Context` | `FIELDS.INTERACTIONS.RELATIONSHIP_CONTEXT` | Linked → Relationship Contexts |
 
-### Tasks
-The portal Tasks live in the **`Tasks`** Airtable table (not "Linked Todoist Tasks", which is a separate linked field for Todoist integration). The primary field is `Title` (maps to `task.name`). Client link field is `Client` (linked → Users).
+### Relationship Contexts (`TABLES.RELATIONSHIP_CONTEXTS`)
+Replaces the old Coach-Person Context and Coach Session tables.
+
+| Airtable field | TS constant | Notes |
+|---|---|---|
+| `Human` | `FIELDS.RELATIONSHIP_CONTEXTS.HUMAN` | Linked → Humans (the coachee / direct report) |
+| `Lead` | `FIELDS.RELATIONSHIP_CONTEXTS.LEAD` | Linked → Humans (the coach / manager) |
+| `Relationship Type` | `FIELDS.RELATIONSHIP_CONTEXTS.TYPE` | singleSelect: `'coaching'` \| `'reports_to'` \| `'client'` \| `'prospect'` \| `'personal'` \| `'peer'` |
+| `Permission Level` | `FIELDS.RELATIONSHIP_CONTEXTS.PERMISSION_LEVEL` | |
+| `Status` | `FIELDS.RELATIONSHIP_CONTEXTS.STATUS` | |
+| `Start Date` | `FIELDS.RELATIONSHIP_CONTEXTS.START_DATE` | |
+| `End Date` | `FIELDS.RELATIONSHIP_CONTEXTS.END_DATE` | |
+| `Tasks` | `FIELDS.RELATIONSHIP_CONTEXTS.TASKS_LINKED` | Linked → Tasks |
+| `Notes` | `FIELDS.RELATIONSHIP_CONTEXTS.NOTES_LINKED` | Linked → Notes |
+
+### Notes (`TABLES.NOTES`)
+Central notes system — all note types live here.
+
+| Airtable field | TS constant | Notes |
+|---|---|---|
+| `Content` | `FIELDS.NOTES.BODY` | Primary text field |
+| `Note Title` | `FIELDS.NOTES.NOTE_TITLE` | Optional label (singleLineText) |
+| `Date` | `FIELDS.NOTES.DATE` | |
+| `Human` | `FIELDS.NOTES.HUMAN` | Linked → Humans |
+| `Author Person` | `FIELDS.NOTES.AUTHOR_PERSON` | Linked → Humans (who wrote the note) |
+| `Subject Person` | `FIELDS.NOTES.SUBJECT_PERSON` | Linked → Humans (who the note is about) |
+| `Meeting Link` | `FIELDS.NOTES.MEETING_LINK` | Linked → Interactions (preferred over legacy `MEETING` text field) |
+| `Note Type` | `FIELDS.NOTES.NOTE_TYPE` | `"general_note"` \| `"interaction_note"` \| `"ink_note"` \| `"prep_note"` \| `"quick_notes"` |
+| `Ink Image URL` | `FIELDS.NOTES.INK_IMAGE_URL` | Cloudinary URL for handwritten/ink notes |
+| `Ink Note Data` | `FIELDS.NOTES.INK_NOTE_DATA` | TLStore JSON snapshot for resumable ink editing |
+| `Relationship Context` | `FIELDS.NOTES.RELATIONSHIP_CONTEXT` | Linked → Relationship Contexts |
+| `Visibility` | `FIELDS.NOTES.VISIBILITY` | Always write `"private_to_author"` |
+
+### Messages (`TABLES.MESSAGES`)
+| Airtable field | TS constant | Notes |
+|---|---|---|
+| `Message Name` | `FIELDS.MESSAGES.MESSAGE_NAME` | Primary field |
+| `Subject` | `FIELDS.MESSAGES.SUBJECT` | Subject line |
+| `AI Generated Message Content` | `FIELDS.MESSAGES.AI_GENERATED_MESSAGE_CONTENT` | Body |
+| `Draft Content` | `FIELDS.MESSAGES.DRAFT_CONTENT` | Editable draft body |
+| `Status` | `FIELDS.MESSAGES.STATUS` | `"Pending"` or `"Sent"` — **never `"Draft"`** |
+| `Created` | `FIELDS.MESSAGES.CREATED` | Created time — read-only, never write |
+
+### Humans — key fields (`TABLES.HUMANS`)
+| Airtable field | TS constant | Notes |
+|---|---|---|
+| `Full Name` | `FIELDS.HUMANS.FULL_NAME` | Formula field — **never write to it** |
+| `First Name` / `Last Name` | `FIELDS.HUMANS.FIRST_NAME` / `FIELDS.HUMANS.LAST_NAME` | Write these instead |
+| `Preferred Name` | `FIELDS.HUMANS.PREFERRED_NAME` | Optional display name override |
+| `Work Email` | `FIELDS.HUMANS.WORK_EMAIL` | Used for calendar matching |
+| `Role` | `FIELDS.HUMANS.ROLE` | `"admin"`, `"coach"`, `"client"` |
+| `Coach` | `FIELDS.HUMANS.COACH` | Linked record IDs |
+| `Associated Meetings` | `FIELDS.HUMANS.ASSOCIATED_MEETINGS` | Linked → Interactions — used for session count |
+| `Organization` | `FIELDS.HUMANS.ORGANIZATION` | Linked → Organizations — write this to set org |
+| `Organization Name` | `FIELDS.HUMANS.ORGANIZATION_NAME` | Lookup — **read-only, never write** |
+| `Quick Notes` | `FIELDS.HUMANS.QUICK_NOTES` | **Do not write directly.** Use `upsertQuickNoteForRC()` in notes.ts. |
+| `Portal Theme` | `FIELDS.HUMANS.THEME` | singleSelect: `"light"` \| `"dark"` \| `"system"` |
+
+### Tasks (`TABLES.TASKS`)
+Primary field is `Title` (`FIELDS.TASKS.TITLE`). Client link field is `Human` (`FIELDS.TASKS.HUMAN`, linked → Humans). Not to be confused with "Linked Todoist Tasks", which is a separate Todoist integration field.
 
 ## Key conventions
 
-- **All meetings data comes from Portal Calendar Events** — the old Calendar Events table is an archived read-only snapshot and is never queried by the portal.
-- **Never write to formula or created-time fields**: `Full Name`, `Calculation`, `Created`, `Organization Name`, `Organization ID`.
+- **All Airtable field access uses IDs** — `airtableFetch()` in `client.ts` appends `returnFieldsByFieldId=true` to all GETs. Always access response fields via `record.fields[FIELDS.X.Y]`, never by string name. New writes can also use field IDs as keys.
+- **All interactions data comes from `TABLES.INTERACTIONS`** — `TABLES.MEETINGS` is an alias pointing to the same table, kept for backward compat. There is no separate archived table being queried.
+- **Relationship Contexts replace Coach-Person Context + Coach Session** — the old tables no longer exist. Notes for a relationship are in the Notes table, linked via `FIELDS.NOTES.RELATIONSHIP_CONTEXT`.
+- **Never write to formula or lookup fields**: `Full Name`, `Organization Name`, `Created`.
 - **Message status**: always `"Pending"` for drafts. Never `"Draft"`.
-- **Airtable mutations**: use direct `fetch()` to the REST API. No SDK (SDK doesn't support PATCH cleanly).
+- **Airtable mutations**: use direct `fetch()` to the REST API. No SDK.
 - **All Airtable access is server-side only** — API key must never reach the browser.
 - **Server actions** live in `actions.ts` co-located with the page/component that uses them.
-- **Linked record filtering**: Airtable formula `filterByFormula` only returns the primary field value for linked records, not the record ID. Filter by linked record IDs in JavaScript after fetching, OR use the Airtable record ID directly in the URL path.
-- **Upsert pattern**: fetch existing record(s) → filter in JS → PATCH if found, POST if not. See `coachSessions.ts` or `coachPersonContext.ts` for the pattern.
+- **Linked record filtering**: Airtable `filterByFormula` returns only the primary field value for linked records, not the record ID. Filter by linked record IDs in JavaScript after fetching.
+- **Upsert pattern**: fetch existing record(s) → filter in JS → PATCH if found, POST if not. See `notes.ts` (`upsertGeneralNoteForRC`, `upsertQuickNoteForRC`) for canonical examples.
 
 ## Known gotchas
 
-- **`Full Name` is a formula** — Airtable rejects writes to it. Always write `First Name` + `Last Name` separately.
-- **`Organization Name` is a lookup** — read-only. Write the `Organization` linked field (via field ID `FIELDS.HUMANS.ORGANIZATION`) to set the organization.
+- **`Full Name` is a formula** — Airtable rejects writes to it. Always write `First Name` + `Last Name` separately via `FIELDS.HUMANS.FIRST_NAME` / `FIELDS.HUMANS.LAST_NAME`.
+- **`Organization Name` is a lookup** — read-only. Write the `Organization` linked field (`FIELDS.HUMANS.ORGANIZATION`) to set the org.
 - **shadcn `<Select>` requires non-empty string values** — never use `value=""`. Use a sentinel like `"none"` and convert back to `undefined`/`null` before saving.
-- **Profile photos go through Cloudinary** — Airtable attachment fields can't be written via REST API with a raw file. The upload flow is: browser → `/api/upload-photo` → Cloudinary → get URL → Airtable PATCH `Avatar URL` field.
-- **`Participant Emails`** in Portal Calendar Events is stored as a comma-separated string; the app normalises it to `string[]` in `mapRecord`. When writing back, join with `', '`.
-- **Coach Session and Coach-Person Context records are matched in JavaScript** (not Airtable formulas) because Airtable formula filters on linked record fields return primary field values, not IDs. This means the upsert functions fetch all records for a coach and filter client-side — acceptable at current data volumes.
-- **`getRecentCoachSessionsForPerson`** takes a `personAirtableId` and returns sessions sorted by `lastUpdated` descending. It does NOT take a meeting ID — use it for the profile page "most recent session" card.
-- **Calendar sync** runs via POST `/api/calendar/sync`. It can be triggered from the Settings page (Clerk session auth) or by a cron job (SYNC_SECRET header auth). It does NOT overwrite the `Notes` field on existing records — only coaches write to Notes.
-- **Session note panel** on the dashboard allows coaches to attach notes to Portal Calendar Events records directly. These notes also appear on the client profile page under "Session Notes (from Calendar)".
+- **Profile photos go through Cloudinary** — Airtable attachment fields can't be written via REST API with a raw file. The upload flow is: browser → `/api/upload-photo` → Cloudinary → get URL → Airtable PATCH `FIELDS.HUMANS.PROFILE_PHOTO`.
+- **`FIELDS.INTERACTIONS.ATTENDEES`** is stored in Airtable as a comma-separated string; the app normalises it to `string[]` in `mapRecord`. When writing back, join with `', '`. This field was formerly called `Participant Emails`.
+- **Notes linked to interactions** use `FIELDS.NOTES.MEETING_LINK` (multipleRecordLinks). The legacy `MEETING` singleLineText field also exists on older records — `mapRecord` in notes.ts falls back to it automatically.
+- **`NoteType` canonical values** for new writes are `'general_note'` and `'interaction_note'`. Legacy values (`general_context`, `meeting_note`, etc.) may exist on older Airtable records and round-trip safely but should never be written by new code.
+- **Calendar sync** runs via POST `/api/calendar/sync`. Triggered from Settings (Clerk auth) or cron (SYNC_SECRET header). Never overwrites `Notes` on existing Interaction records.
+- **Admin impersonation** — `getCurrentUserRecord()` returns `isImpersonated: true` and swaps `airtableId`/`role`/`email` to the impersonated user when an admin has activated impersonation. `realAirtableId` always holds the logged-in admin's own ID.
+- **`/meetings` route still exists** alongside `/interactions` — both are active pages. New features go on `/interactions`.
