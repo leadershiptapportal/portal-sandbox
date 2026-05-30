@@ -168,7 +168,7 @@ export default async function UsersPage() {
       <HumansGrid
         users={enrichedHumans}
         coaches={coaches}
-        companies={profileOptions.companies}
+        organizations={profileOptions.organizations}
       />
     </>
   )

@@ -15,7 +15,7 @@ interface ProfileOption {
 }
 
 interface ProfileOptions {
-  companies: ProfileOption[]
+  organizations: ProfileOption[]
   enneagrams: ProfileOption[]
   mbtis: ProfileOption[]
   conflictPostures: ProfileOption[]
@@ -157,7 +157,7 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
   // Coach and Team Lead removed — those relationships are now managed via the
   // RelationshipsSection on the profile page, which writes to the canonical
   // Relationship Contexts table.
-  const [companyId, setCompanyId] = useState('')
+  const [organizationId, setOrganizationId] = useState('')
   const [role, setRole] = useState('')
 
   // ── Contact ───────────────────────────────────────────────────────────────────
@@ -191,7 +191,7 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
     setWorkEmail(user.workEmail ?? '')
     setBirthday(user.birthday ?? '')
     setStartDate(user.startDate ?? '')
-    setCompanyId(user.companyLinkedIds?.[0] ?? '')
+    setOrganizationId(user.organizationLinkedIds?.[0] ?? '')
     setRole(user.role ?? '')
     setWorkCellNumber(user.workCellNumber ?? '')
     setPersonalCellNumber(user.personalCellNumber ?? '')
@@ -285,7 +285,7 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
     if (role !== (user.role ?? '')) patch['Role'] = role
 
     // Linked single-record fields — only if changed and non-empty
-    if (companyId && companyId !== (user.companyLinkedIds?.[0] ?? '')) patch['Company'] = [companyId]
+    if (organizationId && organizationId !== (user.organizationLinkedIds?.[0] ?? '')) patch['Organization'] = [organizationId]
     if (enneagramId && enneagramId !== (user.enneagramIds?.[0] ?? '')) patch['Enneagram'] = [enneagramId]
     if (mbtiId && mbtiId !== (user.mbtiIds?.[0] ?? '')) patch['MBTI'] = [mbtiId]
     if (conflictPostureId && conflictPostureId !== (user.conflictPostureIds?.[0] ?? '')) patch['Conflict Posture'] = [conflictPostureId]
@@ -412,7 +412,7 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
               <Section title="Organization">
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="Organization" half>
-                    <SelectField value={companyId} onChange={setCompanyId} options={options?.companies ?? []} placeholder="Select organization…" disabled={saving} loading={optionsLoading} />
+                    <SelectField value={organizationId} onChange={setOrganizationId} options={options?.organizations ?? []} placeholder="Select organization…" disabled={saving} loading={optionsLoading} />
                   </Field>
                   <Field label="Role" half>
                     <select value={role} onChange={(e) => setRole(e.target.value)} disabled={saving} className={selectCls}>

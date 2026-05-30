@@ -8,7 +8,7 @@ export async function createClientAction(data: {
   lastName: string
   workEmail: string
   jobTitle?: string
-  companyId?: string
+  organizationId?: string
   coachId?: string
 }): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
@@ -17,7 +17,7 @@ export async function createClientAction(data: {
       'Last Name': data.lastName,
       'Work Email': data.workEmail,
       ...(data.jobTitle ? { 'Job Title': data.jobTitle } : {}),
-      ...(data.companyId ? { 'Company': [data.companyId] } : {}),
+      ...(data.organizationId ? { 'Organization': [data.organizationId] } : {}),
       ...(data.coachId ? { 'Coach': [data.coachId] } : {}),
     })
     revalidatePath('/myhumans')

@@ -19,10 +19,10 @@ export interface EnrichedHuman {
 interface Props {
   users: EnrichedHuman[]
   coaches: Array<{ id: string; name: string }>
-  companies: Array<{ id: string; name: string }>
+  organizations: Array<{ id: string; name: string }>
 }
 
-type ViewMode = 'humans' | 'company'
+type ViewMode = 'humans' | 'organization'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -79,7 +79,7 @@ function RoleBadge({ role }: { role: string }) {
 function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
   const { user, interactionCount, noteCount, openTaskCount, lastInteraction, nextInteraction } = enriched
   const name = getDisplayName(user)
-  const subtitle = [user.title, user.companyName].filter(Boolean).join(' · ')
+  const subtitle = [user.title, user.organizationName].filter(Boolean).join(' · ')
   const role = user.role && !isRecordId(user.role) ? user.role : null
 
   return (
@@ -112,7 +112,7 @@ function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
             <ChevronRight className="h-4 w-4 text-muted-foreground/60 flex-shrink-0" />
           </div>
 
-          {/* Subtitle: Title · Company */}
+          {/* Subtitle: Title · Organization */}
           {subtitle && (
             <p className="text-sm text-muted-foreground truncate mt-0.5">{subtitle}</p>
           )}
@@ -202,9 +202,9 @@ function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode
         By Name
       </button>
       <button
-        onClick={() => onChange('company')}
+        onClick={() => onChange('organization')}
         className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors border-l border-border ${
-          mode === 'company'
+          mode === 'organization'
             ? 'bg-[hsl(213,70%,30%)] text-white'
             : 'text-muted-foreground hover:bg-muted/50'
         }`}
@@ -218,18 +218,18 @@ function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode
 
 // ── Main grid ─────────────────────────────────────────────────────────────────
 
-export default function HumansGrid({ users, coaches, companies }: Props) {
+export default function HumansGrid({ users, coaches, organizations }: Props) {
   const [query, setQuery] = useState('')
   const [selectedRole, setSelectedRole] = useState('all')
   const [selectedCoach, setSelectedCoach] = useState('all')
-  const [selectedCompany, setSelectedCompany] = useState('all')
+  const [selectedOrganization, setSelectedOrganization] = useState('all')
   const [sortBy, setSortBy] = useState('recent')
   const [viewMode, setViewMode] = useState<ViewMode>('humans')
 
   // Restore view mode from localStorage after mount
   useEffect(() => {
     const saved = localStorage.getItem('clientsViewMode')
-    if (saved === 'humans' || saved === 'company') setViewMode(saved)
+    if (saved === 'humans' || saved === 'organization') setViewMode(saved)
   }, [])
 
   function handleViewModeChange(mode: ViewMode) {
@@ -249,7 +249,7 @@ export default function HumansGrid({ users, coaches, companies }: Props) {
     query.trim() !== '' ||
     selectedRole !== 'all' ||
     selectedCoach !== 'all' ||
-    selectedCompany !== 'all'
+    selectedOrganization !== 'all'
 
   const filtered = useMemo(() => {
     let result = [...users]
@@ -259,7 +259,7 @@ export default function HumansGrid({ users, coaches, companies }: Props) {
       const q = query.toLowerCase()
       result = result.filter(({ user }) =>
         getDisplayName(user).toLowerCase().includes(q) ||
-        (user.companyName ?? '').toLowerCase().includes(q) ||
+        (user.organizationName ?? '').toLowerCase().includes(q) ||
         (user.workEmail ?? '').toLowerCase().includes(q)
       )
     }
@@ -274,14 +274,14 @@ export default function HumansGrid({ users, coaches, companies }: Props) {
       result = result.filter(({ user }) => user.coachIds?.includes(selectedCoach))
     }
 
-    // Company filter — match by linked company record IDs (reliable) with a
-    // fallback to Company Name string-match for users whose linked field
-    // wasn't populated correctly (lookup-as-string bug, see audit doc).
-    if (selectedCompany !== 'all') {
-      const companyName = companies.find((c) => c.id === selectedCompany)?.name
+    // Organization filter — match by linked record IDs (reliable) with a
+    // fallback to organizationName string-match for users whose linked field
+    // wasn't populated correctly.
+    if (selectedOrganization !== 'all') {
+      const organizationName = organizations.find((c) => c.id === selectedOrganization)?.name
       result = result.filter(({ user }) => {
-        if (user.companyLinkedIds?.includes(selectedCompany)) return true
-        if (companyName && user.companyName === companyName) return true
+        if (user.organizationLinkedIds?.includes(selectedOrganization)) return true
+        if (organizationName && user.organizationName === organizationName) return true
         return false
       })
     }
@@ -296,15 +296,15 @@ export default function HumansGrid({ users, coaches, companies }: Props) {
     }
 
     return result
-  }, [users, query, selectedRole, selectedCoach, selectedCompany, sortBy, companies])
+  }, [users, query, selectedRole, selectedCoach, selectedOrganization, sortBy, organizations])
 
-  // Group by company for company view
-  const groupedByCompany = useMemo(() => {
+  // Group by organization for organization view
+  const groupedByOrganization = useMemo(() => {
     const map = new Map<string, EnrichedHuman[]>()
     for (const enriched of filtered) {
-      const company = enriched.user.companyName?.trim() || 'Individual'
-      if (!map.has(company)) map.set(company, [])
-      map.get(company)!.push(enriched)
+      const orgName = enriched.user.organizationName?.trim() || 'Individual'
+      if (!map.has(orgName)) map.set(orgName, [])
+      map.get(orgName)!.push(enriched)
     }
     return [...map.entries()].sort(([a], [b]) => {
       if (a === 'Individual') return 1
@@ -317,7 +317,7 @@ export default function HumansGrid({ users, coaches, companies }: Props) {
     setQuery('')
     setSelectedRole('all')
     setSelectedCoach('all')
-    setSelectedCompany('all')
+    setSelectedOrganization('all')
     setSortBy('recent')
   }
 
@@ -358,11 +358,11 @@ export default function HumansGrid({ users, coaches, companies }: Props) {
           </FilterSelect>
         )}
 
-        {/* Company filter */}
-        {companies.length > 1 && (
-          <FilterSelect value={selectedCompany} onChange={setSelectedCompany}>
-            <option value="all">All Companies</option>
-            {companies.map((c) => (
+        {/* Organization filter */}
+        {organizations.length > 1 && (
+          <FilterSelect value={selectedOrganization} onChange={setSelectedOrganization}>
+            <option value="all">All Organizations</option>
+            {organizations.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </FilterSelect>
@@ -409,14 +409,14 @@ export default function HumansGrid({ users, coaches, companies }: Props) {
             </button>
           )}
         </div>
-      ) : viewMode === 'company' ? (
-        /* ── Company grouped view ─────────────────────────────────────────── */
+      ) : viewMode === 'organization' ? (
+        /* ── Organization grouped view ────────────────────────────────────── */
         <div className="space-y-8">
-          {groupedByCompany.map(([company, members]) => (
-            <div key={company}>
+          {groupedByOrganization.map(([orgName, members]) => (
+            <div key={orgName}>
               <div className="flex items-center gap-2 mb-3">
                 <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                <h3 className="text-sm font-semibold text-foreground">{company}</h3>
+                <h3 className="text-sm font-semibold text-foreground">{orgName}</h3>
                 {members.length > 1 && (
                   <span className="px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-medium">
                     {members.length}

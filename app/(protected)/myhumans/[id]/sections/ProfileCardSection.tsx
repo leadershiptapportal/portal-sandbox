@@ -298,8 +298,8 @@ export default function ProfileCardSection({
           {displayTitle && (
             <p className="text-base text-muted-foreground mt-0.5">{displayTitle}</p>
           )}
-          {user.companyName && (
-            <p className="text-sm text-muted-foreground mt-0.5">{user.companyName}</p>
+          {user.organizationName && (
+            <p className="text-sm text-muted-foreground mt-0.5">{user.organizationName}</p>
           )}
           {contactEmail && (
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
@@ -309,10 +309,10 @@ export default function ProfileCardSection({
           )}
 
           <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1.5">
-            {user.timeAtCompany && (
+            {user.timeAtOrganization && (
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Clock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                {user.timeAtCompany}
+                {user.timeAtOrganization}
               </span>
             )}
             {coach && (

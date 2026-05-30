@@ -899,9 +899,9 @@ export default function PersonSidebar({
               )
             )}
 
-            {/* Company */}
-            {person.companyName && (
-              <p className="text-xs text-muted-foreground">{person.companyName}</p>
+            {/* Organization */}
+            {person.organizationName && (
+              <p className="text-xs text-muted-foreground">{person.organizationName}</p>
             )}
 
             {/* Email */}
@@ -935,10 +935,10 @@ export default function PersonSidebar({
                 />
               )}
             </div>
-            {person.timeAtCompany && (
+            {person.timeAtOrganization && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground pt-0.5">
                 <Clock className="h-3 w-3 flex-shrink-0" />
-                <span>{person.timeAtCompany}</span>
+                <span>{person.timeAtOrganization}</span>
               </div>
             )}
           </div>

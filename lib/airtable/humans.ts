@@ -41,11 +41,11 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Hum
     lastName: f[FIELDS.HUMANS.LAST_NAME] as string | undefined,
     workEmail: f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined,
     role: f[FIELDS.HUMANS.ROLE] as string | undefined,
-    companyName: readLookup(f[FIELDS.HUMANS.COMPANY_NAME]),
+    organizationName: readLookup(f[FIELDS.HUMANS.ORGANIZATION_NAME]),
     profilePhoto: Array.isArray(f[FIELDS.HUMANS.PROFILE_PHOTO])
       ? (f[FIELDS.HUMANS.PROFILE_PHOTO] as Array<{ url: string }>)[0]?.url
       : undefined,
-    timeAtCompany: f[FIELDS.HUMANS.TIME_AT_COMPANY] as string | undefined,
+    timeAtOrganization: f[FIELDS.HUMANS.TIME_AT_ORGANIZATION] as string | undefined,
     coachIds: Array.isArray(f[FIELDS.HUMANS.COACH])
       ? (f[FIELDS.HUMANS.COACH] as string[])
       : [],
@@ -81,8 +81,8 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Hum
       ? (f[FIELDS.HUMANS.APOLOGY_LANGUAGE] as string[]) : [],
     strengthIds: Array.isArray(f[FIELDS.HUMANS.STRENGTHS])
       ? (f[FIELDS.HUMANS.STRENGTHS] as string[]) : [],
-    companyLinkedIds: Array.isArray(f[FIELDS.HUMANS.COMPANY])
-      ? (f[FIELDS.HUMANS.COMPANY] as string[]) : [],
+    organizationLinkedIds: Array.isArray(f[FIELDS.HUMANS.ORGANIZATION])
+      ? (f[FIELDS.HUMANS.ORGANIZATION] as string[]) : [],
     birthday: f[FIELDS.HUMANS.BIRTHDAY] as string | undefined,
     workCellNumber: f[FIELDS.HUMANS.WORK_CELL_NUMBER] as string | undefined,
     personalCellNumber: f[FIELDS.HUMANS.PERSONAL_CELL_NUMBER] as string | undefined,
@@ -128,7 +128,7 @@ export async function createHumanRecord(fields: {
   'Work Email'?: string
   'Role'?: string
   'Coach'?: string[]
-  'Company'?: string[]
+  'Organization'?: string[]
 }): Promise<string> {
   const { apiKey, baseId } = getCredentials()
 
@@ -141,7 +141,7 @@ export async function createHumanRecord(fields: {
       ...(fields['Work Email'] ? { 'Work Email': fields['Work Email'] } : {}),
       ...(fields['Role'] ? { 'Role': fields['Role'] } : {}),
       ...(fields['Coach']?.length ? { 'Coach': fields['Coach'] } : {}),
-      ...(fields['Company']?.length ? { 'Company': fields['Company'] } : {}),
+      ...(fields['Organization']?.length ? { [FIELDS.HUMANS.ORGANIZATION]: fields['Organization'] } : {}),
     },
   }
   console.log('[createHumanRecord] POST body:', JSON.stringify(body, null, 2))
@@ -230,7 +230,7 @@ export interface HumanProfileFields {
   'Strengths'?: string[]
   'Coach'?: string[]
   'Team Lead'?: string[]
-  'Company'?: string[]
+  'Organization'?: string[]
 }
 
 export async function updateHumanProfile(
@@ -239,8 +239,14 @@ export async function updateHumanProfile(
 ): Promise<void> {
   const { apiKey, baseId } = getCredentials()
 
+  // Remap the friendly 'Organization' key → Airtable field ID so writes use IDs not names
+  const remapped = Object.fromEntries(
+    Object.entries(fields).map(([k, v]) =>
+      k === 'Organization' ? [FIELDS.HUMANS.ORGANIZATION, v] : [k, v]
+    )
+  )
   const sanitized = Object.fromEntries(
-    Object.entries(fields).filter(([, v]) => {
+    Object.entries(remapped).filter(([, v]) => {
       if (v === undefined || v === null) return false
       if (typeof v === 'string') return v !== ''
       if (Array.isArray(v)) return v.length > 0
@@ -437,7 +443,7 @@ export async function fetchPersonalityOptions(): Promise<{
 }
 
 export async function fetchProfileOptions(allHumans: Human[]): Promise<{
-  companies: ProfileOption[]
+  organizations: ProfileOption[]
   enneagrams: ProfileOption[]
   mbtis: ProfileOption[]
   conflictPostures: ProfileOption[]
@@ -446,10 +452,10 @@ export async function fetchProfileOptions(allHumans: Human[]): Promise<{
   coaches: ProfileOption[]
   allHumans: ProfileOption[]
 }> {
-  const [companies, enneagrams, mbtis, conflictPostures, apologyLanguages, strengths] =
+  const [organizations, enneagrams, mbtis, conflictPostures, apologyLanguages, strengths] =
     await Promise.all([
-      fetchTableOptions(TABLES.ORGANIZATIONS, FIELDS.COMPANIES.NAME, {
-        filterFormula: `{${FIELDS.COMPANIES.STATUS}}="Active"`,
+      fetchTableOptions(TABLES.ORGANIZATIONS, FIELDS.ORGANIZATIONS.NAME, {
+        filterFormula: `{${FIELDS.ORGANIZATIONS.STATUS}}="Active"`,
       }),
       fetchTableOptions('Enneagram', FIELDS.ENNEAGRAM.NAME, {
         codeField: FIELDS.ENNEAGRAM.TYPE_NUMBER,
@@ -481,7 +487,7 @@ export async function fetchProfileOptions(allHumans: Human[]): Promise<{
 
   const humans = allHumans.map((h) => ({ id: h.id, name: nameOf(h) }))
 
-  return { companies, enneagrams, mbtis, conflictPostures, apologyLanguages, strengths, coaches, allHumans: humans }
+  return { organizations, enneagrams, mbtis, conflictPostures, apologyLanguages, strengths, coaches, allHumans: humans }
 }
 
 export async function getHumanById(id: string): Promise<Human | null> {

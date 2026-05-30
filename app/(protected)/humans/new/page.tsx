@@ -4,7 +4,7 @@ import NewPersonForm from './NewPersonForm'
 
 export default async function NewPersonPage() {
   const allHumans = await getAllHumans()
-  const { coaches, companies } = await fetchProfileOptions(allHumans)
+  const { coaches, organizations } = await fetchProfileOptions(allHumans)
 
   const nameOf = (h: { id: string; fullName?: string; firstName?: string; lastName?: string; workEmail?: string }) =>
     (h.fullName ?? [h.firstName, h.lastName].filter(Boolean).join(' ')) || h.workEmail || h.id
@@ -12,7 +12,7 @@ export default async function NewPersonPage() {
   const allHumanOptions = allHumans.map((h) => ({
     id: h.id,
     name: nameOf(h),
-    companyId: h.companyLinkedIds?.[0],
+    organizationId: h.organizationLinkedIds?.[0],
   }))
 
   return (
@@ -25,7 +25,7 @@ export default async function NewPersonPage() {
         <NewPersonForm
           coaches={coaches}
           allHumans={allHumanOptions}
-          companies={companies}
+          organizations={organizations}
         />
       </div>
     </>

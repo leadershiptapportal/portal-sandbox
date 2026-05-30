@@ -120,9 +120,9 @@ export const FIELDS = {
     WORK_EMAIL: 'fldlL8HrXCnd3K4KL',                               // "Work Email"
     TITLE: 'fldVwZtWoJjZp920l',                                    // "Title"
     ROLE: 'fldaSnC1UCEukV8Um',                                     // "Role"
-    COMPANY_NAME: 'fldHd3omMw7PUAWNJ',                             // "Company Name (from Company)" lookup
+    ORGANIZATION_NAME: 'fldHd3omMw7PUAWNJ',                         // "Organization Name (from Organization)" lookup
     PROFILE_PHOTO: 'fldHj7YBmed6S8s58',                            // "Profile Photo"
-    TIME_AT_COMPANY: 'fldi1Ez09JdS0tjnb',                          // "Time at Company"
+    TIME_AT_ORGANIZATION: 'fldi1Ez09JdS0tjnb',                      // "Time at Organization"
     COACH: 'fld4kKouAYi5plNVL',                                    // "Coach"
     TEAM_LEAD: 'fldRyJGLnzfoZlIpN',                                // "Team Lead"
     QUICK_NOTES: 'fldduqJaVzxE9u6IP',                              // "Quick Notes"
@@ -142,7 +142,7 @@ export const FIELDS = {
     CONFLICT_POSTURE: 'fldCD4HvwKE5SXXLE',                         // "Conflict Posture"
     APOLOGY_LANGUAGE: 'fldVEQ4DZuTARM3ST',                         // "Apology Language"
     STRENGTHS: 'fldcQe5diYYsoThxi',                                // "Strengths"
-    COMPANY: 'fldUu6I5aaiIhTVj6',                                  // "Company"
+    ORGANIZATION: 'fldUu6I5aaiIhTVj6',                              // "Organization" (linked → Organizations)
     BIRTHDAY: 'flde4V2mmmYv0dMME',                                 // "Birthday"
     WORK_CELL_NUMBER: 'fldZIvMj9ggKNAHwO',                         // "Work Cell Number"
     PERSONAL_CELL_NUMBER: 'fldV3990UGnVEdSQL',                     // "Personal Cell Number"
@@ -157,12 +157,12 @@ export const FIELDS = {
     LAST_MODIFIED: 'fldAAzvWFfJSpUs93',                           // "Last Modified" (lastModifiedTime)
     THEME: 'fldPMnj4NBZAv96ob',                                    // "Portal Theme" (singleSelect: "light" | "dark" | "system")
   },
-  COMPANIES: {
-    NAME: 'fldl7bZkR5JCKyLHk',                  // "Company Name"
+  ORGANIZATIONS: {
+    NAME: 'fldl7bZkR5JCKyLHk',                  // "Organization Name"
     STATUS: 'fldk33AceBzzND138',                // "Status"
     ORGANIZATION_TYPE: 'fldkxkzOX87KZctuL',     // "Organization Type"
-    LOGO: 'fldgW4xeX2hkieVb2',                  // "Company Logo" (url)
-    DOMAIN_NAME: 'fldKGWHDCJJZEGorT',           // "Company Domain Name"
+    LOGO: 'fldgW4xeX2hkieVb2',                  // "Organization Logo" (url)
+    DOMAIN_NAME: 'fldKGWHDCJJZEGorT',           // "Organization Domain Name"
   },
   ENNEAGRAM: {
     NAME: 'fldDHEcTx28Dpnccp',                  // "Name"

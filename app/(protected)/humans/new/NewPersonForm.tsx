@@ -17,16 +17,16 @@ import { X } from 'lucide-react'
 interface Person {
   id: string
   name: string
-  companyId?: string
+  organizationId?: string
 }
 
 interface Props {
   coaches: Person[]
   allHumans: Person[]
-  companies: Person[]
+  organizations: Person[]
 }
 
-const NO_COMPANY = '__none__'
+const NO_ORGANIZATION = '__none__'
 
 // ── PersonPicker ──────────────────────────────────────────────────────────────
 
@@ -169,18 +169,18 @@ function RelationshipSummary({
 
 // ── Main Form ─────────────────────────────────────────────────────────────────
 
-export default function NewPersonForm({ coaches, allHumans, companies }: Props) {
+export default function NewPersonForm({ coaches, allHumans, organizations }: Props) {
   const router = useRouter()
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [jobTitle, setJobTitle] = useState('')
   const [workEmail, setWorkEmail] = useState('')
-  const [companyId, setCompanyIdRaw] = useState(NO_COMPANY)
+  const [organizationId, setOrganizationIdRaw] = useState(NO_ORGANIZATION)
 
-  function setCompanyId(next: string) {
-    setCompanyIdRaw(next)
-    // Clear org-fenced selections when company changes
+  function setOrganizationId(next: string) {
+    setOrganizationIdRaw(next)
+    // Clear org-fenced selections when organization changes
     setReportsTo([])
     setDirectReports([])
   }
@@ -192,9 +192,9 @@ export default function NewPersonForm({ coaches, allHumans, companies }: Props) 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const hasCompany = companyId !== NO_COMPANY
-  const orgUsers = hasCompany
-    ? allHumans.filter((h) => h.companyId === companyId)
+  const hasOrganization = organizationId !== NO_ORGANIZATION
+  const orgUsers = hasOrganization
+    ? allHumans.filter((h) => h.organizationId === organizationId)
     : []
 
   const canSubmit = firstName.trim().length > 0 && lastName.trim().length > 0 && !saving
@@ -214,7 +214,7 @@ export default function NewPersonForm({ coaches, allHumans, companies }: Props) 
           lastName: lastName.trim() || undefined,
           jobTitle: jobTitle.trim() || undefined,
           workEmail: workEmail.trim() || undefined,
-          companyId: companyId !== NO_COMPANY ? companyId : undefined,
+          organizationId: organizationId !== NO_ORGANIZATION ? organizationId : undefined,
           coachIds: selectedCoaches.map((c) => c.id),
           reportsToIds: reportsTo.map((p) => p.id),
           directReportIds: directReports.map((p) => p.id),
@@ -292,16 +292,16 @@ export default function NewPersonForm({ coaches, allHumans, companies }: Props) 
           />
         </div>
 
-        {companies.length > 0 && (
+        {organizations.length > 0 && (
           <div className="space-y-1.5">
-            <Label htmlFor="np-company">Organization</Label>
-            <Select value={companyId} onValueChange={setCompanyId} disabled={saving}>
-              <SelectTrigger id="np-company">
+            <Label htmlFor="np-organization">Organization</Label>
+            <Select value={organizationId} onValueChange={setOrganizationId} disabled={saving}>
+              <SelectTrigger id="np-organization">
                 <SelectValue placeholder="Select organization…" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={NO_COMPANY}>No organization</SelectItem>
-                {companies.map((c) => (
+                <SelectItem value={NO_ORGANIZATION}>No organization</SelectItem>
+                {organizations.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name}
                   </SelectItem>
@@ -334,11 +334,11 @@ export default function NewPersonForm({ coaches, allHumans, companies }: Props) 
         </h2>
         <PersonPicker
           label="Who does this person report to?"
-          hint={hasCompany ? 'Their direct manager(s).' : 'Pick an organization above to see who they could report to.'}
+          hint={hasOrganization ? 'Their direct manager(s).' : 'Pick an organization above to see who they could report to.'}
           options={orgUsers}
           selected={reportsTo}
           onChange={setReportsTo}
-          placeholder={hasCompany ? 'Search people…' : 'Select an organization first'}
+          placeholder={hasOrganization ? 'Search people…' : 'Select an organization first'}
         />
       </section>
 
@@ -349,11 +349,11 @@ export default function NewPersonForm({ coaches, allHumans, companies }: Props) 
         </h2>
         <PersonPicker
           label="Who reports to this person?"
-          hint={hasCompany ? 'Usually populated for senior leaders.' : 'Pick an organization above to see who they could report to.'}
+          hint={hasOrganization ? 'Usually populated for senior leaders.' : 'Pick an organization above to see who they could report to.'}
           options={orgUsers}
           selected={directReports}
           onChange={setDirectReports}
-          placeholder={hasCompany ? 'Search people…' : 'Select an organization first'}
+          placeholder={hasOrganization ? 'Search people…' : 'Select an organization first'}
         />
       </section>
 

@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     lastName,
     jobTitle,
     workEmail,
-    companyId,
+    organizationId,
     coachIds = [],
     reportsToIds = [],
     directReportIds = [],
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       'Last Name': lastName.trim(),
       ...(jobTitle?.trim() ? { 'Job Title': jobTitle.trim() } : {}),
       ...(workEmail?.trim() ? { 'Work Email': workEmail.trim() } : {}),
-      ...(companyId ? { 'Company': [companyId] } : {}),
+      ...(organizationId ? { 'Organization': [organizationId] } : {}),
       ...(coachIds.length > 0 ? { 'Coach': coachIds } : {}),
       'Role': 'client',
     })

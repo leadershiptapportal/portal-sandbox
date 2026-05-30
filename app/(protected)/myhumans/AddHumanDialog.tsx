@@ -10,18 +10,18 @@ interface Coach {
   name: string
 }
 
-interface Company {
+interface Organization {
   id: string
   name: string
 }
 
 interface Props {
   coaches: Coach[]
-  companies: Company[]
+  organizations: Organization[]
   currentCoachId?: string
 }
 
-export default function AddHumanDialog({ coaches, companies, currentCoachId }: Props) {
+export default function AddHumanDialog({ coaches, organizations, currentCoachId }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -32,7 +32,7 @@ export default function AddHumanDialog({ coaches, companies, currentCoachId }: P
   const [lastName, setLastName] = useState('')
   const [workEmail, setWorkEmail] = useState('')
   const [jobTitle, setJobTitle] = useState('')
-  const [companyId, setCompanyId] = useState('')
+  const [organizationId, setOrganizationId] = useState('')
   const [coachId, setCoachId] = useState(currentCoachId ?? '')
 
   function openDialog() {
@@ -40,7 +40,7 @@ export default function AddHumanDialog({ coaches, companies, currentCoachId }: P
     setLastName('')
     setWorkEmail('')
     setJobTitle('')
-    setCompanyId('')
+    setOrganizationId('')
     setCoachId(currentCoachId ?? '')
     setError('')
     setToast('')
@@ -59,7 +59,7 @@ export default function AddHumanDialog({ coaches, companies, currentCoachId }: P
       lastName: lastName.trim(),
       workEmail: workEmail.trim(),
       jobTitle: jobTitle.trim() || undefined,
-      companyId: companyId || undefined,
+      organizationId: organizationId || undefined,
       coachId: coachId || undefined,
     })
     setSaving(false)
@@ -155,16 +155,16 @@ export default function AddHumanDialog({ coaches, companies, currentCoachId }: P
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              {companies.length > 0 && (
+              {organizations.length > 0 && (
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-foreground">Organization</label>
                   <select
-                    value={companyId}
-                    onChange={(e) => setCompanyId(e.target.value)}
+                    value={organizationId}
+                    onChange={(e) => setOrganizationId(e.target.value)}
                     className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-card"
                   >
                     <option value="">Select organization</option>
-                    {companies.map((c) => (
+                    {organizations.map((c) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>

@@ -46,7 +46,7 @@ export async function updateProfileAction(
 // ── Fetch profile dropdown options (called when Edit Profile modal opens) ──────
 
 export async function fetchProfileOptionsAction(): Promise<{
-  companies: ProfileOption[]
+  organizations: ProfileOption[]
   enneagrams: ProfileOption[]
   mbtis: ProfileOption[]
   conflictPostures: ProfileOption[]

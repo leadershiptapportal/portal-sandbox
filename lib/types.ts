@@ -1,4 +1,4 @@
-export interface Company {
+export interface Organization {
   id: string;
   name: string;
   domain?: string;
@@ -12,9 +12,9 @@ export interface Human {
   lastName?: string;
   workEmail?: string;
   role?: string;
-  companyName?: string;
+  organizationName?: string;
   profilePhoto?: string;    // Airtable "Profile Photo" attachment (first URL)
-  timeAtCompany?: string;   // text field
+  timeAtOrganization?: string;   // text field
   coachIds?: string[];      // linked record IDs → Coach(es)
   teamLeadIds?: string[];   // linked record IDs → Team Lead(s)
 
@@ -44,7 +44,7 @@ export interface Human {
   conflictPostureIds?: string[]
   apologyLanguageIds?: string[]
   strengthIds?: string[]
-  companyLinkedIds?: string[]   // from the "Company" linked field
+  organizationLinkedIds?: string[]   // from the "Organization" linked field
 
   // Extra contact fields
   birthday?: string             // "Birthday"
