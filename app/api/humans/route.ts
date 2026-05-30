@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { createHumanRecord } from '@/lib/airtable/humans'
 import { generateRelationshipRows } from '@/lib/airtable/relationships'
+import { createAffiliation } from '@/lib/airtable/affiliations'
 
 export async function POST(req: Request) {
   const { userId } = await auth()
@@ -33,10 +34,20 @@ export async function POST(req: Request) {
       lastName: lastName.trim(),
       title: jobTitle?.trim() || undefined,
       workEmail: workEmail?.trim() || undefined,
-      organizationIds: organizationId ? [organizationId] : undefined,
       coachIds: coachIds.length > 0 ? coachIds : undefined,
       role: 'client',
     })
+
+    // 1b. Organization is stored as an Affiliation, not the flat link.
+    if (organizationId) {
+      await createAffiliation({
+        humanId: newHumanId,
+        organizationId,
+        primary: true,
+        status: 'Active',
+        titleAtOrg: jobTitle?.trim() || undefined,
+      })
+    }
 
     // 2. Generate Relationship Context rows
     const rcCount =

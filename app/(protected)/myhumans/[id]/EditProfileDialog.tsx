@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera } from 'lucide-react'
-import { updateProfileAction, fetchProfileOptionsAction, updateCoachContextAction } from './actions'
+import { updateProfileAction, fetchProfileOptionsAction, updateCoachContextAction, setPrimaryOrgAction } from './actions'
 import type { HumanProfileFields } from '@/lib/airtable/humans'
 import type { Human } from '@/lib/types'
 
@@ -284,8 +284,11 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
     if (personalCellNumber !== (user.personalCellNumber ?? '')) patch['Personal Cell Number'] = personalCellNumber
     if (role !== (user.role ?? '')) patch['Role'] = role
 
+    // Organization is now stored as an Affiliation (not the flat link) — handled
+    // via setPrimaryOrgAction below, outside the profile patch.
+    const orgChanged = !!organizationId && organizationId !== (user.organizationLinkedIds?.[0] ?? '')
+
     // Linked single-record fields — only if changed and non-empty
-    if (organizationId && organizationId !== (user.organizationLinkedIds?.[0] ?? '')) patch['Organization'] = [organizationId]
     if (enneagramId && enneagramId !== (user.enneagramIds?.[0] ?? '')) patch['Enneagram'] = [enneagramId]
     if (mbtiId && mbtiId !== (user.mbtiIds?.[0] ?? '')) patch['MBTI'] = [mbtiId]
     if (conflictPostureId && conflictPostureId !== (user.conflictPostureIds?.[0] ?? '')) patch['Conflict Posture'] = [conflictPostureId]
@@ -305,6 +308,16 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
         setSaveStatus('')
         // Append to any existing photo error rather than overwriting it
         setErrorMsg((prev) => (prev ? `${prev}\n${result.error}` : result.error))
+        return
+      }
+    }
+
+    if (orgChanged) {
+      const orgResult = await setPrimaryOrgAction(user.id, organizationId)
+      if ('error' in orgResult) {
+        setSaving(false)
+        setSaveStatus('')
+        setErrorMsg((prev) => (prev ? `${prev}\n${orgResult.error}` : orgResult.error))
         return
       }
     }

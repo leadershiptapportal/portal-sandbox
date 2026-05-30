@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createHumanRecord } from '@/lib/airtable/humans'
+import { createAffiliation } from '@/lib/airtable/affiliations'
 
 export async function createClientAction(data: {
   firstName: string
@@ -17,9 +18,18 @@ export async function createClientAction(data: {
       lastName: data.lastName,
       workEmail: data.workEmail,
       title: data.jobTitle,
-      organizationIds: data.organizationId ? [data.organizationId] : undefined,
       coachIds: data.coachId ? [data.coachId] : undefined,
     })
+    // Organization is stored as an Affiliation, not the flat Humans.Organization link.
+    if (data.organizationId) {
+      await createAffiliation({
+        humanId: id,
+        organizationId: data.organizationId,
+        primary: true,
+        status: 'Active',
+        titleAtOrg: data.jobTitle,
+      })
+    }
     revalidatePath('/myhumans')
     return { success: true, id }
   } catch (err) {

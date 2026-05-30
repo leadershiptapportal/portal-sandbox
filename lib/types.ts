@@ -4,6 +4,31 @@ export interface Organization {
   domain?: string;
 }
 
+export type AffiliationType =
+  | 'employee'
+  | 'contractor'
+  | 'member'
+  | 'client'
+  | 'founder'
+  | 'alum'
+  | 'other';
+
+export type AffiliationStatus = 'Active' | 'Inactive' | 'Paused' | 'Ended';
+
+export interface Affiliation {
+  id: string;
+  humanId: string;
+  humanName?: string;
+  organizationId: string;
+  organizationName?: string;
+  type: AffiliationType;
+  status: AffiliationStatus;
+  startDate?: string;   // YYYY-MM-DD
+  endDate?: string;     // YYYY-MM-DD
+  titleAtOrg?: string;
+  primary: boolean;
+}
+
 export interface Human {
   id: string;
   fullName?: string;

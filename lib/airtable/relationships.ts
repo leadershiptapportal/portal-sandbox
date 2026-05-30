@@ -117,7 +117,9 @@ function mapRecord(
     leadTitle: leadData?.title,
     relationshipType: normalizeRelationshipType(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.TYPE]),
     status: (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.STATUS] as string) ?? '',
-    organizationId: undefined,
+    organizationId: Array.isArray(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.ORGANIZATION])
+      ? (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.ORGANIZATION] as string[])[0]
+      : undefined,
     startDate: (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.START_DATE] as string) ?? undefined,
     endDate: (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.END_DATE] as string) ?? undefined,
   }
@@ -565,6 +567,7 @@ export interface CreateRCInput {
   type: RelationshipType
   status?: 'Active' | 'Inactive' | 'Paused' | 'Ended'
   startDate?: string  // YYYY-MM-DD
+  organizationId?: string  // sponsoring org of the engagement
 }
 
 /**
@@ -606,6 +609,7 @@ export async function createRelationshipContext(input: CreateRCInput): Promise<s
     [FIELDS.RELATIONSHIP_CONTEXTS.STATUS]: input.status ?? 'Active',
   }
   if (input.startDate) fields[FIELDS.RELATIONSHIP_CONTEXTS.START_DATE] = input.startDate
+  if (input.organizationId) fields[FIELDS.RELATIONSHIP_CONTEXTS.ORGANIZATION] = [input.organizationId]
 
   const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}`, {
     method: 'POST',
@@ -630,6 +634,7 @@ export interface UpdateRCInput {
    */
   humanId?: string
   leadId?: string
+  organizationId?: string | null
 }
 
 export async function updateRelationshipContext(
@@ -644,6 +649,9 @@ export async function updateRelationshipContext(
   if (input.endDate !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.END_DATE] = input.endDate
   if (input.humanId !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN] = [input.humanId]
   if (input.leadId !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.LEAD] = [input.leadId]
+  if (input.organizationId !== undefined) {
+    fields[FIELDS.RELATIONSHIP_CONTEXTS.ORGANIZATION] = input.organizationId ? [input.organizationId] : []
+  }
   if (Object.keys(fields).length === 0) return
 
   const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}/${rcId}`, {

@@ -7,6 +7,7 @@
 | `lib/auth/getCurrentUserRecord.ts` | Resolves Clerk session → Airtable Humans record. Supports admin impersonation. Always call this in server actions that need the coach's Airtable ID. |
 | `lib/airtable/humans.ts` | CRUD for Humans table. `updateHumanProfile()` is the main write path for profile edits. Never write `Quick Notes` here — use `upsertQuickNoteForRC()` in notes.ts. |
 | `lib/airtable/relationships.ts` | Relationship Contexts table — maps `humanId` (coachee) ↔ `leadId` (coach/manager) with type, status, dates. Replaces the old Coach-Person Context and Coach Session tables. |
+| `lib/airtable/affiliations.ts` | Affiliations table — Human ↔ Organization join with type/status/dates/primary. Replaces the flat `Humans.Organization` link so a human can have multiple orgs over time. `getAffiliationsForHuman()`, `getMembers()`, `getPrimaryAffiliationMap()`, `pickPrimaryAffiliation()`, CRUD. |
 | `lib/airtable/notes.ts` | All notes: general observations, interaction notes, ink notes, prep notes, quick notes. `createNote()`, `upsertGeneralNoteForRC()`, `upsertQuickNoteForRC()`, `getInteractionNotesGrouped()`. |
 | `lib/airtable/interactions.ts` | Interactions table access (formerly meetings/Portal Calendar Events): read, write notes, create manual interactions. Legacy aliases (`getAllUpcomingMeetings` etc.) are exported for backwards compat. |
 | `lib/airtable/messages.ts` | Messages table access. |
@@ -45,6 +46,23 @@ Replaces the old Coach-Person Context and Coach Session tables.
 | `End Date` | `FIELDS.RELATIONSHIP_CONTEXTS.END_DATE` | |
 | `Tasks` | `FIELDS.RELATIONSHIP_CONTEXTS.TASKS_LINKED` | Linked → Tasks |
 | `Notes` | `FIELDS.RELATIONSHIP_CONTEXTS.NOTES_LINKED` | Linked → Notes |
+| `Organization` | `FIELDS.RELATIONSHIP_CONTEXTS.ORGANIZATION` | Linked → Organizations — sponsoring org of the engagement (distinct from a person's own affiliations) |
+
+### Affiliations (`TABLES.AFFILIATIONS`)
+Human ↔ Organization join. Replaces the flat `Humans.Organization` link; a human may have multiple affiliations, concurrent or sequential.
+
+| Airtable field | TS constant | Notes |
+|---|---|---|
+| `Affiliation` | `FIELDS.AFFILIATIONS.NAME` | Primary label |
+| `Human` | `FIELDS.AFFILIATIONS.HUMAN` | Linked → Humans |
+| `Organization` | `FIELDS.AFFILIATIONS.ORGANIZATION` | Linked → Organizations |
+| `Affiliation Type` | `FIELDS.AFFILIATIONS.TYPE` | singleSelect: `employee` \| `contractor` \| `member` \| `client` \| `founder` \| `alum` \| `other` |
+| `Status` | `FIELDS.AFFILIATIONS.STATUS` | singleSelect: `Active` \| `Inactive` \| `Paused` \| `Ended` — **source of truth for visibility** |
+| `Start Date` / `End Date` | `FIELDS.AFFILIATIONS.START_DATE` / `END_DATE` | Informational; missing dates default to visible |
+| `Title at Org` | `FIELDS.AFFILIATIONS.TITLE_AT_ORG` | Role/title held at this org |
+| `Primary` | `FIELDS.AFFILIATIONS.PRIMARY` | checkbox — the human's primary/current org for card/grid display |
+
+**Visibility rule:** show an affiliation unless `Status` is `Ended`/`Inactive` or `End Date` is in the past. See `isAffiliationVisible()`.
 
 ### Notes (`TABLES.NOTES`)
 Central notes system — all note types live here.

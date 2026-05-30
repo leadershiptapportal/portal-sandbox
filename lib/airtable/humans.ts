@@ -127,6 +127,9 @@ export interface CreateHumanFields {
   workEmail?: string
   role?: string
   coachIds?: string[]
+  /** @deprecated Organizations are now modelled as Affiliations. Create an
+   *  Affiliation row (lib/airtable/affiliations.ts) instead of writing the flat
+   *  Humans.Organization link. Kept only for rollback; no caller should set it. */
   organizationIds?: string[]
 }
 
@@ -230,6 +233,8 @@ export interface HumanProfileFields {
   'Strengths'?: string[]
   'Coach'?: string[]
   'Team Lead'?: string[]
+  /** @deprecated Use an Affiliation (lib/airtable/affiliations.ts) /
+   *  setPrimaryOrgAction instead of the flat Humans.Organization link. */
   'Organization'?: string[]
 }
 

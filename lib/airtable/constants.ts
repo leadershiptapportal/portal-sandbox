@@ -23,6 +23,7 @@ export const TABLES = {
   PERMISSION_PROFILES: 'tbl1XeWzXjE41fSSE',     // "Permission Profiles"
   CONNECTED_CALENDARS: 'tblJs7uabNEOsgyoF',     // "Connected Calendars"
   RELATIONSHIP_CONTEXTS: 'tblYdLi7dp2RmhNjh',   // "Relationship Contexts"
+  AFFILIATIONS: 'tblNSHwUlG3aTymZl',            // "Affiliations" (Human ↔ Organization join)
   INTERACTIONS: 'tblUm3dEvQqQBhxSE',            // "Interactions" (formerly "Meetings")
   MEETINGS: 'tblUm3dEvQqQBhxSE',                // @deprecated — use INTERACTIONS
   NOTES: 'tblSTELdCWLYk5dq4',                   // "Notes"
@@ -47,6 +48,18 @@ export const FIELDS = {
     END_DATE: 'fldeAxACxxeiULgZr',              // "End Date"
     TASKS_LINKED: 'fld9UnUYXwKCEBKrT',          // "Tasks" (linked → Tasks)
     NOTES_LINKED: 'fld3omA1BHtk6k1cK',          // "Notes" (linked → Notes)
+    ORGANIZATION: 'fldcO9G1f6nPgJDq9',          // "Organization" (linked → Organizations) — sponsoring org of the engagement
+  },
+  AFFILIATIONS: {
+    NAME: 'fldlwsKjbEWJcNhac',                  // "Affiliation" (primary — "Human — Organization")
+    HUMAN: 'flddIAJbRhfDQrQfM',                 // "Human" (linked → Humans)
+    ORGANIZATION: 'fld1y5NBaZYEheErR',          // "Organization" (linked → Organizations)
+    TYPE: 'fldxLNcuIsRjRhh0w',                  // "Affiliation Type" (singleSelect: employee | contractor | member | client | founder | alum | other)
+    STATUS: 'fld7SyapFgro3Nfxt',               // "Status" (singleSelect: Active | Inactive | Paused | Ended)
+    START_DATE: 'fldSchdRv21IqZFmH',            // "Start Date"
+    END_DATE: 'fldHDJYCPQ6rtzHOv',              // "End Date"
+    TITLE_AT_ORG: 'fldsITrAhiVNTSoLD',          // "Title at Org" (singleLineText)
+    PRIMARY: 'fldSWodkiPZ2tQq3Z',               // "Primary" (checkbox — the human's primary/current org)
   },
   INTERACTIONS: {
     TITLE: 'fldAk4BCE60mYBv4I',                 // "Subject"
@@ -158,6 +171,7 @@ export const FIELDS = {
     NOTES_LINKED: 'fldtaUHrHe079g2iz',                            // "Notes" (multipleRecordLinks → Notes)
     TASKS_LINKED: 'fldeWGoSfUIqV3CbE',                            // "Tasks" (multipleRecordLinks → Tasks)
     CONNECTED_CALENDARS: 'fld7aipXZ3XzINu0p',                     // "Connected Calendars" (multipleRecordLinks)
+    AFFILIATIONS: 'fldst9Sb7WWifXrtw',                            // "Affiliations" (multipleRecordLinks → Affiliations)
     RELATIONSHIP_CONTEXTS_CLIENT: 'fldXDcLMxY0q87gwE',            // "Relationship Contexts (Client)" — human is coachee
     RELATIONSHIP_CONTEXTS_COACH: 'fldFabqxT4dx63zeK',             // "Relationship Contexts (Coach)" — human is lead
     LAST_MODIFIED: 'fldAAzvWFfJSpUs93',                           // "Last Modified" (lastModifiedTime)

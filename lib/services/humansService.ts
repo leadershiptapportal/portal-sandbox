@@ -1,5 +1,6 @@
 import { getAllHumans, getHumanById as fetchHumanById } from "@/lib/airtable/humans";
 import { getRelationshipContexts } from "@/lib/airtable/relationships";
+import { enrichHumansWithAffiliations } from "@/lib/airtable/affiliations";
 import type { Human } from "@/lib/types";
 import type { SessionUser } from "@/lib/auth/getSessionUser";
 
@@ -58,24 +59,27 @@ export async function getHumans(
   const deduped = deduplicateHumans(all)
 
   if (filterByCoachId) {
-    return deduped.filter((h) => h.coachIds?.includes(filterByCoachId))
+    return enrichHumansWithAffiliations(deduped.filter((h) => h.coachIds?.includes(filterByCoachId)))
   }
 
-  if (!sessionUser || sessionUser.role === 'admin') return deduped;
+  if (!sessionUser || sessionUser.role === 'admin') return enrichHumansWithAffiliations(deduped);
 
   const coachRecord = deduped.find(
     (h) => h.workEmail?.toLowerCase() === sessionUser.email.toLowerCase(),
   );
 
-  if (!coachRecord) return deduped;
+  if (!coachRecord) return enrichHumansWithAffiliations(deduped);
 
   const scoped = deduped.filter((h) => h.coachIds?.includes(coachRecord.id));
 
-  return scoped.length > 0 ? scoped : deduped;
+  return enrichHumansWithAffiliations(scoped.length > 0 ? scoped : deduped);
 }
 
 export async function getHumanById(id: string): Promise<Human | null> {
-  return fetchHumanById(id);
+  const human = await fetchHumanById(id);
+  if (!human) return null;
+  const [enriched] = await enrichHumansWithAffiliations([human]);
+  return enriched;
 }
 
 /**
@@ -99,10 +103,11 @@ export async function getHumansByRelationship(coachAirtableId: string): Promise<
   const nameOf = (h: Human) =>
     (h.fullName ?? ([h.firstName, h.lastName].filter(Boolean).join(' ') || h.workEmail || '')).toLowerCase()
 
-  return humans.sort((a, b) => {
+  const sorted = humans.sort((a, b) => {
     const diff = typeOrder(a.id) - typeOrder(b.id)
     return diff !== 0 ? diff : nameOf(a).localeCompare(nameOf(b))
   })
+  return enrichHumansWithAffiliations(sorted)
 }
 
 /**

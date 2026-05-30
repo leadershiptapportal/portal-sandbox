@@ -23,6 +23,12 @@ import {
   type UpdateRCInput,
   type RelationshipType,
 } from '@/lib/airtable/relationships'
+import {
+  getAffiliationsForHuman,
+  createAffiliation,
+  updateAffiliation,
+  pickPrimaryAffiliation,
+} from '@/lib/airtable/affiliations'
 
 // ── Edit Profile ──────────────────────────────────────────────────────────────
 
@@ -40,6 +46,35 @@ export async function updateProfileAction(
     console.error('[updateProfileAction] error:', err)
     const msg = err instanceof Error ? err.message : String(err)
     return { error: msg.includes('Airtable PATCH failed') ? msg : 'Failed to update profile — please try again' }
+  }
+}
+
+/**
+ * Sets a human's primary organization by upserting their primary affiliation.
+ * Backs the single "Organization" control on the Edit Profile dialog while the
+ * full multi-affiliation editor is built out. Affiliations are the source of
+ * truth — the flat Humans.Organization link is no longer written.
+ */
+export async function setPrimaryOrgAction(
+  humanId: string,
+  organizationId: string,
+): Promise<{ success: true } | { error: string }> {
+  try {
+    const affiliations = await getAffiliationsForHuman(humanId)
+    const primary = pickPrimaryAffiliation(affiliations)
+
+    if (primary) {
+      if (primary.organizationId !== organizationId) {
+        await updateAffiliation(primary.id, { organizationId, primary: true })
+      }
+    } else {
+      await createAffiliation({ humanId, organizationId, primary: true, status: 'Active' })
+    }
+    revalidatePath(`/myhumans/${humanId}`)
+    return { success: true }
+  } catch (err) {
+    console.error('[setPrimaryOrgAction] error:', err)
+    return { error: 'Failed to update organization — please try again' }
   }
 }
 
