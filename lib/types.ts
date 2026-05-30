@@ -26,6 +26,7 @@ export interface Affiliation {
   startDate?: string;   // YYYY-MM-DD
   endDate?: string;     // YYYY-MM-DD
   titleAtOrg?: string;
+  workCellAtOrg?: string;
   primary: boolean;
 }
 

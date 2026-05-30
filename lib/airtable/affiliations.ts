@@ -74,8 +74,25 @@ function mapRecord(
     startDate: (f[FIELDS.AFFILIATIONS.START_DATE] as string) ?? undefined,
     endDate: (f[FIELDS.AFFILIATIONS.END_DATE] as string) ?? undefined,
     titleAtOrg: (f[FIELDS.AFFILIATIONS.TITLE_AT_ORG] as string) ?? undefined,
+    workCellAtOrg: (f[FIELDS.AFFILIATIONS.WORK_CELL_AT_ORG] as string) ?? undefined,
     primary: f[FIELDS.AFFILIATIONS.PRIMARY] === true,
   }
+}
+
+/** Formats a tenure string ("2 years, 3 months" / "5 months") from a start date. */
+function formatTenure(startISO?: string): string | undefined {
+  if (!startISO) return undefined
+  const start = new Date(startISO)
+  if (Number.isNaN(start.getTime())) return undefined
+  const now = new Date()
+  let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth())
+  if (now.getDate() < start.getDate()) months -= 1
+  if (months < 0) return undefined
+  const years = Math.floor(months / 12)
+  const rem = months % 12
+  const yPart = years > 0 ? `${years} year${years !== 1 ? 's' : ''}` : ''
+  const mPart = rem > 0 ? `${rem} month${rem !== 1 ? 's' : ''}` : ''
+  return [yPart, mPart].filter(Boolean).join(', ') || 'Less than a month'
 }
 
 // ── Visibility / currency helpers ─────────────────────────────────────────────
@@ -211,10 +228,16 @@ export async function enrichHumansWithAffiliations(humans: Human[]): Promise<Hum
   return humans.map((h) => {
     const primary = primaryMap.get(h.id)
     if (!primary) return h
+    // Affiliation is authoritative for org-context fields; fall back to whatever
+    // is still on the Human record (legacy values not yet migrated).
     return {
       ...h,
       organizationName: primary.organizationName ?? h.organizationName,
       organizationLinkedIds: [primary.organizationId],
+      title: primary.titleAtOrg ?? h.title,
+      workCellNumber: primary.workCellAtOrg ?? h.workCellNumber,
+      startDate: primary.startDate ?? h.startDate,
+      timeAtOrganization: formatTenure(primary.startDate) ?? h.timeAtOrganization,
     }
   })
 }
@@ -229,6 +252,7 @@ export interface CreateAffiliationInput {
   startDate?: string
   endDate?: string
   titleAtOrg?: string
+  workCellAtOrg?: string
   primary?: boolean
 }
 
@@ -255,6 +279,7 @@ export async function createAffiliation(input: CreateAffiliationInput): Promise<
   if (input.startDate) fields[FIELDS.AFFILIATIONS.START_DATE] = input.startDate
   if (input.endDate) fields[FIELDS.AFFILIATIONS.END_DATE] = input.endDate
   if (input.titleAtOrg) fields[FIELDS.AFFILIATIONS.TITLE_AT_ORG] = input.titleAtOrg
+  if (input.workCellAtOrg) fields[FIELDS.AFFILIATIONS.WORK_CELL_AT_ORG] = input.workCellAtOrg
   if (input.primary) fields[FIELDS.AFFILIATIONS.PRIMARY] = true
 
   const res = await airtableFetch(`${API_BASE}/${baseId}/${TABLE}`, {
@@ -273,6 +298,7 @@ export interface UpdateAffiliationInput {
   startDate?: string | null
   endDate?: string | null
   titleAtOrg?: string | null
+  workCellAtOrg?: string | null
   primary?: boolean
   organizationId?: string
 }
@@ -288,6 +314,7 @@ export async function updateAffiliation(
   if (input.startDate !== undefined) fields[FIELDS.AFFILIATIONS.START_DATE] = input.startDate
   if (input.endDate !== undefined) fields[FIELDS.AFFILIATIONS.END_DATE] = input.endDate
   if (input.titleAtOrg !== undefined) fields[FIELDS.AFFILIATIONS.TITLE_AT_ORG] = input.titleAtOrg
+  if (input.workCellAtOrg !== undefined) fields[FIELDS.AFFILIATIONS.WORK_CELL_AT_ORG] = input.workCellAtOrg
   if (input.primary !== undefined) fields[FIELDS.AFFILIATIONS.PRIMARY] = input.primary
   if (input.organizationId !== undefined) fields[FIELDS.AFFILIATIONS.ORGANIZATION] = [input.organizationId]
   if (Object.keys(fields).length === 0) return

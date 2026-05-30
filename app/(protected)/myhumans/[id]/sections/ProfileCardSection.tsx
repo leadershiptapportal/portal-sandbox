@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Mail, Clock, UserCheck, StickyNote, Cake, CalendarDays, Check, X, Plus, Pencil } from 'lucide-react'
+import { Mail, Clock, UserCheck, StickyNote, Cake, Check, X, Plus, Pencil } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -257,7 +257,7 @@ export default function ProfileCardSection({
 }: Props) {
   const router = useRouter()
 
-  async function saveDateField(field: 'Birthday' | 'Start Date', value: string) {
+  async function saveDateField(field: 'Birthday', value: string) {
     await updateProfileAction(user.id, { [field]: value })
     router.refresh()
   }
@@ -329,8 +329,8 @@ export default function ProfileCardSection({
             )}
           </div>
 
-          {/* Birthday + Start Date chips */}
-          {(userCanWrite || user.birthday || user.startDate) && (
+          {/* Birthday chip (Start Date is now managed per organization in the Organizations section) */}
+          {(userCanWrite || user.birthday) && (
             <div className="mt-2 flex flex-wrap gap-2">
               <InlineDateChip
                 icon={<Cake className="h-3 w-3" />}
@@ -339,14 +339,6 @@ export default function ProfileCardSection({
                 format="month-day"
                 canEdit={userCanWrite}
                 onSave={(v) => saveDateField('Birthday', v)}
-              />
-              <InlineDateChip
-                icon={<CalendarDays className="h-3 w-3" />}
-                value={user.startDate}
-                label="Start Date"
-                format="month-year"
-                canEdit={userCanWrite}
-                onSave={(v) => saveDateField('Start Date', v)}
               />
             </div>
           )}

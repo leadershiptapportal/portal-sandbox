@@ -61,6 +61,7 @@ export interface AddAffiliationInput {
   status?: AffiliationStatus
   startDate?: string
   titleAtOrg?: string
+  workCellAtOrg?: string
   primary?: boolean
 }
 
@@ -75,6 +76,7 @@ export async function addAffiliationAction(
       status: input.status,
       startDate: input.startDate,
       titleAtOrg: input.titleAtOrg,
+      workCellAtOrg: input.workCellAtOrg,
       primary: input.primary,
     })
     revalidatePath(`/myhumans/${input.subjectHumanId}`)
@@ -94,6 +96,7 @@ export interface AddAffiliationWithNewOrgInput {
   status?: AffiliationStatus
   startDate?: string
   titleAtOrg?: string
+  workCellAtOrg?: string
   primary?: boolean
 }
 
@@ -113,6 +116,7 @@ export async function addAffiliationWithNewOrgAction(
       status: input.status,
       startDate: input.startDate,
       titleAtOrg: input.titleAtOrg,
+      workCellAtOrg: input.workCellAtOrg,
       primary: input.primary,
     })
     revalidatePath(`/myhumans/${input.subjectHumanId}`)

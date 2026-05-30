@@ -59,6 +59,7 @@ export const FIELDS = {
     START_DATE: 'fldSchdRv21IqZFmH',            // "Start Date"
     END_DATE: 'fldHDJYCPQ6rtzHOv',              // "End Date"
     TITLE_AT_ORG: 'fldsITrAhiVNTSoLD',          // "Title at Org" (singleLineText)
+    WORK_CELL_AT_ORG: 'fldZ0uw8O1LudctVs',      // "Work Cell at Org" (phoneNumber — moved off Humans)
     PRIMARY: 'fldSWodkiPZ2tQq3Z',               // "Primary" (checkbox — the human's primary/current org)
   },
   INTERACTIONS: {
@@ -137,11 +138,11 @@ export const FIELDS = {
     FIRST_NAME: 'fldOGveomFlCV6DjD',                               // "First Name"
     LAST_NAME: 'fldJh2vuJqYkyyZqx',                                // "Last Name"
     WORK_EMAIL: 'fldlL8HrXCnd3K4KL',                               // "Work Email"
-    TITLE: 'fldVwZtWoJjZp920l',                                    // "Title"
+    TITLE: 'fldVwZtWoJjZp920l',                                    // "[Deprecated] Title" — moved to Affiliations.Title at Org; read as fallback only
     ROLE: 'fldaSnC1UCEukV8Um',                                     // "Role"
-    ORGANIZATION_NAME: 'fldHd3omMw7PUAWNJ',                         // "Organization Name (from Organization)" lookup
+    ORGANIZATION_NAME: 'fldHd3omMw7PUAWNJ',                         // "[Deprecated] Company Name (from Company)" lookup — org name now from primary Affiliation; fallback only
     PROFILE_PHOTO: 'fldHj7YBmed6S8s58',                            // "Profile Photo"
-    TIME_AT_ORGANIZATION: 'fldi1Ez09JdS0tjnb',                      // "Time at Organization"
+    TIME_AT_ORGANIZATION: 'fldi1Ez09JdS0tjnb',                      // "[Deprecated] Time at Company" — tenure now derived from Affiliations.Start Date
     COACH: 'fld4kKouAYi5plNVL',                                    // "Coach"
     TEAM_LEAD: 'fldRyJGLnzfoZlIpN',                                // "Team Lead"
     QUICK_NOTES: 'fldduqJaVzxE9u6IP',                              // "Quick Notes"
@@ -161,11 +162,11 @@ export const FIELDS = {
     CONFLICT_POSTURE: 'fldCD4HvwKE5SXXLE',                         // "Conflict Posture"
     APOLOGY_LANGUAGE: 'fldVEQ4DZuTARM3ST',                         // "Apology Language"
     STRENGTHS: 'fldcQe5diYYsoThxi',                                // "Strengths"
-    ORGANIZATION: 'fldUu6I5aaiIhTVj6',                              // "Organization" (linked → Organizations)
+    ORGANIZATION: 'fldUu6I5aaiIhTVj6',                              // "[Deprecated] Company" (linked → Organizations) — replaced by Affiliations; org fallback only
     BIRTHDAY: 'flde4V2mmmYv0dMME',                                 // "Birthday"
-    WORK_CELL_NUMBER: 'fldZIvMj9ggKNAHwO',                         // "Work Cell Number"
+    WORK_CELL_NUMBER: 'fldZIvMj9ggKNAHwO',                         // "[Deprecated] Work Cell Number" — moved to Affiliations.Work Cell at Org; fallback only
     PERSONAL_CELL_NUMBER: 'fldV3990UGnVEdSQL',                     // "Personal Cell Number"
-    START_DATE: 'fldgDu0FAVHCEtp0w',                               // "Start Date"
+    START_DATE: 'fldgDu0FAVHCEtp0w',                               // "[Deprecated] Start Date" — org hire date moved to Affiliations.Start Date; fallback only
     // Linked record fields on Humans (not the singleLineText lookup variants)
     MEETINGS_LINKED: 'fldPvW5FXxWUiiI8F',                         // "Meetings" (multipleRecordLinks → Meetings)
     NOTES_LINKED: 'fldtaUHrHe079g2iz',                            // "Notes" (multipleRecordLinks → Notes)

@@ -146,20 +146,18 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [preferredName, setPreferredName] = useState('')
-  const [title, setTitle] = useState('')
   const [workEmail, setWorkEmail] = useState('')
 
   // ── Personal Info ─────────────────────────────────────────────────────────────
   const [birthday, setBirthday] = useState('')
-  const [startDate, setStartDate] = useState('')
 
-  // Coach, Team Lead, and Organization removed — those are managed in their own
-  // profile sections (RelationshipsSection / AffiliationsSection), which write to
-  // the canonical Relationship Contexts and Affiliations tables.
+  // Coach, Team Lead, Organization, Title, Work Cell, and Start Date removed —
+  // those are managed in their own profile sections (RelationshipsSection /
+  // AffiliationsSection), which write to the canonical Relationship Contexts and
+  // Affiliations tables.
   const [role, setRole] = useState('')
 
   // ── Contact ───────────────────────────────────────────────────────────────────
-  const [workCellNumber, setWorkCellNumber] = useState('')
   const [personalCellNumber, setPersonalCellNumber] = useState('')
 
   // ── Quick Notes ───────────────────────────────────────────────────────────────
@@ -185,12 +183,9 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
     setFirstName(user.firstName ?? '')
     setLastName(user.lastName ?? '')
     setPreferredName(user.preferredName ?? '')
-    setTitle(user.title ?? '')
     setWorkEmail(user.workEmail ?? '')
     setBirthday(user.birthday ?? '')
-    setStartDate(user.startDate ?? '')
     setRole(user.role ?? '')
-    setWorkCellNumber(user.workCellNumber ?? '')
     setPersonalCellNumber(user.personalCellNumber ?? '')
     setQuickNotes(initialQuickNotes ?? '')
     setEnneagramId(user.enneagramIds?.[0] ?? '')
@@ -273,11 +268,8 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
     if (firstName !== (user.firstName ?? '')) patch['First Name'] = firstName
     if (lastName !== (user.lastName ?? '')) patch['Last Name'] = lastName
     if (preferredName !== (user.preferredName ?? '')) patch['Preferred Name'] = preferredName
-    if (title !== (user.title ?? '')) patch['Title'] = title
     if (workEmail !== (user.workEmail ?? '')) patch['Work Email'] = workEmail
     if (birthday !== (user.birthday ?? '')) patch['Birthday'] = birthday
-    if (startDate !== (user.startDate ?? '')) patch['Start Date'] = startDate
-    if (workCellNumber !== (user.workCellNumber ?? '')) patch['Work Cell Number'] = workCellNumber
     if (personalCellNumber !== (user.personalCellNumber ?? '')) patch['Personal Cell Number'] = personalCellNumber
     if (role !== (user.role ?? '')) patch['Role'] = role
 
@@ -389,9 +381,11 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
                   <Field label="First Name" half><input className={inputCls} value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" disabled={saving} /></Field>
                   <Field label="Last Name" half><input className={inputCls} value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Smith" disabled={saving} /></Field>
                   <Field label="Preferred Name" half><input className={inputCls} value={preferredName} onChange={(e) => setPreferredName(e.target.value)} placeholder="e.g. Jay" disabled={saving} /></Field>
-                  <Field label="Title" half><input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="VP of Operations" disabled={saving} /></Field>
                   <Field label="Work Email"><input className={inputCls} type="email" value={workEmail} onChange={(e) => setWorkEmail(e.target.value)} placeholder="jane@company.com" disabled={saving} /></Field>
                 </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Title, work cell, and start date are managed per organization in the Organizations section.
+                </p>
               </Section>
 
               {/* ── Section 3: Personal Info ────────────────────────────── */}
@@ -399,9 +393,6 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="Birthday" half>
                     <input className={inputCls} type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} disabled={saving} />
-                  </Field>
-                  <Field label="Start Date" half>
-                    <input className={inputCls} type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={saving} />
                   </Field>
                 </div>
               </Section>
@@ -425,9 +416,6 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
               {/* ── Section 5: Contact ───────────────────────────────────── */}
               <Section title="Contact">
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Work Cell Number" half>
-                    <input className={inputCls} type="tel" value={workCellNumber} onChange={(e) => setWorkCellNumber(e.target.value)} placeholder="+1 555 000 0000" disabled={saving} />
-                  </Field>
                   <Field label="Personal Cell Number" half>
                     <input className={inputCls} type="tel" value={personalCellNumber} onChange={(e) => setPersonalCellNumber(e.target.value)} placeholder="+1 555 000 0000" disabled={saving} />
                   </Field>

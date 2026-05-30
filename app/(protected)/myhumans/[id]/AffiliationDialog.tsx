@@ -51,6 +51,7 @@ interface EditProps {
   initialStartDate?: string
   initialEndDate?: string
   initialTitleAtOrg?: string
+  initialWorkCellAtOrg?: string
   initialPrimary: boolean
   trigger?: React.ReactNode
 }
@@ -100,6 +101,9 @@ export default function AffiliationDialog(props: Props) {
   const [titleAtOrg, setTitleAtOrg] = useState(
     props.mode === 'edit' ? (props.initialTitleAtOrg ?? '') : '',
   )
+  const [workCellAtOrg, setWorkCellAtOrg] = useState(
+    props.mode === 'edit' ? (props.initialWorkCellAtOrg ?? '') : '',
+  )
   const [startDate, setStartDate] = useState(
     props.mode === 'edit' ? (props.initialStartDate ?? '') : '',
   )
@@ -118,6 +122,7 @@ export default function AffiliationDialog(props: Props) {
       setType('employee')
       setStatus('Active')
       setTitleAtOrg('')
+      setWorkCellAtOrg('')
       setStartDate('')
       setEndDate('')
       setPrimary(false)
@@ -125,6 +130,7 @@ export default function AffiliationDialog(props: Props) {
       setType(props.initialType)
       setStatus(props.initialStatus)
       setTitleAtOrg(props.initialTitleAtOrg ?? '')
+      setWorkCellAtOrg(props.initialWorkCellAtOrg ?? '')
       setStartDate(props.initialStartDate ?? '')
       setEndDate(props.initialEndDate ?? '')
       setPrimary(props.initialPrimary)
@@ -147,6 +153,7 @@ export default function AffiliationDialog(props: Props) {
             status,
             startDate: startDate || undefined,
             titleAtOrg: titleAtOrg.trim() || undefined,
+            workCellAtOrg: workCellAtOrg.trim() || undefined,
             primary,
           })
           if (!result.success) { setError(result.error ?? 'Failed to add.'); setSaving(false); return }
@@ -161,6 +168,7 @@ export default function AffiliationDialog(props: Props) {
             status,
             startDate: startDate || undefined,
             titleAtOrg: titleAtOrg.trim() || undefined,
+            workCellAtOrg: workCellAtOrg.trim() || undefined,
             primary,
           })
           if (!result.success) { setError(result.error ?? 'Failed to create.'); setSaving(false); return }
@@ -183,6 +191,7 @@ export default function AffiliationDialog(props: Props) {
           startDate: startDate || null,
           endDate: endDate || null,
           titleAtOrg: titleAtOrg.trim() || null,
+          workCellAtOrg: workCellAtOrg.trim() || null,
           primary,
         },
       })
@@ -349,6 +358,19 @@ export default function AffiliationDialog(props: Props) {
                 onChange={(e) => setTitleAtOrg(e.target.value)}
                 disabled={saving}
                 placeholder="e.g. VP of Operations"
+              />
+            </div>
+
+            {/* Work cell at org */}
+            <div className="space-y-1.5">
+              <Label htmlFor="aff-workcell">Work cell at organization</Label>
+              <Input
+                id="aff-workcell"
+                type="tel"
+                value={workCellAtOrg}
+                onChange={(e) => setWorkCellAtOrg(e.target.value)}
+                disabled={saving}
+                placeholder="+1 555 000 0000"
               />
             </div>
 

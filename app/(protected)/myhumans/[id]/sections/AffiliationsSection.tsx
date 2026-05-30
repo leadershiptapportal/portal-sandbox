@@ -80,6 +80,7 @@ function AffiliationPill({
           initialStartDate={affiliation.startDate}
           initialEndDate={affiliation.endDate}
           initialTitleAtOrg={affiliation.titleAtOrg}
+          initialWorkCellAtOrg={affiliation.workCellAtOrg}
           initialPrimary={affiliation.primary}
           trigger={
             <button
