@@ -1,22 +1,25 @@
 # LeadershipTap Portal
 
-An internal coaching portal for a small leadership team. Built with Next.js 16, Clerk authentication, and Airtable as the data source.
+An internal coaching portal for the LeadershipTap team. Coaches use it to track client relationships, session notes, interactions, and follow-up tasks. Built with Next.js, Clerk, and Airtable.
 
 ## Stack
 
-- **Framework**: Next.js 16 (App Router, TypeScript)
-- **Auth**: Clerk (Microsoft 365 / Google SSO)
-- **Calendar**: Microsoft Graph API (app-only, reads coach calendar events)
-- **Data**: Airtable (server-side only — API key never exposed to browser)
-- **UI**: Tailwind CSS + shadcn/ui
-- **File uploads**: Cloudinary (profile photos)
-- **Hosting**: Render
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router, TypeScript, React 19) |
+| Auth | Clerk v7 (Microsoft 365 / Google SSO) |
+| Calendar | Microsoft Graph API (app-only, reads coach calendar events) |
+| Data | Airtable (server-side only — API key never reaches the browser) |
+| UI | Tailwind CSS v4 + shadcn/ui (Radix) |
+| Canvas notes | tldraw + perfect-freehand |
+| File uploads | Cloudinary (profile photos, ink images) |
+| Hosting | Render (web service + hourly cron) |
 
 ## Prerequisites
 
 - Node.js 18+
 - A [Clerk](https://clerk.com) account with an application created
-- An [Airtable](https://airtable.com) base with the LeadershipTap schema and a Personal Access Token
+- An Airtable base with the LeadershipTap schema and a Personal Access Token
 - An Azure app registration with `Calendars.Read` (application permission) granted
 
 ## Getting Started
@@ -45,16 +48,16 @@ NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
 
 # Microsoft Graph (calendar sync only)
-AZURE_TENANT_ID=...               # Azure AD tenant ID
-AZURE_CLIENT_ID=...               # App registration client ID
-AZURE_CLIENT_SECRET=...           # App registration client secret
+AZURE_TENANT_ID=...
+AZURE_CLIENT_ID=...
+AZURE_CLIENT_SECRET=...
 
 # Calendar sync tuning (optional — defaults shown)
 SYNC_SECRET=...                   # Shared secret for cron-triggered syncs
-SYNC_PAST_DAYS=90                 # How far back to sync (default 90)
-SYNC_FUTURE_DAYS=60               # How far forward to sync (default 60)
+SYNC_PAST_DAYS=90
+SYNC_FUTURE_DAYS=60
 
-# Cloudinary (profile photo uploads)
+# Cloudinary (profile photo and ink image uploads)
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=...
 CLOUDINARY_UPLOAD_PRESET=...
 ```
@@ -75,53 +78,46 @@ Open [http://localhost:3000](http://localhost:3000). You will be redirected to `
 
 | Table | Purpose |
 |---|---|
-| **Users** | All people — coaches, admins, clients. `Role` field distinguishes them. |
-| **Portal Calendar Events** | Active calendar table. Synced from Microsoft Graph via `/api/calendar/sync`. Fields: Subject, Start, End, Provider Event ID, Participant Emails, Notes, Note Name. |
-| **Calendar Events** | Archived — historical snapshot only. Never queried by the portal. |
-| **Relationship Contexts** | Per coach ↔ client pair: type (`coaching` or `reports_to`), status, start date. One row per pair. The join table for everything coach-scoped. |
-| **Coach-Person Context** | Legacy per coach ↔ client pair: Quick Notes, Family Details. Still read/written but not in spec v2. |
-| **Coach Session** | Legacy per coach ↔ meeting pair: Session Notes, Action Items. Still read/written but not in spec v2. |
-| **Notes** | RC-scoped coaching notes with Author Person, Subject Person, Relationship Context anchors. The spec v2 canonical notes store. |
+| **Humans** | All people — coaches, admins, clients. `Role` field distinguishes them. |
+| **Portal Calendar Events** | Active calendar table. Synced from Microsoft Graph via `/api/calendar/sync`. |
+| **Relationship Contexts** | Per coach ↔ client pair: type (`coaching` or `reports_to`), status, start date. The join table for all coach-scoped queries. |
+| **Interactions** | Logged sessions between a coach and client, linked to a meeting or created manually. |
+| **Notes** | All coaching notes — general context, prep notes, meeting notes — anchored to a Relationship Context. |
 | **Messages** | Follow-up email drafts. Status: `"Pending"` or `"Sent"` (never `"Draft"`). |
 | **Tasks** | Portal action items linked to clients. |
-| **Companies** | Company records linked from Users. |
-| **Permission Profiles** | Single "standard" profile record used as a scaffold for v2 permission model. |
-| **Enneagram / 16Personalities / Conflict Postures / Apology Languages / Strengths** | Lookup tables for personality fields. |
+| **Companies** | Company records linked from Humans. |
+| **Connected Calendars** | OAuth calendar connections per coach (for future calendar sync improvements). |
+| **Permission Profiles** | Single "standard" profile record — scaffold for v2 permission model. |
+| **Enneagram / 16Personalities / Conflict Postures / Apology Languages / Strengths** | Lookup tables for personality fields on Human profiles. |
+| **Calendar Events** | Archived — historical snapshot only. Never queried by the portal. |
 
-### Auth layers
+### Auth
 
-There are two separate auth systems that never interact:
+**Clerk** handles app login. Every browser session is authenticated via Clerk. `getCurrentUserRecord()` resolves the Clerk session to an Airtable Human record by email. Role (`admin` / `coach`) comes from Clerk `publicMetadata.role` as the source of truth.
 
-**Clerk** — app login. Every browser session is authenticated via Clerk. `getCurrentUserRecord()` resolves the Clerk session to an Airtable Users record by email. Role (`admin` / `coach`) comes from Clerk `publicMetadata.role` as the source of truth.
-
-**Microsoft Graph** — calendar data only. Uses client credentials (app-only) flow — no user login required. Called exclusively from the `/api/calendar/sync` route handler. The access token is never stored; it is fetched fresh on each sync.
+**Microsoft Graph** is used for calendar data only, via client credentials (app-only) flow — no user OAuth needed. Called exclusively from `/api/calendar/sync`. The access token is fetched fresh on each sync and never stored.
 
 ### Note model
 
-Notes live in three places depending on their scope:
+Notes always go to the **Notes** table, anchored to a Relationship Context. `Note Type` determines the kind:
 
-| Scope | Table | When to use |
-|---|---|---|
-| General client facts | **Users** record | Persistent profile fields (name, birthday, etc.) |
-| Coach ↔ client context | **Coach-Person Context** | Quick Notes, Family Details — per coach/person pair (legacy) |
-| Session notes | **Coach Session** | Notes captured during or after a specific meeting (legacy) |
-| All scoped notes | **Notes** | RC-anchored notes — the spec v2 canonical store |
-
-Session notes written via the dashboard note panel go to the **Notes** table with `Note Type = meeting_note` and a Meeting link. Coach Session records are legacy and not written to for new sessions.
+| Note Type | When used |
+|---|---|
+| `general_context` | General coaching notes from the dashboard or profile |
+| `meeting_note` | Notes attached to a specific interaction/meeting |
+| `prep_note` | Pre-session preparation notes |
 
 ### View modes
 
-Coaches can toggle between **Coach View** (sees only their own clients) and **Admin View** (sees all clients). The toggle is in the sidebar.
+Coaches can toggle between **Coach View** (own clients only) and **Admin View** (all clients). The toggle is in the sidebar.
 
-- The current mode is stored in the `lt_view_mode` cookie (readable server-side).
-- `ViewModeProvider` (client) syncs the cookie with `localStorage` and exposes `useViewMode()`.
-- Server components read the cookie directly via `next/headers` cookies to filter data before rendering.
+- Current mode is stored in the `lt_view_mode` cookie (readable server-side).
+- `ViewModeProvider` (client component) syncs the cookie with `localStorage` and exposes `useViewMode()`.
+- Server components read the cookie directly via `next/headers` to filter data before rendering.
 
 ### Calendar sync
 
-`POST /api/calendar/sync` fetches events for all `@leadershiptap.com` coach accounts from the Airtable Users table, syncing from `SYNC_PAST_DAYS` days back to `SYNC_FUTURE_DAYS` days ahead, then upserts them into Portal Calendar Events using `Provider Event ID` as the stable identity key. Events are only synced if the attendee has an active Relationship Context with the calendar owner.
-
-The sync runs hourly as a Render cron job (`render.yaml`) and can also be triggered manually from the Settings page (Clerk session auth) or via the `SYNC_SECRET` header.
+`POST /api/calendar/sync` fetches events for all `@leadershiptap.com` coaches from Microsoft Graph and upserts them into Portal Calendar Events using `Provider Event ID` as the dedup key. It runs hourly via a Render cron job and can be triggered manually from the Settings page.
 
 ---
 
@@ -130,55 +126,92 @@ The sync runs hourly as a Render cron job (`render.yaml`) and can also be trigge
 ```
 app/
 ├── (protected)/
-│   ├── layout.tsx            # ViewModeProvider + auth
-│   ├── dashboard/            # Main dashboard
-│   ├── users/
-│   │   ├── page.tsx          # Clients directory
-│   │   └── [id]/
-│   │       ├── page.tsx      # Client profile
-│   │       └── sessions/[meetingId]/   # Session detail
-│   ├── people/               # New person onboarding
-│   ├── meetings/[id]/        # Meeting detail (coach-view)
-│   ├── sessions/             # Sessions list
-│   ├── settings/             # Settings + manual calendar sync trigger
-│   └── admin/                # Admin-only pages
+│   ├── layout.tsx                  # ViewModeProvider + auth wrapper
+│   ├── dashboard/                  # Main coaching dashboard
+│   ├── myhumans/                   # People directory
+│   │   ├── page.tsx                # Grid of coach's clients
+│   │   └── [id]/                   # Person profile
+│   │       ├── page.tsx
+│   │       ├── interactions/       # Interaction detail view
+│   │       ├── take-notes/         # Split-panel session note-taking (typed + canvas)
+│   │       ├── messages/           # Message drafts for this person
+│   │       └── notes/              # Notes list for this person
+│   ├── interactions/               # All interactions list
+│   ├── meetings/                   # Calendar meetings list
+│   │   └── [eventId]/              # Meeting detail
+│   ├── people/
+│   │   └── new/                    # New person onboarding form
+│   ├── settings/                   # Account settings + calendar setup
+│   └── admin/                      # Admin-only pages (profiles, relationships, users)
 ├── api/
-│   ├── calendar/sync/        # Microsoft Graph → Airtable upsert
-│   ├── upload-photo/         # Cloudinary → Airtable avatar
-│   └── upload-image/         # Cloudinary generic image upload
+│   ├── calendar/sync/              # Microsoft Graph → Portal Calendar Events upsert
+│   ├── humans/                     # Human record CRUD
+│   ├── notes/                      # Notes CRUD
+│   ├── people/                     # People-related endpoints
+│   ├── permissions/                # Permission checks
+│   ├── search/                     # Global search
+│   ├── upload-photo/               # Cloudinary → Airtable avatar
+│   └── upload-image/               # Cloudinary generic image upload (ink notes)
 ├── context/
-│   └── ViewModeContext.tsx   # Coach/Admin view toggle
+│   └── ViewModeContext.tsx         # Coach/Admin view toggle
 └── actions/
-    └── viewMode.ts           # Server action: set lt_view_mode cookie
+    └── viewMode.ts                 # Server action: set lt_view_mode cookie
 
 lib/
-├── airtable/                 # Low-level Airtable fetch functions (no SDK)
-│   ├── users.ts
-│   ├── meetings.ts
-│   ├── relationships.ts      # Relationship Contexts CRUD + resolveContextForSubject
-│   ├── notes.ts
-│   ├── tasks.ts
-│   ├── messages.ts
-│   ├── coachPersonContext.ts
-│   ├── coachSessions.ts
-│   ├── constants.ts          # Field name constants
-│   └── schema.generated.ts  # Auto-generated field IDs (run dump-airtable-schema.ts to refresh)
-├── graph/                    # Microsoft Graph helpers
-│   ├── auth.ts               # getGraphAccessToken (client credentials)
-│   └── calendar.ts           # fetchCalendarEvents
-├── services/                 # Business logic (uses lib/airtable/*)
-│   ├── usersService.ts
+├── airtable/                       # Low-level Airtable fetch functions (direct fetch, no SDK mutations)
+│   ├── humans.ts                   # Humans table CRUD
+│   ├── interactions.ts             # Interactions table
+│   ├── meetings.ts                 # Portal Calendar Events (single source of truth for meetings)
+│   ├── notes.ts                    # Notes table
+│   ├── messages.ts                 # Messages table
+│   ├── tasks.ts                    # Tasks table
+│   ├── relationships.ts            # Relationship Contexts CRUD + resolveContextForSubject
+│   ├── calendarEvents.ts           # Connected calendar events
+│   ├── connectedCalendars.ts       # OAuth calendar connections
+│   ├── permissionProfiles.ts       # Permission profiles lookup
+│   ├── constants.ts                # Field name string constants
+│   └── schema.generated.ts        # Auto-generated field IDs (run dump-airtable-schema.ts to refresh)
+├── microsoft/                      # Microsoft Graph helpers
+│   ├── auth.ts                     # getGraphAccessToken (client credentials flow)
+│   └── graph.ts                    # fetchCalendarEvents
+├── services/                       # Business logic layer (composes lib/airtable/*)
+│   ├── humansService.ts
+│   ├── interactionsService.ts
 │   ├── meetingsService.ts
 │   └── messagesService.ts
 └── auth/
-    ├── getCurrentUserRecord.ts   # Clerk → Airtable record resolver
+    ├── getCurrentUserRecord.ts     # Clerk session → Airtable Human record resolver
     ├── getSessionUser.ts
     ├── isAuthorized.ts
-    └── permissions.ts
+    ├── permissions.ts
+    ├── impersonation.ts
+    └── requireCurrentPortalPerson.ts
+
+components/                         # Shared UI components
+scripts/
+├── dump-airtable-schema.ts         # Regenerates lib/airtable/schema.generated.ts from live Airtable schema
+└── sync-calendar.mjs               # Entry point for the Render cron calendar sync job
+middleware.ts                       # Clerk route protection middleware
 ```
+
+---
+
+## Key Conventions
+
+- **All Airtable access is server-side only** — API key must never reach the browser.
+- **Mutations use direct `fetch()`** to the Airtable REST API — no SDK (SDK doesn't support PATCH cleanly).
+- **Server actions** live in `actions.ts` co-located with the page or component that uses them.
+- **Upsert pattern**: fetch existing record(s) → filter in JS → PATCH if found, POST if not. See `lib/airtable/relationships.ts` for the pattern.
+- **Never write to formula or read-only fields**: `Full Name`, `Calculation`, `Created`, `Company Name`, `Company ID`.
+- **Message status**: always `"Pending"` for unsent drafts. Never `"Draft"`.
+- **Profile photos** upload via browser → `/api/upload-photo` → Cloudinary → Airtable PATCH `Avatar URL`.
+
+---
 
 ## Deployment
 
-Hosted on **Render**. The web service auto-deploys on push to `main`. A separate Render cron job (`render.yaml`) runs `scripts/sync-calendar.mjs` hourly to keep calendar events up to date.
+Hosted on **Render**. The web service auto-deploys on push to `main`.
 
-Add all `.env.local` variables to the Render service's Environment tab. The `SYNC_SECRET` must match between the cron job env and the web service env.
+A separate Render cron job (`render.yaml`) runs `scripts/sync-calendar.mjs` hourly to keep Portal Calendar Events up to date. The cron job authenticates to the web service via the `SYNC_SECRET` header.
+
+Add all `.env.local` variables to the Render service's Environment tab. `SYNC_SECRET` must match between the cron job env and the web service env.
