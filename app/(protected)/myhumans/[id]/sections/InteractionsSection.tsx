@@ -100,11 +100,10 @@ export default function InteractionsSection({
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground/60 group-hover:text-muted-foreground flex-shrink-0 mt-1 transition-colors" />
                   </Link>
-                  {(lastMeeting.notes || lastMeeting.actionItems) && (
+                  {lastMeeting.notes && (
                     <div className="px-4 pb-4 border-t border-border">
                       <RecentInteractionCard
-                        notes={lastMeeting.notes ?? ''}
-                        actionItems={lastMeeting.actionItems ?? null}
+                        notes={lastMeeting.notes}
                       />
                     </div>
                   )}
@@ -133,11 +132,6 @@ export default function InteractionsSection({
                       </p>
                       <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         <p className="text-xs text-muted-foreground">{formatMeetingDate(m.startTime)}</p>
-                        {m.sessionStatus && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-muted text-muted-foreground border border-border">
-                            {m.sessionStatus}
-                          </span>
-                        )}
                       </div>
                       {m.notes ? (
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{m.notes}</p>

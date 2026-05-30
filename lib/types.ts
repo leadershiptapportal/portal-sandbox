@@ -10,13 +10,9 @@ export interface User {
   preferredName?: string;
   firstName?: string;
   lastName?: string;
-  email: string;
   workEmail?: string;
-  jobTitle?: string;
   role?: string;
-  companyId?: string;
   companyName?: string;
-  avatarUrl?: string;
   profilePhoto?: string;    // Airtable "Profile Photo" attachment (first URL)
   timeAtCompany?: string;   // text field
   coachIds?: string[];      // linked record IDs → Coach(es)
@@ -24,7 +20,6 @@ export interface User {
 
   // Coaching context
   quickNotes?: string;
-  familyDetails?: string;
 
   // Personality & Strengths (lookup fields — read only)
   enneagramType?: string;            // "Enneagram Type (from Enneagram)"
@@ -38,8 +33,6 @@ export interface User {
   strengths?: Array<{ name: string; domain?: string }>;
 
   // Org / Team
-  managerIds?: string[];       // linked record IDs — first element is the manager
-  directReportIds?: string[];  // linked record IDs — all direct reports
   teamMemberIds?: string[];    // linked record IDs — team members
 
   // Session count via linked record field (avoids email matching)
@@ -54,7 +47,6 @@ export interface User {
   companyLinkedIds?: string[]   // from the "Company" linked field
 
   // Extra contact fields
-  personalEmail?: string        // "Personal Email"
   birthday?: string             // "Birthday"
   workCellNumber?: string       // "Work Cell Number"
   personalCellNumber?: string   // "Personal Cell Number"
@@ -62,12 +54,8 @@ export interface User {
   // Legacy / misc
   enneagram?: string;
   mbti?: string;
-  department?: string;
   title?: string;        // maps to Airtable "Title" (distinct from "Job Title")
   startDate?: string;
-  engagementLevel?: string;
-  coachNotes?: string;
-  internalNotes?: string;  // Airtable "Internal Notes" — coaching context on Users table
   theme?: 'light' | 'dark' | 'system';  // User's preferred UI theme
 }
 
@@ -81,8 +69,6 @@ export interface Interaction {
   senderEmail?: string;
   participantEmails: string[];
   notes?: string;
-  sessionStatus?: string | null;
-  actionItems?: string | null;
   // Set during calendar sync when a participant matches a known Relationship Context
   humanName?: string;
   relationshipContextId?: string;

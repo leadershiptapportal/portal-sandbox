@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, Calendar, Clock, Users, CheckSquare, ClipboardList, NotebookPen, Pencil } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, Users, ClipboardList, NotebookPen, Pencil } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { getUserById } from '@/lib/services/usersService'
 import { getInteractionById } from '@/lib/airtable/interactions'
@@ -35,12 +35,6 @@ function formatTime(iso: string, timezone?: string): string {
   }, resolveDisplayTz(timezone))
 }
 
-const SESSION_STATUS_STYLES: Record<string, string> = {
-  Completed:  'bg-emerald-50 text-emerald-700 border-emerald-200',
-  Scheduled:  'bg-blue-50 text-blue-700 border-blue-200',
-  Cancelled:  'bg-rose-50 text-rose-700 border-rose-200',
-}
-
 export default async function InteractionDetailPage({ params, searchParams }: Props) {
   const { id, interactionId } = await params
   const { edit } = await searchParams
@@ -65,10 +59,6 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
     ? `${formatDateTime(interaction.startTime, tz)} – ${formatTime(interaction.endTime, tz)} ET`
     : `${formatDateTime(interaction.startTime, tz)} ET`
 
-  const statusStyle = interaction.sessionStatus
-    ? (SESSION_STATUS_STYLES[interaction.sessionStatus] ?? 'bg-muted text-muted-foreground border-border')
-    : null
-
   const takeNotesBase = `/myhumans/${id}/take-notes?interactionId=${interactionId}`
 
   return (
@@ -88,11 +78,6 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
           <h1 className="text-xl font-bold text-foreground leading-snug">
             {interaction.title || 'Untitled Interaction'}
           </h1>
-          {interaction.sessionStatus && statusStyle && (
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border flex-shrink-0 ${statusStyle}`}>
-              {interaction.sessionStatus}
-            </span>
-          )}
         </div>
 
         <div className="mt-4 space-y-2">
@@ -221,19 +206,6 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
           </div>
         )}
       </div>
-
-      {/* ── Action Items ──────────────────────────────────────────────────── */}
-      {interaction.actionItems && (
-        <div className="bg-card rounded-xl shadow-sm p-5 md:p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <CheckSquare className="h-4 w-4 text-amber-500" />
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Action Items</h2>
-          </div>
-          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-            {interaction.actionItems}
-          </p>
-        </div>
-      )}
 
     </div>
   )

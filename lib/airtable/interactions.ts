@@ -39,8 +39,6 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Int
     senderEmail: undefined,
     participantEmails: parseEmails(record.fields[FIELDS.INTERACTIONS.ATTENDEES]),
     notes: (record.fields[FIELDS.INTERACTIONS.NOTES_TEXT] as string) || undefined,
-    sessionStatus: null,
-    actionItems: null,
     humanName: (record.fields[FIELDS.INTERACTIONS.CLIENT_NAME] as string) || undefined,
     relationshipContextId: firstLinkedId(record.fields[FIELDS.INTERACTIONS.RELATIONSHIP_CONTEXT]),
     interactionType: (record.fields[FIELDS.INTERACTIONS.INTERACTION_TYPE] as string) || undefined,

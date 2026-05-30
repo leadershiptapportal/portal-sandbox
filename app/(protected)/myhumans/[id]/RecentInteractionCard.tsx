@@ -6,10 +6,9 @@ const NOTES_PREVIEW_CHARS = 300
 
 interface Props {
   notes: string
-  actionItems: string | null
 }
 
-export default function RecentInteractionCard({ notes, actionItems }: Props) {
+export default function RecentInteractionCard({ notes }: Props) {
   const [expanded, setExpanded] = useState(false)
 
   const needsTruncation = notes.length > NOTES_PREVIEW_CHARS
@@ -36,17 +35,6 @@ export default function RecentInteractionCard({ notes, actionItems }: Props) {
         )}
       </div>
 
-      {/* Action Items */}
-      {actionItems && (
-        <div className="rounded-lg bg-amber-50 border border-amber-100 px-3 py-2.5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-600 mb-1">
-            Action Items
-          </p>
-          <p className="text-sm text-amber-900 whitespace-pre-wrap leading-relaxed">
-            {actionItems}
-          </p>
-        </div>
-      )}
     </div>
   )
 }
