@@ -5,6 +5,7 @@ import type { Affiliation } from '@/lib/types'
 interface OrgOption {
   id: string
   name: string
+  logo?: string
 }
 
 interface Props {
@@ -12,6 +13,24 @@ interface Props {
   affiliations: Affiliation[]
   organizations: OrgOption[]
   canEdit: boolean
+}
+
+function OrgAvatar({ org, name }: { org?: OrgOption; name: string }) {
+  if (org?.logo) {
+    return (
+      <img
+        src={org.logo}
+        alt={name}
+        className="w-8 h-8 rounded-full object-contain flex-shrink-0 bg-muted"
+      />
+    )
+  }
+  const initials = name.split(/\s+/).map((w) => w[0]).join('').toUpperCase().slice(0, 2)
+  return (
+    <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-semibold flex-shrink-0">
+      {initials}
+    </div>
+  )
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -28,18 +47,14 @@ function AffiliationPill({
   affiliation,
   subjectHumanId,
   canEdit,
+  orgOption,
 }: {
   affiliation: Affiliation
   subjectHumanId: string
   canEdit: boolean
+  orgOption?: OrgOption
 }) {
   const isInactive = affiliation.status !== 'Active'
-  const orgInitials = (affiliation.organizationName ?? '?')
-    .split(/\s+/)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
 
   return (
     <div
@@ -47,9 +62,7 @@ function AffiliationPill({
         isInactive ? 'border-border bg-muted/50 opacity-70' : 'border-border bg-card'
       }`}
     >
-      <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-semibold flex-shrink-0">
-        {orgInitials}
-      </div>
+      <OrgAvatar org={orgOption} name={affiliation.organizationName ?? '?'} />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
@@ -102,6 +115,8 @@ export default function AffiliationsSection({
   organizations,
   canEdit,
 }: Props) {
+  const orgById = new Map(organizations.map((o) => [o.id, o]))
+
   // Primary first, then active before inactive, then by org name.
   const sorted = [...affiliations].sort(
     (a, b) =>
@@ -136,6 +151,7 @@ export default function AffiliationsSection({
               affiliation={aff}
               subjectHumanId={subjectHumanId}
               canEdit={canEdit}
+              orgOption={orgById.get(aff.organizationId)}
             />
           ))}
         </div>

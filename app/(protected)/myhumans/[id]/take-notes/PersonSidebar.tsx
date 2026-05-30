@@ -55,7 +55,6 @@ interface BucketItem {
   rc: RelationshipContext
   otherPersonId: string
   otherName: string
-  otherTitle?: string
   role: 'coach' | 'coachee' | 'manager' | 'report' | 'client' | 'prospect' | 'personal' | 'peer'
 }
 
@@ -63,24 +62,23 @@ function classifyRelationship(rc: RelationshipContext, subjectId: string): Bucke
   const subjectIsPerson = rc.humanId === subjectId
   const otherPersonId = subjectIsPerson ? rc.leadId : rc.humanId
   const otherName     = subjectIsPerson ? rc.leadName : rc.humanName
-  const otherTitle    = subjectIsPerson ? rc.leadTitle : rc.humanTitle
   if (rc.relationshipType === 'coaching') {
-    return { rc, otherPersonId, otherName, otherTitle, role: subjectIsPerson ? 'coach' : 'coachee' }
+    return { rc, otherPersonId, otherName, role: subjectIsPerson ? 'coach' : 'coachee' }
   }
   if (rc.relationshipType === 'reports_to') {
-    return { rc, otherPersonId, otherName, otherTitle, role: subjectIsPerson ? 'manager' : 'report' }
+    return { rc, otherPersonId, otherName, role: subjectIsPerson ? 'manager' : 'report' }
   }
   if (rc.relationshipType === 'client') {
-    return { rc, otherPersonId, otherName, otherTitle, role: 'client' }
+    return { rc, otherPersonId, otherName, role: 'client' }
   }
   if (rc.relationshipType === 'prospect') {
-    return { rc, otherPersonId, otherName, otherTitle, role: 'prospect' }
+    return { rc, otherPersonId, otherName, role: 'prospect' }
   }
   if (rc.relationshipType === 'personal') {
-    return { rc, otherPersonId, otherName, otherTitle, role: 'personal' }
+    return { rc, otherPersonId, otherName, role: 'personal' }
   }
   if (rc.relationshipType === 'peer') {
-    return { rc, otherPersonId, otherName, otherTitle, role: 'peer' }
+    return { rc, otherPersonId, otherName, role: 'peer' }
   }
   return null
 }
@@ -553,9 +551,6 @@ function CompactRelationshipsSection({
                           />
                         )}
                       </div>
-                      {item.otherTitle && (
-                        <p className="text-[11px] text-muted-foreground truncate">{item.otherTitle}</p>
-                      )}
                       <CompactRCNote
                         rcId={item.rc.id}
                         subjectPersonId={item.otherPersonId}
@@ -885,18 +880,9 @@ export default function PersonSidebar({
               )}
             </div>
 
-            {/* Title (inline editable) */}
-            {userCanWrite ? (
-              <InlineText
-                label=""
-                value={displayTitle ?? ''}
-                placeholder="Add title…"
-                onSave={(v) => saveProfile({ 'Title': v })}
-              />
-            ) : (
-              displayTitle && (
-                <p className="text-xs text-muted-foreground">{displayTitle}</p>
-              )
+            {/* Title — read-only; managed via Organizations section */}
+            {displayTitle && (
+              <p className="text-xs text-muted-foreground">{displayTitle}</p>
             )}
 
             {/* Organization */}
@@ -925,15 +911,7 @@ export default function PersonSidebar({
                   onSave={(v) => saveProfile({ 'Birthday': v })}
                 />
               )}
-              {userCanWrite && (
-                <InlineDateField
-                  icon={<CalendarDays className="h-3 w-3" />}
-                  value={person.startDate}
-                  format="month-year"
-                  label="Start Date"
-                  onSave={(v) => saveProfile({ 'Start Date': v })}
-                />
-              )}
+              {/* Start Date is now on the Affiliation — read-only here */}
             </div>
             {person.timeAtOrganization && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground pt-0.5">

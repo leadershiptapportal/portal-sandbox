@@ -68,9 +68,6 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Hum
     associatedMeetingIds: Array.isArray(f[FIELDS.HUMANS.ASSOCIATED_MEETINGS])
       ? (f[FIELDS.HUMANS.ASSOCIATED_MEETINGS] as string[])
       : [],
-    teamMemberIds: Array.isArray(f[FIELDS.HUMANS.TEAM_MEMBERS])
-      ? (f[FIELDS.HUMANS.TEAM_MEMBERS] as string[])
-      : [],
     enneagramIds: Array.isArray(f[FIELDS.HUMANS.ENNEAGRAM])
       ? (f[FIELDS.HUMANS.ENNEAGRAM] as string[]) : [],
     mbtiIds: Array.isArray(f[FIELDS.HUMANS.MBTI])
@@ -84,10 +81,8 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Hum
     // organizationLinkedIds is now set by enrichHumansWithAffiliations(); starts empty
     organizationLinkedIds: [],
     birthday: f[FIELDS.HUMANS.BIRTHDAY] as string | undefined,
-    workCellNumber: f[FIELDS.HUMANS.WORK_CELL_NUMBER] as string | undefined,
+    // workCellNumber, title, startDate: now authoritative from Affiliations; set by enrichHumansWithAffiliations()
     personalCellNumber: f[FIELDS.HUMANS.PERSONAL_CELL_NUMBER] as string | undefined,
-    title: f[FIELDS.HUMANS.TITLE] as string | undefined,
-    startDate: f[FIELDS.HUMANS.START_DATE] as string | undefined,
     theme: (f[FIELDS.HUMANS.THEME] as 'light' | 'dark' | 'system' | undefined) || undefined,
   };
 }
@@ -123,14 +118,9 @@ export async function searchHumansByName(
 export interface CreateHumanFields {
   firstName?: string
   lastName?: string
-  title?: string
   workEmail?: string
   role?: string
   coachIds?: string[]
-  /** @deprecated Organizations are now modelled as Affiliations. Create an
-   *  Affiliation row (lib/airtable/affiliations.ts) instead of writing the flat
-   *  Humans.Organization link. Kept only for rollback; no caller should set it. */
-  organizationIds?: string[]
 }
 
 export async function createHumanRecord(fields: CreateHumanFields): Promise<string> {
@@ -140,11 +130,9 @@ export async function createHumanRecord(fields: CreateHumanFields): Promise<stri
     fields: {
       ...(fields.firstName ? { [FIELDS.HUMANS.FIRST_NAME]: fields.firstName } : {}),
       ...(fields.lastName ? { [FIELDS.HUMANS.LAST_NAME]: fields.lastName } : {}),
-      ...(fields.title ? { [FIELDS.HUMANS.TITLE]: fields.title } : {}),
       ...(fields.workEmail ? { [FIELDS.HUMANS.WORK_EMAIL]: fields.workEmail } : {}),
       ...(fields.role ? { [FIELDS.HUMANS.ROLE]: fields.role } : {}),
       ...(fields.coachIds?.length ? { [FIELDS.HUMANS.COACH]: fields.coachIds } : {}),
-      ...(fields.organizationIds?.length ? { [FIELDS.HUMANS.ORGANIZATION]: fields.organizationIds } : {}),
     },
   }
   console.log('[createHumanRecord] POST body:', JSON.stringify(body, null, 2))
@@ -164,27 +152,6 @@ export async function createHumanRecord(fields: CreateHumanFields): Promise<stri
   return data.id as string
 }
 
-export async function patchTeamMembers(
-  humanId: string,
-  memberIds: string[],
-): Promise<void> {
-  const { apiKey, baseId } = getCredentials()
-  const body = { fields: { [FIELDS.HUMANS.TEAM_MEMBERS]: memberIds } }
-  console.log('[patchTeamMembers] PATCH humanId:', humanId, 'body:', JSON.stringify(body))
-  const res = await airtableFetch(`${API_BASE}/${baseId}/${HUMANS_TABLE}/${humanId}`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  })
-  const data = await res.json()
-  console.log('[patchTeamMembers] status:', res.status, 'response:', JSON.stringify(data))
-  if (!res.ok) {
-    throw new Error(`Airtable PATCH failed: ${JSON.stringify(data)}`)
-  }
-}
 
 export async function getAllHumans(): Promise<Human[]> {
   let apiKey: string, baseId: string;
@@ -220,10 +187,7 @@ export interface HumanProfileFields {
   'Last Name'?: string
   'Preferred Name'?: string
   'Work Email'?: string
-  'Title'?: string
-  'Start Date'?: string
   'Birthday'?: string
-  'Work Cell Number'?: string
   'Personal Cell Number'?: string
   'Role'?: string
   'Enneagram'?: string[]
@@ -233,9 +197,6 @@ export interface HumanProfileFields {
   'Strengths'?: string[]
   'Coach'?: string[]
   'Team Lead'?: string[]
-  /** @deprecated Use an Affiliation (lib/airtable/affiliations.ts) /
-   *  setPrimaryOrgAction instead of the flat Humans.Organization link. */
-  'Organization'?: string[]
 }
 
 export async function updateHumanProfile(
@@ -249,10 +210,7 @@ export async function updateHumanProfile(
     'Last Name': FIELDS.HUMANS.LAST_NAME,
     'Preferred Name': FIELDS.HUMANS.PREFERRED_NAME,
     'Work Email': FIELDS.HUMANS.WORK_EMAIL,
-    'Title': FIELDS.HUMANS.TITLE,
-    'Start Date': FIELDS.HUMANS.START_DATE,
     'Birthday': FIELDS.HUMANS.BIRTHDAY,
-    'Work Cell Number': FIELDS.HUMANS.WORK_CELL_NUMBER,
     'Personal Cell Number': FIELDS.HUMANS.PERSONAL_CELL_NUMBER,
     'Role': FIELDS.HUMANS.ROLE,
     'Enneagram': FIELDS.HUMANS.ENNEAGRAM,
@@ -262,7 +220,6 @@ export async function updateHumanProfile(
     'Strengths': FIELDS.HUMANS.STRENGTHS,
     'Coach': FIELDS.HUMANS.COACH,
     'Team Lead': FIELDS.HUMANS.TEAM_LEAD,
-    'Organization': FIELDS.HUMANS.ORGANIZATION,
   }
   const remapped = Object.fromEntries(
     Object.entries(fields).map(([k, v]) => [NAME_TO_ID[k] ?? k, v])

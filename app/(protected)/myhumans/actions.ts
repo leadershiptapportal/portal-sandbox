@@ -19,7 +19,6 @@ export async function createClientAction(data: {
       firstName: data.firstName,
       lastName: data.lastName,
       workEmail: data.workEmail,
-      title: data.jobTitle,
       coachIds: data.coachId ? [data.coachId] : undefined,
     })
 

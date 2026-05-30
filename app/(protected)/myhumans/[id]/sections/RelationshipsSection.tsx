@@ -37,7 +37,6 @@ interface BucketItem {
   rc: RelationshipContext
   otherPersonId: string
   otherName: string
-  otherTitle?: string
   role: BucketRole
 }
 
@@ -45,25 +44,24 @@ function classifyRelationship(rc: RelationshipContext, subjectId: string): Bucke
   const subjectIsPerson = rc.humanId === subjectId
   const otherPersonId = subjectIsPerson ? rc.leadId : rc.humanId
   const otherName     = subjectIsPerson ? rc.leadName : rc.humanName
-  const otherTitle    = subjectIsPerson ? rc.leadTitle : rc.humanTitle
 
   if (rc.relationshipType === 'coaching') {
-    return { rc, otherPersonId, otherName, otherTitle, role: subjectIsPerson ? 'coach' : 'coachee' }
+    return { rc, otherPersonId, otherName, role: subjectIsPerson ? 'coach' : 'coachee' }
   }
   if (rc.relationshipType === 'reports_to') {
-    return { rc, otherPersonId, otherName, otherTitle, role: subjectIsPerson ? 'manager' : 'report' }
+    return { rc, otherPersonId, otherName, role: subjectIsPerson ? 'manager' : 'report' }
   }
   if (rc.relationshipType === 'client') {
-    return { rc, otherPersonId, otherName, otherTitle, role: 'client' }
+    return { rc, otherPersonId, otherName, role: 'client' }
   }
   if (rc.relationshipType === 'prospect') {
-    return { rc, otherPersonId, otherName, otherTitle, role: 'prospect' }
+    return { rc, otherPersonId, otherName, role: 'prospect' }
   }
   if (rc.relationshipType === 'personal') {
-    return { rc, otherPersonId, otherName, otherTitle, role: 'personal' }
+    return { rc, otherPersonId, otherName, role: 'personal' }
   }
   if (rc.relationshipType === 'peer') {
-    return { rc, otherPersonId, otherName, otherTitle, role: 'peer' }
+    return { rc, otherPersonId, otherName, role: 'peer' }
   }
   return null
 }
@@ -121,9 +119,6 @@ function RelationshipPill({
           <p className="text-sm font-medium text-foreground truncate group-hover:text-[hsl(213,70%,30%)]">
             {item.otherName}
           </p>
-          {item.otherTitle && (
-            <p className="text-xs text-muted-foreground truncate">{item.otherTitle}</p>
-          )}
           {item.rc.organizationId && orgNameById?.get(item.rc.organizationId) && (
             <p className="text-xs text-muted-foreground/70 truncate">
               {orgNameById.get(item.rc.organizationId)}

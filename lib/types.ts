@@ -58,9 +58,6 @@ export interface Human {
   apologyLanguageDescriptor?: string;
   strengths?: Array<{ name: string; domain?: string }>;
 
-  // Org / Team
-  teamMemberIds?: string[];    // linked record IDs — team members
-
   // Session count via linked record field (avoids email matching)
   associatedMeetingIds?: string[]   // "Associated Meetings" linked field → Portal Calendar Events
 

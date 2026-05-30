@@ -121,7 +121,6 @@ export default function RelationshipDialog(props: Props) {
   // Create-new state
   const [newFirstName, setNewFirstName] = useState('')
   const [newLastName, setNewLastName] = useState('')
-  const [newTitle, setNewTitle] = useState('')
   const [newEmail, setNewEmail] = useState('')
 
   // Shared state
@@ -144,7 +143,6 @@ export default function RelationshipDialog(props: Props) {
       setOtherPersonId('')
       setNewFirstName('')
       setNewLastName('')
-      setNewTitle('')
       setNewEmail('')
       setRole('coachee')
       setStartDate('')
@@ -185,7 +183,6 @@ export default function RelationshipDialog(props: Props) {
             subjectPersonId: props.subjectPersonId,
             firstName: newFirstName.trim(),
             lastName: newLastName.trim() || undefined,
-            title: newTitle.trim() || undefined,
             email: newEmail.trim() || undefined,
             type,
             role: role2,
@@ -325,16 +322,6 @@ export default function RelationshipDialog(props: Props) {
                           placeholder="Last"
                         />
                       </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="new-title">Title / relation</Label>
-                      <Input
-                        id="new-title"
-                        value={newTitle}
-                        onChange={(e) => setNewTitle(e.target.value)}
-                        disabled={saving}
-                        placeholder="e.g. Senior Manager, Husband, Owner of Bakery"
-                      />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="new-email">Email (optional)</Label>

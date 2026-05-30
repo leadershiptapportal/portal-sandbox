@@ -10,7 +10,6 @@ import {
   type ProfileOption,
   searchHumansByName,
   createHumanRecord,
-  patchTeamMembers,
   getAllHumans,
 } from '@/lib/airtable/humans'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
@@ -181,49 +180,6 @@ export async function searchUsersAction(
   return searchHumansByName(query.trim())
 }
 
-export async function linkExistingTeamMember(
-  leaderId: string,
-  existingMemberIds: string[],
-  newMemberId: string,
-): Promise<{ success: true } | { error: string }> {
-  if (existingMemberIds.includes(newMemberId)) return { success: true }
-  try {
-    const newIds = [...existingMemberIds, newMemberId]
-    console.log('[linkExistingTeamMember] PATCH leaderId:', leaderId, '| Team Members:', newIds)
-    await patchTeamMembers(leaderId, newIds)
-    revalidatePath(`/myhumans/${leaderId}`)
-    return { success: true }
-  } catch (err) {
-    console.error('[linkExistingTeamMember] error:', err)
-    return { error: 'Failed to link team member — please try again' }
-  }
-}
-
-export async function createAndLinkTeamMember(
-  leaderId: string,
-  existingMemberIds: string[],
-  memberData: {
-    firstName: string
-    lastName?: string
-    jobTitle?: string
-  },
-): Promise<{ success: true } | { error: string }> {
-  try {
-    console.log('[createAndLinkTeamMember] creating user:', memberData)
-    const newId = await createHumanRecord({
-      firstName: memberData.firstName || undefined,
-      lastName: memberData.lastName || undefined,
-      title: memberData.jobTitle || undefined,
-    })
-    console.log('[createAndLinkTeamMember] created record id:', newId, '| linking to leader:', leaderId)
-    await patchTeamMembers(leaderId, [...existingMemberIds, newId])
-    revalidatePath(`/myhumans/${leaderId}`)
-    return { success: true }
-  } catch (err) {
-    console.error('[createAndLinkTeamMember] error:', err)
-    return { error: String(err instanceof Error ? err.message : err) }
-  }
-}
 
 // ── Log a Note ────────────────────────────────────────────────────────────────
 export async function saveNoteAction(
@@ -692,7 +648,6 @@ export async function addRelationshipWithNewPersonAction(params: {
   subjectPersonId: string
   firstName: string
   lastName?: string
-  title?: string
   email?: string
   type: RelationshipType
   role: 'subject_is_person' | 'subject_is_lead'
@@ -705,7 +660,6 @@ export async function addRelationshipWithNewPersonAction(params: {
     const newHumanId = await createHumanRecord({
       firstName: params.firstName,
       lastName: params.lastName,
-      title: params.title,
       workEmail: params.email,
     })
 

@@ -47,9 +47,6 @@ export default function TheirTeamSection({ directReports, nextTrail, canDrillDee
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground truncate">{report.name}</p>
-                  {report.title && (
-                    <p className="text-xs text-muted-foreground truncate">{report.title}</p>
-                  )}
                 </div>
                 <span className="text-[10px] text-muted-foreground flex-shrink-0">View in org chart</span>
               </div>
@@ -75,9 +72,6 @@ export default function TheirTeamSection({ directReports, nextTrail, canDrillDee
               )}
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-foreground truncate">{report.name}</p>
-                {report.title && (
-                  <p className="text-xs text-muted-foreground truncate">{report.title}</p>
-                )}
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground/60 group-hover:text-muted-foreground flex-shrink-0 transition-colors" />
             </Link>

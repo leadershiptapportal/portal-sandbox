@@ -16,6 +16,7 @@ export interface OrganizationOption {
   id: string
   name: string
   domain?: string
+  logo?: string
 }
 
 /** All organizations except those explicitly marked Inactive, sorted by name. */
@@ -36,6 +37,7 @@ export async function listOrganizations(): Promise<OrganizationOption[]> {
       id: r.id,
       name: ((r.fields[FIELDS.ORGANIZATIONS.NAME] as string) ?? '').trim() || r.id,
       domain: (r.fields[FIELDS.ORGANIZATIONS.DOMAIN_NAME] as string) ?? undefined,
+      logo: (r.fields[FIELDS.ORGANIZATIONS.LOGO] as string) ?? undefined,
     }))
     .sort((a: OrganizationOption, b: OrganizationOption) => a.name.localeCompare(b.name))
 }

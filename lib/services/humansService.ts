@@ -14,7 +14,6 @@ function dataScore(human: Human): number {
   if (human.mbtiType) score++
   if (human.title) score++
   if (human.organizationName) score++
-  if (human.teamMemberIds?.length) score += human.teamMemberIds.length
   return score
 }
 

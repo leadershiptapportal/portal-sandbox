@@ -32,7 +32,6 @@ export async function POST(req: Request) {
     const newHumanId = await createHumanRecord({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
-      title: jobTitle?.trim() || undefined,
       workEmail: workEmail?.trim() || undefined,
       coachIds: coachIds.length > 0 ? coachIds : undefined,
       role: 'client',

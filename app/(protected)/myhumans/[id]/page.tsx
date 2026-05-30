@@ -75,7 +75,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   const managerId = null
   const coachId = user.coachIds?.[0] ?? null
   const teamLeadId = user.teamLeadIds?.[0] ?? null
-  const teamMemberIdList = user.teamMemberIds ?? []
   // Resolved display name — passed to getInteractionsForUser so the lookup can
   // also match interactions via the {Client Name} field (set by sync), not just
   // by email substring in {Attendees}. Belt-and-suspenders for sparse data.
@@ -89,7 +88,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     manager,
     coach,
     teamLead,
-    teamMemberResults,
     theirTeamReports,
     allPersonRelationships,
     allUsersForPicker,
@@ -109,7 +107,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     managerId ? getHumanById(managerId).catch(() => null) : Promise.resolve(null),
     coachId ? getHumanById(coachId).catch(() => null) : Promise.resolve(null),
     teamLeadId ? getHumanById(teamLeadId).catch(() => null) : Promise.resolve(null),
-    Promise.all(teamMemberIdList.map((tid) => getHumanById(tid).catch(() => null))),
     getDirectReports(id).catch(() => []),
     getRelationshipsForHuman(id).catch(() => []),
     getAllHumans().catch(() => [] as Human[]),
@@ -136,7 +133,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   ])
 
   const directReports = theirTeamReports
-  const teamMembers = teamMemberResults.filter((u): u is Human => u !== null)
   // Only show notes not attached to a meeting in the standalone Notes section.
   // Meeting-linked notes belong to their interaction's detail view.
   const standaloneNotes = sessionNotes.filter(

@@ -18,10 +18,8 @@ export interface RelationshipContext {
   id: string
   humanId: string        // the coachee / direct report / contact (Person field)
   humanName: string
-  humanTitle?: string
   leadId: string          // the coach / manager / professional (Lead field)
   leadName: string
-  leadTitle?: string
   relationshipType: RelationshipType
   status: string
   organizationId?: string
@@ -59,24 +57,18 @@ function normalizeRelationshipType(raw: unknown): RelationshipType {
   return 'coaching'
 }
 
-interface HumanData { name: string; title?: string }
-
-/**
- * Fetches name + title for all People records.
- * Used to populate humanName/leadName/humanTitle/leadTitle without per-record lookups.
- */
-async function buildHumanDataMap(apiKey: string, baseId: string): Promise<Map<string, HumanData>> {
+/** Fetches name for all Humans. Used to populate humanName/leadName without per-record lookups. */
+async function buildHumanDataMap(apiKey: string, baseId: string): Promise<Map<string, string>> {
   const usersTable = encodeURIComponent(TABLES.HUMANS)
   const res = await airtableFetch(
     `${API_BASE}/${baseId}/${usersTable}` +
       `?fields[]=${encodeURIComponent(FIELDS.HUMANS.FULL_NAME)}` +
       `&fields[]=${encodeURIComponent(FIELDS.HUMANS.FIRST_NAME)}` +
       `&fields[]=${encodeURIComponent(FIELDS.HUMANS.LAST_NAME)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.HUMANS.TITLE)}` +
       `&maxRecords=5000`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
-  const map = new Map<string, HumanData>()
+  const map = new Map<string, string>()
   if (!res.ok) return map
   const data = await res.json()
   for (const r of data.records ?? []) {
@@ -85,15 +77,14 @@ async function buildHumanDataMap(apiKey: string, baseId: string): Promise<Map<st
     const first = (f[FIELDS.HUMANS.FIRST_NAME] as string | undefined)?.trim()
     const last = (f[FIELDS.HUMANS.LAST_NAME] as string | undefined)?.trim()
     const name = full || [first, last].filter(Boolean).join(' ') || (r.id as string)
-    const title = (f[FIELDS.HUMANS.TITLE] as string | undefined)?.trim() || undefined
-    map.set(r.id as string, { name, title })
+    map.set(r.id as string, name)
   }
   return map
 }
 
 function mapRecord(
   r: { id: string; fields: Record<string, unknown> },
-  humanDataMap: Map<string, HumanData>,
+  humanDataMap: Map<string, string>,
 ): RelationshipContext | null {
   const personIds = Array.isArray(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN])
     ? (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN] as string[])
@@ -105,16 +96,12 @@ function mapRecord(
 
   const humanId = personIds[0]
   const leadId = leadIds[0]
-  const personData = humanDataMap.get(humanId)
-  const leadData = humanDataMap.get(leadId)
   return {
     id: r.id,
     humanId,
-    humanName: personData?.name ?? humanId,
-    humanTitle: personData?.title,
+    humanName: humanDataMap.get(humanId) ?? humanId,
     leadId,
-    leadName: leadData?.name ?? leadId,
-    leadTitle: leadData?.title,
+    leadName: humanDataMap.get(leadId) ?? leadId,
     relationshipType: normalizeRelationshipType(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.TYPE]),
     status: (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.STATUS] as string) ?? '',
     organizationId: Array.isArray(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.ORGANIZATION])
@@ -243,7 +230,6 @@ export async function getAllRelationshipContexts(): Promise<RelationshipContext[
 export interface DirectReport {
   humanId: string
   name: string
-  title?: string
   email?: string
   photoUrl?: string
 }
@@ -301,7 +287,6 @@ export async function getDirectReports(
       `&fields[]=${encodeURIComponent(FIELDS.HUMANS.FULL_NAME)}` +
       `&fields[]=${encodeURIComponent(FIELDS.HUMANS.FIRST_NAME)}` +
       `&fields[]=${encodeURIComponent(FIELDS.HUMANS.LAST_NAME)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.HUMANS.TITLE)}` +
       `&fields[]=${encodeURIComponent(FIELDS.HUMANS.WORK_EMAIL)}` +
       `&fields[]=${encodeURIComponent(FIELDS.HUMANS.PROFILE_PHOTO)}`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
@@ -326,7 +311,6 @@ export async function getDirectReports(
     results.push({
       humanId: r.id as string,
       name,
-      title: (f[FIELDS.HUMANS.TITLE] as string | undefined)?.trim() || undefined,
       email: (f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined)?.trim() || undefined,
       photoUrl,
     })
