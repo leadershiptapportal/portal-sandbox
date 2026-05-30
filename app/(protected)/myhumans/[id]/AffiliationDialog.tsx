@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Plus } from 'lucide-react'
+import SearchCombobox from '@/components/ui/SearchCombobox'
 import {
   addAffiliationAction,
   addAffiliationWithNewOrgAction,
@@ -272,19 +273,16 @@ export default function AffiliationDialog(props: Props) {
 
                 {addMode === 'find' ? (
                   <div className="space-y-1.5">
-                    <Label htmlFor="aff-org">
+                    <Label>
                       Organization <span className="text-destructive">*</span>
                     </Label>
-                    <Select value={organizationId} onValueChange={setOrganizationId} disabled={saving}>
-                      <SelectTrigger id="aff-org">
-                        <SelectValue placeholder="Select an organization…" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {props.organizations.map((o) => (
-                          <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <SearchCombobox
+                      options={props.organizations}
+                      value={organizationId}
+                      onValueChange={setOrganizationId}
+                      placeholder="Search organizations…"
+                      disabled={saving}
+                    />
                   </div>
                 ) : (
                   <div className="space-y-3">

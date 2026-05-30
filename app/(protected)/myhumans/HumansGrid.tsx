@@ -2,8 +2,9 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
-import { ChevronRight, Plus, Search, Users, X, LayoutGrid, Building2 } from 'lucide-react'
+import { ChevronRight, Search, Users, X, LayoutGrid, Building2 } from 'lucide-react'
 import type { Human } from '@/lib/types'
+import CreateHumanModal from './CreateHumanModal'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -18,6 +19,10 @@ export interface EnrichedHuman {
 
 interface Props {
   users: EnrichedHuman[]
+  coaches: Array<{ id: string; name: string }>
+  organizations: Array<{ id: string; name: string }>
+  currentCoachId?: string
+  currentCoachName?: string
 }
 
 type ViewMode = 'humans' | 'organization'
@@ -181,7 +186,7 @@ function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode
 
 // ── Main grid ─────────────────────────────────────────────────────────────────
 
-export default function HumansGrid({ users }: Props) {
+export default function HumansGrid({ users, coaches, organizations, currentCoachId, currentCoachName }: Props) {
   const [query, setQuery] = useState('')
   const [sortBy, setSortBy] = useState('recent')
   const [viewMode, setViewMode] = useState<ViewMode>('humans')
@@ -263,14 +268,14 @@ export default function HumansGrid({ users }: Props) {
         {/* View toggle */}
         <ViewToggle mode={viewMode} onChange={handleViewModeChange} />
 
-        {/* Add Human button */}
-        <Link
-          href="/humans/new"
-          className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-muted/50 transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          Add Human
-        </Link>
+        <div className="ml-auto">
+          <CreateHumanModal
+            coaches={coaches}
+            organizations={organizations}
+            currentCoachId={currentCoachId}
+            currentCoachName={currentCoachName}
+          />
+        </div>
       </div>
 
       {/* ── Grid or empty state ─────────────────────────────────────────────── */}

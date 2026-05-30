@@ -142,6 +142,10 @@ export default async function UsersPage() {
       />
       <HumansGrid
         users={enrichedHumans}
+        coaches={profileOptions.coaches}
+        organizations={profileOptions.organizations}
+        currentCoachId={userRecord.airtableId ?? undefined}
+        currentCoachName={userRecord.name}
       />
     </>
   )

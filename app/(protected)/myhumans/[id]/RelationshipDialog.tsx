@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Plus } from 'lucide-react'
+import SearchCombobox from '@/components/ui/SearchCombobox'
 import {
   addRelationshipAction,
   updateRelationshipAction,
@@ -281,21 +282,16 @@ export default function RelationshipDialog(props: Props) {
 
                 {addMode === 'find' ? (
                   <div className="space-y-1.5">
-                    <Label htmlFor="rel-person">
+                    <Label>
                       Person <span className="text-destructive">*</span>
                     </Label>
-                    <Select value={otherPersonId} onValueChange={setOtherPersonId} disabled={saving}>
-                      <SelectTrigger id="rel-person">
-                        <SelectValue placeholder="Select a person…" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {props.people
-                          .filter((p) => p.id !== props.subjectPersonId)
-                          .map((p) => (
-                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
+                    <SearchCombobox
+                      options={props.people.filter((p) => p.id !== props.subjectPersonId)}
+                      value={otherPersonId}
+                      onValueChange={setOtherPersonId}
+                      placeholder="Search people…"
+                      disabled={saving}
+                    />
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -402,22 +398,14 @@ export default function RelationshipDialog(props: Props) {
             {/* Engagement sponsor org — shown when orgs are available */}
             {props.organizations && props.organizations.length > 0 && (
               <div className="space-y-1.5">
-                <Label htmlFor="rc-org">Engagement sponsor <span className="text-muted-foreground font-normal">(optional)</span></Label>
-                <Select
-                  value={organizationId || 'none'}
-                  onValueChange={(v) => setOrganizationId(v === 'none' ? '' : v)}
+                <Label>Engagement sponsor <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                <SearchCombobox
+                  options={props.organizations}
+                  value={organizationId}
+                  onValueChange={setOrganizationId}
+                  placeholder="Search organizations…"
                   disabled={saving}
-                >
-                  <SelectTrigger id="rc-org">
-                    <SelectValue placeholder="No sponsor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No sponsor</SelectItem>
-                    {props.organizations.map((o) => (
-                      <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
               </div>
             )}
           </div>

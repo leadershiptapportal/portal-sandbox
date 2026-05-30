@@ -9,7 +9,7 @@ import { createRelationshipContext } from '@/lib/airtable/relationships'
 export async function createClientAction(data: {
   firstName: string
   lastName: string
-  workEmail: string
+  workEmail?: string
   jobTitle?: string
   organizationId?: string
   newOrg?: { name: string; domain?: string; orgType?: string }
