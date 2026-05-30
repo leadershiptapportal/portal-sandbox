@@ -18,6 +18,8 @@ import {
   getRelationshipsForHuman,
 } from '@/lib/airtable/relationships'
 import { getAllHumans, fetchPersonalityOptions } from '@/lib/airtable/humans'
+import { getAffiliationsForHuman } from '@/lib/airtable/affiliations'
+import { listOrganizations } from '@/lib/airtable/organizations'
 import PlaceholderSection from '@/components/ui/PlaceholderSection'
 import { getDisplayName, getInitials, isRecordId, SectionHeading } from './sections/helpers'
 import ProfileCardSection from './sections/ProfileCardSection'
@@ -28,7 +30,8 @@ import TheirTeamSection from './sections/TheirTeamSection'
 import MessagesSection from './sections/MessagesSection'
 import TasksSection from './sections/TasksSection'
 import RelationshipsSection from './sections/RelationshipsSection'
-import type { Human, Note, Task } from '@/lib/types'
+import AffiliationsSection from './sections/AffiliationsSection'
+import type { Human, Note, Task, Affiliation } from '@/lib/types'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -91,6 +94,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     allPersonRelationships,
     allUsersForPicker,
     personalityOptions,
+    affiliations,
+    organizationOptions,
   ] = await Promise.all([
     // Every fetch is wrapped in `.catch(...)` so a single failing Airtable
     // call (permission, rate limit, transient network) can't reject the
@@ -109,6 +114,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     getRelationshipsForHuman(id).catch(() => []),
     getAllHumans().catch(() => [] as Human[]),
     fetchPersonalityOptions().catch(() => null),
+    getAffiliationsForHuman(id).catch(() => [] as Affiliation[]),
+    listOrganizations().catch(() => []),
   ])
 
   // Resolve the coach's RC with this person, then batch quick note + RC notes
@@ -275,6 +282,14 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         canEdit={userCanWrite}
         rcNotes={rcNotes}
         currentCoachId={currentUserRecord.airtableId ?? ''}
+      />
+
+      {/* ── Organizations (affiliations) ──────────────────────────────────── */}
+      <AffiliationsSection
+        subjectHumanId={id}
+        affiliations={affiliations}
+        organizations={organizationOptions}
+        canEdit={userCanWrite}
       />
 
       {/* ── Most Recent Interactions ──────────────────────────────────────── */}

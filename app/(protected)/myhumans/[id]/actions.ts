@@ -24,11 +24,13 @@ import {
   type RelationshipType,
 } from '@/lib/airtable/relationships'
 import {
-  getAffiliationsForHuman,
   createAffiliation,
   updateAffiliation,
-  pickPrimaryAffiliation,
+  deleteAffiliation,
+  type UpdateAffiliationInput,
 } from '@/lib/airtable/affiliations'
+import { createOrganization } from '@/lib/airtable/organizations'
+import type { AffiliationType, AffiliationStatus } from '@/lib/types'
 
 // ── Edit Profile ──────────────────────────────────────────────────────────────
 
@@ -49,32 +51,104 @@ export async function updateProfileAction(
   }
 }
 
-/**
- * Sets a human's primary organization by upserting their primary affiliation.
- * Backs the single "Organization" control on the Edit Profile dialog while the
- * full multi-affiliation editor is built out. Affiliations are the source of
- * truth — the flat Humans.Organization link is no longer written.
- */
-export async function setPrimaryOrgAction(
-  humanId: string,
-  organizationId: string,
-): Promise<{ success: true } | { error: string }> {
-  try {
-    const affiliations = await getAffiliationsForHuman(humanId)
-    const primary = pickPrimaryAffiliation(affiliations)
+// ── Affiliations (Human ↔ Organization) ──────────────────────────────────────
+// Mirrors the Relationship Context add/edit/delete actions.
 
-    if (primary) {
-      if (primary.organizationId !== organizationId) {
-        await updateAffiliation(primary.id, { organizationId, primary: true })
-      }
-    } else {
-      await createAffiliation({ humanId, organizationId, primary: true, status: 'Active' })
-    }
-    revalidatePath(`/myhumans/${humanId}`)
+export interface AddAffiliationInput {
+  subjectHumanId: string
+  organizationId: string
+  type: AffiliationType
+  status?: AffiliationStatus
+  startDate?: string
+  titleAtOrg?: string
+  primary?: boolean
+}
+
+export async function addAffiliationAction(
+  input: AddAffiliationInput,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await createAffiliation({
+      humanId: input.subjectHumanId,
+      organizationId: input.organizationId,
+      type: input.type,
+      status: input.status,
+      startDate: input.startDate,
+      titleAtOrg: input.titleAtOrg,
+      primary: input.primary,
+    })
+    revalidatePath(`/myhumans/${input.subjectHumanId}`)
     return { success: true }
   } catch (err) {
-    console.error('[setPrimaryOrgAction] error:', err)
-    return { error: 'Failed to update organization — please try again' }
+    console.error('[addAffiliationAction] error:', err)
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to add organization' }
+  }
+}
+
+export interface AddAffiliationWithNewOrgInput {
+  subjectHumanId: string
+  orgName: string
+  orgDomain?: string
+  orgType?: string
+  type: AffiliationType
+  status?: AffiliationStatus
+  startDate?: string
+  titleAtOrg?: string
+  primary?: boolean
+}
+
+export async function addAffiliationWithNewOrgAction(
+  input: AddAffiliationWithNewOrgInput,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const organizationId = await createOrganization({
+      name: input.orgName,
+      domain: input.orgDomain,
+      type: input.orgType,
+    })
+    await createAffiliation({
+      humanId: input.subjectHumanId,
+      organizationId,
+      type: input.type,
+      status: input.status,
+      startDate: input.startDate,
+      titleAtOrg: input.titleAtOrg,
+      primary: input.primary,
+    })
+    revalidatePath(`/myhumans/${input.subjectHumanId}`)
+    return { success: true }
+  } catch (err) {
+    console.error('[addAffiliationWithNewOrgAction] error:', err)
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to create organization' }
+  }
+}
+
+export async function updateAffiliationAction(input: {
+  affiliationId: string
+  subjectHumanId: string
+  fields: UpdateAffiliationInput
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    await updateAffiliation(input.affiliationId, input.fields)
+    revalidatePath(`/myhumans/${input.subjectHumanId}`)
+    return { success: true }
+  } catch (err) {
+    console.error('[updateAffiliationAction] error:', err)
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to update organization' }
+  }
+}
+
+export async function deleteAffiliationAction(input: {
+  affiliationId: string
+  subjectHumanId: string
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    await deleteAffiliation(input.affiliationId)
+    revalidatePath(`/myhumans/${input.subjectHumanId}`)
+    return { success: true }
+  } catch (err) {
+    console.error('[deleteAffiliationAction] error:', err)
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to remove organization' }
   }
 }
 

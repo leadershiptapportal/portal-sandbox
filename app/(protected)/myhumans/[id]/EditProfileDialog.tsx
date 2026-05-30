@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera } from 'lucide-react'
-import { updateProfileAction, fetchProfileOptionsAction, updateCoachContextAction, setPrimaryOrgAction } from './actions'
+import { updateProfileAction, fetchProfileOptionsAction, updateCoachContextAction } from './actions'
 import type { HumanProfileFields } from '@/lib/airtable/humans'
 import type { Human } from '@/lib/types'
 
@@ -153,11 +153,9 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
   const [birthday, setBirthday] = useState('')
   const [startDate, setStartDate] = useState('')
 
-  // ── Organization ─────────────────────────────────────────────────────────────
-  // Coach and Team Lead removed — those relationships are now managed via the
-  // RelationshipsSection on the profile page, which writes to the canonical
-  // Relationship Contexts table.
-  const [organizationId, setOrganizationId] = useState('')
+  // Coach, Team Lead, and Organization removed — those are managed in their own
+  // profile sections (RelationshipsSection / AffiliationsSection), which write to
+  // the canonical Relationship Contexts and Affiliations tables.
   const [role, setRole] = useState('')
 
   // ── Contact ───────────────────────────────────────────────────────────────────
@@ -191,7 +189,6 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
     setWorkEmail(user.workEmail ?? '')
     setBirthday(user.birthday ?? '')
     setStartDate(user.startDate ?? '')
-    setOrganizationId(user.organizationLinkedIds?.[0] ?? '')
     setRole(user.role ?? '')
     setWorkCellNumber(user.workCellNumber ?? '')
     setPersonalCellNumber(user.personalCellNumber ?? '')
@@ -284,9 +281,7 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
     if (personalCellNumber !== (user.personalCellNumber ?? '')) patch['Personal Cell Number'] = personalCellNumber
     if (role !== (user.role ?? '')) patch['Role'] = role
 
-    // Organization is now stored as an Affiliation (not the flat link) — handled
-    // via setPrimaryOrgAction below, outside the profile patch.
-    const orgChanged = !!organizationId && organizationId !== (user.organizationLinkedIds?.[0] ?? '')
+    // Organization is managed in the AffiliationsSection, not here.
 
     // Linked single-record fields — only if changed and non-empty
     if (enneagramId && enneagramId !== (user.enneagramIds?.[0] ?? '')) patch['Enneagram'] = [enneagramId]
@@ -308,16 +303,6 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
         setSaveStatus('')
         // Append to any existing photo error rather than overwriting it
         setErrorMsg((prev) => (prev ? `${prev}\n${result.error}` : result.error))
-        return
-      }
-    }
-
-    if (orgChanged) {
-      const orgResult = await setPrimaryOrgAction(user.id, organizationId)
-      if ('error' in orgResult) {
-        setSaving(false)
-        setSaveStatus('')
-        setErrorMsg((prev) => (prev ? `${prev}\n${orgResult.error}` : orgResult.error))
         return
       }
     }
@@ -421,12 +406,10 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
                 </div>
               </Section>
 
-              {/* ── Section 4: Organization ─────────────────────────────── */}
-              <Section title="Organization">
+              {/* ── Section 4: Role ──────────────────────────────────────── */}
+              {/* Organization moved to the AffiliationsSection on the profile page. */}
+              <Section title="Role">
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Organization" half>
-                    <SelectField value={organizationId} onChange={setOrganizationId} options={options?.organizations ?? []} placeholder="Select organization…" disabled={saving} loading={optionsLoading} />
-                  </Field>
                   <Field label="Role" half>
                     <select value={role} onChange={(e) => setRole(e.target.value)} disabled={saving} className={selectCls}>
                       <option value="">Select role…</option>
