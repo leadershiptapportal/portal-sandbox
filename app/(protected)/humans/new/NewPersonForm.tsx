@@ -206,7 +206,7 @@ export default function NewPersonForm({ coaches, allHumans, companies }: Props) 
     setError('')
 
     try {
-      const res = await fetch('/api/people', {
+      const res = await fetch('/api/humans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

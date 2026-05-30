@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       relationshipContextsCreated: rcCount,
     })
   } catch (err) {
-    console.error('[POST /api/people] error:', err)
+    console.error('[POST /api/humans] error:', err)
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Failed to create person' },
       { status: 500 },
