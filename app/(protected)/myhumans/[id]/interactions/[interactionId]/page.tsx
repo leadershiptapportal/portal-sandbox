@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, Calendar, Clock, Users, ClipboardList, NotebookPen, Pencil } from 'lucide-react'
 import { notFound } from 'next/navigation'
-import { getUserById } from '@/lib/services/usersService'
+import { getHumanById } from '@/lib/services/humansService'
 import { getInteractionById } from '@/lib/airtable/interactions'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getInteractionNotesGrouped } from '@/lib/airtable/notes'
@@ -41,7 +41,7 @@ export default async function InteractionDetailPage({ params, searchParams }: Pr
   const autoEdit = edit === '1'
 
   const [user, interaction, currentUserRecord] = await Promise.all([
-    getUserById(id),
+    getHumanById(id),
     getInteractionById(interactionId),
     getCurrentUserRecord(),
   ])

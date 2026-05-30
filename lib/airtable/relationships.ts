@@ -342,7 +342,7 @@ export async function getDirectReports(
  *
  * Dynamic import of getAllUsers avoids a circular module dependency.
  */
-export async function getDownstreamPeople(
+export async function getDownstreamHumans(
   personAirtableId: string,
   depth: number = 1,
 ): Promise<import('@/lib/types').Human[]> {
@@ -364,7 +364,7 @@ export async function getDownstreamPeople(
 
   // Recurse one level deeper, deduplicating by ID
   const seen = new Set([personAirtableId, ...direct.map((u) => u.id)])
-  const nested = await Promise.all(direct.map((u) => getDownstreamPeople(u.id, safeDepth - 1)))
+  const nested = await Promise.all(direct.map((u) => getDownstreamHumans(u.id, safeDepth - 1)))
   for (const group of nested) {
     for (const u of group) {
       if (!seen.has(u.id)) {

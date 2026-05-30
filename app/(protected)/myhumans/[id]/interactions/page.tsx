@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ChevronRight, Calendar, NotebookPen, FileText } from 'lucide-react'
 import BackLink from '@/components/BackLink'
-import { getUserById } from '@/lib/services/usersService'
+import { getHumanById } from '@/lib/services/humansService'
 import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
@@ -43,7 +43,7 @@ export default async function PersonInteractionsPage({ params }: Props) {
   const { id } = await params
 
   const [user, sessionUser, currentUserRecord] = await Promise.all([
-    getUserById(id),
+    getHumanById(id),
     getSessionUser(),
     getCurrentUserRecord(),
   ])

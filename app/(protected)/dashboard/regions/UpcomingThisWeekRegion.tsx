@@ -1,4 +1,4 @@
-import { getUsers, getHumansByRelationship } from '@/lib/services/usersService'
+import { getHumans, getHumansByRelationship } from '@/lib/services/humansService'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getAllUpcomingInteractions, getRecentPastInteractions } from '@/lib/airtable/interactions'
@@ -19,7 +19,7 @@ export default async function UpcomingThisWeekRegion({ userRecord }: Props) {
 
   const [users, upcomingMeetings, recentMeetings, coachContexts, coachNotes] = await Promise.all([
     isAdmin || !userRecord.airtableId
-      ? getUsers(sessionUser)
+      ? getHumans(sessionUser)
       : getHumansByRelationship(userRecord.airtableId),
     getAllUpcomingInteractions(30, ownerEmail),
     getRecentPastInteractions(30, ownerEmail),

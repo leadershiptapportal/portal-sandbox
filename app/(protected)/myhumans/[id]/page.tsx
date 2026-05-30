@@ -5,7 +5,7 @@ import {
   Paperclip,
 } from 'lucide-react'
 import BackLink from '@/components/BackLink'
-import { getUserById } from '@/lib/services/usersService'
+import { getHumanById } from '@/lib/services/humansService'
 import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getUserMessages } from '@/lib/services/messagesService'
 import { getNotesByUser, getGeneralNotesByRCIds, getQuickNoteForRC } from '@/lib/airtable/notes'
@@ -17,7 +17,7 @@ import {
   getDirectReports,
   getRelationshipsForPerson,
 } from '@/lib/airtable/relationships'
-import { getAllUsers, fetchPersonalityOptions } from '@/lib/airtable/users'
+import { getAllHumans, fetchPersonalityOptions } from '@/lib/airtable/humans'
 import PlaceholderSection from '@/components/ui/PlaceholderSection'
 import { getDisplayName, getInitials, isRecordId, SectionHeading } from './sections/helpers'
 import ProfileCardSection from './sections/ProfileCardSection'
@@ -55,7 +55,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   const MAX_DRILL_DEPTH = 3
 
   const [user, sessionUser, currentUserRecord] = await Promise.all([
-    getUserById(id),
+    getHumanById(id),
     getSessionUser(),
     getCurrentUserRecord(),
   ])
@@ -101,13 +101,13 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     getUserMessages(id).catch(() => []),
     getNotesByUser(id).catch(() => [] as Note[]),
     getTasksByUser(id).catch(() => [] as Task[]),
-    managerId ? getUserById(managerId).catch(() => null) : Promise.resolve(null),
-    coachId ? getUserById(coachId).catch(() => null) : Promise.resolve(null),
-    teamLeadId ? getUserById(teamLeadId).catch(() => null) : Promise.resolve(null),
-    Promise.all(teamMemberIdList.map((tid) => getUserById(tid).catch(() => null))),
+    managerId ? getHumanById(managerId).catch(() => null) : Promise.resolve(null),
+    coachId ? getHumanById(coachId).catch(() => null) : Promise.resolve(null),
+    teamLeadId ? getHumanById(teamLeadId).catch(() => null) : Promise.resolve(null),
+    Promise.all(teamMemberIdList.map((tid) => getHumanById(tid).catch(() => null))),
     getDirectReports(id).catch(() => []),
     getRelationshipsForPerson(id).catch(() => []),
-    getAllUsers().catch(() => [] as Human[]),
+    getAllHumans().catch(() => [] as Human[]),
     fetchPersonalityOptions().catch(() => null),
   ])
 

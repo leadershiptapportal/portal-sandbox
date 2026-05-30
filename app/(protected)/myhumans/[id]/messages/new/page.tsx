@@ -1,5 +1,5 @@
 import BackLink from '@/components/BackLink'
-import { getUserById } from '@/lib/services/usersService'
+import { getHumanById } from '@/lib/services/humansService'
 import { getUserMessages } from '@/lib/services/messagesService'
 import PageHeader from '@/components/layout/PageHeader'
 import NewMessageForm from './NewMessageForm'
@@ -10,7 +10,7 @@ interface Props {
 
 export default async function NewMessagePage({ params }: Props) {
   const { id } = await params
-  const user = await getUserById(id)
+  const user = await getHumanById(id)
 
   const clientName = user?.fullName
     ?? (user ? [user.firstName, user.lastName].filter(Boolean).join(' ') : null)

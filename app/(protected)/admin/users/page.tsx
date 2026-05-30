@@ -1,12 +1,12 @@
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
-import { getAdminPortalUsers } from '@/lib/airtable/users'
+import { getAdminPortalHumans } from '@/lib/airtable/humans'
 import { getPermissionProfiles } from '@/lib/airtable/permissionProfiles'
 import { UserRow } from './UserRow'
 
 export default async function AdminUsersPage() {
   const [userRecord, users, profiles] = await Promise.all([
     getCurrentUserRecord(),
-    getAdminPortalUsers(),
+    getAdminPortalHumans(),
     getPermissionProfiles(),
   ])
 

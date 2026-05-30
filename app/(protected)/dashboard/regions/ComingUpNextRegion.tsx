@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ClipboardList, NotebookPen } from 'lucide-react'
-import { getUsers, getHumansByRelationship } from '@/lib/services/usersService'
+import { getHumans, getHumansByRelationship } from '@/lib/services/humansService'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getAllUpcomingInteractions, getRecentPastInteractions } from '@/lib/airtable/interactions'
@@ -22,7 +22,7 @@ export default async function ComingUpNextRegion({ userRecord }: Props) {
   const [users, upcomingInteractions, pastDay, coachContexts, coachNotes] =
     await Promise.all([
       isAdmin || !userRecord.airtableId
-        ? getUsers(sessionUser)
+        ? getHumans(sessionUser)
         : getHumansByRelationship(userRecord.airtableId),
       getAllUpcomingInteractions(7, ownerEmail),
       getRecentPastInteractions(1, ownerEmail),

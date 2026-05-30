@@ -5,7 +5,7 @@ import { createTask, updateTask, updateTaskStatus, deleteTask, type UpdateTaskDa
 import type { TaskStatus } from '@/lib/types'
 import { createNote, updateNote, deleteNote } from '@/lib/airtable/notes'
 import { getInteractionsByUserEmail } from '@/lib/airtable/interactions'
-import { getUserById } from '@/lib/services/usersService'
+import { getHumanById } from '@/lib/services/humansService'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { resolveContextForSubject } from '@/lib/airtable/relationships'
 
@@ -82,7 +82,7 @@ export async function fetchHumanInteractionsAction(
   humanId: string,
 ): Promise<Array<{ id: string; label: string }>> {
   try {
-    const user = await getUserById(humanId)
+    const user = await getHumanById(humanId)
     if (!user) return []
     const email = user.workEmail
     if (!email) return []

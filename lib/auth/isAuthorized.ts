@@ -1,4 +1,4 @@
-import { getAllUsers } from '@/lib/airtable/users'
+import { getAllHumans } from '@/lib/airtable/humans'
 import type { SessionUser } from './getSessionUser'
 
 /**
@@ -15,7 +15,7 @@ export async function canAccessUser(
 ): Promise<boolean> {
   if (sessionUser.role === 'admin') return true
 
-  const all = await getAllUsers()
+  const all = await getAllHumans()
 
   // Resolve the coach's own Airtable record ID by email
   const coachRecord = all.find(

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { createUserRecord } from '@/lib/airtable/users'
+import { createHumanRecord } from '@/lib/airtable/humans'
 import { generateRelationshipRows } from '@/lib/airtable/relationships'
 
 export async function POST(req: Request) {
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
   try {
     // 1. Create Users record
-    const newPersonId = await createUserRecord({
+    const newPersonId = await createHumanRecord({
       'First Name': firstName.trim(),
       'Last Name': lastName.trim(),
       ...(jobTitle?.trim() ? { 'Job Title': jobTitle.trim() } : {}),

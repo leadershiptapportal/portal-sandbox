@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getUserById } from '@/lib/services/usersService'
+import { getHumanById } from '@/lib/services/humansService'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getAllHumans, fetchProfileOptions } from '@/lib/airtable/humans'
@@ -29,7 +29,7 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
     : 'general'
 
   const [user, sessionUser, currentUserRecord] = await Promise.all([
-    getUserById(id),
+    getHumanById(id),
     getSessionUser(),
     getCurrentUserRecord(),
   ])

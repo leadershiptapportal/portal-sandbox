@@ -1,6 +1,6 @@
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
 import { airtableFetch } from '@/lib/airtable/client'
-import { getUsers } from '@/lib/services/usersService'
+import { getHumans } from '@/lib/services/humansService'
 import { formatEastern } from '@/lib/utils/dateFormat'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
@@ -63,7 +63,7 @@ export default async function UsersPage() {
   const filterByCoachId = isAdmin ? undefined : (userRecord.airtableId ?? undefined)
 
   const [users, allRecentNotes, openTasks, allHumansForOptions, coachInteractions] = await Promise.all([
-    getUsers(sessionUser, filterByCoachId),
+    getHumans(sessionUser, filterByCoachId),
     getAllRecentNotes(300),
     getAllOpenTasks(),
     getAllHumans(),

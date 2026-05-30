@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { searchUsersByName } from '@/lib/airtable/users'
+import { searchHumansByName } from '@/lib/airtable/humans'
 
 export async function GET(req: Request) {
   const { userId } = await auth()
@@ -10,6 +10,6 @@ export async function GET(req: Request) {
   const q = searchParams.get('q')?.trim() ?? ''
   if (q.length < 2) return NextResponse.json([])
 
-  const results = await searchUsersByName(q)
+  const results = await searchHumansByName(q)
   return NextResponse.json(results)
 }

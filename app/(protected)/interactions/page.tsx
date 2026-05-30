@@ -1,5 +1,5 @@
 import { Calendar } from 'lucide-react'
-import { getUsers, getHumansByRelationship } from '@/lib/services/usersService'
+import { getHumans, getHumansByRelationship } from '@/lib/services/humansService'
 import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getAllUpcomingInteractions, getRecentPastInteractions } from '@/lib/airtable/interactions'
@@ -37,7 +37,7 @@ export default async function InteractionsIndexPage({ searchParams }: Props) {
 
   const [users, upcomingInteractions, pastInteractions, coachContexts, coachNotes] = await Promise.all([
     isAdmin || !userRecord.airtableId
-      ? getUsers(sessionUser)
+      ? getHumans(sessionUser)
       : getHumansByRelationship(userRecord.airtableId),
     getAllUpcomingInteractions(FUTURE_DAYS, ownerEmail),
     getRecentPastInteractions(PAST_DAYS, ownerEmail),

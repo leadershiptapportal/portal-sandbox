@@ -452,8 +452,8 @@ export async function logManualSessionAction(params: {
   const rc = await resolveContextForSubject(userRecord.airtableId, params.subjectPersonId)
   if (!rc) throw new Error('NO_RELATIONSHIP')
 
-  const { getUserById } = await import('@/lib/services/usersService')
-  const subject = await getUserById(params.subjectPersonId)
+  const { getHumanById } = await import('@/lib/services/humansService')
+  const subject = await getHumanById(params.subjectPersonId)
   const subjectName = subject
     ? subject.fullName || [subject.firstName, subject.lastName].filter(Boolean).join(' ')
     : 'Unknown'

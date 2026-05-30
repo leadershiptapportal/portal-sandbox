@@ -1,7 +1,7 @@
 import { currentUser } from '@clerk/nextjs/server'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getConnectedCalendarsByClerkUserId } from '@/lib/airtable/connectedCalendars'
-import { getUserById } from '@/lib/airtable/users'
+import { getHumanById } from '@/lib/airtable/humans'
 import ManageAccountButton from './ManageAccountButton'
 import SyncCalendarSection from './SyncCalendarSection'
 import { ThemeToggle } from './ThemeToggle'
@@ -25,7 +25,7 @@ export default async function SettingsPage() {
       : Promise.resolve([]),
     // Use realAirtableId so impersonating admin saves their own theme preference
     (userRecord.realAirtableId ?? userRecord.airtableId)
-      ? getUserById((userRecord.realAirtableId ?? userRecord.airtableId)!)
+      ? getHumanById((userRecord.realAirtableId ?? userRecord.airtableId)!)
       : Promise.resolve(null),
   ])
 

@@ -1,5 +1,5 @@
 import { CheckSquare } from 'lucide-react'
-import { getUsers, getHumansByRelationship, getPortalCoaches } from '@/lib/services/usersService'
+import { getHumans, getHumansByRelationship, getPortalCoaches } from '@/lib/services/humansService'
 import { getTasks } from '@/lib/airtable/tasks'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import DashboardTaskItem, { type DashboardTask } from '../DashboardTaskItem'
@@ -25,7 +25,7 @@ export default async function OpenTasksRegion({ userRecord }: Props) {
   const [rawOpenTasks, users, coachUsers] = await Promise.all([
     userRecord.airtableId ? getTasks(userRecord.airtableId) : Promise.resolve([]),
     isAdmin || !userRecord.airtableId
-      ? getUsers(sessionUser)
+      ? getHumans(sessionUser)
       : getHumansByRelationship(userRecord.airtableId),
     getPortalCoaches(userRecord.airtableId ?? undefined),
   ])

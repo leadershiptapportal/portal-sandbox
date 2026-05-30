@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createUserRecord } from '@/lib/airtable/users'
+import { createHumanRecord } from '@/lib/airtable/humans'
 
 export async function createClientAction(data: {
   firstName: string
@@ -12,7 +12,7 @@ export async function createClientAction(data: {
   coachId?: string
 }): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
-    const id = await createUserRecord({
+    const id = await createHumanRecord({
       'First Name': data.firstName,
       'Last Name': data.lastName,
       'Work Email': data.workEmail,

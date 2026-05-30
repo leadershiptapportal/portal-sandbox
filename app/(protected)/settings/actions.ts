@@ -3,14 +3,14 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
-import { updateUserTheme } from '@/lib/airtable/users'
+import { updateHumanTheme } from '@/lib/airtable/humans'
 import { IMPERSONATE_COOKIE } from '@/lib/auth/impersonation'
 
 export async function saveThemeAction(theme: 'light' | 'dark' | 'system') {
   const userRecord = await getCurrentUserRecord()
   if (!userRecord.realAirtableId) return
   // Always save theme to the real user's record, not the impersonated one
-  await updateUserTheme(userRecord.realAirtableId, theme)
+  await updateHumanTheme(userRecord.realAirtableId, theme)
 }
 
 export async function startImpersonationAction(airtableRecordId: string) {

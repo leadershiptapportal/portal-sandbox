@@ -1,4 +1,4 @@
-import { getRelationshipContexts, getDownstreamPeople } from '@/lib/airtable/relationships'
+import { getRelationshipContexts, getDownstreamHumans } from '@/lib/airtable/relationships'
 
 export type PermissionLevel = 'internal_admin' | 'coach_owner' | 'downstream_viewer' | 'read_only'
 
@@ -36,7 +36,7 @@ export async function getPermissionLevel(
   // Cascading: walk the org tree from the coach. If target is reachable,
   // grant view-only downstream access. Capped at 3 hops to prevent runaway.
   try {
-    const downstream = await getDownstreamPeople(coachAirtableId, 3)
+    const downstream = await getDownstreamHumans(coachAirtableId, 3)
     if (downstream.some((u) => u.id === targetClientAirtableId)) {
       return 'downstream_viewer'
     }

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { updateUserRoleAction, updateUserPermissionProfileAction, startImpersonationAction } from './actions'
-import type { AdminPortalUser } from '@/lib/airtable/users'
+import type { AdminPortalHuman } from '@/lib/airtable/humans'
 import type { PermissionProfile } from '@/lib/airtable/permissionProfiles'
 
 const ROLE_OPTIONS = [
@@ -19,7 +19,7 @@ const ROLE_BADGE: Record<string, string> = {
 }
 
 interface Props {
-  user: AdminPortalUser
+  user: AdminPortalHuman
   profiles: PermissionProfile[]
   currentUserRecordId: string  // to prevent self-impersonation
 }

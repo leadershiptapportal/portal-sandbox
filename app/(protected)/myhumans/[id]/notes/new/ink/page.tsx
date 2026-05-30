@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getUserById } from '@/lib/services/usersService'
+import { getHumanById } from '@/lib/services/humansService'
 import InkNoteComposer from './InkNoteComposer'
 
 interface Props {
@@ -21,7 +21,7 @@ function getDisplayName(user: {
 
 export default async function InkNotePage({ params }: Props) {
   const { id } = await params
-  const user = await getUserById(id)
+  const user = await getHumanById(id)
   if (!user) notFound()
 
   return (
