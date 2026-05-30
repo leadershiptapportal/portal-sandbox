@@ -476,8 +476,11 @@ export async function fetchProfileOptions(allHumans: Human[]): Promise<{
 }> {
   const [organizations, enneagrams, mbtis, conflictPostures, apologyLanguages, strengths] =
     await Promise.all([
+      // Show every org except those explicitly marked Inactive. Most org
+      // records have a blank Status, so an `="Active"` filter (the old behaviour)
+      // matched nothing and left the dropdown empty.
       fetchTableOptions(TABLES.ORGANIZATIONS, FIELDS.ORGANIZATIONS.NAME, {
-        filterFormula: `{${FIELDS.ORGANIZATIONS.STATUS}}="Active"`,
+        filterFormula: `NOT({${FIELDS.ORGANIZATIONS.STATUS}}="Inactive")`,
       }),
       fetchTableOptions(TABLES.ENNEAGRAM, FIELDS.ENNEAGRAM.NAME, {
         codeField: FIELDS.ENNEAGRAM.TYPE_NUMBER,
