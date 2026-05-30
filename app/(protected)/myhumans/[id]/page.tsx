@@ -319,7 +319,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         <PlaceholderSection
           icon={<Paperclip />}
           title="No resources yet"
-          message="Resources and documents attached to this person will appear here."
+          message="Resources and documents attached to this human will appear here."
         />
       </div>
 

@@ -118,7 +118,7 @@ function SelectField({
 // publicMetadata.role, not this field. Three values mirror the system roles
 // documented in CLAUDE.md.
 const ROLE_OPTIONS = [
-  { value: 'Client', label: 'Person' },
+  { value: 'Client', label: 'Human' },
   { value: 'Coach', label: 'Coach' },
   { value: 'Admin', label: 'Admin' },
 ]
@@ -458,7 +458,7 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
                   rows={4}
                   value={quickNotes}
                   onChange={(e) => setQuickNotes(e.target.value)}
-                  placeholder="Add quick notes about this person…"
+                  placeholder="Add quick notes about this human…"
                   disabled={saving}
                 />
               </Section>

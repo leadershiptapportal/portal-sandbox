@@ -142,7 +142,7 @@ export default async function UsersPage() {
   const humansWithOpenTasks = users.filter((u) => (openTaskCountByUser.get(u.id) ?? 0) > 0).length
 
   const statParts = [
-    `${users.length} ${users.length !== 1 ? 'people' : 'person'}`,
+    `${users.length} ${users.length !== 1 ? 'humans' : 'human'}`,
     coachCount > 0 ? `${coachCount} coach${coachCount !== 1 ? 'es' : ''}` : null,
     humansWithOpenTasks > 0 ? `${humansWithOpenTasks} with open tasks` : null,
   ].filter(Boolean)
@@ -162,7 +162,7 @@ export default async function UsersPage() {
   return (
     <>
       <PageHeader
-        title="My People"
+        title="My Humans"
         description={description}
       />
       <HumansGrid

@@ -64,7 +64,7 @@ export default function AddHumanDialog({ coaches, organizations, currentCoachId 
     })
     setSaving(false)
     if (!result.success) {
-      setError(result.error ?? 'Failed to create client — please try again.')
+      setError(result.error ?? 'Failed to create human — please try again.')
       return
     }
     setOpen(false)
@@ -82,7 +82,7 @@ export default function AddHumanDialog({ coaches, organizations, currentCoachId 
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[hsl(213,70%,30%)] text-white text-sm font-medium hover:bg-[hsl(213,70%,25%)] transition-colors"
       >
         <UserPlus className="h-4 w-4" />
-        Add Person
+        Add Human
       </button>
 
       {toast && (
@@ -102,7 +102,7 @@ export default function AddHumanDialog({ coaches, organizations, currentCoachId 
           {/* Modal */}
           <div className="relative bg-card rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">Add New Person</h2>
+              <h2 className="text-lg font-semibold text-foreground">Add New Human</h2>
               <button
                 onClick={() => setOpen(false)}
                 disabled={saving}
@@ -197,7 +197,7 @@ export default function AddHumanDialog({ coaches, organizations, currentCoachId 
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-[hsl(213,70%,30%)] text-white text-sm font-medium rounded-lg hover:bg-[hsl(213,70%,25%)] disabled:opacity-50 transition-colors"
               >
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                {saving ? 'Creating…' : 'Create Client'}
+                {saving ? 'Creating…' : 'Create Human'}
               </button>
               <button
                 onClick={() => setOpen(false)}

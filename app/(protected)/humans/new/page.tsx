@@ -18,7 +18,7 @@ export default async function NewPersonPage() {
   return (
     <>
       <PageHeader
-        title="Add Person"
+        title="Add Human"
         description="Relationship context rows are created automatically based on the selections below."
       />
       <div className="max-w-2xl mx-auto py-6 px-4">

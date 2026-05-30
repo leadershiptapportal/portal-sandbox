@@ -385,19 +385,19 @@ export default function HumansGrid({ users, coaches, organizations }: Props) {
           className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-muted/50 transition-colors"
         >
           <Plus className="h-4 w-4" />
-          Add Person
+          Add Human
         </Link>
       </div>
 
       {/* ── Grid or empty state ─────────────────────────────────────────────── */}
       {users.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No people yet.</p>
+        <p className="text-sm text-muted-foreground">No humans yet.</p>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
             <Users className="h-6 w-6 text-muted-foreground" />
           </div>
-          <p className="text-sm font-medium text-foreground mb-1">No people match your search</p>
+          <p className="text-sm font-medium text-foreground mb-1">No humans match your search</p>
           <p className="text-xs text-muted-foreground mb-4">Try adjusting your filters</p>
           {hasFilters && (
             <button

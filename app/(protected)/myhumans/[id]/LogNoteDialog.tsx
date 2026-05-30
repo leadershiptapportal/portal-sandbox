@@ -102,7 +102,7 @@ export default function LogNoteDialog({ userId, humans, trigger }: Props) {
             {/* Person search — only when no userId pre-set */}
             {!userId && humans && (
               <div className="space-y-1.5" ref={searchRef}>
-                <Label>Person</Label>
+                <Label>Human</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                   <input
@@ -151,7 +151,7 @@ export default function LogNoteDialog({ userId, humans, trigger }: Props) {
                         ))
                       ) : (
                         <p className="px-3 py-3 text-sm text-muted-foreground italic">
-                          No matching people found.
+                          No matching humans found.
                         </p>
                       )}
                     </div>
@@ -174,7 +174,7 @@ export default function LogNoteDialog({ userId, humans, trigger }: Props) {
               />
             ) : (
               <p className="text-sm text-muted-foreground py-4 text-center">
-                {userId ? '' : 'Search for a person above to write your note.'}
+                {userId ? '' : 'Search for a human above to write your note.'}
               </p>
             )}
           </div>
