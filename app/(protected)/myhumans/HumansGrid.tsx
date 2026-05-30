@@ -221,7 +221,6 @@ function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode
 export default function HumansGrid({ users, coaches, organizations }: Props) {
   const [query, setQuery] = useState('')
   const [selectedRole, setSelectedRole] = useState('all')
-  const [selectedCoach, setSelectedCoach] = useState('all')
   const [selectedOrganization, setSelectedOrganization] = useState('all')
   const [sortBy, setSortBy] = useState('recent')
   const [viewMode, setViewMode] = useState<ViewMode>('humans')
@@ -248,7 +247,6 @@ export default function HumansGrid({ users, coaches, organizations }: Props) {
   const hasFilters =
     query.trim() !== '' ||
     selectedRole !== 'all' ||
-    selectedCoach !== 'all' ||
     selectedOrganization !== 'all'
 
   const filtered = useMemo(() => {
@@ -267,11 +265,6 @@ export default function HumansGrid({ users, coaches, organizations }: Props) {
     // Role filter
     if (selectedRole !== 'all') {
       result = result.filter(({ user }) => user.role === selectedRole)
-    }
-
-    // Coach filter
-    if (selectedCoach !== 'all') {
-      result = result.filter(({ user }) => user.coachIds?.includes(selectedCoach))
     }
 
     // Organization filter — match by linked record IDs (reliable) with a
@@ -296,7 +289,7 @@ export default function HumansGrid({ users, coaches, organizations }: Props) {
     }
 
     return result
-  }, [users, query, selectedRole, selectedCoach, selectedOrganization, sortBy, organizations])
+  }, [users, query, selectedRole, selectedOrganization, sortBy, organizations])
 
   // Group by organization for organization view
   const groupedByOrganization = useMemo(() => {
@@ -316,7 +309,6 @@ export default function HumansGrid({ users, coaches, organizations }: Props) {
   function clearFilters() {
     setQuery('')
     setSelectedRole('all')
-    setSelectedCoach('all')
     setSelectedOrganization('all')
     setSortBy('recent')
   }
@@ -344,16 +336,6 @@ export default function HumansGrid({ users, coaches, organizations }: Props) {
             <option value="all">All Roles</option>
             {roles.map((r) => (
               <option key={r} value={r}>{r}</option>
-            ))}
-          </FilterSelect>
-        )}
-
-        {/* Coach filter */}
-        {coaches.length > 1 && (
-          <FilterSelect value={selectedCoach} onChange={setSelectedCoach}>
-            <option value="all">All Coaches</option>
-            {coaches.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </FilterSelect>
         )}

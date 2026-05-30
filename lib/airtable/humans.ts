@@ -41,18 +41,10 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Hum
     lastName: f[FIELDS.HUMANS.LAST_NAME] as string | undefined,
     workEmail: f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined,
     role: f[FIELDS.HUMANS.ROLE] as string | undefined,
-    // organizationName is now authoritative from Affiliations via enrichHumansWithAffiliations()
+    // organizationName, coachIds, teamLeadIds, timeAtOrganization: derived from Affiliations/RC enrichment
     profilePhoto: Array.isArray(f[FIELDS.HUMANS.PROFILE_PHOTO])
       ? (f[FIELDS.HUMANS.PROFILE_PHOTO] as Array<{ url: string }>)[0]?.url
       : undefined,
-    // timeAtOrganization is now derived from Affiliations.startDate via enrichHumansWithAffiliations()
-    coachIds: Array.isArray(f[FIELDS.HUMANS.COACH])
-      ? (f[FIELDS.HUMANS.COACH] as string[])
-      : [],
-    teamLeadIds: Array.isArray(f[FIELDS.HUMANS.TEAM_LEAD])
-      ? (f[FIELDS.HUMANS.TEAM_LEAD] as string[])
-      : [],
-    quickNotes: f[FIELDS.HUMANS.QUICK_NOTES] as string | undefined,
     enneagramType: readLookup(f[FIELDS.HUMANS.ENNEAGRAM_TYPE_FROM_ENNEAGRAM]),
     enneagramDescriptor: readLookup(f[FIELDS.HUMANS.DESCRIPTOR_FROM_ENNEAGRAM]),
     mbtiType: readLookup(f[FIELDS.HUMANS.MBTI_FROM_MBTI]),
@@ -120,7 +112,6 @@ export interface CreateHumanFields {
   lastName?: string
   workEmail?: string
   role?: string
-  coachIds?: string[]
 }
 
 export async function createHumanRecord(fields: CreateHumanFields): Promise<string> {
@@ -132,7 +123,6 @@ export async function createHumanRecord(fields: CreateHumanFields): Promise<stri
       ...(fields.lastName ? { [FIELDS.HUMANS.LAST_NAME]: fields.lastName } : {}),
       ...(fields.workEmail ? { [FIELDS.HUMANS.WORK_EMAIL]: fields.workEmail } : {}),
       ...(fields.role ? { [FIELDS.HUMANS.ROLE]: fields.role } : {}),
-      ...(fields.coachIds?.length ? { [FIELDS.HUMANS.COACH]: fields.coachIds } : {}),
     },
   }
   console.log('[createHumanRecord] POST body:', JSON.stringify(body, null, 2))
@@ -195,8 +185,6 @@ export interface HumanProfileFields {
   'Conflict Posture'?: string[]
   'Apology Language'?: string[]
   'Strengths'?: string[]
-  'Coach'?: string[]
-  'Team Lead'?: string[]
 }
 
 export async function updateHumanProfile(
@@ -218,8 +206,6 @@ export async function updateHumanProfile(
     'Conflict Posture': FIELDS.HUMANS.CONFLICT_POSTURE,
     'Apology Language': FIELDS.HUMANS.APOLOGY_LANGUAGE,
     'Strengths': FIELDS.HUMANS.STRENGTHS,
-    'Coach': FIELDS.HUMANS.COACH,
-    'Team Lead': FIELDS.HUMANS.TEAM_LEAD,
   }
   const remapped = Object.fromEntries(
     Object.entries(fields).map(([k, v]) => [NAME_TO_ID[k] ?? k, v])

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createHumanRecord } from '@/lib/airtable/humans'
 import { createAffiliation } from '@/lib/airtable/affiliations'
 import { createOrganization } from '@/lib/airtable/organizations'
+import { createRelationshipContext } from '@/lib/airtable/relationships'
 
 export async function createClientAction(data: {
   firstName: string
@@ -19,7 +20,6 @@ export async function createClientAction(data: {
       firstName: data.firstName,
       lastName: data.lastName,
       workEmail: data.workEmail,
-      coachIds: data.coachId ? [data.coachId] : undefined,
     })
 
     let orgId = data.organizationId
@@ -28,6 +28,15 @@ export async function createClientAction(data: {
         name: data.newOrg.name,
         domain: data.newOrg.domain,
         type: data.newOrg.orgType,
+      })
+    }
+
+    if (data.coachId) {
+      await createRelationshipContext({
+        humanId: id,
+        leadId: data.coachId,
+        type: 'coaching',
+        status: 'Active',
       })
     }
 

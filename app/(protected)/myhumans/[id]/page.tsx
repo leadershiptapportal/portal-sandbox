@@ -73,8 +73,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
 
   const contactEmail = user.workEmail ?? ''
   const managerId = null
-  const coachId = user.coachIds?.[0] ?? null
-  const teamLeadId = user.teamLeadIds?.[0] ?? null
   // Resolved display name — passed to getInteractionsForUser so the lookup can
   // also match interactions via the {Client Name} field (set by sync), not just
   // by email substring in {Attendees}. Belt-and-suspenders for sparse data.
@@ -86,8 +84,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     sessionNotes,
     tasks,
     manager,
-    coach,
-    teamLead,
     theirTeamReports,
     allPersonRelationships,
     allUsersForPicker,
@@ -105,8 +101,6 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     getNotesByUser(id).catch(() => [] as Note[]),
     getTasksByUser(id).catch(() => [] as Task[]),
     managerId ? getHumanById(managerId).catch(() => null) : Promise.resolve(null),
-    coachId ? getHumanById(coachId).catch(() => null) : Promise.resolve(null),
-    teamLeadId ? getHumanById(teamLeadId).catch(() => null) : Promise.resolve(null),
     getDirectReports(id).catch(() => []),
     getRelationshipsForHuman(id).catch(() => []),
     getAllHumans().catch(() => [] as Human[]),
@@ -145,6 +139,12 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     id,
   )
   const userCanWrite = canWrite(permissionLevel)
+
+  // Derive coach and team lead names from Relationship Contexts (canonical source)
+  const myCoachRC = allPersonRelationships.find((rc) => rc.humanId === id && rc.relationshipType === 'coaching')
+  const myTeamLeadRC = allPersonRelationships.find((rc) => rc.humanId === id && rc.relationshipType === 'reports_to')
+  const coachName = myCoachRC?.leadName
+  const teamLeadName = myTeamLeadRC?.leadName
 
   const orgNameById = new Map(organizationOptions.map((o) => [o.id, o.name]))
 
@@ -256,8 +256,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         displayTitle={displayTitle}
         showPreferredName={!!showPreferredName}
         badges={badges}
-        coach={coach}
-        teamLead={teamLead}
+        coachName={coachName}
+        teamLeadName={teamLeadName}
         userCanWrite={userCanWrite}
         quickNotes={quickNote?.content ?? null}
         quickNoteRcId={coachRC?.id ?? null}

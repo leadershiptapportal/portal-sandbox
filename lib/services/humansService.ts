@@ -7,9 +7,7 @@ import type { SessionUser } from "@/lib/auth/getSessionUser";
 function dataScore(human: Human): number {
   let score = 0
   if (human.profilePhoto) score += 2
-  if (human.coachIds?.length) score += human.coachIds.length
   if (human.strengths?.length) score += human.strengths.length
-  if (human.quickNotes) score++
   if (human.enneagramType) score++
   if (human.mbtiType) score++
   if (human.title) score++
@@ -75,9 +73,7 @@ export async function getHumans(
   // active Relationship Context where I'm the Lead (the canonical, new way).
   if (filterByCoachId) {
     const rcIds = await coacheeIdsViaRC(filterByCoachId)
-    return enrichHumansWithAffiliations(
-      deduped.filter((h) => h.coachIds?.includes(filterByCoachId) || rcIds.has(h.id)),
-    )
+    return enrichHumansWithAffiliations(deduped.filter((h) => rcIds.has(h.id)))
   }
 
   if (!sessionUser || sessionUser.role === 'admin') return enrichHumansWithAffiliations(deduped);
@@ -89,8 +85,7 @@ export async function getHumans(
   if (!coachRecord) return enrichHumansWithAffiliations(deduped);
 
   const rcIds = await coacheeIdsViaRC(coachRecord.id)
-  const scoped = deduped.filter((h) => h.coachIds?.includes(coachRecord.id) || rcIds.has(h.id));
-
+  const scoped = deduped.filter((h) => rcIds.has(h.id))
   return enrichHumansWithAffiliations(scoped.length > 0 ? scoped : deduped);
 }
 

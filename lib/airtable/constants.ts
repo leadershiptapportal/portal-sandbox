@@ -133,19 +133,13 @@ export const FIELDS = {
     CLERK_USER_ID: 'fldFADxRhS8Jx8oEr',                            // "Clerk User ID"
     PERMISSION_PROFILE: 'fldKCYbCstGpxPqDh',                       // "Portal Permission Profile" (linked)
     LAST_PORTAL_LOGIN: 'fldHRzhxghjtyXBbt',                        // "Last Portal Login"
-    FULL_NAME: 'fldH8rST4tjq0gis7',                                // "Full Name"
+    FULL_NAME: 'fldH8rST4tjq0gis7',                                // "Full Name" (formula)
     PREFERRED_NAME: 'fld3HX06VuQWQYCM1',                           // "Preferred Name"
     FIRST_NAME: 'fldOGveomFlCV6DjD',                               // "First Name"
     LAST_NAME: 'fldJh2vuJqYkyyZqx',                                // "Last Name"
     WORK_EMAIL: 'fldlL8HrXCnd3K4KL',                               // "Work Email"
-    TITLE: 'fldVwZtWoJjZp920l',                                    // "[Deprecated] Title" — moved to Affiliations.Title at Org; read as fallback only
     ROLE: 'fldaSnC1UCEukV8Um',                                     // "Role"
-    ORGANIZATION_NAME: 'fldHd3omMw7PUAWNJ',                         // "[Deprecated] Company Name (from Company)" lookup — org name now from primary Affiliation; fallback only
     PROFILE_PHOTO: 'fldHj7YBmed6S8s58',                            // "Profile Photo"
-    TIME_AT_ORGANIZATION: 'fldi1Ez09JdS0tjnb',                      // "[Deprecated] Time at Company" — tenure now derived from Affiliations.Start Date
-    COACH: 'fld4kKouAYi5plNVL',                                    // "Coach"
-    TEAM_LEAD: 'fldRyJGLnzfoZlIpN',                                // "Team Lead"
-    QUICK_NOTES: 'fldduqJaVzxE9u6IP',                              // "Quick Notes"
     ENNEAGRAM_TYPE_FROM_ENNEAGRAM: 'fld3NTWw3EmFRVBRY',            // "Enneagram Type (from Enneagram)"
     DESCRIPTOR_FROM_ENNEAGRAM: 'fldfTiZfRCarNCvUe',                // "Descriptor (from Enneagram)"
     MBTI_FROM_MBTI: 'fldetFbWFerHgk3Ai',                           // "MBTI (from MBTI)"
@@ -156,21 +150,13 @@ export const FIELDS = {
     STRENGTH_NAME_FROM_STRENGTHS: 'fldm4MrDJsj8BZHRz',             // "Strength Name (from Strengths)"
     DOMAIN_FROM_STRENGTHS: 'fldG84OLoi5HtKagW',                    // "Domain (from Strengths)"
     ASSOCIATED_MEETINGS: 'fld1t3bIXyBxHEh4B',                      // "Associated Meetings"
-    TEAM_MEMBERS: 'fldbpthkjaXy7mU0R',                             // "Team Members"
     ENNEAGRAM: 'fldSQ11YFsWjlkREZ',                                // "Enneagram"
     MBTI: 'fldyjw72Zx7bbbSqQ',                                     // "MBTI"
     CONFLICT_POSTURE: 'fldCD4HvwKE5SXXLE',                         // "Conflict Posture"
     APOLOGY_LANGUAGE: 'fldVEQ4DZuTARM3ST',                         // "Apology Language"
     STRENGTHS: 'fldcQe5diYYsoThxi',                                // "Strengths"
-    ORGANIZATION: 'fldUu6I5aaiIhTVj6',                              // "[Deprecated] Company" (linked → Organizations) — replaced by Affiliations; org fallback only
     BIRTHDAY: 'flde4V2mmmYv0dMME',                                 // "Birthday"
-    WORK_CELL_NUMBER: 'fldZIvMj9ggKNAHwO',                         // "[Deprecated] Work Cell Number" — moved to Affiliations.Work Cell at Org; fallback only
     PERSONAL_CELL_NUMBER: 'fldV3990UGnVEdSQL',                     // "Personal Cell Number"
-    START_DATE: 'fldgDu0FAVHCEtp0w',                               // "[Deprecated] Start Date" — org hire date moved to Affiliations.Start Date; fallback only
-    // Linked record fields on Humans (not the singleLineText lookup variants)
-    MEETINGS_LINKED: 'fldPvW5FXxWUiiI8F',                         // "Meetings" (multipleRecordLinks → Meetings)
-    NOTES_LINKED: 'fldtaUHrHe079g2iz',                            // "Notes" (multipleRecordLinks → Notes)
-    TASKS_LINKED: 'fldeWGoSfUIqV3CbE',                            // "Tasks" (multipleRecordLinks → Tasks)
     CONNECTED_CALENDARS: 'fld7aipXZ3XzINu0p',                     // "Connected Calendars" (multipleRecordLinks)
     AFFILIATIONS: 'fldst9Sb7WWifXrtw',                            // "Affiliations" (multipleRecordLinks → Affiliations)
     RELATIONSHIP_CONTEXTS_CLIENT: 'fldXDcLMxY0q87gwE',            // "Relationship Contexts (Client)" — human is coachee

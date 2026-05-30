@@ -33,7 +33,6 @@ export async function POST(req: Request) {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       workEmail: workEmail?.trim() || undefined,
-      coachIds: coachIds.length > 0 ? coachIds : undefined,
       role: 'client',
     })
 

@@ -232,8 +232,8 @@ interface Props {
   displayTitle?: string
   showPreferredName: boolean
   badges: Array<{ label: string; className: string }>
-  coach: Human | null
-  teamLead: Human | null
+  coachName?: string
+  teamLeadName?: string
   userCanWrite: boolean
   quickNotes?: string | null
   quickNoteRcId?: string | null
@@ -248,8 +248,8 @@ export default function ProfileCardSection({
   displayTitle,
   showPreferredName,
   badges,
-  coach,
-  teamLead,
+  coachName,
+  teamLeadName,
   userCanWrite,
   quickNotes = null,
   quickNoteRcId = null,
@@ -315,16 +315,16 @@ export default function ProfileCardSection({
                 {user.timeAtOrganization}
               </span>
             )}
-            {coach && (
+            {coachName && (
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <UserCheck className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                Coach: {getDisplayName(coach)}
+                Coach: {coachName}
               </span>
             )}
-            {teamLead && (
+            {teamLeadName && (
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <UserCheck className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                Team Lead: {getDisplayName(teamLead)}
+                Team Lead: {teamLeadName}
               </span>
             )}
           </div>

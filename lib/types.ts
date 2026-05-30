@@ -39,10 +39,8 @@ export interface Human {
   workEmail?: string;
   role?: string;
   organizationName?: string;
-  profilePhoto?: string;    // Airtable "Profile Photo" attachment (first URL)
-  timeAtOrganization?: string;   // text field
-  coachIds?: string[];      // linked record IDs → Coach(es)
-  teamLeadIds?: string[];   // linked record IDs → Team Lead(s)
+  profilePhoto?: string;
+  timeAtOrganization?: string;
 
   // Coaching context
   quickNotes?: string;

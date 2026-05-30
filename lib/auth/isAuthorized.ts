@@ -1,13 +1,11 @@
 import { getAllHumans } from '@/lib/airtable/humans'
+import { getRelationshipContexts } from '@/lib/airtable/relationships'
 import type { SessionUser } from './getSessionUser'
 
 /**
  * Returns true if sessionUser may read or write data scoped to the given
- * Airtable Users record ID.
- *
- * - Admin: always allowed
- * - Coach: allowed only if the target user's "Coach" linked-record field
- *   contains the coach's own Airtable record ID (resolved by email).
+ * Airtable record ID. Coach access is determined by Relationship Contexts
+ * (the coach is the Lead in an active RC where the target is the Human).
  */
 export async function canAccessUser(
   userId: string,
@@ -16,23 +14,19 @@ export async function canAccessUser(
   if (sessionUser.role === 'admin') return true
 
   const all = await getAllHumans()
-
-  // Resolve the coach's own Airtable record ID by email
   const coachRecord = all.find(
-    (u) =>
-      u.workEmail?.toLowerCase() === sessionUser.email.toLowerCase(),
+    (u) => u.workEmail?.toLowerCase() === sessionUser.email.toLowerCase(),
   )
 
-  // Coach not found in Airtable — fall back to allowing access so the portal
-  // doesn't break while coach records are still being configured.
+  // Coach not found in Airtable — allow access so the portal doesn't break
+  // while the coach record is still being configured.
   if (!coachRecord) return true
 
-  const target = all.find((u) => u.id === userId)
-  const scoped = all.filter((u) => u.coachIds?.includes(coachRecord.id))
+  const contexts = await getRelationshipContexts(coachRecord.id)
+  const coacheeIds = new Set(contexts.map((c) => c.humanId))
 
-  // If the Coach field isn't wired up yet (no clients linked), allow access.
-  // This matches the fallback in usersService.getUsers().
-  if (scoped.length === 0) return true
+  // No RCs configured yet — allow access as a safety fallback.
+  if (coacheeIds.size === 0) return true
 
-  return target?.coachIds?.includes(coachRecord.id) ?? false
+  return coacheeIds.has(userId)
 }

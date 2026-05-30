@@ -83,10 +83,12 @@ async function main() {
 
   for (const h of humans) {
     const f = h.fields
-    const orgId = firstLink(f[FIELDS.HUMANS.ORGANIZATION])
+    // These flat fields were removed from FIELDS.HUMANS after migration was complete.
+    // Script is obsolete — all 47 humans were migrated via the Airtable MCP.
+    const orgId = firstLink(f['fldUu6I5aaiIhTVj6' /* [Deprecated] Company */])
     const name = (f[FIELDS.HUMANS.FULL_NAME] as string) || h.id
-    const title = (f[FIELDS.HUMANS.TITLE] as string | undefined)?.trim()
-    const timeAtOrg = (f[FIELDS.HUMANS.TIME_AT_ORGANIZATION] as string | undefined)?.trim()
+    const title = (f['fldVwZtWoJjZp920l' /* [Deprecated] Title */] as string | undefined)?.trim()
+    const timeAtOrg = (f['fldi1Ez09JdS0tjnb' /* [Deprecated] Time at Company */] as string | undefined)?.trim()
 
     if (!orgId) {
       if (title || timeAtOrg) orphanText.push(`${name} (title=${title ?? '—'}, timeAtOrg=${timeAtOrg ?? '—'})`)
