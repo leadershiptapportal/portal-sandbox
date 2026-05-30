@@ -20,7 +20,7 @@ const NOISE_PATTERN =
 
 // ── Relationship context map ──────────────────────────────────────────────────
 
-type ContextEntry = { contextId: string; personId: string; personName: string }
+type ContextEntry = { contextId: string; humanId: string; humanName: string }
 type ContextMap = Map<string, ContextEntry> // lowercase email → entry
 
 async function buildContextMap(
@@ -67,10 +67,10 @@ async function buildContextMap(
     const leads = Array.isArray(f[RC.LEAD]) ? (f[RC.LEAD] as string[]) : []
     if (!leads.includes(coachAirtableId)) continue
     const persons = Array.isArray(f[RC.HUMAN]) ? (f[RC.HUMAN] as string[]) : []
-    for (const personId of persons) {
-      const person = personLookup.get(personId)
+    for (const humanId of persons) {
+      const person = personLookup.get(humanId)
       if (!person) continue
-      contextMap.set(person.email, { contextId: r.id as string, personId, personName: person.name })
+      contextMap.set(person.email, { contextId: r.id as string, humanId, humanName: person.name })
     }
   }
 
@@ -97,7 +97,7 @@ async function upsertInteraction(
   event: GraphEvent,
   coachEmail: string,
   contextId: string,
-  personName: string,
+  humanName: string,
 ): Promise<void> {
   const start = event.start.dateTime ?? event.start.date
   const end = event.end.dateTime ?? event.end.date
@@ -117,7 +117,7 @@ async function upsertInteraction(
     [F.END]: end,
     [F.PROVIDER_EVENT_ID]: event.id,
     [F.CALENDAR_OWNER]: coachEmail,
-    [F.CLIENT_NAME]: personName,
+    [F.CLIENT_NAME]: humanName,
     [F.ATTENDEES]: attendeesString,
     [F.MEETING_STATUS]: new Date(end).getTime() < Date.now() ? 'Completed' : 'Scheduled',
     [F.CALENDAR_PROVIDER]: 'Outlook',
@@ -273,7 +273,7 @@ export async function POST() {
         if (matches.length === 0) continue
 
         for (const match of matches) {
-          await upsertInteraction(apiKey, baseId, event, person.email, match.contextId, match.personName)
+          await upsertInteraction(apiKey, baseId, event, person.email, match.contextId, match.humanName)
           totalUpserted++
         }
       }

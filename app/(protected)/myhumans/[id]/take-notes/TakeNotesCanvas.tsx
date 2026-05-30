@@ -18,8 +18,8 @@ const TldrawNoteCanvas = dynamic(
 )
 
 interface Props {
-  personId: string
-  personName: string
+  humanId: string
+  humanName: string
   meetings: Interaction[]
   initialInteraction: Interaction | null
   existingInkNote?: Note | null
@@ -57,8 +57,8 @@ function formatInteractionLabel(m: Interaction): string {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function TakeNotesCanvas({
-  personId,
-  personName,
+  humanId,
+  humanName,
   meetings,
   initialInteraction,
   existingInkNote,
@@ -71,7 +71,7 @@ export default function TakeNotesCanvas({
   const isDarkMode = resolvedTheme === 'dark'
 
   const canvasRef = useRef<TldrawNoteCanvasHandle | null>(null)
-  const draftKey  = `ink-draft-${personId}`
+  const draftKey  = `ink-draft-${humanId}`
 
   const [color,    setColor]    = useState(COLORS[0].value)
   const [width,    setWidth]    = useState(WIDTHS[2].value)   // default: Medium
@@ -180,7 +180,7 @@ export default function TakeNotesCanvas({
       }
 
       const result = await saveInkNoteAction(
-        personId,
+        humanId,
         uploadJson.url,
         inkNoteData,
         caption.trim() || undefined,

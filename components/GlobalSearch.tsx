@@ -129,7 +129,7 @@ export default function GlobalSearch({ collapsed }: { collapsed: boolean }) {
       if (q.trim().length < 2) { setResults([]); setLoading(false); return }
       setLoading(true)
       try {
-        const res = await fetch(`/api/search/users?q=${encodeURIComponent(q)}`)
+        const res = await fetch(`/api/search/humans?q=${encodeURIComponent(q)}`)
         const data = await res.json()
         setResults(Array.isArray(data) ? data : [])
         setActiveIndex(0)

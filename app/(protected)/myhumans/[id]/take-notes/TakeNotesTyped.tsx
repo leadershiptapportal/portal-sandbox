@@ -10,7 +10,7 @@ import type { Note } from '@/lib/airtable/notes'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 
 interface Props {
-  personId: string
+  humanId: string
   meetings: Interaction[]
   initialInteraction: Interaction | null
   existingNote?: Note | null
@@ -30,7 +30,7 @@ function formatInteractionLabel(m: Interaction): string {
 }
 
 export default function TakeNotesTyped({
-  personId,
+  humanId,
   meetings,
   initialInteraction,
   existingNote,
@@ -39,7 +39,7 @@ export default function TakeNotesTyped({
   onCancel,
   onContentChange,
 }: Props) {
-  const draftKey = `typed-draft-${personId}-${noteCategory}`
+  const draftKey = `typed-draft-${humanId}-${noteCategory}`
   const isOnline = useOnlineStatus()
 
   const [noteTitle, setNoteTitle] = useState(existingNote?.noteTitle ?? '')
@@ -130,7 +130,7 @@ export default function TakeNotesTyped({
     setError(null)
 
     const result = await saveTypedNoteAction(
-      personId,
+      humanId,
       content.trim(),
       noteCategory,
       selectedMeetingId || undefined,

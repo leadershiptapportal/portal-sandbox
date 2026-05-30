@@ -6,7 +6,7 @@ import { getAllHumans, fetchProfileOptions } from '@/lib/airtable/humans'
 import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getInteractionById } from '@/lib/airtable/interactions'
 import { getMostRecentInteractionNoteByHuman, getInteractionNotesGrouped, getGeneralNotesByRCIds, getQuickNoteForRC } from '@/lib/airtable/notes'
-import { getRelationshipsForPerson } from '@/lib/airtable/relationships'
+import { getRelationshipsForHuman } from '@/lib/airtable/relationships'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import TakeNotesWorkspace from './TakeNotesWorkspace'
 import type { Interaction } from '@/lib/types'
@@ -53,7 +53,7 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
       ).catch(() => ({ upcoming: [] as Interaction[], past: [] as Interaction[] })),
       interactionId ? getInteractionById(interactionId).catch(() => null) : Promise.resolve(null),
       getPermissionLevel(currentUserRecord.airtableId, currentUserRecord.role, id),
-      getRelationshipsForPerson(id).catch(() => []),
+      getRelationshipsForHuman(id).catch(() => []),
     ])
 
   // Resolve coach's RC with this person, then load notes in parallel

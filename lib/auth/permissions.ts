@@ -29,7 +29,7 @@ export async function getPermissionLevel(
   // Direct coaching relationship (highest non-admin level).
   const directContexts = await getRelationshipContexts(coachAirtableId)
   const directCoaching = directContexts.find(
-    (c) => c.personId === targetClientAirtableId && c.relationshipType === 'coaching',
+    (c) => c.humanId === targetClientAirtableId && c.relationshipType === 'coaching',
   )
   if (directCoaching) return 'coach_owner'
 

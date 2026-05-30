@@ -189,12 +189,12 @@ export default function RelationshipDialog(props: Props) {
 
       // Edit mode
       const { type, subjectIs } = roleToTypeAndDirection(role)
-      const personId = subjectIs === 'person' ? props.subjectPersonId : props.otherPersonId
+      const humanId = subjectIs === 'person' ? props.subjectPersonId : props.otherPersonId
       const leadId   = subjectIs === 'person' ? props.otherPersonId  : props.subjectPersonId
       const result = await updateRelationshipAction({
         rcId: props.rcId,
         subjectPersonId: props.subjectPersonId,
-        fields: { type, status, startDate: startDate || null, personId, leadId },
+        fields: { type, status, startDate: startDate || null, humanId, leadId },
       })
       if (!result.success) { setError(result.error ?? 'Failed to update.'); setSaving(false); return }
       toast.success('Relationship updated')

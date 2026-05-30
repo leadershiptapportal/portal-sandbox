@@ -105,17 +105,17 @@ function InlineDateChip({
 // ── Quick Notes inline + modal ────────────────────────────────────────────────
 
 function ProfileQuickNotes({
-  personId,
+  humanId,
   rcId,
   initialNotes,
   canEdit,
 }: {
-  personId: string
+  humanId: string
   rcId: string | null
   initialNotes: string | null
   canEdit: boolean
 }) {
-  const draftKey = `qn-draft-${personId}`
+  const draftKey = `qn-draft-${humanId}`
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState(initialNotes ?? '')
   const [saved, setSaved] = useState(initialNotes ?? '')
@@ -138,7 +138,7 @@ function ProfileQuickNotes({
     if (draft === saved) { setOpen(false); return }
     if (!rcId) { setOpen(false); return }
     setSaving(true)
-    await updateCoachContextAction(personId, rcId, draft)
+    await updateCoachContextAction(humanId, rcId, draft)
     clearDraft(draftKey)
     setSaving(false)
     setSaved(draft)
@@ -237,7 +237,7 @@ interface Props {
   userCanWrite: boolean
   quickNotes?: string | null
   quickNoteRcId?: string | null
-  personId?: string
+  humanId?: string
 }
 
 export default function ProfileCardSection({
@@ -253,7 +253,7 @@ export default function ProfileCardSection({
   userCanWrite,
   quickNotes = null,
   quickNoteRcId = null,
-  personId,
+  humanId,
 }: Props) {
   const router = useRouter()
 
@@ -363,9 +363,9 @@ export default function ProfileCardSection({
         </div>
       )}
 
-      {personId && quickNoteRcId && (
+      {humanId && quickNoteRcId && (
         <ProfileQuickNotes
-          personId={personId}
+          humanId={humanId}
           rcId={quickNoteRcId}
           initialNotes={quickNotes}
           canEdit={userCanWrite}

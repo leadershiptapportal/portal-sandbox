@@ -15,7 +15,7 @@ import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getPermissionLevel, canWrite } from '@/lib/auth/permissions'
 import {
   getDirectReports,
-  getRelationshipsForPerson,
+  getRelationshipsForHuman,
 } from '@/lib/airtable/relationships'
 import { getAllHumans, fetchPersonalityOptions } from '@/lib/airtable/humans'
 import PlaceholderSection from '@/components/ui/PlaceholderSection'
@@ -106,7 +106,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     teamLeadId ? getHumanById(teamLeadId).catch(() => null) : Promise.resolve(null),
     Promise.all(teamMemberIdList.map((tid) => getHumanById(tid).catch(() => null))),
     getDirectReports(id).catch(() => []),
-    getRelationshipsForPerson(id).catch(() => []),
+    getRelationshipsForHuman(id).catch(() => []),
     getAllHumans().catch(() => [] as Human[]),
     fetchPersonalityOptions().catch(() => null),
   ])
@@ -256,7 +256,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         userCanWrite={userCanWrite}
         quickNotes={quickNote?.content ?? null}
         quickNoteRcId={coachRC?.id ?? null}
-        personId={id}
+        humanId={id}
       />
 
       {/* ── Relationships (coaches, coachees, manager, reports) ──────────── */}

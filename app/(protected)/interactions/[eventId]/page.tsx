@@ -50,7 +50,7 @@ export default async function SessionPage({ params }: Props) {
   const matchedContext = interaction.relationshipContextId
     ? contexts.find((c) => c.id === interaction.relationshipContextId)
     : null
-  const clientAirtableId = matchedContext?.personId ?? undefined
+  const clientAirtableId = matchedContext?.humanId ?? undefined
 
   // Permission level for this session's client
   const permissionLevel = clientAirtableId

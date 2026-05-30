@@ -64,7 +64,7 @@ export default async function AdminRelationshipsPage() {
                 return (
                   <tr key={ctx.id} className="hover:bg-muted/50 transition-colors">
                     <td className="px-4 py-3 font-medium text-foreground">{ctx.leadName}</td>
-                    <td className="px-4 py-3 text-foreground">{ctx.personName}</td>
+                    <td className="px-4 py-3 text-foreground">{ctx.humanName}</td>
                     <td className="px-4 py-3 text-muted-foreground capitalize">
                       {ctx.relationshipType?.replace(/_/g, ' ') || '—'}
                     </td>

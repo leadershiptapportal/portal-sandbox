@@ -101,7 +101,7 @@ export async function GET(req: NextRequest) {
     await upsertConnectedCalendar({
       clerkUserId: person.clerkUserId,
       clerkEmail: person.email,
-      personId: person.airtableRecordId,
+      humanId: person.airtableRecordId,
       provider: 'Outlook',
       providerAccountEmail,
       providerUserId,

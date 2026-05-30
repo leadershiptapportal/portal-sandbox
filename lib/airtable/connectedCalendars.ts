@@ -95,7 +95,7 @@ export async function getConnectedCalendarsByClerkUserId(
  * JS-filtered because linked record fields can't be filtered by ID in Airtable formulas.
  */
 export async function getConnectedCalendarsByPersonId(
-  personId: string,
+  humanId: string,
 ): Promise<ConnectedCalendar[]> {
   const { apiKey, baseId } = getCredentials()
   const res = await airtableFetch(
@@ -109,13 +109,13 @@ export async function getConnectedCalendarsByPersonId(
   const data = await res.json()
   return (data.records ?? [])
     .map(mapRecord)
-    .filter((c: ConnectedCalendar) => c.personIds.includes(personId))
+    .filter((c: ConnectedCalendar) => c.personIds.includes(humanId))
 }
 
 export interface UpsertConnectedCalendarData {
   clerkUserId: string
   clerkEmail: string
-  personId: string
+  humanId: string
   provider: string
   providerAccountEmail: string
   providerUserId?: string
@@ -146,7 +146,7 @@ export async function upsertConnectedCalendar(
   const connectionName = `${data.provider} — ${data.clerkEmail}`
   const fields: Record<string, unknown> = {
     [CC.CONNECTION_NAME]: connectionName,
-    [CC.HUMAN]: [data.personId],
+    [CC.HUMAN]: [data.humanId],
     [CC.PROVIDER]: data.provider,
     [CC.PROVIDER_ACCOUNT_EMAIL]: data.providerAccountEmail,
     [CC.ACCESS_TOKEN]: data.accessToken,

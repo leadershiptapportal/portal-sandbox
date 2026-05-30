@@ -16,9 +16,9 @@ export type RelationshipType = 'coaching' | 'reports_to' | 'client' | 'prospect'
 
 export interface RelationshipContext {
   id: string
-  personId: string        // the coachee / direct report / contact (Person field)
-  personName: string
-  personTitle?: string
+  humanId: string        // the coachee / direct report / contact (Person field)
+  humanName: string
+  humanTitle?: string
   leadId: string          // the coach / manager / professional (Lead field)
   leadName: string
   leadTitle?: string
@@ -63,7 +63,7 @@ interface PersonData { name: string; title?: string }
 
 /**
  * Fetches name + title for all People records.
- * Used to populate personName/leadName/personTitle/leadTitle without per-record lookups.
+ * Used to populate humanName/leadName/humanTitle/leadTitle without per-record lookups.
  */
 async function buildPersonDataMap(apiKey: string, baseId: string): Promise<Map<string, PersonData>> {
   const usersTable = encodeURIComponent(TABLES.HUMANS)
@@ -103,15 +103,15 @@ function mapRecord(
     : []
   if (personIds.length === 0 || leadIds.length === 0) return null
 
-  const personId = personIds[0]
+  const humanId = personIds[0]
   const leadId = leadIds[0]
-  const personData = personDataMap.get(personId)
+  const personData = personDataMap.get(humanId)
   const leadData = personDataMap.get(leadId)
   return {
     id: r.id,
-    personId,
-    personName: personData?.name ?? personId,
-    personTitle: personData?.title,
+    humanId,
+    humanName: personData?.name ?? humanId,
+    humanTitle: personData?.title,
     leadId,
     leadName: leadData?.name ?? leadId,
     leadTitle: leadData?.title,
@@ -169,10 +169,10 @@ export async function getRelationshipContexts(
  */
 export async function getRelationshipContext(
   leadId: string,
-  personId: string,
+  humanId: string,
 ): Promise<RelationshipContext | null> {
   const contexts = await getRelationshipContexts(leadId)
-  return contexts.find((c) => c.personId === personId) ?? null
+  return contexts.find((c) => c.humanId === humanId) ?? null
 }
 
 /**
@@ -205,7 +205,7 @@ export async function getUpstreamContexts(
     .map((r: { id: string; fields: Record<string, unknown> }) => mapRecord(r, nameMap))
     .filter(
       (r: RelationshipContext | null): r is RelationshipContext =>
-        r !== null && r.personId === personAirtableId,
+        r !== null && r.humanId === personAirtableId,
     )
 }
 
@@ -239,7 +239,7 @@ export async function getAllRelationshipContexts(): Promise<RelationshipContext[
 // ── Downstream traversal ──────────────────────────────────────────────────────
 
 export interface DirectReport {
-  personId: string
+  humanId: string
   name: string
   title?: string
   email?: string
@@ -322,7 +322,7 @@ export async function getDirectReports(
     const photoUrl = photoArr?.[0]?.url ?? undefined
 
     results.push({
-      personId: r.id as string,
+      humanId: r.id as string,
       name,
       title: (f[FIELDS.HUMANS.TITLE] as string | undefined)?.trim() || undefined,
       email: (f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined)?.trim() || undefined,
@@ -357,7 +357,7 @@ export async function getDownstreamHumans(
   const byId = new Map(allHumans.map((h) => [h.id, h]))
 
   const direct = contexts
-    .map((c) => byId.get(c.personId))
+    .map((c) => byId.get(c.humanId))
     .filter((h): h is import('@/lib/types').Human => h != null)
 
   if (safeDepth <= 1) return direct
@@ -421,13 +421,13 @@ export async function resolveContextForSubject(
   }
 
   // 1. Direct: coach → subject
-  const direct = byLead.get(coachId)?.find((c) => c.personId === subjectPersonId)
+  const direct = byLead.get(coachId)?.find((c) => c.humanId === subjectPersonId)
   if (direct) return direct
 
   // 2. One-hop: coach → intermediate → subject. Return the coach's upstream RC.
   for (const rc of byLead.get(coachId) ?? []) {
-    const downstream = byLead.get(rc.personId) ?? []
-    if (downstream.some((d) => d.personId === subjectPersonId)) return rc
+    const downstream = byLead.get(rc.humanId) ?? []
+    if (downstream.some((d) => d.humanId === subjectPersonId)) return rc
   }
 
   return null
@@ -436,13 +436,13 @@ export async function resolveContextForSubject(
 // ── Write: onboarding row generation ─────────────────────────────────────────
 
 /**
- * Fetches all Relationship Context rows where Person = personId and returns
+ * Fetches all Relationship Context rows where Person = humanId and returns
  * a compact list of {leadId, type} for duplicate detection.
  */
 async function fetchExistingPairs(
   apiKey: string,
   baseId: string,
-  personId: string,
+  humanId: string,
 ): Promise<Array<{ leadId: string; type: string }>> {
   const res = await airtableFetch(
     `${API_BASE}/${baseId}/${TABLE}?maxRecords=500`,
@@ -455,7 +455,7 @@ async function fetchExistingPairs(
       const persons = Array.isArray(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN])
         ? (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN] as string[])
         : []
-      return persons.includes(personId)
+      return persons.includes(humanId)
     })
     .map((r: { id: string; fields: Record<string, unknown> }) => ({
       leadId: (
@@ -498,8 +498,8 @@ export async function generateRelationshipRows(data: OnboardingData): Promise<vo
       lead: leadId,
       type: 'reports_to' as const,
     })),
-    ...directReports.map((personId) => ({
-      person: personId,
+    ...directReports.map((humanId) => ({
+      person: humanId,
       lead: newPersonId,
       type: 'reports_to' as const,
     })),
@@ -516,7 +516,7 @@ export async function generateRelationshipRows(data: OnboardingData): Promise<vo
     ),
   )
 
-  // Build a Set of "personId|leadId|type" keys that already exist
+  // Build a Set of "humanId|leadId|type" keys that already exist
   const existingKeys = new Set<string>()
   for (const { pid, pairs } of existingByPerson) {
     for (const p of pairs) {
@@ -560,7 +560,7 @@ export async function generateRelationshipRows(data: OnboardingData): Promise<vo
 // ── Single-record CRUD on Relationship Contexts ──────────────────────────────
 
 export interface CreateRCInput {
-  personId: string
+  humanId: string
   leadId: string
   type: RelationshipType
   status?: 'Active' | 'Inactive' | 'Paused' | 'Ended'
@@ -576,10 +576,10 @@ export async function createRelationshipContext(input: CreateRCInput): Promise<s
   const { apiKey, baseId } = getCredentials()
 
   // Dedup: check for existing Person+Lead+Type combo before creating.
-  const existingPairs = await fetchExistingPairs(apiKey, baseId, input.personId)
+  const existingPairs = await fetchExistingPairs(apiKey, baseId, input.humanId)
   const dupe = existingPairs.find((p) => p.leadId === input.leadId && p.type === input.type)
   if (dupe) {
-    log.warn(`[createRelationshipContext] duplicate ignored: person=${input.personId} lead=${input.leadId} type=${input.type}`)
+    log.warn(`[createRelationshipContext] duplicate ignored: person=${input.humanId} lead=${input.leadId} type=${input.type}`)
     // Walk RCs to find the existing record ID
     const res = await airtableFetch(
       `${API_BASE}/${baseId}/${TABLE}?maxRecords=1000`,
@@ -591,7 +591,7 @@ export async function createRelationshipContext(input: CreateRCInput): Promise<s
         const f = r.fields as Record<string, unknown>
         const persons = Array.isArray(f[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN]) ? (f[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN] as string[]) : []
         const leads = Array.isArray(f[FIELDS.RELATIONSHIP_CONTEXTS.LEAD]) ? (f[FIELDS.RELATIONSHIP_CONTEXTS.LEAD] as string[]) : []
-        if (persons[0] === input.personId && leads[0] === input.leadId) {
+        if (persons[0] === input.humanId && leads[0] === input.leadId) {
           const t = normalizeRelationshipType(f[FIELDS.RELATIONSHIP_CONTEXTS.TYPE])
           if (t === input.type) return r.id as string
         }
@@ -600,7 +600,7 @@ export async function createRelationshipContext(input: CreateRCInput): Promise<s
   }
 
   const fields: Record<string, unknown> = {
-    [FIELDS.RELATIONSHIP_CONTEXTS.HUMAN]: [input.personId],
+    [FIELDS.RELATIONSHIP_CONTEXTS.HUMAN]: [input.humanId],
     [FIELDS.RELATIONSHIP_CONTEXTS.LEAD]: [input.leadId],
     [FIELDS.RELATIONSHIP_CONTEXTS.TYPE]: input.type,
     [FIELDS.RELATIONSHIP_CONTEXTS.STATUS]: input.status ?? 'Active',
@@ -628,7 +628,7 @@ export interface UpdateRCInput {
    * `type` alone doesn't move the relationship between buckets in the UI.
    * Provide the new Person/Lead record IDs to apply the direction change.
    */
-  personId?: string
+  humanId?: string
   leadId?: string
 }
 
@@ -642,7 +642,7 @@ export async function updateRelationshipContext(
   if (input.status !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.STATUS] = input.status
   if (input.startDate !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.START_DATE] = input.startDate
   if (input.endDate !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.END_DATE] = input.endDate
-  if (input.personId !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN] = [input.personId]
+  if (input.humanId !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN] = [input.humanId]
   if (input.leadId !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.LEAD] = [input.leadId]
   if (Object.keys(fields).length === 0) return
 
@@ -674,7 +674,7 @@ export async function deleteRelationshipContext(rcId: string): Promise<void> {
  * Used by the Relationships section on profile pages to show all of a
  * person's connections in both directions.
  */
-export async function getRelationshipsForPerson(personId: string): Promise<RelationshipContext[]> {
+export async function getRelationshipsForHuman(humanId: string): Promise<RelationshipContext[]> {
   const { apiKey, baseId } = getCredentials()
   const [res, nameMap] = await Promise.all([
     airtableFetch(`${API_BASE}/${baseId}/${TABLE}?maxRecords=2000`, {
@@ -688,7 +688,7 @@ export async function getRelationshipsForPerson(personId: string): Promise<Relat
   return (data.records ?? [])
     .map((r: { id: string; fields: Record<string, unknown> }) => mapRecord(r, nameMap))
     .filter((r: RelationshipContext | null): r is RelationshipContext =>
-      r !== null && (r.personId === personId || r.leadId === personId),
+      r !== null && (r.humanId === humanId || r.leadId === humanId),
     )
 }
 

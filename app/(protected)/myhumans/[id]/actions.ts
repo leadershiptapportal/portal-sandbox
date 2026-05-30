@@ -398,15 +398,15 @@ export async function updateInteractionNotesAction(
 // ── Quick Notes ───────────────────────────────────────────────────────────────
 
 export async function updateCoachContextAction(
-  personId: string,
+  humanId: string,
   rcId: string,
   content: string,
 ): Promise<{ success: true } | { error: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
     if (!userRecord.airtableId) return { error: 'Could not resolve your user record.' }
-    await upsertQuickNoteForRC(rcId, userRecord.airtableId, content, personId)
-    revalidatePath(`/myhumans/${personId}`)
+    await upsertQuickNoteForRC(rcId, userRecord.airtableId, content, humanId)
+    revalidatePath(`/myhumans/${humanId}`)
     return { success: true }
   } catch (err) {
     console.error('[updateCoachContextAction]', err)
@@ -517,13 +517,13 @@ export async function addRelationshipAction(params: {
     const userRecord = await getCurrentUserRecord()
     if (!userRecord.airtableId) return { success: false, error: 'Could not resolve your user record.' }
 
-    const personId =
+    const humanId =
       params.role === 'subject_is_person' ? params.subjectPersonId : params.otherPersonId
     const leadId =
       params.role === 'subject_is_person' ? params.otherPersonId : params.subjectPersonId
 
     const input: CreateRCInput = {
-      personId,
+      humanId,
       leadId,
       type: params.type,
       status: 'Active',
@@ -594,11 +594,11 @@ export async function addRelationshipWithNewPersonAction(params: {
       ...(params.email ? { 'Work Email': params.email } : {}),
     })
 
-    const personId = params.role === 'subject_is_person' ? params.subjectPersonId : newPersonId
+    const humanId = params.role === 'subject_is_person' ? params.subjectPersonId : newPersonId
     const leadId = params.role === 'subject_is_person' ? newPersonId : params.subjectPersonId
 
     const input: CreateRCInput = {
-      personId,
+      humanId,
       leadId,
       type: params.type,
       status: 'Active',

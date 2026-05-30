@@ -34,10 +34,10 @@ interface BucketItem {
 }
 
 function classifyRelationship(rc: RelationshipContext, subjectId: string): BucketItem | null {
-  const subjectIsPerson = rc.personId === subjectId
-  const otherPersonId = subjectIsPerson ? rc.leadId : rc.personId
-  const otherName     = subjectIsPerson ? rc.leadName : rc.personName
-  const otherTitle    = subjectIsPerson ? rc.leadTitle : rc.personTitle
+  const subjectIsPerson = rc.humanId === subjectId
+  const otherPersonId = subjectIsPerson ? rc.leadId : rc.humanId
+  const otherName     = subjectIsPerson ? rc.leadName : rc.humanName
+  const otherTitle    = subjectIsPerson ? rc.leadTitle : rc.humanTitle
 
   if (rc.relationshipType === 'coaching') {
     return { rc, otherPersonId, otherName, otherTitle, role: subjectIsPerson ? 'coach' : 'coachee' }

@@ -31,7 +31,7 @@ export default function TheirTeamSection({ directReports, nextTrail, canDrillDee
           if (!canDrillDeeper) {
             return (
               <div
-                key={report.personId}
+                key={report.humanId}
                 className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/50"
               >
                 {report.photoUrl ? (
@@ -58,8 +58,8 @@ export default function TheirTeamSection({ directReports, nextTrail, canDrillDee
 
           return (
             <Link
-              key={report.personId}
-              href={`/myhumans/${report.personId}?trail=${nextTrail}`}
+              key={report.humanId}
+              href={`/myhumans/${report.humanId}?trail=${nextTrail}`}
               className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-border hover:bg-muted/50 transition-colors group"
             >
               {report.photoUrl ? (

@@ -220,8 +220,8 @@ export default function TakeNotesWorkspace({
             <div className="w-full h-full bg-card animate-pulse" />
           ) : inputMode === 'ink' ? (
             <TakeNotesCanvas
-              personId={person.id}
-              personName={displayName}
+              humanId={person.id}
+              humanName={displayName}
               meetings={meetings}
               initialInteraction={initialInteraction}
               existingInkNote={existingInkNote}
@@ -232,7 +232,7 @@ export default function TakeNotesWorkspace({
             />
           ) : (
             <TakeNotesTyped
-              personId={person.id}
+              humanId={person.id}
               meetings={meetings}
               initialInteraction={initialInteraction}
               existingNote={existingTypedNote}

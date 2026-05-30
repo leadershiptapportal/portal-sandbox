@@ -91,8 +91,8 @@ export async function getHumansByRelationship(coachAirtableId: string): Promise<
 
   if (contexts.length === 0) return []
 
-  const typeByHumanId = new Map(contexts.map((c) => [c.personId, c.relationshipType]))
-  const humanIds = new Set(contexts.map((c) => c.personId))
+  const typeByHumanId = new Map(contexts.map((c) => [c.humanId, c.relationshipType]))
+  const humanIds = new Set(contexts.map((c) => c.humanId))
   const humans = deduped.filter((h) => humanIds.has(h.id))
 
   const typeOrder = (id: string) => (typeByHumanId.get(id) === 'coaching' ? 0 : 1)
