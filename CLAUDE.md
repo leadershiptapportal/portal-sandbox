@@ -1,12 +1,26 @@
 # LeadershipTap Portal — Claude Context
 
+## Terminology & data model
+
+These terms have specific meanings in this codebase. Use them consistently.
+
+| Term | Definition |
+|---|---|
+| **Human** | A person record in the Humans table (`TABLES.HUMANS`). The fundamental entity — everyone tracked in the app is a Human. Distinctions like "who is coaching whom" or "what org someone belongs to" come from Relationship Contexts and Affiliations, not from a type or role field on the Human itself. |
+| **Relationship Context** | A directed link between two Humans: `Human` (the other party) ↔ `Lead` (the app user who owns the relationship). Typed by `Relationship Type`: `coaching`, `reports_to`, `client`, `prospect`, `personal`, `peer`. These type labels exist **only** on Relationship Contexts — never as a field on the Human record itself. |
+| **Affiliation** | A Human ↔ Organization join record. Typed by `Affiliation Type`: `employee`, `contractor`, `member`, `client`, `founder`, `alum`, `other`. A human can have multiple affiliations over time. These type labels exist **only** on Affiliations — never as a field on the Human record itself. |
+| **Interaction** | A calendar event, meeting, call, email, or other touchpoint. Lives in `TABLES.INTERACTIONS`. |
+| **Note** | Any written observation — general note, session note, ink note, prep note, or quick note. All note types live in `TABLES.NOTES`, distinguished by `Note Type`. There is no notes field on the Human record. |
+| **Organization** | An org record in `TABLES.ORGANIZATIONS`. Humans connect to orgs via Affiliations. A Relationship Context may also link to an Organization as the sponsoring org of the engagement. |
+| **Permission Profile** | Determines what a logged-in human can do in the app. Linked from the Human record via `FIELDS.HUMANS.PERMISSION_PROFILE`. Currently two profiles exist: `admin` and `coach`. There is no `Role` field on Humans — access level is always derived from the linked Permission Profile name (`FIELDS.PERMISSION_PROFILES.PROFILE_NAME`). |
+
 ## Key files at a glance
 
 | File | What it does |
 |---|---|
-| `lib/auth/getCurrentUserRecord.ts` | Resolves Clerk session → Airtable Humans record. Supports admin impersonation. Always call this in server actions that need the coach's Airtable ID. |
-| `lib/airtable/humans.ts` | CRUD for Humans table. `updateHumanProfile()` is the main write path for profile edits. Never write `Quick Notes` here — use `upsertQuickNoteForRC()` in notes.ts. |
-| `lib/airtable/relationships.ts` | Relationship Contexts table — maps `humanId` (coachee) ↔ `leadId` (coach/manager) with type, status, dates. Replaces the old Coach-Person Context and Coach Session tables. |
+| `lib/auth/getCurrentUserRecord.ts` | Resolves Clerk session → Airtable Humans record. Supports admin impersonation. Always call this in server actions that need the human's Airtable ID. |
+| `lib/airtable/humans.ts` | CRUD for Humans table. `updateHumanProfile()` is the main write path for profile edits. |
+| `lib/airtable/relationships.ts` | Relationship Contexts table — maps one Human to another with a typed, directed relationship. Replaces the old Coach-Person Context and Coach Session tables. |
 | `lib/airtable/affiliations.ts` | Affiliations table — Human ↔ Organization join with type/status/dates/primary. Replaces the flat `Humans.Organization` link so a human can have multiple orgs over time. `getAffiliationsForHuman()`, `getMembers()`, `getPrimaryAffiliationMap()`, `pickPrimaryAffiliation()`, CRUD. |
 | `lib/airtable/notes.ts` | All notes: general observations, interaction notes, ink notes, prep notes, quick notes. `createNote()`, `upsertGeneralNoteForRC()`, `upsertQuickNoteForRC()`, `getInteractionNotesGrouped()`. |
 | `lib/airtable/interactions.ts` | Interactions table access (formerly meetings/Portal Calendar Events): read, write notes, create manual interactions. Legacy aliases (`getAllUpcomingMeetings` etc.) are exported for backwards compat. |
@@ -33,20 +47,20 @@
 | `Relationship Context` | `FIELDS.INTERACTIONS.RELATIONSHIP_CONTEXT` | Linked → Relationship Contexts |
 
 ### Relationship Contexts (`TABLES.RELATIONSHIP_CONTEXTS`)
-Replaces the old Coach-Person Context and Coach Session tables.
+Replaces the old Coach-Person Context and Coach Session tables. A Relationship Context connects two Humans in a typed, directed relationship owned by the Lead.
 
 | Airtable field | TS constant | Notes |
 |---|---|---|
-| `Human` | `FIELDS.RELATIONSHIP_CONTEXTS.HUMAN` | Linked → Humans (the coachee / direct report) |
-| `Lead` | `FIELDS.RELATIONSHIP_CONTEXTS.LEAD` | Linked → Humans (the coach / manager) |
+| `Human` | `FIELDS.RELATIONSHIP_CONTEXTS.HUMAN` | Linked → Humans (the other party in the relationship) |
+| `Lead` | `FIELDS.RELATIONSHIP_CONTEXTS.LEAD` | Linked → Humans (the app user who owns/holds the relationship) |
 | `Relationship Type` | `FIELDS.RELATIONSHIP_CONTEXTS.TYPE` | singleSelect: `'coaching'` \| `'reports_to'` \| `'client'` \| `'prospect'` \| `'personal'` \| `'peer'` |
-| `Permission Level` | `FIELDS.RELATIONSHIP_CONTEXTS.PERMISSION_LEVEL` | |
+| `Permission Level` | `FIELDS.RELATIONSHIP_CONTEXTS.PERMISSION_LEVEL` | **Unimplemented scaffolding — never read or written by code. Access is determined dynamically by relationship traversal, not this field.** |
 | `Status` | `FIELDS.RELATIONSHIP_CONTEXTS.STATUS` | |
 | `Start Date` | `FIELDS.RELATIONSHIP_CONTEXTS.START_DATE` | |
 | `End Date` | `FIELDS.RELATIONSHIP_CONTEXTS.END_DATE` | |
 | `Tasks` | `FIELDS.RELATIONSHIP_CONTEXTS.TASKS_LINKED` | Linked → Tasks |
 | `Notes` | `FIELDS.RELATIONSHIP_CONTEXTS.NOTES_LINKED` | Linked → Notes |
-| `Organization` | `FIELDS.RELATIONSHIP_CONTEXTS.ORGANIZATION` | Linked → Organizations — sponsoring org of the engagement (distinct from a person's own affiliations) |
+| `Organization` | `FIELDS.RELATIONSHIP_CONTEXTS.ORGANIZATION` | Linked → Organizations — sponsoring org of the engagement (distinct from a human's own affiliations) |
 
 ### Affiliations (`TABLES.AFFILIATIONS`)
 Human ↔ Organization join. Replaces the flat `Humans.Organization` link; a human may have multiple affiliations, concurrent or sequential.
@@ -65,7 +79,7 @@ Human ↔ Organization join. Replaces the flat `Humans.Organization` link; a hum
 **Visibility rule:** show an affiliation unless `Status` is `Ended`/`Inactive` or `End Date` is in the past. See `isAffiliationVisible()`.
 
 ### Notes (`TABLES.NOTES`)
-Central notes system — all note types live here.
+Central notes system — all note types live here, distinguished by `Note Type`.
 
 | Airtable field | TS constant | Notes |
 |---|---|---|
@@ -99,12 +113,11 @@ Central notes system — all note types live here.
 | `First Name` / `Last Name` | `FIELDS.HUMANS.FIRST_NAME` / `FIELDS.HUMANS.LAST_NAME` | Write these instead |
 | `Preferred Name` | `FIELDS.HUMANS.PREFERRED_NAME` | Optional display name override |
 | `Work Email` | `FIELDS.HUMANS.WORK_EMAIL` | Used for calendar matching |
-| `Role` | `FIELDS.HUMANS.ROLE` | `"admin"`, `"coach"`, `"client"` |
-| `Coach` | `FIELDS.HUMANS.COACH` | Linked record IDs |
+| `Portal Permission Profile` | `FIELDS.HUMANS.PERMISSION_PROFILE` | Linked → Permission Profiles — determines app access. Derive role from the linked profile name (`FIELDS.PERMISSION_PROFILES.PROFILE_NAME`). Never store role as a flat field. |
+| `Affiliations` | `FIELDS.HUMANS.AFFILIATIONS` | Linked → Affiliations — read org memberships here; write via the Affiliations table, not this field directly |
+| `Relationship Contexts (Client)` | `FIELDS.HUMANS.RELATIONSHIP_CONTEXTS_CLIENT` | Linked → Relationship Contexts where this human is the other party |
+| `Relationship Contexts (Coach)` | `FIELDS.HUMANS.RELATIONSHIP_CONTEXTS_COACH` | Linked → Relationship Contexts where this human is the Lead |
 | `Associated Meetings` | `FIELDS.HUMANS.ASSOCIATED_MEETINGS` | Linked → Interactions — used for session count |
-| `Organization` | `FIELDS.HUMANS.ORGANIZATION` | Linked → Organizations — write this to set org |
-| `Organization Name` | `FIELDS.HUMANS.ORGANIZATION_NAME` | Lookup — **read-only, never write** |
-| `Quick Notes` | `FIELDS.HUMANS.QUICK_NOTES` | **Do not write directly.** Use `upsertQuickNoteForRC()` in notes.ts. |
 | `Portal Theme` | `FIELDS.HUMANS.THEME` | singleSelect: `"light"` \| `"dark"` \| `"system"` |
 
 ### Tasks (`TABLES.TASKS`)
@@ -117,23 +130,23 @@ Primary field is `Title` (`FIELDS.TASKS.TITLE`). Client link field is `Human` (`
 - **`createHumanRecord` takes `CreateHumanFields`** (camelCase TS keys). All callers must use this typed interface — no string Airtable field name keys at call sites. Mapping to field IDs happens inside `createHumanRecord`.
 - **`updateHumanProfile` takes `HumanProfileFields`** (human-readable string keys). The complete name→ID mapping lives inside `updateHumanProfile`. Do not add partial mappings elsewhere.
 - **Relationship Contexts replace Coach-Person Context + Coach Session** — the old tables no longer exist. Notes for a relationship are in the Notes table, linked via `FIELDS.NOTES.RELATIONSHIP_CONTEXT`.
-- **Never write to formula or lookup fields**: `Full Name`, `Organization Name`, `Created`.
+- **Org membership lives in Affiliations** — there is no writable org field on the Human record. To read or write a human's organization(s), use `TABLES.AFFILIATIONS` and the functions in `affiliations.ts`.
+- **Never write to formula or lookup fields**: `Full Name`, `Created`.
 - **Message status**: always `"Pending"` for drafts. Never `"Draft"`.
 - **Airtable mutations**: use direct `fetch()` to the REST API. No SDK.
 - **All Airtable access is server-side only** — API key must never reach the browser.
 - **Server actions** live in `actions.ts` co-located with the page/component that uses them.
 - **Linked record filtering**: Airtable `filterByFormula` returns only the primary field value for linked records, not the record ID. Filter by linked record IDs in JavaScript after fetching.
-- **Upsert pattern**: fetch existing record(s) → filter in JS → PATCH if found, POST if not. See `notes.ts` (`upsertGeneralNoteForRC`, `upsertQuickNoteForRC`) for canonical examples.
+- **Upsert pattern**: fetch existing record(s) → filter in JS → PATCH if found, POST if not. See `notes.ts` (`upsertGeneralNoteForRC`) for canonical examples.
 
 ## Known gotchas
 
 - **`Full Name` is a formula** — Airtable rejects writes to it. Always write `First Name` + `Last Name` separately via `FIELDS.HUMANS.FIRST_NAME` / `FIELDS.HUMANS.LAST_NAME`.
-- **`Organization Name` is a lookup** — read-only. Write the `Organization` linked field (`FIELDS.HUMANS.ORGANIZATION`) to set the org.
+- **Org membership lives in Affiliations, not on the Human record** — there is no `Organization` or `Organization Name` field to write on Humans. Read and write org relationships through `TABLES.AFFILIATIONS`.
 - **shadcn `<Select>` requires non-empty string values** — never use `value=""`. Use a sentinel like `"none"` and convert back to `undefined`/`null` before saving.
 - **Profile photos go through Cloudinary** — Airtable attachment fields can't be written via REST API with a raw file. The upload flow is: browser → `/api/upload-photo` → Cloudinary → get URL → Airtable PATCH `FIELDS.HUMANS.PROFILE_PHOTO`.
 - **`FIELDS.INTERACTIONS.ATTENDEES`** is stored in Airtable as a comma-separated string; the app normalises it to `string[]` in `mapRecord`. When writing back, join with `', '`. This field was formerly called `Participant Emails`.
 - **Notes linked to interactions** use `FIELDS.NOTES.MEETING_LINK` (multipleRecordLinks). The legacy `MEETING` singleLineText field also exists on older records — `mapRecord` in notes.ts falls back to it automatically.
 - **`NoteType` canonical values** for new writes are `'general_note'` and `'interaction_note'`. Legacy values (`general_context`, `meeting_note`, etc.) may exist on older Airtable records and round-trip safely but should never be written by new code.
 - **Calendar sync** runs via POST `/api/calendar/sync`. Triggered from Settings (Clerk auth) or cron (SYNC_SECRET header). Never overwrites `Notes` on existing Interaction records.
-- **Admin impersonation** — `getCurrentUserRecord()` returns `isImpersonated: true` and swaps `airtableId`/`role`/`email` to the impersonated user when an admin has activated impersonation. `realAirtableId` always holds the logged-in admin's own ID.
-- **`/meetings` route still exists** alongside `/interactions` — both are active pages. New features go on `/interactions`.
+- **Admin impersonation** — `getCurrentUserRecord()` returns `isImpersonated: true` and swaps `airtableId`/`email` to the impersonated human when an admin has activated impersonation. `realAirtableId` always holds the logged-in admin's own ID.
