@@ -127,20 +127,12 @@ export default async function UsersPage() {
     }
   })
 
-  // ── Header stats (Part G) ────────────────────────────────────────────────
-  const coachCount = users.filter((u) => u.role?.toLowerCase() === 'coach').length
   const humansWithOpenTasks = users.filter((u) => (openTaskCountByUser.get(u.id) ?? 0) > 0).length
-
   const statParts = [
     `${users.length} ${users.length !== 1 ? 'humans' : 'human'}`,
-    coachCount > 0 ? `${coachCount} coach${coachCount !== 1 ? 'es' : ''}` : null,
     humansWithOpenTasks > 0 ? `${humansWithOpenTasks} with open tasks` : null,
   ].filter(Boolean)
-
-  const description =
-    process.env.NODE_ENV === 'development'
-      ? `${userRecord.role} view  ·  ${statParts.join('  ·  ')}`
-      : statParts.join('  ·  ')
+  const description = statParts.join('  ·  ')
 
   return (
     <>

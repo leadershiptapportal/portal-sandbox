@@ -200,9 +200,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     .join(',')
   const canDrillDeeper = currentDepth < MAX_DRILL_DEPTH
 
-  const displayTitle =
-    user.title ??
-    (user.role && !isRecordId(user.role) ? user.role : undefined)
+  const displayTitle = user.title
 
   // Show preferred name only when it differs from the display name
   const showPreferredName =
@@ -210,11 +208,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     user.preferredName !== name &&
     !isRecordId(user.preferredName)
 
-  const badges = [
-    user.role && !isRecordId(user.role)
-      ? { label: user.role, className: 'bg-muted text-muted-foreground' }
-      : null,
-  ].filter((b): b is { label: string; className: string } => b !== null)
+  const badges: Array<{ label: string; className: string }> = []
 
   return (
     <div className="px-4 py-5 md:p-8 max-w-5xl mx-auto space-y-6">

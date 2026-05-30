@@ -7,7 +7,6 @@ interface PortalUser {
   id: string
   name: string
   email: string
-  role: string
 }
 
 export function ImpersonateSection({ users }: { users: PortalUser[] }) {
@@ -33,7 +32,7 @@ export function ImpersonateSection({ users }: { users: PortalUser[] }) {
           <option value="">Choose a user…</option>
           {users.map((u) => (
             <option key={u.id} value={u.id}>
-              {u.name} ({u.role}) — {u.email}
+              {u.name} — {u.email}
             </option>
           ))}
         </select>

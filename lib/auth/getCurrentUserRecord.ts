@@ -4,12 +4,30 @@ import { airtableFetch } from '@/lib/airtable/client'
 import { TABLES, FIELDS } from '@/lib/airtable/constants'
 import { getImpersonatedRecordId } from './impersonation'
 
+async function fetchProfileRole(
+  baseId: string,
+  token: string,
+  profileId: string,
+): Promise<CurrentUserRecord['role']> {
+  const url = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(TABLES.PERMISSION_PROFILES)}/${profileId}?fields[]=${encodeURIComponent(FIELDS.PERMISSION_PROFILES.PROFILE_NAME)}`
+  const res = await airtableFetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'force-cache',
+  })
+  if (!res.ok) return 'unknown'
+  const data = await res.json()
+  const name = ((data.fields?.[FIELDS.PERMISSION_PROFILES.PROFILE_NAME] as string | undefined) ?? '').toLowerCase().trim()
+  if (name === 'admin') return 'admin'
+  if (name === 'coach') return 'coach'
+  return 'unknown'
+}
+
 export interface CurrentUserRecord {
   clerkId: string
   email: string
   airtableId: string | null
-  role: 'admin' | 'coach' | 'client' | 'unknown'
-  realRole: 'admin' | 'coach' | 'client' | 'unknown'  // always the actual logged-in user's role
+  role: 'admin' | 'coach' | 'unknown'
+  realRole: 'admin' | 'coach' | 'unknown'  // always the actual logged-in user's role
   name: string
   isImpersonated: boolean
   realAirtableId: string | null  // admin's own ID when impersonating, otherwise same as airtableId
@@ -102,17 +120,19 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
     if (!match) {
       log.warn('[getCurrentUserRecord] No Airtable record found for:', searchEmail)
       const clerkRole = (clerkUser.publicMetadata as { role?: string })?.role
-      const role = clerkRole === 'admin' ? 'admin' : clerkRole === 'coach' ? 'coach' : 'admin'
+      const role = clerkRole === 'admin' ? 'admin' : clerkRole === 'coach' ? 'coach' : 'unknown'
       return { clerkId: clerkUser.id, email, airtableId: null, role, realRole: role, name, isImpersonated: false, realAirtableId: null }
     }
 
-    const rawRole = ((match.fields[FIELDS.HUMANS.ROLE] as string) ?? '').toLowerCase().trim()
-    const role: CurrentUserRecord['role'] =
-      rawRole === 'admin' ? 'admin' :
-      rawRole === 'coach' ? 'coach' :
-      rawRole === 'client' ? 'client' : 'unknown'
-
     const realAirtableId = match.id as string
+
+    // Derive role from linked Permission Profile name
+    const profileIds = Array.isArray(match.fields[FIELDS.HUMANS.PERMISSION_PROFILE])
+      ? (match.fields[FIELDS.HUMANS.PERMISSION_PROFILE] as string[])
+      : []
+    const role: CurrentUserRecord['role'] = profileIds.length > 0
+      ? await fetchProfileRole(baseId, token, profileIds[0])
+      : 'unknown'
 
     // ── Impersonation: admins can view the portal as another user ─────────
     if (role === 'admin') {
@@ -133,9 +153,12 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
           if (impRes.ok) {
             const impData = await impRes.json()
             const f = impData.fields as Record<string, unknown>
-            const impRaw = ((f[FIELDS.HUMANS.ROLE] as string) ?? '').toLowerCase().trim()
-            const impRole: CurrentUserRecord['role'] =
-              impRaw === 'admin' ? 'admin' : impRaw === 'coach' ? 'coach' : impRaw === 'client' ? 'client' : 'unknown'
+            const impProfileIds = Array.isArray(f[FIELDS.HUMANS.PERMISSION_PROFILE])
+              ? (f[FIELDS.HUMANS.PERMISSION_PROFILE] as string[])
+              : []
+            const impRole: CurrentUserRecord['role'] = impProfileIds.length > 0
+              ? await fetchProfileRole(impBase, impKey, impProfileIds[0])
+              : 'unknown'
             const impEmail = (f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined) ?? email
             const impName = [f[FIELDS.HUMANS.FIRST_NAME], f[FIELDS.HUMANS.LAST_NAME]].filter(Boolean).join(' ')
             return {
@@ -143,7 +166,7 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
               email: impEmail,
               airtableId: impersonateId,
               role: impRole,
-              realRole: role,  // role = the real admin's role, computed before impersonation
+              realRole: role,
               name: impName || impEmail,
               isImpersonated: true,
               realAirtableId,

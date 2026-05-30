@@ -23,21 +23,6 @@ async function assertAdmin() {
   return u
 }
 
-export async function updateUserRoleAction(recordId: string, role: string) {
-  await assertAdmin()
-  const { apiKey, baseId } = getEnv()
-  const res = await airtableFetch(`${API}/${baseId}/${TABLES.HUMANS}/${recordId}`, {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fields: { [FIELDS.HUMANS.ROLE]: role } }),
-  })
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`Failed to update role: ${text}`)
-  }
-  revalidatePath('/admin/users')
-}
-
 export async function updateUserPermissionProfileAction(recordId: string, profileId: string) {
   await assertAdmin()
   const { apiKey, baseId } = getEnv()

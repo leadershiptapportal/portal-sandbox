@@ -37,7 +37,6 @@ export interface Human {
   firstName?: string;
   lastName?: string;
   workEmail?: string;
-  role?: string;
   organizationName?: string;
   profilePhoto?: string;
   timeAtOrganization?: string;

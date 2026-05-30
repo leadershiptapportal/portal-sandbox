@@ -33,7 +33,6 @@ export default async function AdminUsersPage() {
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">User</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Role</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Permission Profile</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Last Login</th>
                 <th className="px-4 py-3" />
@@ -54,7 +53,7 @@ export default async function AdminUsersPage() {
       )}
 
       <div className="mt-4 p-4 bg-muted/50 rounded-xl border border-border text-xs text-muted-foreground space-y-1">
-        <p><strong className="text-foreground">Adding a new user:</strong> Find their record in the Humans table, set their Role, link a Permission Profile, and ensure their Work Email matches their Clerk login. Their Clerk User ID is written automatically on first login.</p>
+        <p><strong className="text-foreground">Adding a new user:</strong> Find their record in the Humans table, link a Permission Profile, and ensure their Work Email matches their Clerk login. Their Clerk User ID is written automatically on first login.</p>
         <p><strong className="text-foreground">View as:</strong> Impersonates a user for the current browser session (8-hour max). An amber banner appears while active.</p>
       </div>
     </div>

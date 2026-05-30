@@ -9,7 +9,6 @@ import { ThemeToggle } from './ThemeToggle'
 const ROLE_BADGE: Record<string, string> = {
   admin:   'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
   coach:   'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-  client:  'bg-muted text-muted-foreground',
   unknown: 'bg-muted text-muted-foreground',
 }
 

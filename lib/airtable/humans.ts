@@ -40,7 +40,7 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Hum
     firstName: f[FIELDS.HUMANS.FIRST_NAME] as string | undefined,
     lastName: f[FIELDS.HUMANS.LAST_NAME] as string | undefined,
     workEmail: f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined,
-    role: f[FIELDS.HUMANS.ROLE] as string | undefined,
+    // role: now derived from Permission Profile name, not a flat Humans field
     // organizationName, coachIds, teamLeadIds, timeAtOrganization: derived from Affiliations/RC enrichment
     profilePhoto: Array.isArray(f[FIELDS.HUMANS.PROFILE_PHOTO])
       ? (f[FIELDS.HUMANS.PROFILE_PHOTO] as Array<{ url: string }>)[0]?.url
@@ -119,7 +119,6 @@ export async function createHumanRecord(fields: CreateHumanFields): Promise<stri
       ...(fields.firstName ? { [FIELDS.HUMANS.FIRST_NAME]: fields.firstName } : {}),
       ...(fields.lastName ? { [FIELDS.HUMANS.LAST_NAME]: fields.lastName } : {}),
       ...(fields.workEmail ? { [FIELDS.HUMANS.WORK_EMAIL]: fields.workEmail } : {}),
-      ...(fields.role ? { [FIELDS.HUMANS.ROLE]: fields.role } : {}),
     },
   }
   console.log('[createHumanRecord] POST body:', JSON.stringify(body, null, 2))
@@ -176,7 +175,6 @@ export interface HumanProfileFields {
   'Work Email'?: string
   'Birthday'?: string
   'Personal Cell Number'?: string
-  'Role'?: string
   'Enneagram'?: string[]
   'MBTI'?: string[]
   'Conflict Posture'?: string[]
@@ -197,7 +195,6 @@ export async function updateHumanProfile(
     'Work Email': FIELDS.HUMANS.WORK_EMAIL,
     'Birthday': FIELDS.HUMANS.BIRTHDAY,
     'Personal Cell Number': FIELDS.HUMANS.PERSONAL_CELL_NUMBER,
-    'Role': FIELDS.HUMANS.ROLE,
     'Enneagram': FIELDS.HUMANS.ENNEAGRAM,
     'MBTI': FIELDS.HUMANS.MBTI,
     'Conflict Posture': FIELDS.HUMANS.CONFLICT_POSTURE,
@@ -242,7 +239,6 @@ export interface AdminPortalHuman {
   id: string
   name: string
   email: string
-  role: string
   permissionProfileIds: string[]
   clerkUserId: string
   lastPortalLogin: string | null
@@ -252,7 +248,7 @@ export async function getAdminPortalHumans(): Promise<AdminPortalHuman[]> {
   const { apiKey, baseId } = getCredentials()
   const fields = [
     FIELDS.HUMANS.FIRST_NAME, FIELDS.HUMANS.LAST_NAME, FIELDS.HUMANS.FULL_NAME,
-    FIELDS.HUMANS.WORK_EMAIL, FIELDS.HUMANS.ROLE, FIELDS.HUMANS.PERMISSION_PROFILE,
+    FIELDS.HUMANS.WORK_EMAIL, FIELDS.HUMANS.PERMISSION_PROFILE,
     FIELDS.HUMANS.CLERK_USER_ID, FIELDS.HUMANS.LAST_PORTAL_LOGIN,
   ].map((f) => `fields[]=${encodeURIComponent(f)}`).join('&')
   const formula = encodeURIComponent(`{${FIELDS.HUMANS.CLERK_USER_ID}} != ""`)
@@ -271,7 +267,6 @@ export async function getAdminPortalHumans(): Promise<AdminPortalHuman[]> {
       id: r.id,
       name,
       email: (f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined) ?? '',
-      role: (f[FIELDS.HUMANS.ROLE] as string | undefined) ?? 'unknown',
       permissionProfileIds: Array.isArray(f[FIELDS.HUMANS.PERMISSION_PROFILE])
         ? (f[FIELDS.HUMANS.PERMISSION_PROFILE] as string[])
         : [],
@@ -281,11 +276,10 @@ export async function getAdminPortalHumans(): Promise<AdminPortalHuman[]> {
   })
 }
 
-export async function getPortalLoginHumans(): Promise<Array<{ id: string; name: string; email: string; role: string }>> {
+export async function getPortalLoginHumans(): Promise<Array<{ id: string; name: string; email: string }>> {
   const { apiKey, baseId } = getCredentials()
-  const fields = [FIELDS.HUMANS.FIRST_NAME, FIELDS.HUMANS.LAST_NAME, FIELDS.HUMANS.FULL_NAME, FIELDS.HUMANS.WORK_EMAIL, FIELDS.HUMANS.ROLE, FIELDS.HUMANS.CLERK_USER_ID]
+  const fields = [FIELDS.HUMANS.FIRST_NAME, FIELDS.HUMANS.LAST_NAME, FIELDS.HUMANS.FULL_NAME, FIELDS.HUMANS.WORK_EMAIL, FIELDS.HUMANS.CLERK_USER_ID]
     .map((f) => `fields[]=${encodeURIComponent(f)}`).join('&')
-  // Filter to Humans that have a Clerk User ID (i.e. actual portal login users)
   const formula = encodeURIComponent(`{${FIELDS.HUMANS.CLERK_USER_ID}} != ""`)
   const res = await airtableFetch(
     `${API_BASE}/${baseId}/${HUMANS_TABLE}?filterByFormula=${formula}&${fields}&maxRecords=100`,
@@ -302,7 +296,6 @@ export async function getPortalLoginHumans(): Promise<Array<{ id: string; name: 
       id: r.id,
       name,
       email: (f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined) ?? '',
-      role: (f[FIELDS.HUMANS.ROLE] as string | undefined) ?? 'unknown',
     }
   })
 }
@@ -447,7 +440,7 @@ export async function fetchProfileOptions(allHumans: Human[]): Promise<{
     (h.fullName ?? [h.firstName, h.lastName].filter(Boolean).join(' ')) || h.workEmail || h.id
 
   const coaches = allHumans
-    .filter((h) => h.role?.toLowerCase() === 'coach' || h.role?.toLowerCase() === 'admin')
+    .filter((h) => (h.workEmail ?? '').toLowerCase().includes('@leadershiptap.com'))
     .map((h) => ({ id: h.id, name: nameOf(h) }))
 
   const humans = allHumans.map((h) => ({ id: h.id, name: nameOf(h) }))

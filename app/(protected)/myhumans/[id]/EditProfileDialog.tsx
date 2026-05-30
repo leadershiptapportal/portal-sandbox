@@ -114,14 +114,6 @@ function SelectField({
   )
 }
 
-// Role is a display label only. Portal access is controlled by Clerk's
-// publicMetadata.role, not this field. Three values mirror the system roles
-// documented in CLAUDE.md.
-const ROLE_OPTIONS = [
-  { value: 'Client', label: 'Human' },
-  { value: 'Coach', label: 'Coach' },
-  { value: 'Admin', label: 'Admin' },
-]
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -155,7 +147,6 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
   // those are managed in their own profile sections (RelationshipsSection /
   // AffiliationsSection), which write to the canonical Relationship Contexts and
   // Affiliations tables.
-  const [role, setRole] = useState('')
 
   // ── Contact ───────────────────────────────────────────────────────────────────
   const [personalCellNumber, setPersonalCellNumber] = useState('')
@@ -185,7 +176,6 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
     setPreferredName(user.preferredName ?? '')
     setWorkEmail(user.workEmail ?? '')
     setBirthday(user.birthday ?? '')
-    setRole(user.role ?? '')
     setPersonalCellNumber(user.personalCellNumber ?? '')
     setQuickNotes(initialQuickNotes ?? '')
     setEnneagramId(user.enneagramIds?.[0] ?? '')
@@ -271,9 +261,8 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
     if (workEmail !== (user.workEmail ?? '')) patch['Work Email'] = workEmail
     if (birthday !== (user.birthday ?? '')) patch['Birthday'] = birthday
     if (personalCellNumber !== (user.personalCellNumber ?? '')) patch['Personal Cell Number'] = personalCellNumber
-    if (role !== (user.role ?? '')) patch['Role'] = role
 
-    // Organization is managed in the AffiliationsSection, not here.
+    // Organization and role are managed elsewhere (AffiliationsSection / admin panel).
 
     // Linked single-record fields — only if changed and non-empty
     if (enneagramId && enneagramId !== (user.enneagramIds?.[0] ?? '')) patch['Enneagram'] = [enneagramId]
@@ -397,23 +386,7 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
                 </div>
               </Section>
 
-              {/* ── Section 4: Role ──────────────────────────────────────── */}
-              {/* Organization moved to the AffiliationsSection on the profile page. */}
-              <Section title="Role">
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Role" half>
-                    <select value={role} onChange={(e) => setRole(e.target.value)} disabled={saving} className={selectCls}>
-                      <option value="">Select role…</option>
-                      {ROLE_OPTIONS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-                    </select>
-                  </Field>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Coach and reporting relationships are managed in the Relationships section on this profile.
-                </p>
-              </Section>
-
-              {/* ── Section 5: Contact ───────────────────────────────────── */}
+              {/* ── Section 4: Contact ───────────────────────────────────── */}
               <Section title="Contact">
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="Personal Cell Number" half>

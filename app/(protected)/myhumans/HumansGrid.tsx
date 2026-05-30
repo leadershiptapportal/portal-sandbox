@@ -64,21 +64,10 @@ function isRecordId(v: string): boolean {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function RoleBadge({ role }: { role: string }) {
-  if (!role || isRecordId(role)) return null
-  const lower = role.toLowerCase()
-  if (lower === 'coach')
-    return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-700 whitespace-nowrap">{role}</span>
-  if (lower === 'admin')
-    return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-foreground text-background whitespace-nowrap">{role}</span>
-  return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-muted text-muted-foreground whitespace-nowrap">{role}</span>
-}
-
 function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
   const { user, interactionCount, noteCount, openTaskCount, lastInteraction, nextInteraction } = enriched
   const name = getDisplayName(user)
   const subtitle = [user.title, user.organizationName].filter(Boolean).join(' · ')
-  const role = user.role && !isRecordId(user.role) ? user.role : null
 
   return (
     <Link
@@ -106,7 +95,6 @@ function HumanCard({ enriched }: { enriched: EnrichedHuman }) {
           {/* Name row + role badge + chevron */}
           <div className="flex items-center gap-1.5">
             <p className="font-semibold text-foreground truncate flex-1 min-w-0">{name}</p>
-            {role && <RoleBadge role={role} />}
             <ChevronRight className="h-4 w-4 text-muted-foreground/60 flex-shrink-0" />
           </div>
 

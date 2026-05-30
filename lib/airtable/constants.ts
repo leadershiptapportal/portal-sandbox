@@ -138,7 +138,6 @@ export const FIELDS = {
     FIRST_NAME: 'fldOGveomFlCV6DjD',                               // "First Name"
     LAST_NAME: 'fldJh2vuJqYkyyZqx',                                // "Last Name"
     WORK_EMAIL: 'fldlL8HrXCnd3K4KL',                               // "Work Email"
-    ROLE: 'fldaSnC1UCEukV8Um',                                     // "Role"
     PROFILE_PHOTO: 'fldHj7YBmed6S8s58',                            // "Profile Photo"
     ENNEAGRAM_TYPE_FROM_ENNEAGRAM: 'fld3NTWw3EmFRVBRY',            // "Enneagram Type (from Enneagram)"
     DESCRIPTOR_FROM_ENNEAGRAM: 'fldfTiZfRCarNCvUe',                // "Descriptor (from Enneagram)"
