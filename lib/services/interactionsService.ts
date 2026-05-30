@@ -1,7 +1,7 @@
 import { getAllInteractions, getInteractionsByUserEmail, getInteractionById, updatePortalEventNotes } from "@/lib/airtable/interactions";
 import { canAccessUser } from "@/lib/auth/isAuthorized";
 import type { SessionUser } from "@/lib/auth/getSessionUser";
-import type { Interaction, User } from "@/lib/types";
+import type { Interaction, Human } from "@/lib/types";
 
 interface SplitInteractions {
   upcoming: Interaction[];
@@ -107,8 +107,8 @@ function stripTld(email: string): string {
 }
 
 // Index both the normalised email and its TLD-stripped variant so fuzzy lookups work.
-export function buildEmailToUserMap(users: User[]): Map<string, User> {
-  const map = new Map<string, User>()
+export function buildEmailToUserMap(users: Human[]): Map<string, Human> {
+  const map = new Map<string, Human>()
   for (const user of users) {
     for (const raw of [user.workEmail]) {
       if (!raw) continue
@@ -125,16 +125,16 @@ export function buildEmailToUserMap(users: User[]): Map<string, User> {
 }
 
 // Look up an interaction participant email with exact-then-TLD-stripped fallback.
-function lookupEmail(email: string, emailToUser: Map<string, User>): User | null {
+function lookupEmail(email: string, emailToUser: Map<string, Human>): Human | null {
   const norm = normalizeEmail(email)
   return emailToUser.get(norm) ?? emailToUser.get(stripTld(norm)) ?? null
 }
 
-// Returns the first User whose email matches any participant in the interaction.
+// Returns the first Human whose email matches any participant in the interaction.
 export function findClientForInteraction(
   interaction: Interaction,
-  emailToUser: Map<string, User>
-): User | null {
+  emailToUser: Map<string, Human>
+): Human | null {
   for (const email of interaction.participantEmails) {
     const user = lookupEmail(email, emailToUser)
     if (user) return user
@@ -146,7 +146,7 @@ export function findClientForInteraction(
 // participant, capped at the first non-duplicate match per interaction.
 export function groupInteractionsByUser(
   interactions: Interaction[],
-  users: User[]
+  users: Human[]
 ): Map<string, Interaction[]> {
   const emailToUser = buildEmailToUserMap(users)
   const result = new Map<string, Interaction[]>()

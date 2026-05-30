@@ -28,7 +28,7 @@ import TheirTeamSection from './sections/TheirTeamSection'
 import MessagesSection from './sections/MessagesSection'
 import TasksSection from './sections/TasksSection'
 import RelationshipsSection from './sections/RelationshipsSection'
-import type { User, Note, Task } from '@/lib/types'
+import type { Human, Note, Task } from '@/lib/types'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -63,7 +63,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   if (!user) {
     return (
       <div className="p-8">
-        <p className="text-muted-foreground">User not found.</p>
+        <p className="text-muted-foreground">Human not found.</p>
       </div>
     )
   }
@@ -107,7 +107,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
     Promise.all(teamMemberIdList.map((tid) => getUserById(tid).catch(() => null))),
     getDirectReports(id).catch(() => []),
     getRelationshipsForPerson(id).catch(() => []),
-    getAllUsers().catch(() => [] as User[]),
+    getAllUsers().catch(() => [] as Human[]),
     fetchPersonalityOptions().catch(() => null),
   ])
 
@@ -129,7 +129,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   ])
 
   const directReports = theirTeamReports
-  const teamMembers = teamMemberResults.filter((u): u is User => u !== null)
+  const teamMembers = teamMemberResults.filter((u): u is Human => u !== null)
   // Only show notes not attached to a meeting in the standalone Notes section.
   // Meeting-linked notes belong to their interaction's detail view.
   const standaloneNotes = sessionNotes.filter(

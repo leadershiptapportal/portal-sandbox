@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Search, Users } from 'lucide-react'
-import type { User } from '@/lib/types'
+import type { Human } from '@/lib/types'
 
-function displayName(user: User): string {
+function displayName(user: Human): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')
@@ -24,20 +24,20 @@ const AVATAR_COLORS = [
   'bg-orange-500',
 ]
 
-function avatarColor(user: User): string {
+function avatarColor(user: Human): string {
   const name = displayName(user)
   const idx = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % AVATAR_COLORS.length
   return AVATAR_COLORS[idx]
 }
 
-function initials(user: User): string {
+function initials(user: Human): string {
   const first = user.firstName ?? user.fullName?.split(' ')[0] ?? ''
   const last = user.lastName ?? user.fullName?.split(' ').slice(-1)[0] ?? ''
   return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase() || user.workEmail?.[0]?.toUpperCase() || '?'
 }
 
 interface UsersListProps {
-  users: User[]
+  users: Human[]
 }
 
 export default function UsersList({ users }: UsersListProps) {

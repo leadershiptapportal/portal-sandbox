@@ -5,9 +5,9 @@ import { getSessionUser } from '@/lib/auth/getSessionUser'
 import DashboardTaskItem, { type DashboardTask } from '../DashboardTaskItem'
 import AddTaskDashboardDialog from '../AddTaskDashboardDialog'
 import type { CurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
-import type { User } from '@/lib/types'
+import type { Human } from '@/lib/types'
 
-function getDisplayName(user: User): string {
+function getDisplayName(user: Human): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')

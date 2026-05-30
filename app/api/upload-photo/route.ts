@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const token = process.env.AIRTABLE_API_KEY!
 
     const airtableRes = await airtableFetch(
-      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(TABLES.PEOPLE)}/${userId}`,
+      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(TABLES.HUMANS)}/${userId}`,
       {
         method: 'PATCH',
         headers: {

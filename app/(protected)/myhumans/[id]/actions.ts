@@ -4,15 +4,15 @@ import { revalidatePath } from 'next/cache'
 import { createNote, updateNote, updateInkNoteFields, getNotesByInteractionId, upsertGeneralNoteForRC, upsertQuickNoteForRC } from '@/lib/airtable/notes'
 import { createTask, updateTaskStatus } from '@/lib/airtable/tasks'
 import {
-  updateUserProfile,
-  type UserProfileFields,
+  updateHumanProfile,
+  type HumanProfileFields,
   fetchProfileOptions,
   type ProfileOption,
-  searchUsersByName,
-  createUserRecord,
+  searchHumansByName,
+  createHumanRecord,
   patchTeamMembers,
-  getAllUsers,
-} from '@/lib/airtable/users'
+  getAllHumans,
+} from '@/lib/airtable/humans'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import {
   resolveContextForSubject,
@@ -28,12 +28,12 @@ import {
 
 export async function updateProfileAction(
   userId: string,
-  changed: UserProfileFields,
+  changed: HumanProfileFields,
 ): Promise<{ success: true } | { error: string }> {
   console.log('[updateProfileAction] userId:', userId)
   console.log('[updateProfileAction] fields being sent:', JSON.stringify(changed, null, 2))
   try {
-    await updateUserProfile(userId, changed)
+    await updateHumanProfile(userId, changed)
     revalidatePath(`/myhumans/${userId}`)
     return { success: true }
   } catch (err) {
@@ -53,10 +53,10 @@ export async function fetchProfileOptionsAction(): Promise<{
   apologyLanguages: ProfileOption[]
   strengths: ProfileOption[]
   coaches: ProfileOption[]
-  allUsers: ProfileOption[]
+  allHumans: ProfileOption[]
 }> {
-  const allUsers = await getAllUsers()
-  return fetchProfileOptions(allUsers)
+  const allHumans = await getAllHumans()
+  return fetchProfileOptions(allHumans)
 }
 
 // ── Team Members ──────────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ export async function searchUsersAction(
   query: string,
 ): Promise<Array<{ id: string; name: string; jobTitle?: string }>> {
   if (!query.trim()) return []
-  return searchUsersByName(query.trim())
+  return searchHumansByName(query.trim())
 }
 
 export async function linkExistingTeamMember(
@@ -97,7 +97,7 @@ export async function createAndLinkTeamMember(
 ): Promise<{ success: true } | { error: string }> {
   try {
     console.log('[createAndLinkTeamMember] creating user:', memberData)
-    const newId = await createUserRecord({
+    const newId = await createHumanRecord({
       'First Name': memberData.firstName || undefined,
       'Last Name': memberData.lastName || undefined,
       'Title': memberData.jobTitle || undefined,
@@ -587,7 +587,7 @@ export async function addRelationshipWithNewPersonAction(params: {
     const userRecord = await getCurrentUserRecord()
     if (!userRecord.airtableId) return { success: false, error: 'Could not resolve your user record.' }
 
-    const newPersonId = await createUserRecord({
+    const newPersonId = await createHumanRecord({
       'First Name': params.firstName,
       ...(params.lastName ? { 'Last Name': params.lastName } : {}),
       ...(params.title ? { 'Title': params.title } : {}),

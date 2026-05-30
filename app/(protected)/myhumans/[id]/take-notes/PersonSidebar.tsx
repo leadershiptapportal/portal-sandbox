@@ -22,8 +22,8 @@ import {
   upsertRCNoteAction,
 } from '../actions'
 import RelationshipDialog from '../RelationshipDialog'
-import type { User } from '@/lib/types'
-import type { ProfileOption } from '@/lib/airtable/users'
+import type { Human } from '@/lib/types'
+import type { ProfileOption } from '@/lib/airtable/humans'
 import type { RelationshipContext } from '@/lib/airtable/relationships'
 import type { Note } from '@/lib/airtable/notes'
 import { useDraftSave, clearDraft, loadDraft } from '@/hooks/useDraftSave'
@@ -35,16 +35,16 @@ interface ProfileOptions {
   apologyLanguages: ProfileOption[]
   strengths: ProfileOption[]
   coaches: ProfileOption[]
-  allUsers: ProfileOption[]
+  allHumans: ProfileOption[]
 }
 
 interface Props {
-  person: User
+  person: Human
   quickNoteContent?: string
   quickNoteRcId?: string | null
   profileOptions: ProfileOptions
   userCanWrite: boolean
-  onPersonUpdate?: (partial: Partial<User>) => void
+  onPersonUpdate?: (partial: Partial<Human>) => void
   relationships?: RelationshipContext[]
   rcNotes?: Map<string, Note>
 }
@@ -91,7 +91,7 @@ function EditNameDialog({
   person,
   onSave,
 }: {
-  person: User
+  person: Human
   onSave: (firstName: string, lastName: string, preferredName: string) => Promise<void>
 }) {
   const [open, setOpen] = useState(false)
@@ -813,7 +813,7 @@ export default function PersonSidebar({
   async function saveProfile(fields: Parameters<typeof updateProfileAction>[1]) {
     const result = await updateProfileAction(person.id, fields)
     if ('error' in result) console.error('[PersonSidebar] profile save error:', result.error)
-    else onPersonUpdate?.(fields as Partial<User>)
+    else onPersonUpdate?.(fields as Partial<Human>)
   }
 
   async function saveQuickNote(content: string) {
@@ -851,7 +851,7 @@ export default function PersonSidebar({
   const displayTitle = person.title
   const contactEmail = person.workEmail ?? ''
 
-  const allPeopleForPicker = profileOptions.allUsers.map((u) => ({ id: u.id, name: u.name }))
+  const allPeopleForPicker = profileOptions.allHumans.map((u) => ({ id: u.id, name: u.name }))
 
   return (
     <div className="divide-y divide-border">

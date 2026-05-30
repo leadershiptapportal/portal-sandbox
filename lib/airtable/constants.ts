@@ -18,7 +18,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const TABLES = {
-  PEOPLE: 'tblD4Pttofq0sDl2R',                  // "People"
+  HUMANS: 'tblD4Pttofq0sDl2R',                  // "Humans"
   ORGANIZATIONS: 'tbl56SmsLjb0odxag',           // "Organizations"
   PERMISSION_PROFILES: 'tbl1XeWzXjE41fSSE',     // "Permission Profiles"
   CONNECTED_CALENDARS: 'tblJs7uabNEOsgyoF',     // "Connected Calendars"
@@ -32,7 +32,7 @@ export const TABLES = {
 
 export const FIELDS = {
   RELATIONSHIP_CONTEXTS: {
-    PERSON: 'fldvNEiXLMymiyCTj',                // "Person"
+    HUMAN: 'fldvNEiXLMymiyCTj',                 // "Human"
     LEAD: 'fld1f2J50eTmLoSXG',                  // "Lead"
     TYPE: 'fldjEfITRItxf7OLl',                  // "Relationship Type"
     PERMISSION_LEVEL: 'fldbZwRLGEz5mAsws',      // "Permission Level"
@@ -49,7 +49,7 @@ export const FIELDS = {
     PROVIDER_EVENT_ID: 'fldcugcsHlIPbEgna',     // "Provider Event ID"
     ATTENDEES: 'fldpCCYTuIOXuqqCd',             // "Attendees"
     CALENDAR_OWNER: 'fld790fAzn86Lquig',        // "Calendar Owner" (text email)
-    CALENDAR_OWNER_PERSON: 'fldj13l8IStVOJeq1', // "Calendar Owner Person" (linked → People)
+    CALENDAR_OWNER_PERSON: 'fldj13l8IStVOJeq1', // "Calendar Owner Person" (linked → Humans)
     CLIENT_NAME: 'fldK2TOXuqUOSWdk9',           // "Client Name"
     RELATIONSHIP_CONTEXT: 'fldwLPj5ahMVI9mam',  // "Relationship Context" (linked)
     TIMEZONE: 'fld0MYHtXEbwJ0EFe',              // "Timezone"
@@ -69,7 +69,7 @@ export const FIELDS = {
     PROVIDER_EVENT_ID: 'fldcugcsHlIPbEgna',     // "Provider Event ID"
     ATTENDEES: 'fldpCCYTuIOXuqqCd',             // "Attendees"
     CALENDAR_OWNER: 'fld790fAzn86Lquig',        // "Calendar Owner" (text email)
-    CALENDAR_OWNER_PERSON: 'fldj13l8IStVOJeq1', // "Calendar Owner Person" (linked → People)
+    CALENDAR_OWNER_PERSON: 'fldj13l8IStVOJeq1', // "Calendar Owner Person" (linked → Humans)
     CLIENT_NAME: 'fldK2TOXuqUOSWdk9',           // "Client Name"
     RELATIONSHIP_CONTEXT: 'fldwLPj5ahMVI9mam',  // "Relationship Context" (linked)
     TIMEZONE: 'fld0MYHtXEbwJ0EFe',              // "Timezone"
@@ -85,10 +85,10 @@ export const FIELDS = {
     BODY: 'fldCT8P7Da1INkG0T',                  // "Content" (primary text field)
     NOTE_TITLE: 'fldqvZQqv7yytyHnT',            // "Note Title" (singleLineText — optional label for general notes)
     DATE: 'fldnOSv13VmCbOtEY',                  // "Date"
-    CLIENT: 'fldDLBsX8zXpJInAD',                // "Client" (linked → People)
+    HUMAN: 'fldDLBsX8zXpJInAD',                 // "Human" (linked → Humans)
     COACH_NAME: 'fld4QwJB7HdqZPQZt',            // "Coach Name"
-    AUTHOR_PERSON: 'fldWJgq54h0A2OvCy',         // "Author Person" (linked → People)
-    SUBJECT_PERSON: 'fldzCJbxYI9Ny5nwj',        // "Subject Person" (linked → People)
+    AUTHOR_PERSON: 'fldWJgq54h0A2OvCy',         // "Author Person" (linked → Humans)
+    SUBJECT_PERSON: 'fldzCJbxYI9Ny5nwj',        // "Subject Person" (linked → Humans)
     MEETING: 'flduXwHTvTUjaZ9Fz',               // "Meeting" (singleLineText — legacy)
     MEETING_LINK: 'fldb4rVcTf0mrkvFf',          // "Meeting Link" (linked → Meetings — preferred)
     NOTE_TYPE: 'fldRCz98Sppbgbq5e',             // "Note Type"
@@ -101,7 +101,7 @@ export const FIELDS = {
     TITLE: 'fldRgrskNdZharknP',                 // "Title"
     STATUS: 'fldtsgD1YZ6t1mwpm',                // "Status"
     DUE_DATE: 'fldrSWXmgm4vSuLyV',              // "Due Date"
-    CLIENT: 'flduy2wmhQfarU9yP',                // "Client"
+    HUMAN: 'flduy2wmhQfarU9yP',                 // "Human" (linked → Humans)
     NOTES: 'fldPjSEnJ22a10vfw',                 // "Notes"
     RELATIONSHIP_CONTEXT: 'fldQbgGA2WfAXXVuV',  // "Relationship Context"
     CREATED_BY_PERSON: 'fldVIIP6weGTTYB07',     // "Created By Person"
@@ -109,7 +109,7 @@ export const FIELDS = {
     TASK_TYPE: 'fldhJUxdZGKijHSKX',             // "Task Type"
     VISIBILITY: 'fldOpVCxStZP5tMhP',            // "Visibility"
   },
-  USERS: {
+  HUMANS: {
     CLERK_USER_ID: 'fldFADxRhS8Jx8oEr',                            // "Clerk User ID"
     PERMISSION_PROFILE: 'fldKCYbCstGpxPqDh',                       // "Portal Permission Profile" (linked)
     LAST_PORTAL_LOGIN: 'fldHRzhxghjtyXBbt',                        // "Last Portal Login"
@@ -147,13 +147,13 @@ export const FIELDS = {
     WORK_CELL_NUMBER: 'fldZIvMj9ggKNAHwO',                         // "Work Cell Number"
     PERSONAL_CELL_NUMBER: 'fldV3990UGnVEdSQL',                     // "Personal Cell Number"
     START_DATE: 'fldgDu0FAVHCEtp0w',                               // "Start Date"
-    // Linked record fields on People (not the singleLineText lookup variants)
+    // Linked record fields on Humans (not the singleLineText lookup variants)
     MEETINGS_LINKED: 'fldPvW5FXxWUiiI8F',                         // "Meetings" (multipleRecordLinks → Meetings)
     NOTES_LINKED: 'fldtaUHrHe079g2iz',                            // "Notes" (multipleRecordLinks → Notes)
     TASKS_LINKED: 'fldeWGoSfUIqV3CbE',                            // "Tasks" (multipleRecordLinks → Tasks)
     CONNECTED_CALENDARS: 'fld7aipXZ3XzINu0p',                     // "Connected Calendars" (multipleRecordLinks)
-    RELATIONSHIP_CONTEXTS_CLIENT: 'fldXDcLMxY0q87gwE',            // "Relationship Contexts (Client)" — person is coachee
-    RELATIONSHIP_CONTEXTS_COACH: 'fldFabqxT4dx63zeK',             // "Relationship Contexts (Coach)" — person is lead
+    RELATIONSHIP_CONTEXTS_CLIENT: 'fldXDcLMxY0q87gwE',            // "Relationship Contexts (Client)" — human is coachee
+    RELATIONSHIP_CONTEXTS_COACH: 'fldFabqxT4dx63zeK',             // "Relationship Contexts (Coach)" — human is lead
     LAST_MODIFIED: 'fldAAzvWFfJSpUs93',                           // "Last Modified" (lastModifiedTime)
     THEME: 'fldPMnj4NBZAv96ob',                                    // "Portal Theme" (singleSelect: "light" | "dark" | "system")
   },
@@ -188,7 +188,7 @@ export const FIELDS = {
   },
   CONNECTED_CALENDARS: {
     CONNECTION_NAME: 'fldjj4sUqh1Rdz34T',       // "Connection Name" (primary)
-    PERSON: 'fldaS5RFjObe3O40j',                // "Person" (linked → People)
+    HUMAN: 'fldaS5RFjObe3O40j',                 // "Human" (linked → Humans)
     PROVIDER: 'fldFdmevMOuaMCJGS',              // "Provider" (singleSelect: "Outlook", "Google")
     PROVIDER_ACCOUNT_EMAIL: 'fld6WDIroNlUQb5TN', // "Provider Account Email"
     PROVIDER_USER_ID: 'fldk7m4uHjglWykbP',      // "Provider User ID"
@@ -218,7 +218,7 @@ export const FIELDS = {
     CAN_VIEW_DIRECT_REPORTS: 'fldRnf8el6uan7QEt',     // "Can View Direct Reports" (checkbox)
     NOTES_DEFAULT_VISIBILITY: 'fldoio0Bwxso2736X',    // "Notes Default Visibility" (singleSelect)
     RELATIONSHIP_CONTEXTS_LINKED: 'fldqIjUpJFsdVSIsn', // "Relationship Contexts" (linked)
-    PEOPLE_LINKED: 'fldMq09F3luFHKdRM',               // "People" (linked)
+    HUMANS_LINKED: 'fldMq09F3luFHKdRM',               // "Humans" (linked)
   },
   MESSAGES: {
     MESSAGE_NAME: 'fldRIXITrwYvnBGyL',          // "Message Name"
@@ -231,7 +231,7 @@ export const FIELDS = {
     SENT_DATE: 'fldl3gImAEAqahxt4',             // "Sent Date"
     CREATED: 'fldFrjFZVlpUm7Abj',               // "Created"
     MEETING: 'Meeting',                         // singleLineText field on Messages — keep as legacy name (lookup-style)
-    CLIENT: 'fldyAJpx9JBLeMNj7',                // "Client"
+    HUMAN: 'fldyAJpx9JBLeMNj7',                 // "Client" (singleLineText — legacy field name kept in Airtable)
     ASSOCIATED_MEETINGS: 'fldyyn094584CIz6x',   // "Associated Meetings"
     ATTACHMENTS: 'fldxGMUQVcekiQ0Cj',           // "Attachments"
     RECIPIENT_EMAIL_FINAL: 'fld0EeBYZPVu0PH7j', // "Recipient Email (Final)"

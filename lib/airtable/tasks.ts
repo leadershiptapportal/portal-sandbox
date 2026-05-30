@@ -48,7 +48,7 @@ function mapTaskRecord(r: AirtableRecord): Task {
     title: (r.fields[FIELDS.TASKS.TITLE] as string) || 'Untitled',
     status,
     dueDate: (r.fields[FIELDS.TASKS.DUE_DATE] as string) || undefined,
-    humanId: firstLinkedId(r.fields[FIELDS.TASKS.CLIENT]),
+    humanId: firstLinkedId(r.fields[FIELDS.TASKS.HUMAN]),
     notes: (r.fields[FIELDS.TASKS.NOTES] as string) || undefined,
     relationshipContextId: firstLinkedId(r.fields[FIELDS.TASKS.RELATIONSHIP_CONTEXT]),
     createdByPersonId: createdById,
@@ -194,7 +194,7 @@ export async function createTask(data: CreateTaskData): Promise<string> {
   }
   if (data.notes) fields[FIELDS.TASKS.NOTES] = data.notes
   if (data.dueDate) fields[FIELDS.TASKS.DUE_DATE] = data.dueDate
-  if (data.humanId) fields[FIELDS.TASKS.CLIENT] = [data.humanId]
+  if (data.humanId) fields[FIELDS.TASKS.HUMAN] = [data.humanId]
   if (data.assignedToPersonId) fields[FIELDS.TASKS.ASSIGNED_TO_PERSON] = [data.assignedToPersonId]
   if (rcId) fields[FIELDS.TASKS.RELATIONSHIP_CONTEXT] = [rcId]
 

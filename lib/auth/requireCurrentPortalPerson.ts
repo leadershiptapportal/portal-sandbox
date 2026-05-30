@@ -51,17 +51,17 @@ function getEnv() {
 }
 
 function peopleUrl(baseId: string) {
-  return `${AIRTABLE_API}/${baseId}/${TABLES.PEOPLE}`
+  return `${AIRTABLE_API}/${baseId}/${TABLES.HUMANS}`
 }
 
 function personFields() {
   return [
-    FIELDS.USERS.CLERK_USER_ID,
-    FIELDS.USERS.PERMISSION_PROFILE,
-    FIELDS.USERS.WORK_EMAIL,
-    FIELDS.USERS.FIRST_NAME,
-    FIELDS.USERS.LAST_NAME,
-    FIELDS.USERS.ROLE,
+    FIELDS.HUMANS.CLERK_USER_ID,
+    FIELDS.HUMANS.PERMISSION_PROFILE,
+    FIELDS.HUMANS.WORK_EMAIL,
+    FIELDS.HUMANS.FIRST_NAME,
+    FIELDS.HUMANS.LAST_NAME,
+    FIELDS.HUMANS.ROLE,
   ]
     .map((f) => `fields[]=${encodeURIComponent(f)}`)
     .join('&')
@@ -139,7 +139,7 @@ async function writeClerkUserId(
   const res = await fetch(`${peopleUrl(baseId)}/${recordId}`, {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fields: { [FIELDS.USERS.CLERK_USER_ID]: clerkUserId } }),
+    body: JSON.stringify({ fields: { [FIELDS.HUMANS.CLERK_USER_ID]: clerkUserId } }),
   })
   if (!res.ok) {
     const text = await res.text()
@@ -164,17 +164,17 @@ function mapRecord(
   realAirtableId: string,
 ): PortalPerson {
   const f = record.fields
-  const profileIds = Array.isArray(f[FIELDS.USERS.PERMISSION_PROFILE])
-    ? (f[FIELDS.USERS.PERMISSION_PROFILE] as string[])
+  const profileIds = Array.isArray(f[FIELDS.HUMANS.PERMISSION_PROFILE])
+    ? (f[FIELDS.HUMANS.PERMISSION_PROFILE] as string[])
     : []
   return {
     airtableRecordId: record.id,
     clerkUserId,
     realAirtableId,
-    email: (f[FIELDS.USERS.WORK_EMAIL] as string | undefined) ?? email,
-    firstName: (f[FIELDS.USERS.FIRST_NAME] as string | undefined) ?? '',
-    lastName: (f[FIELDS.USERS.LAST_NAME] as string | undefined) ?? '',
-    role: resolveRole(f[FIELDS.USERS.ROLE]),
+    email: (f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined) ?? email,
+    firstName: (f[FIELDS.HUMANS.FIRST_NAME] as string | undefined) ?? '',
+    lastName: (f[FIELDS.HUMANS.LAST_NAME] as string | undefined) ?? '',
+    role: resolveRole(f[FIELDS.HUMANS.ROLE]),
     permissionProfileIds: profileIds,
     permissions,
     isImpersonated,
@@ -201,13 +201,13 @@ export const requireCurrentPortalPerson = cache(async (): Promise<PortalPerson> 
   // ── 1. Resolve the REAL admin's record first ──────────────────────────────
   const safeClerkId = clerkUserId.replace(/"/g, '\\"')
   let realRecord = await fetchByFormula(
-    baseId, token, `{${FIELDS.USERS.CLERK_USER_ID}} = "${safeClerkId}"`,
+    baseId, token, `{${FIELDS.HUMANS.CLERK_USER_ID}} = "${safeClerkId}"`,
   )
 
   if (!realRecord && email) {
     const safeEmail = email.toLowerCase().replace(/"/g, '\\"')
     realRecord = await fetchByFormula(
-      baseId, token, `LOWER({${FIELDS.USERS.WORK_EMAIL}}) = "${safeEmail}"`,
+      baseId, token, `LOWER({${FIELDS.HUMANS.WORK_EMAIL}}) = "${safeEmail}"`,
     )
     if (realRecord) {
       await writeClerkUserId(baseId, token, realRecord.id, clerkUserId)
@@ -219,7 +219,7 @@ export const requireCurrentPortalPerson = cache(async (): Promise<PortalPerson> 
     redirect('/access-denied')
   }
 
-  const realRole = resolveRole(realRecord.fields[FIELDS.USERS.ROLE])
+  const realRole = resolveRole(realRecord.fields[FIELDS.HUMANS.ROLE])
   const realAirtableId = realRecord.id
 
   // ── 2. Check impersonation (admin-only) ───────────────────────────────────
@@ -239,8 +239,8 @@ export const requireCurrentPortalPerson = cache(async (): Promise<PortalPerson> 
   }
 
   // ── 3. Enforce permission profile on the TARGET record ────────────────────
-  const profileIds = Array.isArray(targetRecord.fields[FIELDS.USERS.PERMISSION_PROFILE])
-    ? (targetRecord.fields[FIELDS.USERS.PERMISSION_PROFILE] as string[])
+  const profileIds = Array.isArray(targetRecord.fields[FIELDS.HUMANS.PERMISSION_PROFILE])
+    ? (targetRecord.fields[FIELDS.HUMANS.PERMISSION_PROFILE] as string[])
     : []
 
   if (profileIds.length === 0) {
@@ -258,7 +258,7 @@ export const requireCurrentPortalPerson = cache(async (): Promise<PortalPerson> 
       ? { canWriteNotes: true, canCreateMeetings: true, canViewPersonProfile: true, canViewDirectReports: true, notesDefaultVisibility: 'internal_only' }
       : DEFAULT_PERMISSIONS
 
-  const targetEmail = (targetRecord.fields[FIELDS.USERS.WORK_EMAIL] as string | undefined) ?? email
+  const targetEmail = (targetRecord.fields[FIELDS.HUMANS.WORK_EMAIL] as string | undefined) ?? email
 
   return mapRecord(targetRecord, clerkUserId, targetEmail, permissions, isImpersonated, realAirtableId)
 })

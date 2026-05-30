@@ -42,11 +42,11 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
     }
 
     const searchEmail = email.toLowerCase().trim()
-    const usersTable = encodeURIComponent(TABLES.PEOPLE)
+    const usersTable = encodeURIComponent(TABLES.HUMANS)
 
     // ── Step 1: formula lookup (fast, handles most cases) ──────────────────
     const safeEmail = searchEmail.replace(/"/g, '\\"')
-    const formula = encodeURIComponent(`LOWER({${FIELDS.USERS.WORK_EMAIL}}) = "${safeEmail}"`)
+    const formula = encodeURIComponent(`LOWER({${FIELDS.HUMANS.WORK_EMAIL}}) = "${safeEmail}"`)
     const formulaRes = await airtableFetch(
       `https://api.airtable.com/v0/${baseId}/${usersTable}?filterByFormula=${formula}&maxRecords=1`,
       { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' },
@@ -106,7 +106,7 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
       return { clerkId: clerkUser.id, email, airtableId: null, role, realRole: role, name, isImpersonated: false, realAirtableId: null }
     }
 
-    const rawRole = ((match.fields[FIELDS.USERS.ROLE] as string) ?? '').toLowerCase().trim()
+    const rawRole = ((match.fields[FIELDS.HUMANS.ROLE] as string) ?? '').toLowerCase().trim()
     const role: CurrentUserRecord['role'] =
       rawRole === 'admin' ? 'admin' :
       rawRole === 'coach' ? 'coach' :
@@ -125,7 +125,7 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
           return { apiKey: k, baseId: b }
         })()
         if (impKey && impBase) {
-          const usersTable = encodeURIComponent(TABLES.PEOPLE)
+          const usersTable = encodeURIComponent(TABLES.HUMANS)
           const impRes = await airtableFetch(
             `https://api.airtable.com/v0/${impBase}/${usersTable}/${impersonateId}`,
             { headers: { Authorization: `Bearer ${impKey}` }, cache: 'no-store' },
@@ -133,11 +133,11 @@ export async function getCurrentUserRecord(): Promise<CurrentUserRecord> {
           if (impRes.ok) {
             const impData = await impRes.json()
             const f = impData.fields as Record<string, unknown>
-            const impRaw = ((f[FIELDS.USERS.ROLE] as string) ?? '').toLowerCase().trim()
+            const impRaw = ((f[FIELDS.HUMANS.ROLE] as string) ?? '').toLowerCase().trim()
             const impRole: CurrentUserRecord['role'] =
               impRaw === 'admin' ? 'admin' : impRaw === 'coach' ? 'coach' : impRaw === 'client' ? 'client' : 'unknown'
-            const impEmail = (f[FIELDS.USERS.WORK_EMAIL] as string | undefined) ?? email
-            const impName = [f[FIELDS.USERS.FIRST_NAME], f[FIELDS.USERS.LAST_NAME]].filter(Boolean).join(' ')
+            const impEmail = (f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined) ?? email
+            const impName = [f[FIELDS.HUMANS.FIRST_NAME], f[FIELDS.HUMANS.LAST_NAME]].filter(Boolean).join(' ')
             return {
               clerkId: clerkUser.id,
               email: impEmail,

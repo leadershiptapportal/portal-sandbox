@@ -1,9 +1,9 @@
 import { findClientForInteraction } from '@/lib/services/interactionsService'
 import { resolveDisplayTz } from '@/lib/utils/dateFormat'
-import type { Interaction, User } from '@/lib/types'
+import type { Interaction, Human } from '@/lib/types'
 import type { UpcomingItem } from '../UpcomingInteractionsCard'
 
-function getDisplayName(user: User): string {
+function getDisplayName(user: Human): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')
@@ -11,7 +11,7 @@ function getDisplayName(user: User): string {
 }
 
 interface MapOpts {
-  emailToUser: Map<string, User>
+  emailToUser: Map<string, Human>
   notedInteractionIds: Set<string>
   coachEmail: string
 }

@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { getUserById } from '@/lib/services/usersService'
 import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
-import { getAllUsers, fetchProfileOptions } from '@/lib/airtable/users'
+import { getAllHumans, fetchProfileOptions } from '@/lib/airtable/humans'
 import { getInteractionsForUser } from '@/lib/services/interactionsService'
 import { getInteractionById } from '@/lib/airtable/interactions'
 import { getMostRecentInteractionNoteByHuman, getInteractionNotesGrouped, getGeneralNotesByRCIds, getQuickNoteForRC } from '@/lib/airtable/notes'
@@ -43,7 +43,7 @@ export default async function TakeNotesPage({ params, searchParams }: Props) {
 
   const [profileOptions, interactions, initialInteraction, permissionLevel, relationships] =
     await Promise.all([
-      getAllUsers().then((allUsers) => fetchProfileOptions(allUsers)),
+      getAllHumans().then((allHumans) => fetchProfileOptions(allHumans)),
       getInteractionsForUser(
         contactEmail,
         sessionUser,

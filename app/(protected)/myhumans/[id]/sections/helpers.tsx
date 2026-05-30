@@ -1,14 +1,14 @@
-import type { User } from '@/lib/types'
+import type { Human } from '@/lib/types'
 import { formatEastern, resolveDisplayTz } from '@/lib/utils/dateFormat'
 
-export function getDisplayName(user: User): string {
+export function getDisplayName(user: Human): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')
   return user.preferredName ?? user.workEmail ?? ''
 }
 
-export function getInitials(user: User): string {
+export function getInitials(user: Human): string {
   const first = user.firstName ?? user.fullName?.split(' ')[0] ?? ''
   const last = user.lastName ?? user.fullName?.split(' ').slice(-1)[0] ?? ''
   return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase() || user.workEmail?.[0]?.toUpperCase() || '?'

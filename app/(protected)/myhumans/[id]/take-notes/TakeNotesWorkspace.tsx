@@ -8,8 +8,8 @@ import PersonSidebar from './PersonSidebar'
 import TakeNotesCanvas from './TakeNotesCanvas'
 import TakeNotesTyped from './TakeNotesTyped'
 import LastInteractionNotesDialog from '@/components/LastInteractionNotesDialog'
-import type { User, Interaction } from '@/lib/types'
-import type { ProfileOption } from '@/lib/airtable/users'
+import type { Human, Interaction } from '@/lib/types'
+import type { ProfileOption } from '@/lib/airtable/humans'
 import type { LastNoteData } from '@/components/LastInteractionNotesDialog'
 import type { RelationshipContext } from '@/lib/airtable/relationships'
 import type { Note } from '@/lib/airtable/notes'
@@ -22,11 +22,11 @@ interface ProfileOptions {
   apologyLanguages: ProfileOption[]
   strengths: ProfileOption[]
   coaches: ProfileOption[]
-  allUsers: ProfileOption[]
+  allHumans: ProfileOption[]
 }
 
 interface Props {
-  person: User
+  person: Human
   quickNoteContent?: string
   quickNoteRcId?: string | null
   profileOptions: ProfileOptions

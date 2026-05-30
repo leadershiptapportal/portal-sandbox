@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera } from 'lucide-react'
 import { updateProfileAction, fetchProfileOptionsAction, updateCoachContextAction } from './actions'
-import type { UserProfileFields } from '@/lib/airtable/users'
-import type { User } from '@/lib/types'
+import type { HumanProfileFields } from '@/lib/airtable/humans'
+import type { Human } from '@/lib/types'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -22,18 +22,18 @@ interface ProfileOptions {
   apologyLanguages: ProfileOption[]
   strengths: ProfileOption[]
   coaches: ProfileOption[]
-  allUsers: ProfileOption[]
+  allHumans: ProfileOption[]
 }
 
 interface Props {
-  user: User
+  user: Human
   initialQuickNotes?: string | null
   quickNoteRcId?: string | null
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function getInitials(user: User): string {
+function getInitials(user: Human): string {
   if (user.firstName && user.lastName) return (user.firstName[0] + user.lastName[0]).toUpperCase()
   if (user.fullName) {
     const parts = user.fullName.trim().split(/\s+/)
@@ -270,7 +270,7 @@ export default function EditProfileDialog({ user, initialQuickNotes, quickNoteRc
     // ── Phase 2: PATCH changed profile fields ─────────────────────────────────
     setSaveStatus('saving')
 
-    const patch: UserProfileFields = {}
+    const patch: HumanProfileFields = {}
 
     // Text fields — only include if changed
     if (firstName !== (user.firstName ?? '')) patch['First Name'] = firstName

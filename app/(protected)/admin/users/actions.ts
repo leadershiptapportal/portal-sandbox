@@ -26,10 +26,10 @@ async function assertAdmin() {
 export async function updateUserRoleAction(recordId: string, role: string) {
   await assertAdmin()
   const { apiKey, baseId } = getEnv()
-  const res = await airtableFetch(`${API}/${baseId}/${TABLES.PEOPLE}/${recordId}`, {
+  const res = await airtableFetch(`${API}/${baseId}/${TABLES.HUMANS}/${recordId}`, {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fields: { [FIELDS.USERS.ROLE]: role } }),
+    body: JSON.stringify({ fields: { [FIELDS.HUMANS.ROLE]: role } }),
   })
   if (!res.ok) {
     const text = await res.text()
@@ -43,10 +43,10 @@ export async function updateUserPermissionProfileAction(recordId: string, profil
   const { apiKey, baseId } = getEnv()
   // profileId='' means clear the profile
   const profileIds = profileId ? [profileId] : []
-  const res = await airtableFetch(`${API}/${baseId}/${TABLES.PEOPLE}/${recordId}`, {
+  const res = await airtableFetch(`${API}/${baseId}/${TABLES.HUMANS}/${recordId}`, {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fields: { [FIELDS.USERS.PERMISSION_PROFILE]: profileIds } }),
+    body: JSON.stringify({ fields: { [FIELDS.HUMANS.PERMISSION_PROFILE]: profileIds } }),
   })
   if (!res.ok) {
     const text = await res.text()

@@ -4,7 +4,7 @@ export interface Company {
   domain?: string;
 }
 
-export interface User {
+export interface Human {
   id: string;
   fullName?: string;
   preferredName?: string;

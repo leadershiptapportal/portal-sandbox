@@ -22,7 +22,7 @@ interface Person {
 
 interface Props {
   coaches: Person[]
-  allUsers: Person[]
+  allHumans: Person[]
   companies: Person[]
 }
 
@@ -169,7 +169,7 @@ function RelationshipSummary({
 
 // ── Main Form ─────────────────────────────────────────────────────────────────
 
-export default function NewPersonForm({ coaches, allUsers, companies }: Props) {
+export default function NewPersonForm({ coaches, allHumans, companies }: Props) {
   const router = useRouter()
 
   const [firstName, setFirstName] = useState('')
@@ -194,7 +194,7 @@ export default function NewPersonForm({ coaches, allUsers, companies }: Props) {
 
   const hasCompany = companyId !== NO_COMPANY
   const orgUsers = hasCompany
-    ? allUsers.filter((u) => u.companyId === companyId)
+    ? allHumans.filter((h) => h.companyId === companyId)
     : []
 
   const canSubmit = firstName.trim().length > 0 && lastName.trim().length > 0 && !saving

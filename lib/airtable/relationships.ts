@@ -66,13 +66,13 @@ interface PersonData { name: string; title?: string }
  * Used to populate personName/leadName/personTitle/leadTitle without per-record lookups.
  */
 async function buildPersonDataMap(apiKey: string, baseId: string): Promise<Map<string, PersonData>> {
-  const usersTable = encodeURIComponent(TABLES.PEOPLE)
+  const usersTable = encodeURIComponent(TABLES.HUMANS)
   const res = await airtableFetch(
     `${API_BASE}/${baseId}/${usersTable}` +
-      `?fields[]=${encodeURIComponent(FIELDS.USERS.FULL_NAME)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.USERS.FIRST_NAME)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.USERS.LAST_NAME)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.USERS.TITLE)}` +
+      `?fields[]=${encodeURIComponent(FIELDS.HUMANS.FULL_NAME)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.HUMANS.FIRST_NAME)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.HUMANS.LAST_NAME)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.HUMANS.TITLE)}` +
       `&maxRecords=5000`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
@@ -81,11 +81,11 @@ async function buildPersonDataMap(apiKey: string, baseId: string): Promise<Map<s
   const data = await res.json()
   for (const r of data.records ?? []) {
     const f = r.fields as Record<string, unknown>
-    const full = (f[FIELDS.USERS.FULL_NAME] as string | undefined)?.trim()
-    const first = (f[FIELDS.USERS.FIRST_NAME] as string | undefined)?.trim()
-    const last = (f[FIELDS.USERS.LAST_NAME] as string | undefined)?.trim()
+    const full = (f[FIELDS.HUMANS.FULL_NAME] as string | undefined)?.trim()
+    const first = (f[FIELDS.HUMANS.FIRST_NAME] as string | undefined)?.trim()
+    const last = (f[FIELDS.HUMANS.LAST_NAME] as string | undefined)?.trim()
     const name = full || [first, last].filter(Boolean).join(' ') || (r.id as string)
-    const title = (f[FIELDS.USERS.TITLE] as string | undefined)?.trim() || undefined
+    const title = (f[FIELDS.HUMANS.TITLE] as string | undefined)?.trim() || undefined
     map.set(r.id as string, { name, title })
   }
   return map
@@ -95,8 +95,8 @@ function mapRecord(
   r: { id: string; fields: Record<string, unknown> },
   personDataMap: Map<string, PersonData>,
 ): RelationshipContext | null {
-  const personIds = Array.isArray(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.PERSON])
-    ? (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.PERSON] as string[])
+  const personIds = Array.isArray(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN])
+    ? (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN] as string[])
     : []
   const leadIds = Array.isArray(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.LEAD])
     ? (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.LEAD] as string[])
@@ -278,8 +278,8 @@ export async function getDirectReports(
       ? (f[FIELDS.RELATIONSHIP_CONTEXTS.LEAD] as string[])
       : []
     if (!leadIds.includes(personAirtableId)) continue
-    const pIds = Array.isArray(f[FIELDS.RELATIONSHIP_CONTEXTS.PERSON])
-      ? (f[FIELDS.RELATIONSHIP_CONTEXTS.PERSON] as string[])
+    const pIds = Array.isArray(f[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN])
+      ? (f[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN] as string[])
       : []
     if (pIds[0]) personIds.push(pIds[0])
   }
@@ -292,16 +292,16 @@ export async function getDirectReports(
   // Batch-fetch Users records for these person IDs
   const orClauses = capped.map((id) => `RECORD_ID()="${id}"`).join(',')
   const userFormula = encodeURIComponent(`OR(${orClauses})`)
-  const usersTable = encodeURIComponent(TABLES.PEOPLE)
+  const usersTable = encodeURIComponent(TABLES.HUMANS)
   const userRes = await airtableFetch(
     `${API_BASE}/${baseId}/${usersTable}` +
       `?filterByFormula=${userFormula}` +
-      `&fields[]=${encodeURIComponent(FIELDS.USERS.FULL_NAME)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.USERS.FIRST_NAME)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.USERS.LAST_NAME)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.USERS.TITLE)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.USERS.WORK_EMAIL)}` +
-      `&fields[]=${encodeURIComponent(FIELDS.USERS.PROFILE_PHOTO)}`,
+      `&fields[]=${encodeURIComponent(FIELDS.HUMANS.FULL_NAME)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.HUMANS.FIRST_NAME)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.HUMANS.LAST_NAME)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.HUMANS.TITLE)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.HUMANS.WORK_EMAIL)}` +
+      `&fields[]=${encodeURIComponent(FIELDS.HUMANS.PROFILE_PHOTO)}`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
   if (!userRes.ok) {
@@ -313,19 +313,19 @@ export async function getDirectReports(
   const results: DirectReport[] = []
   for (const r of userData.records ?? []) {
     const f = r.fields as Record<string, unknown>
-    const fullName = (f[FIELDS.USERS.FULL_NAME] as string | undefined)?.trim()
-    const first = (f[FIELDS.USERS.FIRST_NAME] as string | undefined)?.trim()
-    const last = (f[FIELDS.USERS.LAST_NAME] as string | undefined)?.trim()
+    const fullName = (f[FIELDS.HUMANS.FULL_NAME] as string | undefined)?.trim()
+    const first = (f[FIELDS.HUMANS.FIRST_NAME] as string | undefined)?.trim()
+    const last = (f[FIELDS.HUMANS.LAST_NAME] as string | undefined)?.trim()
     const name = fullName || [first, last].filter(Boolean).join(' ') || r.id
 
-    const photoArr = f[FIELDS.USERS.PROFILE_PHOTO] as Array<{ url: string }> | undefined
+    const photoArr = f[FIELDS.HUMANS.PROFILE_PHOTO] as Array<{ url: string }> | undefined
     const photoUrl = photoArr?.[0]?.url ?? undefined
 
     results.push({
       personId: r.id as string,
       name,
-      title: (f[FIELDS.USERS.TITLE] as string | undefined)?.trim() || undefined,
-      email: (f[FIELDS.USERS.WORK_EMAIL] as string | undefined)?.trim() || undefined,
+      title: (f[FIELDS.HUMANS.TITLE] as string | undefined)?.trim() || undefined,
+      email: (f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined)?.trim() || undefined,
       photoUrl,
     })
   }
@@ -345,20 +345,20 @@ export async function getDirectReports(
 export async function getDownstreamPeople(
   personAirtableId: string,
   depth: number = 1,
-): Promise<import('@/lib/types').User[]> {
+): Promise<import('@/lib/types').Human[]> {
   const safeDepth = Math.min(Math.max(Math.round(depth), 1), 3)
 
   const contexts = await getRelationshipContexts(personAirtableId)
   if (contexts.length === 0) return []
 
-  // Lazy-load to avoid circular deps (users.ts ↔ relationships.ts)
-  const { getAllUsers } = await import('@/lib/airtable/users')
-  const allUsers = await getAllUsers()
-  const byId = new Map(allUsers.map((u) => [u.id, u]))
+  // Lazy-load to avoid circular deps (humans.ts ↔ relationships.ts)
+  const { getAllHumans } = await import('@/lib/airtable/humans')
+  const allHumans = await getAllHumans()
+  const byId = new Map(allHumans.map((h) => [h.id, h]))
 
   const direct = contexts
     .map((c) => byId.get(c.personId))
-    .filter((u): u is import('@/lib/types').User => u != null)
+    .filter((h): h is import('@/lib/types').Human => h != null)
 
   if (safeDepth <= 1) return direct
 
@@ -452,8 +452,8 @@ async function fetchExistingPairs(
   const data = await res.json()
   return (data.records ?? [])
     .filter((r: { id: string; fields: Record<string, unknown> }) => {
-      const persons = Array.isArray(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.PERSON])
-        ? (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.PERSON] as string[])
+      const persons = Array.isArray(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN])
+        ? (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN] as string[])
         : []
       return persons.includes(personId)
     })
@@ -537,7 +537,7 @@ export async function generateRelationshipRows(data: OnboardingData): Promise<vo
     // read this field. Writing a record-ID array to a single-select column
     // silently fails. Leave it for the architecture migration.
     const fields: Record<string, unknown> = {
-      [FIELDS.RELATIONSHIP_CONTEXTS.PERSON]: [row.person],
+      [FIELDS.RELATIONSHIP_CONTEXTS.HUMAN]: [row.person],
       [FIELDS.RELATIONSHIP_CONTEXTS.LEAD]: [row.lead],
       [FIELDS.RELATIONSHIP_CONTEXTS.TYPE]: row.type,
       [FIELDS.RELATIONSHIP_CONTEXTS.STATUS]: 'Active',
@@ -589,7 +589,7 @@ export async function createRelationshipContext(input: CreateRCInput): Promise<s
       const data = await res.json()
       for (const r of data.records ?? []) {
         const f = r.fields as Record<string, unknown>
-        const persons = Array.isArray(f[FIELDS.RELATIONSHIP_CONTEXTS.PERSON]) ? (f[FIELDS.RELATIONSHIP_CONTEXTS.PERSON] as string[]) : []
+        const persons = Array.isArray(f[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN]) ? (f[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN] as string[]) : []
         const leads = Array.isArray(f[FIELDS.RELATIONSHIP_CONTEXTS.LEAD]) ? (f[FIELDS.RELATIONSHIP_CONTEXTS.LEAD] as string[]) : []
         if (persons[0] === input.personId && leads[0] === input.leadId) {
           const t = normalizeRelationshipType(f[FIELDS.RELATIONSHIP_CONTEXTS.TYPE])
@@ -600,7 +600,7 @@ export async function createRelationshipContext(input: CreateRCInput): Promise<s
   }
 
   const fields: Record<string, unknown> = {
-    [FIELDS.RELATIONSHIP_CONTEXTS.PERSON]: [input.personId],
+    [FIELDS.RELATIONSHIP_CONTEXTS.HUMAN]: [input.personId],
     [FIELDS.RELATIONSHIP_CONTEXTS.LEAD]: [input.leadId],
     [FIELDS.RELATIONSHIP_CONTEXTS.TYPE]: input.type,
     [FIELDS.RELATIONSHIP_CONTEXTS.STATUS]: input.status ?? 'Active',
@@ -642,7 +642,7 @@ export async function updateRelationshipContext(
   if (input.status !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.STATUS] = input.status
   if (input.startDate !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.START_DATE] = input.startDate
   if (input.endDate !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.END_DATE] = input.endDate
-  if (input.personId !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.PERSON] = [input.personId]
+  if (input.personId !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN] = [input.personId]
   if (input.leadId !== undefined) fields[FIELDS.RELATIONSHIP_CONTEXTS.LEAD] = [input.leadId]
   if (Object.keys(fields).length === 0) return
 

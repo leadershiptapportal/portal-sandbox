@@ -3,12 +3,12 @@
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { ChevronRight, Plus, Search, Users, X, LayoutGrid, Building2 } from 'lucide-react'
-import type { User } from '@/lib/types'
+import type { Human } from '@/lib/types'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface EnrichedHuman {
-  user: User
+  user: Human
   noteCount: number
   openTaskCount: number
   interactionCount: number  // from user.associatedMeetingIds.length
@@ -26,14 +26,14 @@ type ViewMode = 'humans' | 'company'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function getDisplayName(user: User): string {
+function getDisplayName(user: Human): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')
   return user.preferredName ?? user.workEmail ?? ''
 }
 
-function getInitials(user: User): string {
+function getInitials(user: Human): string {
   if (user.firstName && user.lastName)
     return (user.firstName[0] + user.lastName[0]).toUpperCase()
   if (user.fullName) {

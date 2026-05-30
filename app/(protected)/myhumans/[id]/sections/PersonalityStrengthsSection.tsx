@@ -1,9 +1,9 @@
 import { Brain } from 'lucide-react'
 import { SectionHeading, DescriptorText } from './helpers'
-import type { User } from '@/lib/types'
+import type { Human } from '@/lib/types'
 
 interface Props {
-  user: User
+  user: Human
   // Formatted display labels resolved from personality option tables.
   // e.g. "Type 1 | The Reformer", "INTJ | Architect"
   enneagramLabel?: string

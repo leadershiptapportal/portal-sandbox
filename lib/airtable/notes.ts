@@ -55,7 +55,7 @@ function mapRecord(r: AirtableRecord): Note {
     inkImageUrl: (r.fields[FIELDS.NOTES.INK_IMAGE_URL] as string) || undefined,
     inkNoteData: (r.fields[FIELDS.NOTES.INK_NOTE_DATA] as string) || undefined,
     date: (r.fields[FIELDS.NOTES.DATE] as string) ?? '',
-    humanId: firstLinkedId(r.fields[FIELDS.NOTES.CLIENT]),
+    humanId: firstLinkedId(r.fields[FIELDS.NOTES.HUMAN]),
     coachName: (r.fields[FIELDS.NOTES.COACH_NAME] as string) || undefined,
     authorPersonId: firstLinkedId(r.fields[FIELDS.NOTES.AUTHOR_PERSON]),
     subjectPersonId: firstLinkedId(r.fields[FIELDS.NOTES.SUBJECT_PERSON]),
@@ -225,7 +225,7 @@ export async function createNote(data: CreateNoteData): Promise<Note> {
     [FIELDS.NOTES.NOTE_TYPE]: data.noteType ?? 'general_note',
   }
   if (data.noteTitle) fields[FIELDS.NOTES.NOTE_TITLE] = data.noteTitle
-  if (data.humanId) fields[FIELDS.NOTES.CLIENT] = [data.humanId]
+  if (data.humanId) fields[FIELDS.NOTES.HUMAN] = [data.humanId]
   if (data.authorPersonId) fields[FIELDS.NOTES.AUTHOR_PERSON] = [data.authorPersonId]
   if (data.subjectPersonId) fields[FIELDS.NOTES.SUBJECT_PERSON] = [data.subjectPersonId]
   // Write interactionId to both the linked MEETING_LINK field and the legacy

@@ -15,7 +15,7 @@ function getCredentials() {
 function mapRecord(record: { id: string; fields: Record<string, unknown> }): Message {
   const f = record.fields
   const meetingLinks = f[FIELDS.MESSAGES.MEETING] as string[] | undefined;
-  const userLinks = (f[FIELDS.MESSAGES.CLIENT] ?? []) as string[];
+  const userLinks = (f[FIELDS.MESSAGES.HUMAN] ?? []) as string[];
   return {
     id: record.id,
     messageName: (f[FIELDS.MESSAGES.MESSAGE_NAME] as string) ?? "",

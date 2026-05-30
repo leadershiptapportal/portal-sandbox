@@ -6,12 +6,12 @@ import { getSessionUser } from '@/lib/auth/getSessionUser'
 import { getCurrentUserRecord } from '@/lib/auth/getCurrentUserRecord'
 import { getAllRecentNotes } from '@/lib/airtable/notes'
 import { getAllOpenTasks } from '@/lib/airtable/tasks'
-import { fetchProfileOptions, getAllUsers } from '@/lib/airtable/users'
+import { fetchProfileOptions, getAllHumans } from '@/lib/airtable/humans'
 import PageHeader from '@/components/layout/PageHeader'
 import HumansGrid, { type EnrichedHuman } from './HumansGrid'
-import type { User } from '@/lib/types'
+import type { Human } from '@/lib/types'
 
-function getDisplayName(user: User): string {
+function getDisplayName(user: Human): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')
@@ -62,15 +62,15 @@ export default async function UsersPage() {
   const isAdmin = userRecord.role === 'admin'
   const filterByCoachId = isAdmin ? undefined : (userRecord.airtableId ?? undefined)
 
-  const [users, allRecentNotes, openTasks, allUsersForOptions, coachInteractions] = await Promise.all([
+  const [users, allRecentNotes, openTasks, allHumansForOptions, coachInteractions] = await Promise.all([
     getUsers(sessionUser, filterByCoachId),
     getAllRecentNotes(300),
     getAllOpenTasks(),
-    getAllUsers(),
+    getAllHumans(),
     userRecord.email ? getCoachCalendarInteractions(userRecord.email) : Promise.resolve([]),
   ])
 
-  const profileOptions = await fetchProfileOptions(allUsersForOptions)
+  const profileOptions = await fetchProfileOptions(allHumansForOptions)
 
   // ── Notes count per user ─────────────────────────────────────────────────
   const noteCountByUser = new Map<string, number>()

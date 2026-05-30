@@ -37,10 +37,10 @@ async function buildContextMap(
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
     airtableFetch(
-      `${AIRTABLE_API}/${baseId}/${encodeURIComponent(TABLES.PEOPLE)}` +
-        `?fields[]=${encodeURIComponent(FIELDS.USERS.WORK_EMAIL)}` +
-        `&fields[]=${encodeURIComponent(FIELDS.USERS.FIRST_NAME)}` +
-        `&fields[]=${encodeURIComponent(FIELDS.USERS.LAST_NAME)}` +
+      `${AIRTABLE_API}/${baseId}/${encodeURIComponent(TABLES.HUMANS)}` +
+        `?fields[]=${encodeURIComponent(FIELDS.HUMANS.WORK_EMAIL)}` +
+        `&fields[]=${encodeURIComponent(FIELDS.HUMANS.FIRST_NAME)}` +
+        `&fields[]=${encodeURIComponent(FIELDS.HUMANS.LAST_NAME)}` +
         `&maxRecords=5000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
@@ -53,10 +53,10 @@ async function buildContextMap(
   const personLookup = new Map<string, { email: string; name: string }>()
   for (const r of peopleData.records ?? []) {
     const f = r.fields as Record<string, unknown>
-    const email = (f[FIELDS.USERS.WORK_EMAIL] as string | undefined)?.toLowerCase().trim()
+    const email = (f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined)?.toLowerCase().trim()
     if (!email) continue
-    const first = (f[FIELDS.USERS.FIRST_NAME] as string | undefined)?.trim() ?? ''
-    const last = (f[FIELDS.USERS.LAST_NAME] as string | undefined)?.trim() ?? ''
+    const first = (f[FIELDS.HUMANS.FIRST_NAME] as string | undefined)?.trim() ?? ''
+    const last = (f[FIELDS.HUMANS.LAST_NAME] as string | undefined)?.trim() ?? ''
     personLookup.set(r.id as string, { email, name: [first, last].filter(Boolean).join(' ') || email })
   }
 
@@ -66,7 +66,7 @@ async function buildContextMap(
     const f = r.fields as Record<string, unknown>
     const leads = Array.isArray(f[RC.LEAD]) ? (f[RC.LEAD] as string[]) : []
     if (!leads.includes(coachAirtableId)) continue
-    const persons = Array.isArray(f[RC.PERSON]) ? (f[RC.PERSON] as string[]) : []
+    const persons = Array.isArray(f[RC.HUMAN]) ? (f[RC.HUMAN] as string[]) : []
     for (const personId of persons) {
       const person = personLookup.get(personId)
       if (!person) continue

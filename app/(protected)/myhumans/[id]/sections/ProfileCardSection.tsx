@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import EditProfileDialog from '../EditProfileDialog'
 import { getDisplayName, getInitials, isRecordId } from './helpers'
 import { updateCoachContextAction, updateProfileAction } from '../actions'
-import type { User } from '@/lib/types'
+import type { Human } from '@/lib/types'
 import { useDraftSave, clearDraft, loadDraft } from '@/hooks/useDraftSave'
 
 // ── Inline date chip ──────────────────────────────────────────────────────────
@@ -225,15 +225,15 @@ function ProfileQuickNotes({
 // ── Profile card ──────────────────────────────────────────────────────────────
 
 interface Props {
-  user: User
+  user: Human
   name: string
   initials: string
   contactEmail: string
   displayTitle?: string
   showPreferredName: boolean
   badges: Array<{ label: string; className: string }>
-  coach: User | null
-  teamLead: User | null
+  coach: Human | null
+  teamLead: Human | null
   userCanWrite: boolean
   quickNotes?: string | null
   quickNoteRcId?: string | null

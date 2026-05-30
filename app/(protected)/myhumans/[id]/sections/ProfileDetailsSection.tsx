@@ -1,9 +1,9 @@
 import { FileText } from 'lucide-react'
 import { SectionHeading } from './helpers'
-import type { User } from '@/lib/types'
+import type { Human } from '@/lib/types'
 
 interface Props {
-  user: User
+  user: Human
 }
 
 export default function ProfileDetailsSection({ user }: Props) {

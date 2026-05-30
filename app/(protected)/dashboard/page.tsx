@@ -12,7 +12,7 @@ import {
   TasksSkeleton,
   UpcomingThisWeekSkeleton,
 } from './regions/Skeletons'
-import type { User } from '@/lib/types'
+import type { Human } from '@/lib/types'
 
 function getTimeOfDay(): { label: string; emoji: string } {
   const h = getHourInTimezone()
@@ -21,7 +21,7 @@ function getTimeOfDay(): { label: string; emoji: string } {
   return { label: 'evening', emoji: '🌙' }
 }
 
-function getDisplayName(user: User): string {
+function getDisplayName(user: Human): string {
   if (user.fullName) return user.fullName
   if (user.firstName || user.lastName)
     return [user.firstName, user.lastName].filter(Boolean).join(' ')

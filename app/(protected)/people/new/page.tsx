@@ -1,18 +1,18 @@
-import { getAllUsers, fetchProfileOptions } from '@/lib/airtable/users'
+import { getAllHumans, fetchProfileOptions } from '@/lib/airtable/humans'
 import PageHeader from '@/components/layout/PageHeader'
 import NewPersonForm from './NewPersonForm'
 
 export default async function NewPersonPage() {
-  const allUsers = await getAllUsers()
-  const { coaches, companies } = await fetchProfileOptions(allUsers)
+  const allHumans = await getAllHumans()
+  const { coaches, companies } = await fetchProfileOptions(allHumans)
 
-  const nameOf = (u: { id: string; fullName?: string; firstName?: string; lastName?: string; workEmail?: string }) =>
-    (u.fullName ?? [u.firstName, u.lastName].filter(Boolean).join(' ')) || u.workEmail || u.id
+  const nameOf = (h: { id: string; fullName?: string; firstName?: string; lastName?: string; workEmail?: string }) =>
+    (h.fullName ?? [h.firstName, h.lastName].filter(Boolean).join(' ')) || h.workEmail || h.id
 
-  const allUserOptions = allUsers.map((u) => ({
-    id: u.id,
-    name: nameOf(u),
-    companyId: u.companyLinkedIds?.[0],
+  const allHumanOptions = allHumans.map((h) => ({
+    id: h.id,
+    name: nameOf(h),
+    companyId: h.companyLinkedIds?.[0],
   }))
 
   return (
@@ -24,7 +24,7 @@ export default async function NewPersonPage() {
       <div className="max-w-2xl mx-auto py-6 px-4">
         <NewPersonForm
           coaches={coaches}
-          allUsers={allUserOptions}
+          allHumans={allHumanOptions}
           companies={companies}
         />
       </div>

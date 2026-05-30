@@ -41,7 +41,7 @@ export async function PATCH(
 
   // Build Airtable PATCH payload
   const fields: Record<string, unknown> = {}
-  if (title !== undefined) fields[FIELDS.USERS.TITLE] = title
+  if (title !== undefined) fields[FIELDS.HUMANS.TITLE] = title
 
   const apiKey = process.env.AIRTABLE_API_KEY
   const baseId = process.env.AIRTABLE_BASE_ID
@@ -50,7 +50,7 @@ export async function PATCH(
   }
 
   const res = await airtableFetch(
-    `${API_BASE}/${baseId}/${encodeURIComponent(TABLES.PEOPLE)}/${id}`,
+    `${API_BASE}/${baseId}/${encodeURIComponent(TABLES.HUMANS)}/${id}`,
     {
       method: 'PATCH',
       headers: {

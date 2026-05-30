@@ -42,7 +42,7 @@ function mapRecord(r: { id: string; fields: Record<string, unknown> }): Connecte
   return {
     id: r.id,
     connectionName: (f[CC.CONNECTION_NAME] as string) ?? '',
-    personIds: Array.isArray(f[CC.PERSON]) ? (f[CC.PERSON] as string[]) : [],
+    personIds: Array.isArray(f[CC.HUMAN]) ? (f[CC.HUMAN] as string[]) : [],
     provider: (f[CC.PROVIDER] as string) ?? '',
     providerAccountEmail: (f[CC.PROVIDER_ACCOUNT_EMAIL] as string) ?? '',
     providerUserId: (f[CC.PROVIDER_USER_ID] as string) || undefined,
@@ -146,7 +146,7 @@ export async function upsertConnectedCalendar(
   const connectionName = `${data.provider} — ${data.clerkEmail}`
   const fields: Record<string, unknown> = {
     [CC.CONNECTION_NAME]: connectionName,
-    [CC.PERSON]: [data.personId],
+    [CC.HUMAN]: [data.personId],
     [CC.PROVIDER]: data.provider,
     [CC.PROVIDER_ACCOUNT_EMAIL]: data.providerAccountEmail,
     [CC.ACCESS_TOKEN]: data.accessToken,
