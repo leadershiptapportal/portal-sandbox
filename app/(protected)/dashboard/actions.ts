@@ -102,7 +102,7 @@ export async function fetchHumanInteractionsAction(
   }
 }
 
-// Save a note — either as a Coach Session record or a general note
+// Save a note to the Notes table, optionally linked to an interaction
 export async function dashboardLogNoteAction(params: {
   humanId: string
   content: string
