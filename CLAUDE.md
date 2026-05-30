@@ -72,7 +72,7 @@ The portal Tasks live in the **`Tasks`** Airtable table (not "Linked Todoist Tas
 ## Key conventions
 
 - **All meetings data comes from Portal Calendar Events** — the old Calendar Events table is an archived read-only snapshot and is never queried by the portal.
-- **Never write to formula or created-time fields**: `Full Name`, `Calculation`, `Created`, `Company Name`, `Company ID`.
+- **Never write to formula or created-time fields**: `Full Name`, `Calculation`, `Created`, `Organization Name`, `Organization ID`.
 - **Message status**: always `"Pending"` for drafts. Never `"Draft"`.
 - **Airtable mutations**: use direct `fetch()` to the REST API. No SDK (SDK doesn't support PATCH cleanly).
 - **All Airtable access is server-side only** — API key must never reach the browser.
@@ -83,7 +83,7 @@ The portal Tasks live in the **`Tasks`** Airtable table (not "Linked Todoist Tas
 ## Known gotchas
 
 - **`Full Name` is a formula** — Airtable rejects writes to it. Always write `First Name` + `Last Name` separately.
-- **`Company Name` is a lookup** — read-only. Write the `Company` linked field (array of record IDs) to set the company.
+- **`Organization Name` is a lookup** — read-only. Write the `Organization` linked field (via field ID `FIELDS.HUMANS.ORGANIZATION`) to set the organization.
 - **shadcn `<Select>` requires non-empty string values** — never use `value=""`. Use a sentinel like `"none"` and convert back to `undefined`/`null` before saving.
 - **Profile photos go through Cloudinary** — Airtable attachment fields can't be written via REST API with a raw file. The upload flow is: browser → `/api/upload-photo` → Cloudinary → get URL → Airtable PATCH `Avatar URL` field.
 - **`Participant Emails`** in Portal Calendar Events is stored as a comma-separated string; the app normalises it to `string[]` in `mapRecord`. When writing back, join with `', '`.
