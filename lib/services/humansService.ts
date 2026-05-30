@@ -51,6 +51,20 @@ function deduplicateHumans(humans: Human[]): Human[] {
  * Pass `filterByCoachId` to override the role-based logic with an explicit
  * Airtable record ID filter (used by the Coach View / Admin View toggle).
  */
+/**
+ * Returns the set of human IDs a coach leads via an active Relationship Context
+ * (Lead = coachId). Used to scope My Humans by RC, not just the legacy flat
+ * Coach link. Returns an empty set on any failure so scoping degrades gracefully.
+ */
+async function coacheeIdsViaRC(coachId: string): Promise<Set<string>> {
+  try {
+    const contexts = await getRelationshipContexts(coachId)
+    return new Set(contexts.map((c) => c.humanId))
+  } catch {
+    return new Set()
+  }
+}
+
 export async function getHumans(
   sessionUser?: SessionUser | null,
   filterByCoachId?: string,
@@ -58,8 +72,13 @@ export async function getHumans(
   const all = await getAllHumans();
   const deduped = deduplicateHumans(all)
 
+  // A human is "mine" if they're linked via the legacy flat Coach link OR via an
+  // active Relationship Context where I'm the Lead (the canonical, new way).
   if (filterByCoachId) {
-    return enrichHumansWithAffiliations(deduped.filter((h) => h.coachIds?.includes(filterByCoachId)))
+    const rcIds = await coacheeIdsViaRC(filterByCoachId)
+    return enrichHumansWithAffiliations(
+      deduped.filter((h) => h.coachIds?.includes(filterByCoachId) || rcIds.has(h.id)),
+    )
   }
 
   if (!sessionUser || sessionUser.role === 'admin') return enrichHumansWithAffiliations(deduped);
@@ -70,7 +89,8 @@ export async function getHumans(
 
   if (!coachRecord) return enrichHumansWithAffiliations(deduped);
 
-  const scoped = deduped.filter((h) => h.coachIds?.includes(coachRecord.id));
+  const rcIds = await coacheeIdsViaRC(coachRecord.id)
+  const scoped = deduped.filter((h) => h.coachIds?.includes(coachRecord.id) || rcIds.has(h.id));
 
   return enrichHumansWithAffiliations(scoped.length > 0 ? scoped : deduped);
 }
