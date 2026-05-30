@@ -44,11 +44,17 @@ interface Person {
   name: string
 }
 
+interface OrgOption {
+  id: string
+  name: string
+}
+
 interface AddProps {
   mode: 'add'
   subjectPersonId: string
   subjectName: string
   people: Person[]
+  organizations?: OrgOption[]
   trigger?: React.ReactNode
 }
 
@@ -62,6 +68,8 @@ interface EditProps {
   initialRole: RelationshipRole
   initialStartDate?: string
   initialStatus?: 'Active' | 'Inactive' | 'Paused' | 'Ended'
+  initialOrganizationId?: string
+  organizations?: OrgOption[]
   trigger?: React.ReactNode
 }
 
@@ -126,6 +134,9 @@ export default function RelationshipDialog(props: Props) {
   const [status, setStatus] = useState<'Active' | 'Inactive' | 'Paused' | 'Ended'>(
     props.mode === 'edit' ? (props.initialStatus ?? 'Active') : 'Active',
   )
+  const [organizationId, setOrganizationId] = useState(
+    props.mode === 'edit' ? (props.initialOrganizationId ?? '') : '',
+  )
 
   function handleOpen() {
     if (props.mode === 'add') {
@@ -138,10 +149,12 @@ export default function RelationshipDialog(props: Props) {
       setRole('coachee')
       setStartDate('')
       setStatus('Active')
+      setOrganizationId('')
     } else {
       setRole(props.initialRole)
       setStartDate(props.initialStartDate ?? '')
       setStatus(props.initialStatus ?? 'Active')
+      setOrganizationId(props.initialOrganizationId ?? '')
     }
     setError(null)
     setOpen(true)
@@ -163,6 +176,7 @@ export default function RelationshipDialog(props: Props) {
             type,
             role: role2,
             startDate: startDate || undefined,
+            organizationId: organizationId || undefined,
           })
           if (!result.success) { setError(result.error ?? 'Failed to add.'); setSaving(false); return }
         } else {
@@ -194,7 +208,7 @@ export default function RelationshipDialog(props: Props) {
       const result = await updateRelationshipAction({
         rcId: props.rcId,
         subjectPersonId: props.subjectPersonId,
-        fields: { type, status, startDate: startDate || null, humanId, leadId },
+        fields: { type, status, startDate: startDate || null, humanId, leadId, organizationId: organizationId || null },
       })
       if (!result.success) { setError(result.error ?? 'Failed to update.'); setSaving(false); return }
       toast.success('Relationship updated')
@@ -397,6 +411,28 @@ export default function RelationshipDialog(props: Props) {
                 disabled={saving}
               />
             </div>
+
+            {/* Engagement sponsor org — shown when orgs are available */}
+            {props.organizations && props.organizations.length > 0 && (
+              <div className="space-y-1.5">
+                <Label htmlFor="rc-org">Engagement sponsor <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                <Select
+                  value={organizationId || 'none'}
+                  onValueChange={(v) => setOrganizationId(v === 'none' ? '' : v)}
+                  disabled={saving}
+                >
+                  <SelectTrigger id="rc-org">
+                    <SelectValue placeholder="No sponsor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No sponsor</SelectItem>
+                    {props.organizations.map((o) => (
+                      <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           {error && <p className="text-xs text-destructive">{error}</p>}

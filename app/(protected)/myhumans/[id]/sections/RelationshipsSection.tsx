@@ -11,6 +11,11 @@ interface Person {
   name: string
 }
 
+interface OrgOption {
+  id: string
+  name: string
+}
+
 interface Props {
   subjectPersonId: string
   subjectName: string
@@ -21,6 +26,9 @@ interface Props {
   rcNotes: Map<string, Note>
   /** Airtable ID of the viewing coach — passed to RCNoteInlineEdit. */
   currentCoachId: string
+  /** org ID → name, for showing engagement sponsors on pills. */
+  orgNameById?: Map<string, string>
+  organizations?: OrgOption[]
 }
 
 type BucketRole = 'coach' | 'coachee' | 'manager' | 'report' | 'client' | 'prospect' | 'personal' | 'peer'
@@ -67,6 +75,8 @@ function RelationshipPill({
   canEdit,
   note,
   currentCoachId,
+  orgNameById,
+  organizations,
 }: {
   item: BucketItem
   subjectPersonId: string
@@ -74,6 +84,8 @@ function RelationshipPill({
   canEdit: boolean
   note: Note | undefined
   currentCoachId: string
+  orgNameById?: Map<string, string>
+  organizations?: Array<{ id: string; name: string }>
 }) {
   const initials = item.otherName
     .split(/\s+/)
@@ -112,6 +124,11 @@ function RelationshipPill({
           {item.otherTitle && (
             <p className="text-xs text-muted-foreground truncate">{item.otherTitle}</p>
           )}
+          {item.rc.organizationId && orgNameById?.get(item.rc.organizationId) && (
+            <p className="text-xs text-muted-foreground/70 truncate">
+              {orgNameById.get(item.rc.organizationId)}
+            </p>
+          )}
           {isInactive && (
             <p className="text-xs text-muted-foreground">{item.rc.status}</p>
           )}
@@ -140,6 +157,8 @@ function RelationshipPill({
           }
           initialStartDate={item.rc.startDate}
           initialStatus={item.rc.status as 'Active' | 'Inactive' | 'Paused' | 'Ended'}
+          initialOrganizationId={item.rc.organizationId}
+          organizations={organizations}
           trigger={
             <button
               className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0 mt-0.5"
@@ -164,6 +183,8 @@ function RelationshipGroup({
   emptyText,
   rcNotes,
   currentCoachId,
+  orgNameById,
+  organizations,
   hideWhenEmpty,
 }: {
   label: string
@@ -175,6 +196,8 @@ function RelationshipGroup({
   emptyText: string
   rcNotes: Map<string, Note>
   currentCoachId: string
+  orgNameById?: Map<string, string>
+  organizations?: Array<{ id: string; name: string }>
   hideWhenEmpty?: boolean
 }) {
   if (items.length === 0) {
@@ -206,6 +229,8 @@ function RelationshipGroup({
             canEdit={canEdit}
             note={rcNotes.get(item.rc.id)}
             currentCoachId={currentCoachId}
+            orgNameById={orgNameById}
+            organizations={organizations}
           />
         ))}
       </div>
@@ -221,6 +246,8 @@ export default function RelationshipsSection({
   canEdit,
   rcNotes,
   currentCoachId,
+  orgNameById,
+  organizations,
 }: Props) {
   const classified = relationships
     .map((rc) => classifyRelationship(rc, subjectPersonId))
@@ -233,7 +260,7 @@ export default function RelationshipsSection({
   const personal  = classified.filter((b) => b.role === 'personal')
   const peers     = classified.filter((b) => b.role === 'peer')
 
-  const groupProps = { subjectPersonId, subjectName, canEdit, rcNotes, currentCoachId }
+  const groupProps = { subjectPersonId, subjectName, canEdit, rcNotes, currentCoachId, orgNameById, organizations }
 
   return (
     <div className="bg-card rounded-xl shadow-sm p-4 md:p-6">
@@ -248,6 +275,7 @@ export default function RelationshipsSection({
             subjectPersonId={subjectPersonId}
             subjectName={subjectName}
             people={allPeople}
+            organizations={organizations}
           />
         )}
       </div>

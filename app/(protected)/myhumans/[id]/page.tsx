@@ -150,6 +150,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   )
   const userCanWrite = canWrite(permissionLevel)
 
+  const orgNameById = new Map(organizationOptions.map((o) => [o.id, o.name]))
+
   const pastSorted = [...past].sort(
     (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
   )
@@ -282,6 +284,8 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
         canEdit={userCanWrite}
         rcNotes={rcNotes}
         currentCoachId={currentUserRecord.airtableId ?? ''}
+        orgNameById={orgNameById}
+        organizations={organizationOptions}
       />
 
       {/* ── Organizations (affiliations) ──────────────────────────────────── */}

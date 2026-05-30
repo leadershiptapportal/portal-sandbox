@@ -625,6 +625,7 @@ export async function addRelationshipAction(params: {
   type: RelationshipType
   role: 'subject_is_person' | 'subject_is_lead'
   startDate?: string
+  organizationId?: string
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
@@ -642,6 +643,7 @@ export async function addRelationshipAction(params: {
       status: 'Active',
     }
     if (params.startDate) input.startDate = params.startDate
+    if (params.organizationId) input.organizationId = params.organizationId
 
     await createRelationshipContext(input)
     revalidatePath(`/myhumans/${params.subjectPersonId}`)

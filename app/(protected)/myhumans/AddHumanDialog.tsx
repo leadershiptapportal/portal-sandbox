@@ -32,7 +32,10 @@ export default function AddHumanDialog({ coaches, organizations, currentCoachId 
   const [lastName, setLastName] = useState('')
   const [workEmail, setWorkEmail] = useState('')
   const [jobTitle, setJobTitle] = useState('')
+  const [orgMode, setOrgMode] = useState<'find' | 'create'>('find')
   const [organizationId, setOrganizationId] = useState('')
+  const [newOrgName, setNewOrgName] = useState('')
+  const [newOrgDomain, setNewOrgDomain] = useState('')
   const [coachId, setCoachId] = useState(currentCoachId ?? '')
 
   function openDialog() {
@@ -40,7 +43,10 @@ export default function AddHumanDialog({ coaches, organizations, currentCoachId 
     setLastName('')
     setWorkEmail('')
     setJobTitle('')
+    setOrgMode('find')
     setOrganizationId('')
+    setNewOrgName('')
+    setNewOrgDomain('')
     setCoachId(currentCoachId ?? '')
     setError('')
     setToast('')
@@ -59,7 +65,10 @@ export default function AddHumanDialog({ coaches, organizations, currentCoachId 
       lastName: lastName.trim(),
       workEmail: workEmail.trim(),
       jobTitle: jobTitle.trim() || undefined,
-      organizationId: organizationId || undefined,
+      organizationId: orgMode === 'find' ? (organizationId || undefined) : undefined,
+      newOrg: orgMode === 'create' && newOrgName.trim()
+        ? { name: newOrgName.trim(), domain: newOrgDomain.trim() || undefined }
+        : undefined,
       coachId: coachId || undefined,
     })
     setSaving(false)
@@ -154,39 +163,69 @@ export default function AddHumanDialog({ coaches, organizations, currentCoachId 
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {organizations.length > 0 && (
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-foreground">Organization</label>
-                  <select
-                    value={organizationId}
-                    onChange={(e) => setOrganizationId(e.target.value)}
-                    className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-card"
-                  >
-                    <option value="">Select organization</option>
-                    {organizations.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {coaches.length > 0 && (
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-foreground">Assign Coach</label>
-                  <select
-                    value={coachId}
-                    onChange={(e) => setCoachId(e.target.value)}
-                    className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-card"
-                  >
-                    <option value="">No coach</option>
-                    {coaches.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
+            {/* Organization: find existing or create new */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">Organization</label>
+              <div className="flex rounded-md border border-border overflow-hidden text-xs">
+                <button
+                  type="button"
+                  onClick={() => setOrgMode('find')}
+                  className={`flex-1 py-1.5 font-medium transition-colors ${orgMode === 'find' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  Find existing
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOrgMode('create')}
+                  className={`flex-1 py-1.5 font-medium transition-colors ${orgMode === 'create' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  Add new
+                </button>
+              </div>
+              {orgMode === 'find' ? (
+                <select
+                  value={organizationId}
+                  onChange={(e) => setOrganizationId(e.target.value)}
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-card"
+                >
+                  <option value="">No organization</option>
+                  {organizations.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <div className="space-y-2">
+                  <input
+                    value={newOrgName}
+                    onChange={(e) => setNewOrgName(e.target.value)}
+                    placeholder="Organization name *"
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
+                  />
+                  <input
+                    value={newOrgDomain}
+                    onChange={(e) => setNewOrgDomain(e.target.value)}
+                    placeholder="Domain (optional, e.g. acme.com)"
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)]"
+                  />
                 </div>
               )}
             </div>
+
+            {coaches.length > 0 && (
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">Assign Coach</label>
+                <select
+                  value={coachId}
+                  onChange={(e) => setCoachId(e.target.value)}
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(213,70%,30%)] bg-card"
+                >
+                  <option value="">No coach</option>
+                  {coaches.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {error && <p className="text-xs text-rose-600 font-medium">{error}</p>}
 

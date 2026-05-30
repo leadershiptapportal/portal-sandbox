@@ -41,11 +41,11 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Hum
     lastName: f[FIELDS.HUMANS.LAST_NAME] as string | undefined,
     workEmail: f[FIELDS.HUMANS.WORK_EMAIL] as string | undefined,
     role: f[FIELDS.HUMANS.ROLE] as string | undefined,
-    organizationName: readLookup(f[FIELDS.HUMANS.ORGANIZATION_NAME]),
+    // organizationName is now authoritative from Affiliations via enrichHumansWithAffiliations()
     profilePhoto: Array.isArray(f[FIELDS.HUMANS.PROFILE_PHOTO])
       ? (f[FIELDS.HUMANS.PROFILE_PHOTO] as Array<{ url: string }>)[0]?.url
       : undefined,
-    timeAtOrganization: f[FIELDS.HUMANS.TIME_AT_ORGANIZATION] as string | undefined,
+    // timeAtOrganization is now derived from Affiliations.startDate via enrichHumansWithAffiliations()
     coachIds: Array.isArray(f[FIELDS.HUMANS.COACH])
       ? (f[FIELDS.HUMANS.COACH] as string[])
       : [],
@@ -81,8 +81,8 @@ function mapRecord(record: { id: string; fields: Record<string, unknown> }): Hum
       ? (f[FIELDS.HUMANS.APOLOGY_LANGUAGE] as string[]) : [],
     strengthIds: Array.isArray(f[FIELDS.HUMANS.STRENGTHS])
       ? (f[FIELDS.HUMANS.STRENGTHS] as string[]) : [],
-    organizationLinkedIds: Array.isArray(f[FIELDS.HUMANS.ORGANIZATION])
-      ? (f[FIELDS.HUMANS.ORGANIZATION] as string[]) : [],
+    // organizationLinkedIds is now set by enrichHumansWithAffiliations(); starts empty
+    organizationLinkedIds: [],
     birthday: f[FIELDS.HUMANS.BIRTHDAY] as string | undefined,
     workCellNumber: f[FIELDS.HUMANS.WORK_CELL_NUMBER] as string | undefined,
     personalCellNumber: f[FIELDS.HUMANS.PERSONAL_CELL_NUMBER] as string | undefined,
