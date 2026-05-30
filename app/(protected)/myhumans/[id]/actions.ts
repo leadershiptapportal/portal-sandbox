@@ -582,20 +582,20 @@ export async function addRelationshipWithNewPersonAction(params: {
   type: RelationshipType
   role: 'subject_is_person' | 'subject_is_lead'
   startDate?: string
-}): Promise<{ success: boolean; newPersonId?: string; error?: string }> {
+}): Promise<{ success: boolean; newHumanId?: string; error?: string }> {
   try {
     const userRecord = await getCurrentUserRecord()
     if (!userRecord.airtableId) return { success: false, error: 'Could not resolve your user record.' }
 
-    const newPersonId = await createHumanRecord({
+    const newHumanId = await createHumanRecord({
       'First Name': params.firstName,
       ...(params.lastName ? { 'Last Name': params.lastName } : {}),
       ...(params.title ? { 'Title': params.title } : {}),
       ...(params.email ? { 'Work Email': params.email } : {}),
     })
 
-    const humanId = params.role === 'subject_is_person' ? params.subjectPersonId : newPersonId
-    const leadId = params.role === 'subject_is_person' ? newPersonId : params.subjectPersonId
+    const humanId = params.role === 'subject_is_person' ? params.subjectPersonId : newHumanId
+    const leadId = params.role === 'subject_is_person' ? newHumanId : params.subjectPersonId
 
     const input: CreateRCInput = {
       humanId,
@@ -607,7 +607,7 @@ export async function addRelationshipWithNewPersonAction(params: {
 
     await createRelationshipContext(input)
     revalidatePath(`/myhumans/${params.subjectPersonId}`)
-    return { success: true, newPersonId }
+    return { success: true, newHumanId }
   } catch (err) {
     console.error('[addRelationshipWithNewPersonAction]', err)
     return { success: false, error: err instanceof Error ? err.message : String(err) }

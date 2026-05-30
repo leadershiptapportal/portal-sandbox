@@ -14,7 +14,7 @@ function getCredentials() {
 export interface ConnectedCalendar {
   id: string
   connectionName: string
-  personIds: string[]         // linked → People
+  humanIds: string[]         // linked → Humans
   provider: string            // "Outlook" | "Google"
   providerAccountEmail: string
   providerUserId?: string
@@ -42,7 +42,7 @@ function mapRecord(r: { id: string; fields: Record<string, unknown> }): Connecte
   return {
     id: r.id,
     connectionName: (f[CC.CONNECTION_NAME] as string) ?? '',
-    personIds: Array.isArray(f[CC.HUMAN]) ? (f[CC.HUMAN] as string[]) : [],
+    humanIds: Array.isArray(f[CC.HUMAN]) ? (f[CC.HUMAN] as string[]) : [],
     provider: (f[CC.PROVIDER] as string) ?? '',
     providerAccountEmail: (f[CC.PROVIDER_ACCOUNT_EMAIL] as string) ?? '',
     providerUserId: (f[CC.PROVIDER_USER_ID] as string) || undefined,
@@ -91,7 +91,7 @@ export async function getConnectedCalendarsByClerkUserId(
 }
 
 /**
- * Returns all Connected Calendar records for a given People record ID.
+ * Returns all Connected Calendar records for a given Human record ID.
  * JS-filtered because linked record fields can't be filtered by ID in Airtable formulas.
  */
 export async function getConnectedCalendarsByPersonId(
@@ -109,7 +109,7 @@ export async function getConnectedCalendarsByPersonId(
   const data = await res.json()
   return (data.records ?? [])
     .map(mapRecord)
-    .filter((c: ConnectedCalendar) => c.personIds.includes(humanId))
+    .filter((c: ConnectedCalendar) => c.humanIds.includes(humanId))
 }
 
 export interface UpsertConnectedCalendarData {

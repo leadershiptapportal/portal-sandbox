@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
   try {
     // 1. Create Users record
-    const newPersonId = await createHumanRecord({
+    const newHumanId = await createHumanRecord({
       'First Name': firstName.trim(),
       'Last Name': lastName.trim(),
       ...(jobTitle?.trim() ? { 'Job Title': jobTitle.trim() } : {}),
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 
     if (rcCount > 0) {
       await generateRelationshipRows({
-        newPersonId,
+        newHumanId,
         coaches: coachIds.length > 0 ? coachIds : undefined,
         reportsTo: reportsToIds.length > 0 ? reportsToIds : undefined,
         directReports: directReportIds.length > 0 ? directReportIds : undefined,
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({
-      id: newPersonId,
+      id: newHumanId,
       relationshipContextsCreated: rcCount,
     })
   } catch (err) {

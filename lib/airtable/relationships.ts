@@ -30,7 +30,7 @@ export interface RelationshipContext {
 }
 
 export interface OnboardingData {
-  newPersonId: string
+  newHumanId: string
   coaches?: string[]
   reportsTo?: string[]
   directReports?: string[]
@@ -59,13 +59,13 @@ function normalizeRelationshipType(raw: unknown): RelationshipType {
   return 'coaching'
 }
 
-interface PersonData { name: string; title?: string }
+interface HumanData { name: string; title?: string }
 
 /**
  * Fetches name + title for all People records.
  * Used to populate humanName/leadName/humanTitle/leadTitle without per-record lookups.
  */
-async function buildPersonDataMap(apiKey: string, baseId: string): Promise<Map<string, PersonData>> {
+async function buildHumanDataMap(apiKey: string, baseId: string): Promise<Map<string, HumanData>> {
   const usersTable = encodeURIComponent(TABLES.HUMANS)
   const res = await airtableFetch(
     `${API_BASE}/${baseId}/${usersTable}` +
@@ -76,7 +76,7 @@ async function buildPersonDataMap(apiKey: string, baseId: string): Promise<Map<s
       `&maxRecords=5000`,
     { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
   )
-  const map = new Map<string, PersonData>()
+  const map = new Map<string, HumanData>()
   if (!res.ok) return map
   const data = await res.json()
   for (const r of data.records ?? []) {
@@ -93,7 +93,7 @@ async function buildPersonDataMap(apiKey: string, baseId: string): Promise<Map<s
 
 function mapRecord(
   r: { id: string; fields: Record<string, unknown> },
-  personDataMap: Map<string, PersonData>,
+  humanDataMap: Map<string, HumanData>,
 ): RelationshipContext | null {
   const personIds = Array.isArray(r.fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN])
     ? (r.fields[FIELDS.RELATIONSHIP_CONTEXTS.HUMAN] as string[])
@@ -105,8 +105,8 @@ function mapRecord(
 
   const humanId = personIds[0]
   const leadId = leadIds[0]
-  const personData = personDataMap.get(humanId)
-  const leadData = personDataMap.get(leadId)
+  const personData = humanDataMap.get(humanId)
+  const leadData = humanDataMap.get(leadId)
   return {
     id: r.id,
     humanId,
@@ -145,7 +145,7 @@ export async function getRelationshipContexts(
       `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${formula}&maxRecords=1000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
-    buildPersonDataMap(apiKey, baseId),
+    buildHumanDataMap(apiKey, baseId),
   ])
 
   if (!res.ok) {
@@ -192,7 +192,7 @@ export async function getUpstreamContexts(
       `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${formula}&maxRecords=1000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
-    buildPersonDataMap(apiKey, baseId),
+    buildHumanDataMap(apiKey, baseId),
   ])
 
   if (!res.ok) {
@@ -222,7 +222,7 @@ export async function getAllRelationshipContexts(): Promise<RelationshipContext[
         `&sort%5B0%5D%5Bfield%5D=${encodeURIComponent(FIELDS.RELATIONSHIP_CONTEXTS.STATUS)}&sort%5B0%5D%5Bdirection%5D=asc`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
-    buildPersonDataMap(apiKey, baseId),
+    buildHumanDataMap(apiKey, baseId),
   ])
 
   if (!res.ok) {
@@ -402,7 +402,7 @@ export async function resolveContextForSubject(
       `${API_BASE}/${baseId}/${TABLE}?filterByFormula=${formula}&maxRecords=2000`,
       { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' },
     ),
-    buildPersonDataMap(apiKey, baseId),
+    buildHumanDataMap(apiKey, baseId),
   ])
 
   if (!res.ok) return null
@@ -471,36 +471,36 @@ async function fetchExistingPairs(
  * Creates Relationship Context rows for a newly onboarded person.
  *
  * Row logic:
- *   coaches[]       → Person=newPersonId,   Lead=coachId,      Type=coaching,    PermissionProfile=standard
- *   reportsTo[]     → Person=newPersonId,   Lead=managerId,    Type=reports_to
- *   directReports[] → Person=directReportId, Lead=newPersonId, Type=reports_to
+ *   coaches[]       → Human=newHumanId,   Lead=coachId,      Type=coaching,    PermissionProfile=standard
+ *   reportsTo[]     → Human=newHumanId,   Lead=managerId,    Type=reports_to
+ *   directReports[] → Human=directReportId, Lead=newHumanId, Type=reports_to
  *
  * Duplicate rows (same Person+Lead+Type) are silently skipped.
  */
 export async function generateRelationshipRows(data: OnboardingData): Promise<void> {
   const { apiKey, baseId } = getCredentials()
-  const { newPersonId, coaches = [], reportsTo = [], directReports = [] } = data
+  const { newHumanId, coaches = [], reportsTo = [], directReports = [] } = data
 
   type RowSpec = {
-    person: string
+    human: string
     lead: string
     type: 'coaching' | 'reports_to'
   }
 
   const rows: RowSpec[] = [
     ...coaches.map((leadId) => ({
-      person: newPersonId,
+      human: newHumanId,
       lead: leadId,
       type: 'coaching' as const,
     })),
     ...reportsTo.map((leadId) => ({
-      person: newPersonId,
+      human: newHumanId,
       lead: leadId,
       type: 'reports_to' as const,
     })),
     ...directReports.map((humanId) => ({
-      person: humanId,
-      lead: newPersonId,
+      human: humanId,
+      lead: newHumanId,
       type: 'reports_to' as const,
     })),
   ]
@@ -508,10 +508,10 @@ export async function generateRelationshipRows(data: OnboardingData): Promise<vo
   if (rows.length === 0) return
 
   // Determine all unique person IDs we need to check for existing rows
-  const personIds = [...new Set(rows.map((r) => r.person))]
+  const humanIds = [...new Set(rows.map((r) => r.human))]
 
   const existingByPerson = await Promise.all(
-    personIds.map((pid) =>
+    humanIds.map((pid) =>
       fetchExistingPairs(apiKey, baseId, pid).then((pairs) => ({ pid, pairs })),
     ),
   )
@@ -525,7 +525,7 @@ export async function generateRelationshipRows(data: OnboardingData): Promise<vo
   }
 
   for (const row of rows) {
-    const key = `${row.person}|${row.lead}|${row.type}`
+    const key = `${row.human}|${row.lead}|${row.type}`
     if (existingKeys.has(key)) {
       console.log(`[generateRelationshipRows] Skipping duplicate: ${key}`)
       continue
@@ -537,7 +537,7 @@ export async function generateRelationshipRows(data: OnboardingData): Promise<vo
     // read this field. Writing a record-ID array to a single-select column
     // silently fails. Leave it for the architecture migration.
     const fields: Record<string, unknown> = {
-      [FIELDS.RELATIONSHIP_CONTEXTS.HUMAN]: [row.person],
+      [FIELDS.RELATIONSHIP_CONTEXTS.HUMAN]: [row.human],
       [FIELDS.RELATIONSHIP_CONTEXTS.LEAD]: [row.lead],
       [FIELDS.RELATIONSHIP_CONTEXTS.TYPE]: row.type,
       [FIELDS.RELATIONSHIP_CONTEXTS.STATUS]: 'Active',
@@ -681,7 +681,7 @@ export async function getRelationshipsForHuman(humanId: string): Promise<Relatio
       headers: { Authorization: `Bearer ${apiKey}` },
       cache: 'no-store',
     }),
-    buildPersonDataMap(apiKey, baseId),
+    buildHumanDataMap(apiKey, baseId),
   ])
   if (!res.ok) return []
   const data = await res.json()
